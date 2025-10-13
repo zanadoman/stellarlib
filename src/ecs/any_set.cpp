@@ -21,7 +21,7 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#include "../../include/stellarlib/ecs/any_set.hpp"
+#include <stellarlib/ecs/any_set.hpp>
 
 namespace stellarlib::ecs
 {

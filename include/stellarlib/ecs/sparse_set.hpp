@@ -24,8 +24,8 @@
 #ifndef STELLARLIB_ECS_SPARSE_SET_HPP
 #define STELLARLIB_ECS_SPARSE_SET_HPP
 
-#include "any_set.hpp"
-#include "stack_vector.hpp"
+#include <stellarlib/ecs/any_set.hpp>
+#include <stellarlib/ecs/stack_vector.hpp>
 
 #include <cstddef>
 #include <optional>

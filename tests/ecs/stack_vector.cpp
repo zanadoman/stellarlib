@@ -21,7 +21,7 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#include "../../include/stellarlib/ecs/stack_vector.hpp"
+#include <stellarlib/ecs/stack_vector.hpp>
 
 #include <gtest/gtest.h>
 
