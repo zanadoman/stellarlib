@@ -108,6 +108,10 @@ public:
 	auto operator=(stack_vector<T> &&other) noexcept
 		-> stack_vector<T> &
 	{
+		if (&other == this) {
+			return *this;
+		}
+
 		for (auto &value : *this) {
 			value.~T();
 		}

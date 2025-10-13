@@ -13,7 +13,13 @@ Checks: >
   performance-*,
   portability-*,
   readability-*,
+  -cppcoreguidelines-no-malloc,
+  -cppcoreguidelines-owning-memory,
+  -cppcoreguidelines-pro-bounds-pointer-arithmetic,
+  -hicpp-no-malloc,
   -readability-function-cognitive-complexity,
+  -readability-identifier-length,
+  -readability-implicit-bool-conversion,
   -readability-qualified-auto,
 HeaderFilterRegex: '^\.\/.*\.hpp$'
 WarningsAsErrors: '*'
