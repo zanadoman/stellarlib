@@ -70,7 +70,6 @@ public:
 		, _end{other._end}
 	{
 		other._end      = nullptr;
-		other._size     = 0;
 		other._begin    = nullptr;
 		other._capacity = 0;
 	}

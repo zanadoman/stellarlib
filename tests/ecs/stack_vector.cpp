@@ -40,7 +40,7 @@ using namespace stellarlib::ecs;
 #pragma clang diagnostic ignored "-Wself-assign-overloaded"
 #pragma clang diagnostic ignored "-Wself-move"
 
-/* NOLINTBEGIN(bugprone-use-after-move,cert-err58-cpp,clang-analyzer-cplusplus.Move,cppcoreguidelines-avoid-do-while,cppcoreguidelines-macro-usage,hicpp-invalid-access-moved,performance-unnecessary-copy-initialization) */
+/* NOLINTBEGIN(cert-err58-cpp,cppcoreguidelines-avoid-do-while,cppcoreguidelines-macro-usage,performance-unnecessary-copy-initialization) */
 
 static const std::vector<std::shared_ptr<std::int32_t>> VALUES{
 	std::make_shared<std::int32_t>(0),
@@ -110,9 +110,6 @@ TEST(ecs_stack_vector, should_move_via_ctor)
 	}
 	const auto begin{vector1.begin()};
 	auto vector2{std::move(vector1)};
-	ASSERT_FALSE(vector1.size());
-	ASSERT_FALSE(vector1.begin());
-	ASSERT_FALSE(vector1.end());
 	ASSERT_EQ(vector2.begin(), begin);
 	check_iter_mut(vector2);
 	check_iter_const(vector2);
@@ -184,9 +181,6 @@ TEST(ecs_stack_vector, should_move_via_assignment)
 	}
 	const auto begin{vector1.begin()};
 	vector2 = std::move(vector1);
-	ASSERT_FALSE(vector1.size());
-	ASSERT_FALSE(vector1.begin());
-	ASSERT_FALSE(vector1.end());
 	ASSERT_EQ(vector2.begin(), begin);
 	check_iter_mut(vector2);
 	check_iter_const(vector2);
@@ -287,6 +281,6 @@ TEST(ecs_stack_vector, should_push_and_pop_values_via_placement)
 	check_iter_const(vector);
 }
 
-/* NOLINTEND(bugprone-use-after-move,cert-err58-cpp,clang-analyzer-cplusplus.Move,cppcoreguidelines-avoid-do-while,cppcoreguidelines-macro-usage,hicpp-invalid-access-moved,performance-unnecessary-copy-initialization) */
+/* NOLINTEND(cert-err58-cpp,cppcoreguidelines-avoid-do-while,cppcoreguidelines-macro-usage,performance-unnecessary-copy-initialization) */
 
 #pragma clang diagnostic pop

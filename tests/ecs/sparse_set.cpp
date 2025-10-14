@@ -40,7 +40,7 @@ using namespace stellarlib::ecs;
 #pragma clang diagnostic ignored "-Wself-assign-overloaded"
 #pragma clang diagnostic ignored "-Wself-move"
 
-/* NOLINTBEGIN(bugprone-use-after-move,cert-err58-cpp,clang-analyzer-cplusplus.Move,cppcoreguidelines-avoid-do-while,cppcoreguidelines-macro-usage,hicpp-invalid-access-moved,performance-unnecessary-copy-initialization) */
+/* NOLINTBEGIN(cert-err58-cpp,cppcoreguidelines-avoid-do-while,cppcoreguidelines-macro-usage,performance-unnecessary-copy-initialization) */
 
 #define ASSERT_CONTAINS_EQ(set, key, value) do \
 {                                              \
@@ -274,6 +274,6 @@ TEST(ecs_sparse_set, should_erase_placed_values)
 	erase_backward(set);
 }
 
-/* NOLINTEND(bugprone-use-after-move,cert-err58-cpp,clang-analyzer-cplusplus.Move,cppcoreguidelines-avoid-do-while,cppcoreguidelines-macro-usage,hicpp-invalid-access-moved,performance-unnecessary-copy-initialization) */
+/* NOLINTEND(cert-err58-cpp,cppcoreguidelines-avoid-do-while,cppcoreguidelines-macro-usage,performance-unnecessary-copy-initialization) */
 
 #pragma clang diagnostic pop
