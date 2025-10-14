@@ -27,7 +27,6 @@
 #include <cstddef>
 #include <cstdlib>
 #include <memory>
-#include <new>
 #include <ranges>
 #include <utility>
 
@@ -48,11 +47,7 @@ public:
 			return;
 		}
 
-		_begin = static_cast<decltype(_begin)>(std::malloc(_capacity * sizeof(T)));
-
-		if (!_begin) {
-			throw std::bad_alloc{};
-		}
+		_begin = _allocator.allocate(_capacity);
 
 		_size = other._size;
 		_end  = _begin + _size;
@@ -87,13 +82,9 @@ public:
 		}
 
 		if (_capacity < other._size) {
-			std::free(_begin);
+			_allocator.deallocate(_begin, _capacity);
 			_capacity = other._capacity;
-			_begin    = static_cast<decltype(_begin)>(std::malloc(_capacity * sizeof(T)));
-
-			if (!_begin) {
-				throw std::bad_alloc{};
-			}
+			_begin    = _allocator.allocate(_capacity);
 		}
 
 		_size = other._size;
@@ -117,7 +108,7 @@ public:
 			value.~T();
 		}
 
-		std::free(_begin);
+		_allocator.deallocate(_begin, _capacity);
 		new (this) stack_vector<T>{std::move(other)};
 
 		return *this;
@@ -129,7 +120,7 @@ public:
 			value.~T();
 		}
 
-		std::free(_begin);
+		_allocator.deallocate(_begin, _capacity);
 	}
 
 	auto extend(const std::size_t size)
@@ -139,8 +130,7 @@ public:
 		}
 
 		if (_capacity < size) {
-			_capacity = size;
-			realloc();
+			realloc(size);
 		}
 
 		for (auto i{_size}; i != size; ++i) {
@@ -172,8 +162,7 @@ public:
 			++_end;
 		}
 		else {
-			++_capacity;
-			realloc();
+			realloc(_capacity + 1);
 			new (_begin + _size) T{std::forward<Args>(args)...};
 			_size = _capacity;
 			_end  = _begin + _size;
@@ -238,21 +227,18 @@ private:
 	decltype(_capacity)  _size{};
 	decltype(_begin)     _end{};
 
-	void realloc()
+	void realloc(const std::size_t capacity)
 	{
-		auto tmp{static_cast<decltype(_begin)>(std::malloc(_capacity * sizeof(T)))};
-
-		if (!tmp) {
-			throw std::bad_alloc{};
-		}
+		auto tmp{_allocator.allocate(capacity)};
 
 		for (auto dst{tmp}, src{_begin}; src != _end; ++dst, ++src) {
 			new (dst) T{std::move(*src)};
 			src->~T();
 		}
 
-		std::free(_begin);
-		_begin = tmp;
+		_allocator.deallocate(_begin, _capacity);
+		_capacity = capacity;
+		_begin    = tmp;
 	}
 };
 }
