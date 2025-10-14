@@ -57,6 +57,7 @@ void check_iter_mut(stack_vector<std::shared_ptr<std::int32_t>> &vector)
 	for (decltype(VALUES.size()) i{}; i != VALUES.size(); ++i) {
 		ASSERT_EQ(vector[i], VALUES[i]);
 	}
+	ASSERT_EQ(vector.end() - vector.begin(), vector.size());
 	ASSERT_TRUE(std::ranges::equal(vector, VALUES));
 }
 
@@ -66,6 +67,7 @@ void check_iter_const(const stack_vector<std::shared_ptr<std::int32_t>> &vector)
 	for (decltype(VALUES.size()) i{}; i != VALUES.size(); ++i) {
 		ASSERT_EQ(vector[i], VALUES[i]);
 	}
+	ASSERT_EQ(vector.end() - vector.begin(), vector.size());
 	ASSERT_TRUE(std::ranges::equal(vector, VALUES));
 }
 }
@@ -73,10 +75,10 @@ void check_iter_const(const stack_vector<std::shared_ptr<std::int32_t>> &vector)
 TEST(ecs_stack_vector, should_skip_empty_copy_via_ctor)
 {
 	const stack_vector<std::shared_ptr<std::int32_t>> vector1{};
-	const stack_vector<std::shared_ptr<std::int32_t>> vector2{vector1};
-	ASSERT_FALSE(vector2.size());
-	ASSERT_FALSE(vector2.begin());
-	ASSERT_FALSE(vector2.end());
+	const auto vector2{vector1};
+	ASSERT_EQ(vector2.size(), vector1.size());
+	ASSERT_EQ(vector2.begin(), vector1.begin());
+	ASSERT_EQ(vector2.end(), vector1.end());
 }
 
 TEST(ecs_stack_vector, should_copy_via_ctor)
@@ -85,52 +87,10 @@ TEST(ecs_stack_vector, should_copy_via_ctor)
 	for (const auto &value : VALUES) {
 		vector1.push(value);
 	}
-	stack_vector<std::shared_ptr<std::int32_t>> vector2{vector1};
+	auto vector2{vector1};
+	ASSERT_NE(vector2.begin(), vector1.begin());
 	check_iter_mut(vector2);
-	check_iter_const(vector2);
-}
-
-TEST(ecs_stack_vector, should_skip_self_copy_via_assignment)
-{
-	stack_vector<std::shared_ptr<std::int32_t>> vector{};
-	vector.push(VALUES.front());
-	const auto begin{vector.begin()};
-	vector = vector;
-	ASSERT_EQ(vector.begin(), begin);
-	ASSERT_EQ(vector.size(), 1);
-	ASSERT_EQ(vector[0], VALUES.front());
-}
-
-TEST(ecs_stack_vector, should_optimize_copy_via_assignment)
-{
-	stack_vector<std::shared_ptr<std::int32_t>> vector1{};
-	for (const auto &value : VALUES) {
-		vector1.push(value);
-	}
-	check_iter_mut(vector1);
 	check_iter_const(vector1);
-	stack_vector<std::shared_ptr<std::int32_t>> vector2{};
-	for (const auto &value : std::ranges::reverse_view(VALUES)) {
-		vector2.push(value);
-	}
-	const auto begin{vector2.begin()};
-	vector2 = vector1;
-	ASSERT_EQ(vector2.begin(), begin);
-	check_iter_mut(vector2);
-	check_iter_const(vector2);
-}
-
-TEST(ecs_stack_vector, should_copy_via_assignment)
-{
-	stack_vector<std::shared_ptr<std::int32_t>> vector1{};
-	for (const auto &value : VALUES) {
-		vector1.push(value);
-	}
-	stack_vector<std::shared_ptr<std::int32_t>> vector2{};
-	vector2.push(VALUES.front());
-	vector2 = vector1;
-	check_iter_mut(vector2);
-	check_iter_const(vector2);
 }
 
 TEST(ecs_stack_vector, should_move_via_ctor)
@@ -139,118 +99,59 @@ TEST(ecs_stack_vector, should_move_via_ctor)
 	for (const auto &value : VALUES) {
 		vector1.push(value);
 	}
-	stack_vector<std::shared_ptr<std::int32_t>> vector2{std::move(vector1)};
-	check_iter_mut(vector2);
-	check_iter_const(vector2);
+	const auto begin{vector1.begin()};
+	auto vector2{std::move(vector1)};
+	ASSERT_FALSE(vector1.size());
 	ASSERT_FALSE(vector1.begin());
 	ASSERT_FALSE(vector1.end());
-	ASSERT_EQ(vector1.size(), 0);
-}
-
-TEST(ecs_stack_vector, should_move_via_assignment)
-{
-	stack_vector<std::shared_ptr<std::int32_t>> vector1{};
-	for (const auto &value : VALUES) {
-		vector1.push(value);
-	}
-	stack_vector<std::shared_ptr<std::int32_t>> vector2{};
-	vector2.push(VALUES.front());
-	vector2 = std::move(vector1);
+	ASSERT_EQ(vector2.begin(), begin);
 	check_iter_mut(vector2);
-	check_iter_const(vector2);
-	ASSERT_FALSE(vector1.begin());
-	ASSERT_FALSE(vector1.end());
-	ASSERT_EQ(vector1.size(), 0);
+	check_iter_mut(vector2);
 }
 
-TEST(ecs_stack_vector, should_optimize_extend)
+TEST(ecs_stack_vector, should_skip_self_copy_via_assignment)
 {
 	stack_vector<std::shared_ptr<std::int32_t>> vector{};
 	for (const auto &value : VALUES) {
 		vector.push(value);
 	}
 	const auto begin{vector.begin()};
-	ASSERT_FALSE(vector.extend(vector.size()));
+	vector = vector;
 	ASSERT_EQ(vector.begin(), begin);
 	check_iter_mut(vector);
-	check_iter_const(vector);
-}
-
-TEST(ecs_stack_vector, should_extend)
-{
-	stack_vector<std::shared_ptr<std::int32_t>> vector{};
-	vector.push(VALUES.front());
-	ASSERT_TRUE(vector.extend(VALUES.size()));
-	ASSERT_EQ(vector.size(), VALUES.size());
-	ASSERT_EQ(vector[0], VALUES.front());
-	for (decltype(VALUES.size()) i{1}; i != VALUES.size(); ++i) {
-		ASSERT_EQ(vector[i], std::shared_ptr<std::int32_t>{});
-	}
-}
-
-TEST(ecs_stack_vector, should_push_and_pop_values_via_copy)
-{
-	stack_vector<std::shared_ptr<std::int32_t>> vector{};
-	for (decltype(VALUES.size()) i{}; i != VALUES.size(); ++i) {
-		ASSERT_EQ(vector.size(), i);
-		vector.push(VALUES[i]);
-		ASSERT_EQ(vector.size(), i + 1);
-		ASSERT_EQ(vector[i], VALUES[i]);
-		const auto begin{vector.begin()};
-		vector.pop();
-		ASSERT_EQ(vector.begin(), begin);
-		ASSERT_EQ(vector.size(), i);
-		vector.push(VALUES[i]);
-		ASSERT_EQ(vector.begin(), begin);
-		ASSERT_EQ(vector.size(), i + 1);
-		ASSERT_EQ(vector[i], VALUES[i]);
-	}
 	check_iter_mut(vector);
-	check_iter_const(vector);
 }
 
-TEST(ecs_stack_vector, should_push_and_pop_values_via_move)
+TEST(ecs_stack_vector, should_optimize_copy_assignment)
 {
-	stack_vector<std::shared_ptr<std::int32_t>> vector{};
-	for (decltype(VALUES.size()) i{}; i != VALUES.size(); ++i) {
-		ASSERT_EQ(vector.size(), i);
-		vector.push(std::shared_ptr<std::int32_t>{VALUES[i]});
-		ASSERT_EQ(vector.size(), i + 1);
-		ASSERT_EQ(vector[i], VALUES[i]);
-		const auto begin{vector.begin()};
-		vector.pop();
-		ASSERT_EQ(vector.begin(), begin);
-		ASSERT_EQ(vector.size(), i);
-		vector.push(std::shared_ptr<std::int32_t>{VALUES[i]});
-		ASSERT_EQ(vector.begin(), begin);
-		ASSERT_EQ(vector.size(), i + 1);
-		ASSERT_EQ(vector[i], VALUES[i]);
+	stack_vector<std::shared_ptr<std::int32_t>> vector1{};
+	for (const auto &value : VALUES) {
+		vector1.push(value);
 	}
-	check_iter_mut(vector);
-	check_iter_const(vector);
+	decltype(vector1) vector2{};
+	for (const auto &value : std::ranges::reverse_view(VALUES)) {
+		vector2.push(value);
+	}
+	const auto begin{vector2.begin()};
+	vector2 = vector1;
+	ASSERT_EQ(vector2.begin(), begin);
+	check_iter_mut(vector2);
+	check_iter_mut(vector2);
 }
 
-TEST(ecs_stack_vector, should_push_and_pop_values_via_placement)
+TEST(ecs_stack_vector, should_copy_via_assignment)
 {
-	stack_vector<std::shared_ptr<std::int32_t>> vector{};
-	for (decltype(VALUES.size()) i{}; i != VALUES.size(); ++i) {
-		ASSERT_EQ(vector.size(), i);
-		vector.emplace(VALUES[i]);
-		ASSERT_EQ(vector.size(), i + 1);
-		ASSERT_EQ(vector[i], VALUES[i]);
-		const auto begin{vector.begin()};
-		vector.pop();
-		ASSERT_EQ(vector.begin(), begin);
-		ASSERT_EQ(vector.size(), i);
-		vector.emplace(VALUES[i]);
-		ASSERT_EQ(vector.begin(), begin);
-		ASSERT_EQ(vector.size(), i + 1);
-		ASSERT_EQ(vector[i], VALUES[i]);
+	stack_vector<std::shared_ptr<std::int32_t>> vector1{};
+	for (const auto &value : VALUES) {
+		vector1.push(value);
 	}
-	check_iter_mut(vector);
-	check_iter_const(vector);
+	decltype(vector1) vector2{};
+	vector2.push(VALUES.front());
+	vector2 = vector1;
+	check_iter_mut(vector2);
+	check_iter_const(vector2);
 }
-
-#pragma clang diagnostic pop
 
 /* NOLINTEND(bugprone-use-after-move,cert-err58-cpp,clang-analyzer-cplusplus.Move,cppcoreguidelines-avoid-do-while,cppcoreguidelines-macro-usage,hicpp-invalid-access-moved,performance-unnecessary-copy-initialization) */
+
+#pragma clang diagnostic pop

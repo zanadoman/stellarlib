@@ -273,6 +273,6 @@ TEST(ecs_sparse_set, should_erase_placed_values)
 	erase_backward(set);
 }
 
-#pragma clang diagnostic pop
-
 /* NOLINTEND(bugprone-use-after-move,cert-err58-cpp,clang-analyzer-cplusplus.Move,cppcoreguidelines-avoid-do-while,cppcoreguidelines-macro-usage,hicpp-invalid-access-moved,performance-unnecessary-copy-initialization) */
+
+#pragma clang diagnostic pop
