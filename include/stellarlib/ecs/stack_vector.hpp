@@ -25,7 +25,6 @@
 #define STELLARLIB_ECS_STACK_VECTOR_HPP
 
 #include <cstddef>
-#include <cstdlib>
 #include <memory>
 #include <ranges>
 #include <utility>
@@ -57,7 +56,7 @@ public:
 		_end  = _begin + _size;
 
 		for (auto [dst, src] : std::ranges::views::zip(*this, other)) {
-			new (&dst) T{src};
+			new (std::addressof(dst)) T{src};
 		}
 	}
 
@@ -77,7 +76,7 @@ public:
 	auto operator=(const stack_vector<T, Allocator> &other)
 		-> stack_vector<T, Allocator> &
 	{
-		if (&other == this) {
+		if (std::addressof(other) == this) {
 			return *this;
 		}
 
@@ -95,7 +94,7 @@ public:
 		_end  = _begin + _size;
 
 		for (auto [dst, src] : std::ranges::views::zip(*this, other)) {
-			new (&dst) T{src};
+			new (std::addressof(dst)) T{src};
 		}
 
 		return *this;
@@ -104,7 +103,7 @@ public:
 	auto operator=(stack_vector<T, Allocator> &&other)
 		-> stack_vector<T, Allocator> &
 	{
-		if (&other != this) {
+		if (std::addressof(other) != this) {
 			this->~stack_vector();
 			new (this) stack_vector<T>{std::move(other)};
 		}
