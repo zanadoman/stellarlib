@@ -104,17 +104,10 @@ public:
 	auto operator=(stack_vector<T, Allocator> &&other)
 		-> stack_vector<T, Allocator> &
 	{
-		if (&other == this) {
-			return *this;
+		if (&other != this) {
+			this->~stack_vector();
+			new (this) stack_vector<T>{std::move(other)};
 		}
-
-		for (auto &value : *this) {
-			value.~T();
-		}
-
-		_allocator.deallocate(_begin, _capacity);
-		_allocator.~Allocator();
-		new (this) stack_vector<T>{std::move(other)};
 
 		return *this;
 	}
