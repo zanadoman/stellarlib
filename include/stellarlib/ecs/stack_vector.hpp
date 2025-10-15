@@ -47,9 +47,8 @@ public:
 		}
 
 		_begin = std::allocator<T>::allocate(_capacity);
-
-		_size = other._size;
-		_end  = _begin + _size;
+		_size  = other._size;
+		_end   = _begin + _size;
 
 		for (auto [dst, src] : std::ranges::views::zip(*this, other)) {
 			new (std::addressof(dst)) T{src};
@@ -57,7 +56,7 @@ public:
 	}
 
 	[[nodiscard]]
-	stack_vector(stack_vector<T> &&other)
+	stack_vector(stack_vector<T> &&other) noexcept
 		: _capacity{other._capacity}
 		, _begin{other._begin}
 		, _size{other._size}
