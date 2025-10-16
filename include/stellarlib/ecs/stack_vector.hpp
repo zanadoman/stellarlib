@@ -36,10 +36,10 @@ class stack_vector final : std::allocator<T>
 {
 public:
 	[[nodiscard]]
-	explicit stack_vector() noexcept = default;
+	explicit constexpr stack_vector() noexcept = default;
 
 	[[nodiscard]]
-	stack_vector(const stack_vector<T> &other)
+	constexpr stack_vector(const stack_vector<T> &other)
 		: _capacity{other._capacity}
 	{
 		if (!_capacity) {
@@ -56,7 +56,7 @@ public:
 	}
 
 	[[nodiscard]]
-	stack_vector(stack_vector<T> &&other) noexcept
+	constexpr stack_vector(stack_vector<T> &&other) noexcept
 		: _capacity{other._capacity}
 		, _begin{other._begin}
 		, _size{other._size}
@@ -67,7 +67,7 @@ public:
 		other._capacity = 0;
 	}
 
-	auto operator=(const stack_vector<T> &other)
+	constexpr auto operator=(const stack_vector<T> &other)
 		-> stack_vector<T> &
 	{
 		if (std::addressof(other) == this) {
@@ -94,7 +94,7 @@ public:
 		return *this;
 	}
 
-	auto operator=(stack_vector<T> &&other)
+	constexpr auto operator=(stack_vector<T> &&other)
 		-> stack_vector<T> &
 	{
 		if (std::addressof(other) != this) {
@@ -105,7 +105,7 @@ public:
 		return *this;
 	}
 
-	~stack_vector()
+	constexpr ~stack_vector()
 	{
 		for (auto &value : *this) {
 			value.~T();
@@ -114,7 +114,7 @@ public:
 		std::allocator<T>::deallocate(_begin, _capacity);
 	}
 
-	auto extend(const std::size_t size)
+	constexpr auto extend(const std::size_t size)
 	{
 		if (size <= _size) {
 			return false;
@@ -134,18 +134,18 @@ public:
 		return true;
 	}
 
-	void push(const T &value)
+	constexpr void push(const T &value)
 	{
 		emplace(value);
 	}
 
-	void push(T &&value)
+	constexpr void push(T &&value)
 	{
 		emplace(std::move(value));
 	}
 
 	template <typename ...Args>
-	void emplace(Args &&...args)
+	constexpr void emplace(Args &&...args)
 	{
 		if (_size < _capacity) {
 			new (_end) T{std::forward<Args>(args)...};
@@ -161,50 +161,50 @@ public:
 	}
 
 	[[nodiscard]]
-	auto size() const noexcept
+	constexpr auto size() const noexcept
 	{
 		return _size;
 	}
 
 	[[nodiscard]]
-	auto operator[](const std::size_t i) noexcept
+	constexpr auto operator[](const std::size_t i) noexcept
 		-> T &
 	{
 		return _begin[i];
 	}
 
 	[[nodiscard]]
-	auto operator[](const std::size_t i) const noexcept
+	constexpr auto operator[](const std::size_t i) const noexcept
 		-> const T &
 	{
 		return _begin[i];
 	}
 
 	[[nodiscard]]
-	auto begin() noexcept
+	constexpr auto begin() noexcept
 	{
 		return _begin;
 	}
 
 	[[nodiscard]]
-	auto begin() const noexcept
+	constexpr auto begin() const noexcept
 	{
 		return _begin;
 	}
 
 	[[nodiscard]]
-	auto end() noexcept
+	constexpr auto end() noexcept
 	{
 		return _end;
 	}
 
 	[[nodiscard]]
-	auto end() const noexcept
+	constexpr auto end() const noexcept
 	{
 		return _end;
 	}
 
-	void pop()
+	constexpr void pop()
 	{
 		--_end;
 		_end->~T();
@@ -217,7 +217,7 @@ private:
 	decltype(_capacity)  _size{};
 	decltype(_begin)     _end{};
 
-	void realloc(const std::size_t capacity)
+	constexpr void realloc(const std::size_t capacity)
 	{
 		auto tmp{std::allocator<T>::allocate(capacity)};
 
