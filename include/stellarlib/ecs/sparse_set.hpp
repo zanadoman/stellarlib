@@ -42,18 +42,18 @@ public:
 	explicit sparse_set() noexcept = default;
 
 	[[nodiscard]]
-	sparse_set(const sparse_set<T> &) = default;
+	sparse_set(const sparse_set<T> &) noexcept(false) = default;
 
 	[[nodiscard]]
-	sparse_set(sparse_set<T> &&) = default;
+	sparse_set(sparse_set<T> &&) noexcept = default;
 
-	auto operator=(const sparse_set<T> &)
+	auto operator=(const sparse_set<T> &) noexcept(false)
 		-> sparse_set<T> & = default;
 
-	auto operator=(sparse_set<T> &&)
+	auto operator=(sparse_set<T> &&) noexcept(false)
 		-> sparse_set<T> & = default;
 
-	~sparse_set() final = default;
+	~sparse_set() noexcept(false) final = default;
 
 	void insert(const std::size_t key, const T &value)
 	{

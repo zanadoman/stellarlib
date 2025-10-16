@@ -34,7 +34,7 @@ public:
 	[[nodiscard]]
 	explicit any_set() noexcept = default;
 
-	virtual ~any_set() noexcept;
+	virtual ~any_set() noexcept(false);
 
 	virtual void erase(std::size_t) = 0;
 
