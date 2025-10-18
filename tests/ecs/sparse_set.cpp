@@ -31,6 +31,7 @@
 #include <cstdint>
 #include <memory>
 #include <ranges>
+#include <utility>
 
 using namespace stellarlib::ecs;
 
@@ -45,17 +46,9 @@ using namespace stellarlib::ecs;
 #define ASSERT_CONTAINS_EQ(set, key, value) do \
 {                                              \
 	ASSERT_TRUE((set).contains(key));          \
-	ASSERT_EQ((set)[key], value);              \
-	ASSERT_TRUE((set).at(key));                \
 	ASSERT_EQ(*(set).at(key), value);          \
+	ASSERT_EQ((set)[key], value);              \
 }                                              \
-while (false)
-
-#define ASSERT_NOT_CONTAINS(set, key) do \
-{                                        \
-	ASSERT_FALSE((set).contains(key));   \
-	ASSERT_FALSE((set).at(key));         \
-}                                        \
 while (false)
 
 constexpr std::array<std::size_t, 5>                                KEYS{2, 1, 0, 3, 4};
@@ -69,26 +62,11 @@ static const std::array<std::shared_ptr<std::int32_t>, KEYS.size()> VALUES{
 
 namespace
 {
-void check_values_mut(sparse_set<std::shared_ptr<std::int32_t>> &set)
-{
-	ASSERT_CONTAINS_EQ(set, KEYS[0], VALUES[0]);
-	ASSERT_NOT_CONTAINS(set, KEYS[1]);
-	ASSERT_CONTAINS_EQ(set, KEYS[2], VALUES[2]);
-	ASSERT_NOT_CONTAINS(set, KEYS[3]);
-	ASSERT_CONTAINS_EQ(set, KEYS[4], VALUES[4]);
-}
-
-void check_values_const(const sparse_set<std::shared_ptr<std::int32_t>> &set)
-{
-	ASSERT_CONTAINS_EQ(set, KEYS[0], VALUES[0]);
-	ASSERT_NOT_CONTAINS(set, KEYS[1]);
-	ASSERT_CONTAINS_EQ(set, KEYS[2], VALUES[2]);
-	ASSERT_NOT_CONTAINS(set, KEYS[3]);
-	ASSERT_CONTAINS_EQ(set, KEYS[4], VALUES[4]);
-}
-
 void check_iters_mut(sparse_set<std::shared_ptr<std::int32_t>> &set)
 {
+	for (const auto [key, value] : std::ranges::views::zip(KEYS, VALUES)) {
+		ASSERT_CONTAINS_EQ(set, key, value);
+	}
 	ASSERT_TRUE(std::ranges::equal(set.keys(), KEYS));
 	ASSERT_TRUE(std::ranges::equal(set.values(), VALUES));
 	ASSERT_TRUE(std::ranges::equal(set.zip(), std::ranges::views::zip(KEYS, VALUES)));
@@ -96,48 +74,67 @@ void check_iters_mut(sparse_set<std::shared_ptr<std::int32_t>> &set)
 
 void check_iters_const(const sparse_set<std::shared_ptr<std::int32_t>> &set)
 {
+	for (const auto [key, value] : std::ranges::views::zip(KEYS, VALUES)) {
+		ASSERT_CONTAINS_EQ(set, key, value);
+	}
 	ASSERT_TRUE(std::ranges::equal(set.keys(), KEYS));
 	ASSERT_TRUE(std::ranges::equal(set.values(), VALUES));
 	ASSERT_TRUE(std::ranges::equal(set.zip(), std::ranges::views::zip(KEYS, VALUES)));
 }
-
-void erase_forward(sparse_set<std::shared_ptr<std::int32_t>> &set)
-{
-	ASSERT_CONTAINS_EQ(set, KEYS[0], VALUES[0]);
-	set.erase(KEYS[0]);
-	ASSERT_NOT_CONTAINS(set, KEYS[0]);
-	ASSERT_NOT_CONTAINS(set, KEYS[1]);
-	set.erase(KEYS[1]);
-	ASSERT_NOT_CONTAINS(set, KEYS[1]);
-	ASSERT_CONTAINS_EQ(set, KEYS[2], VALUES[2]);
-	set.erase(KEYS[2]);
-	ASSERT_NOT_CONTAINS(set, KEYS[2]);
-	ASSERT_NOT_CONTAINS(set, KEYS[3]);
-	set.erase(KEYS[3]);
-	ASSERT_NOT_CONTAINS(set, KEYS[3]);
-	ASSERT_CONTAINS_EQ(set, KEYS[4], VALUES[4]);
-	set.erase(KEYS[4]);
-	ASSERT_NOT_CONTAINS(set, KEYS[4]);
 }
 
-void erase_backward(sparse_set<std::shared_ptr<std::int32_t>> &set)
+TEST(ecs_sparse_set, should_init_via_default_ctor)
 {
-	ASSERT_CONTAINS_EQ(set, KEYS[4], VALUES[4]);
-	set.erase(KEYS[4]);
-	ASSERT_NOT_CONTAINS(set, KEYS[4]);
-	ASSERT_NOT_CONTAINS(set, KEYS[3]);
-	set.erase(KEYS[3]);
-	ASSERT_NOT_CONTAINS(set, KEYS[3]);
-	ASSERT_CONTAINS_EQ(set, KEYS[2], VALUES[2]);
-	set.erase(KEYS[2]);
-	ASSERT_NOT_CONTAINS(set, KEYS[2]);
-	ASSERT_NOT_CONTAINS(set, KEYS[1]);
-	set.erase(KEYS[1]);
-	ASSERT_NOT_CONTAINS(set, KEYS[1]);
-	ASSERT_CONTAINS_EQ(set, KEYS[0], VALUES[0]);
-	set.erase(KEYS[0]);
-	ASSERT_NOT_CONTAINS(set, KEYS[0]);
+	const sparse_set<std::shared_ptr<std::int32_t>> set{};
+	ASSERT_TRUE(set.keys().empty());
+	ASSERT_TRUE(set.values().empty());
+	ASSERT_TRUE(set.zip().empty());
 }
+
+TEST(ecs_sparse_set, should_copy_via_ctor)
+{
+	sparse_set<std::shared_ptr<std::int32_t>> set1{};
+	for (const auto [key, value] : std::ranges::views::zip(KEYS, VALUES)) {
+		set1.insert(key, value);
+	}
+	auto set2{set1};
+	check_iters_mut(set2);
+	check_iters_const(set2);
+}
+
+TEST(ecs_sparse_set, should_move_via_ctor)
+{
+	sparse_set<std::shared_ptr<std::int32_t>> set1{};
+	for (const auto [key, value] : std::ranges::views::zip(KEYS, VALUES)) {
+		set1.insert(key, value);
+	}
+	auto set2{std::move(set1)};
+	check_iters_mut(set2);
+	check_iters_const(set2);
+}
+
+TEST(ecs_sparse_set, should_copy_via_assignment)
+{
+	sparse_set<std::shared_ptr<std::int32_t>> set1{};
+	for (const auto [key, value] : std::ranges::views::zip(KEYS, VALUES)) {
+		set1.insert(key, value);
+	}
+	decltype(set1) set2{};
+	set2 = set1;
+	check_iters_mut(set2);
+	check_iters_const(set2);
+}
+
+TEST(ecs_sparse_set, should_move_via_assignment)
+{
+	sparse_set<std::shared_ptr<std::int32_t>> set1{};
+	for (const auto [key, value] : std::ranges::views::zip(KEYS, VALUES)) {
+		set1.insert(key, value);
+	}
+	decltype(set1) set2{};
+	set2 = std::move(set1);
+	check_iters_mut(set2);
+	check_iters_const(set2);
 }
 
 /* NOLINTEND(cert-err58-cpp,cppcoreguidelines-avoid-do-while,cppcoreguidelines-macro-usage,performance-unnecessary-copy-initialization) */

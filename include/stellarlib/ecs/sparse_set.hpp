@@ -98,6 +98,18 @@ public:
 	}
 
 	[[nodiscard]]
+	auto at(const std::size_t key) noexcept
+	{
+		return contains(key) ? _values.begin() + *_sparse[key] : nullptr;
+	}
+
+	[[nodiscard]]
+	auto at(const std::size_t key) const noexcept
+	{
+		return contains(key) ? _values.begin() + *_sparse[key] : nullptr;
+	}
+
+	[[nodiscard]]
 	auto operator[](const std::size_t key) noexcept
 		-> T &
 	{
@@ -109,18 +121,6 @@ public:
 		-> const T &
 	{
 		return _values[*_sparse[key]];
-	}
-
-	[[nodiscard]]
-	auto at(const std::size_t key) noexcept
-	{
-		return contains(key) ? _values.begin() + *_sparse[key] : nullptr;
-	}
-
-	[[nodiscard]]
-	auto at(const std::size_t key) const noexcept
-	{
-		return contains(key) ? _values.begin() + *_sparse[key] : nullptr;
 	}
 
 	[[nodiscard]]
