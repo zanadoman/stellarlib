@@ -55,7 +55,7 @@ namespace
 void check_iter_mut(stack_vector<std::shared_ptr<std::int32_t>> &vector)
 {
 	ASSERT_EQ(vector.size(), VALUES.size());
-	for (decltype(VALUES.size()) i{}; i != VALUES.size(); ++i) {
+	for (std::size_t i{}; i != VALUES.size(); ++i) {
 		ASSERT_EQ(vector[i], VALUES[i]);
 	}
 	ASSERT_EQ(vector.end() - vector.begin(), vector.size());
@@ -65,7 +65,7 @@ void check_iter_mut(stack_vector<std::shared_ptr<std::int32_t>> &vector)
 void check_iter_const(const stack_vector<std::shared_ptr<std::int32_t>> &vector)
 {
 	ASSERT_EQ(vector.size(), VALUES.size());
-	for (decltype(VALUES.size()) i{}; i != VALUES.size(); ++i) {
+	for (std::size_t i{}; i != VALUES.size(); ++i) {
 		ASSERT_EQ(vector[i], VALUES[i]);
 	}
 	ASSERT_EQ(vector.end() - vector.begin(), vector.size());
@@ -134,7 +134,7 @@ TEST(ecs_stack_vector, should_optimize_copy_via_assignment)
 	for (const auto &value : VALUES) {
 		vector1.push(value);
 	}
-	decltype(vector1) vector2{};
+	stack_vector<std::shared_ptr<std::int32_t>> vector2{};
 	for (const auto &value : std::ranges::reverse_view(VALUES)) {
 		vector2.push(value);
 	}
@@ -151,7 +151,7 @@ TEST(ecs_stack_vector, should_copy_via_assignment)
 	for (const auto &value : VALUES) {
 		vector1.push(value);
 	}
-	decltype(vector1) vector2{};
+	stack_vector<std::shared_ptr<std::int32_t>> vector2{};
 	vector2.push(VALUES.front());
 	vector2 = vector1;
 	ASSERT_NE(vector2.begin(), vector1.begin());
@@ -178,7 +178,7 @@ TEST(ecs_stack_vector, should_move_via_assignment)
 	for (const auto &value : VALUES) {
 		vector1.push(value);
 	}
-	decltype(vector1) vector2{};
+	stack_vector<std::shared_ptr<std::int32_t>> vector2{};
 	vector2.push(VALUES.front());
 	const auto begin{vector1.begin()};
 	vector2 = std::move(vector1);
@@ -207,7 +207,7 @@ TEST(ecs_stack_vector, should_extend)
 	ASSERT_TRUE(vector.extend(VALUES.size()));
 	ASSERT_EQ(vector.size(), VALUES.size());
 	ASSERT_EQ(vector[0], VALUES.front());
-	for (decltype(VALUES.size()) i{1}; i != VALUES.size(); ++i) {
+	for (std::size_t i{1}; i != VALUES.size(); ++i) {
 		ASSERT_EQ(vector[i], std::shared_ptr<std::int32_t>{});
 	}
 	ASSERT_EQ(vector.end() - vector.begin(), vector.size());
@@ -216,7 +216,7 @@ TEST(ecs_stack_vector, should_extend)
 TEST(ecs_stack_vector, should_push_and_pop_values)
 {
 	stack_vector<std::shared_ptr<std::int32_t>> vector{};
-	for (decltype(VALUES.size()) i{}; i != VALUES.size(); ++i) {
+	for (std::size_t i{}; i != VALUES.size(); ++i) {
 		vector.push(VALUES[i]);
 		ASSERT_EQ(vector.size(), i + 1);
 		ASSERT_EQ(vector[i], VALUES[i]);

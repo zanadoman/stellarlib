@@ -111,31 +111,31 @@ public:
 	[[nodiscard]]
 	auto keys() const noexcept
 	{
-		return std::ranges::views::all(_keys);
+		return std::views::all(_keys);
 	}
 
 	[[nodiscard]]
 	auto values() noexcept
 	{
-		return std::ranges::views::all(_values);
+		return std::views::all(_values);
 	}
 
 	[[nodiscard]]
 	auto values() const noexcept
 	{
-		return std::ranges::views::all(_values);
+		return std::views::all(_values);
 	}
 
 	[[nodiscard]]
 	auto zip() noexcept
 	{
-		return std::ranges::views::zip(std::as_const(_keys), _values);
+		return std::views::zip(std::as_const(_keys), _values);
 	}
 
 	[[nodiscard]]
 	auto zip() const noexcept
 	{
-		return std::ranges::views::zip(_keys, _values);
+		return std::views::zip(_keys, _values);
 	}
 
 	void erase(const std::size_t key) final

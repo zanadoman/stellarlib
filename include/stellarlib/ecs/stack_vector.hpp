@@ -50,7 +50,7 @@ public:
 		_size  = other._size;
 		_end   = _begin + _size;
 
-		for (auto [dst, src] : std::ranges::views::zip(*this, other)) {
+		for (auto [dst, src] : std::views::zip(*this, other)) {
 			new (std::addressof(dst)) T{src};
 		}
 	}
@@ -87,7 +87,7 @@ public:
 		_size = other._size;
 		_end  = _begin + _size;
 
-		for (auto [dst, src] : std::ranges::views::zip(*this, other)) {
+		for (auto [dst, src] : std::views::zip(*this, other)) {
 			new (std::addressof(dst)) T{src};
 		}
 
@@ -202,10 +202,10 @@ public:
 	}
 
 private:
-	std::size_t          _capacity{};
-	T                   *_begin{};
-	decltype(_capacity)  _size{};
-	decltype(_begin)     _end{};
+	std::size_t  _capacity{};
+	T           *_begin{};
+	std::size_t  _size{};
+	T           *_end{};
 
 	constexpr void realloc(const std::size_t capacity)
 	{
