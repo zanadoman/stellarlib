@@ -53,7 +53,7 @@ static const std::vector<std::shared_ptr<std::int32_t>> VALUES{
 
 namespace
 {
-void check_iter_mut(stack_vector<std::shared_ptr<std::int32_t>> &vector)
+void check_range_mut(stack_vector<std::shared_ptr<std::int32_t>> &vector)
 {
 	ASSERT_EQ(vector.size(), VALUES.size());
 	for (std::size_t i{}; i != VALUES.size(); ++i) {
@@ -63,7 +63,7 @@ void check_iter_mut(stack_vector<std::shared_ptr<std::int32_t>> &vector)
 	ASSERT_TRUE(std::ranges::equal(vector, VALUES));
 }
 
-void check_iter_const(const stack_vector<std::shared_ptr<std::int32_t>> &vector)
+void check_range_const(const stack_vector<std::shared_ptr<std::int32_t>> &vector)
 {
 	ASSERT_EQ(vector.size(), VALUES.size());
 	for (std::size_t i{}; i != VALUES.size(); ++i) {
@@ -99,8 +99,8 @@ TEST(ecs_stack_vector, should_copy_via_ctor)
 	}
 	auto vector2{vector1};
 	ASSERT_NE(vector2.begin(), vector1.begin());
-	check_iter_mut(vector2);
-	check_iter_const(vector2);
+	check_range_mut(vector2);
+	check_range_const(vector2);
 }
 
 TEST(ecs_stack_vector, should_move_via_ctor)
@@ -112,8 +112,8 @@ TEST(ecs_stack_vector, should_move_via_ctor)
 	const auto begin{vector1.begin()};
 	auto vector2{std::move(vector1)};
 	ASSERT_EQ(vector2.begin(), begin);
-	check_iter_mut(vector2);
-	check_iter_const(vector2);
+	check_range_mut(vector2);
+	check_range_const(vector2);
 }
 
 TEST(ecs_stack_vector, should_skip_self_copy_via_assignment)
@@ -125,8 +125,8 @@ TEST(ecs_stack_vector, should_skip_self_copy_via_assignment)
 	const auto begin{vector.begin()};
 	vector = vector;
 	ASSERT_EQ(vector.begin(), begin);
-	check_iter_mut(vector);
-	check_iter_const(vector);
+	check_range_mut(vector);
+	check_range_const(vector);
 }
 
 TEST(ecs_stack_vector, should_optimize_copy_via_assignment)
@@ -142,8 +142,8 @@ TEST(ecs_stack_vector, should_optimize_copy_via_assignment)
 	const auto begin{vector2.begin()};
 	vector2 = vector1;
 	ASSERT_EQ(vector2.begin(), begin);
-	check_iter_mut(vector2);
-	check_iter_const(vector2);
+	check_range_mut(vector2);
+	check_range_const(vector2);
 }
 
 TEST(ecs_stack_vector, should_copy_via_assignment)
@@ -156,8 +156,8 @@ TEST(ecs_stack_vector, should_copy_via_assignment)
 	vector2.push(VALUES.front());
 	vector2 = vector1;
 	ASSERT_NE(vector2.begin(), vector1.begin());
-	check_iter_mut(vector2);
-	check_iter_const(vector2);
+	check_range_mut(vector2);
+	check_range_const(vector2);
 }
 
 TEST(ecs_stack_vector, should_skip_self_move_via_assignment)
@@ -169,8 +169,8 @@ TEST(ecs_stack_vector, should_skip_self_move_via_assignment)
 	const auto begin{vector.begin()};
 	vector = std::move(vector);
 	ASSERT_EQ(vector.begin(), begin);
-	check_iter_mut(vector);
-	check_iter_const(vector);
+	check_range_mut(vector);
+	check_range_const(vector);
 }
 
 TEST(ecs_stack_vector, should_move_via_assignment)
@@ -184,8 +184,8 @@ TEST(ecs_stack_vector, should_move_via_assignment)
 	const auto begin{vector1.begin()};
 	vector2 = std::move(vector1);
 	ASSERT_EQ(vector2.begin(), begin);
-	check_iter_mut(vector2);
-	check_iter_const(vector2);
+	check_range_mut(vector2);
+	check_range_const(vector2);
 }
 
 TEST(ecs_stack_vector, should_optimize_extend)
@@ -197,8 +197,8 @@ TEST(ecs_stack_vector, should_optimize_extend)
 	const auto begin{vector.begin()};
 	ASSERT_FALSE(vector.extend(vector.size()));
 	ASSERT_EQ(vector.begin(), begin);
-	check_iter_mut(vector);
-	check_iter_const(vector);
+	check_range_mut(vector);
+	check_range_const(vector);
 }
 
 TEST(ecs_stack_vector, should_extend)
@@ -236,8 +236,8 @@ TEST(ecs_stack_vector, should_push_and_pop_values)
 		ASSERT_EQ(vector.end() - vector.begin(), i + 1);
 		ASSERT_EQ(*std::ranges::find(vector, VALUES[i]), VALUES[i]);
 	}
-	check_iter_mut(vector);
-	check_iter_const(vector);
+	check_range_mut(vector);
+	check_range_const(vector);
 }
 
 /* NOLINTEND(cert-err58-cpp,performance-unnecessary-copy-initialization) */

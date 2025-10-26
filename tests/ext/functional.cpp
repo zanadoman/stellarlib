@@ -60,21 +60,29 @@ TEST(ext_functional, falsy)
 TEST(ext_functional, subset)
 {
 	ASSERT_TRUE(subset(0xb1100, 0xb1101));
-	ASSERT_TRUE(subset(std::pair{0xb1100, 0xb1101}));
 	ASSERT_TRUE(subset(0xb1101, 0xb1101));
-	ASSERT_TRUE(subset(std::pair{0xb1101, 0xb1101}));
 	ASSERT_FALSE(subset(0xb1101, 0xb1100));
-	ASSERT_FALSE(subset(std::pair{0xb1101, 0xb1100}));
+}
+
+TEST(ext_functional, zip_subset)
+{
+	ASSERT_TRUE(zip_subset(std::pair{0xb1100, 0xb1101}));
+	ASSERT_TRUE(zip_subset(std::pair{0xb1101, 0xb1101}));
+	ASSERT_FALSE(zip_subset(std::pair{0xb1101, 0xb1100}));
 }
 
 TEST(ext_functional, superset)
 {
 	ASSERT_TRUE(superset(0xb1101, 0xb1100));
-	ASSERT_TRUE(superset(std::pair{0xb1101, 0xb1100}));
 	ASSERT_TRUE(superset(0xb1101, 0xb1101));
-	ASSERT_TRUE(superset(std::pair{0xb1101, 0xb1101}));
 	ASSERT_FALSE(superset(0xb1100, 0xb1101));
-	ASSERT_FALSE(superset(std::pair{0xb1100, 0xb1101}));
+}
+
+TEST(ext_functional, zip_superset)
+{
+	ASSERT_TRUE(zip_superset(std::pair{0xb1101, 0xb1100}));
+	ASSERT_TRUE(zip_superset(std::pair{0xb1101, 0xb1101}));
+	ASSERT_FALSE(zip_superset(std::pair{0xb1100, 0xb1101}));
 }
 
 /* NOLINTEND(cert-err58-cpp,performance-unnecessary-copy-initialization) */

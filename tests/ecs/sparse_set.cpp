@@ -54,7 +54,7 @@ static const std::array<std::shared_ptr<std::int32_t>, KEYS.size()> VALUES{
 
 namespace
 {
-void check_iters_mut(sparse_set<std::shared_ptr<std::int32_t>> &set)
+void check_ranges_mut(sparse_set<std::shared_ptr<std::int32_t>> &set)
 {
 	for (const auto [key, value] : std::views::zip(KEYS, VALUES)) {
 		ASSERT_TRUE(set.contains(key));
@@ -66,7 +66,7 @@ void check_iters_mut(sparse_set<std::shared_ptr<std::int32_t>> &set)
 	ASSERT_TRUE(std::ranges::equal(set.zip(), std::views::zip(KEYS, VALUES)));
 }
 
-void check_iters_const(const sparse_set<std::shared_ptr<std::int32_t>> &set)
+void check_ranges_const(const sparse_set<std::shared_ptr<std::int32_t>> &set)
 {
 	for (const auto [key, value] : std::views::zip(KEYS, VALUES)) {
 		ASSERT_TRUE(set.contains(key));
@@ -94,8 +94,8 @@ TEST(ecs_sparse_set, should_copy_via_ctor)
 		set1.insert(key, value);
 	}
 	auto set2{set1};
-	check_iters_mut(set2);
-	check_iters_const(set2);
+	check_ranges_mut(set2);
+	check_ranges_const(set2);
 }
 
 TEST(ecs_sparse_set, should_move_via_ctor)
@@ -105,8 +105,8 @@ TEST(ecs_sparse_set, should_move_via_ctor)
 		set1.insert(key, value);
 	}
 	auto set2{std::move(set1)};
-	check_iters_mut(set2);
-	check_iters_const(set2);
+	check_ranges_mut(set2);
+	check_ranges_const(set2);
 }
 
 TEST(ecs_sparse_set, should_copy_via_assignment)
@@ -117,8 +117,8 @@ TEST(ecs_sparse_set, should_copy_via_assignment)
 	}
 	sparse_set<std::shared_ptr<std::int32_t>> set2{};
 	set2 = set1;
-	check_iters_mut(set2);
-	check_iters_const(set2);
+	check_ranges_mut(set2);
+	check_ranges_const(set2);
 }
 
 TEST(ecs_sparse_set, should_move_via_assignment)
@@ -129,8 +129,8 @@ TEST(ecs_sparse_set, should_move_via_assignment)
 	}
 	sparse_set<std::shared_ptr<std::int32_t>> set2{};
 	set2 = std::move(set1);
-	check_iters_mut(set2);
-	check_iters_const(set2);
+	check_ranges_mut(set2);
+	check_ranges_const(set2);
 }
 
 TEST(ecs_sparse_set, should_insert_and_erase_values)
@@ -158,8 +158,8 @@ TEST(ecs_sparse_set, should_insert_and_erase_values)
 		ASSERT_EQ(*std::ranges::find(set.values(), std::get<1>(pair)), std::get<1>(pair));
 		ASSERT_EQ(*std::ranges::find(set.zip(), pair), pair);
 	}
-	check_iters_mut(set);
-	check_iters_const(set);
+	check_ranges_mut(set);
+	check_ranges_const(set);
 }
 
 TEST(ecs_sparse_set, should_reinsert_value)

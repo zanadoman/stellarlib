@@ -51,7 +51,7 @@ constexpr auto subset(const T &lhs, const T &rhs) noexcept
 
 template <typename T>
 [[nodiscard]]
-constexpr auto subset(const std::pair<T, T> &arg) noexcept
+constexpr auto zip_subset(const std::pair<T, T> &arg) noexcept
 {
 	return (arg.first & arg.second) == arg.first;
 }
@@ -65,7 +65,7 @@ constexpr auto superset(const T &lhs, const T &rhs) noexcept
 
 template <typename T>
 [[nodiscard]]
-constexpr auto superset(const std::pair<T, T> &arg) noexcept
+constexpr auto zip_superset(const std::pair<T, T> &arg) noexcept
 {
 	return (arg.second & arg.first) == arg.second;
 }
