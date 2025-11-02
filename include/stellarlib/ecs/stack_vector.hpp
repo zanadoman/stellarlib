@@ -42,7 +42,7 @@ public:
 	constexpr stack_vector(const stack_vector<T> &other)
 		: _capacity{other._capacity}
 	{
-		if (!static_cast<bool>(_capacity)) {
+		if (_capacity == 0) {
 			return;
 		}
 
@@ -124,12 +124,11 @@ public:
 			realloc(size);
 		}
 
-		for (auto i{_size}; i != size; ++i) {
-			new (_begin + i) T{};
+		for (; _size != size; ++_size) {
+			new (_begin + _size) T{};
 		}
 
-		_size = size;
-		_end  = _begin + _size;
+		_end = _begin + _size;
 
 		return true;
 	}
