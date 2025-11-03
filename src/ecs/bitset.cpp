@@ -26,7 +26,7 @@
 #include <stellarlib/ext/functional.hpp>
 
 #include <algorithm>
-#include <cstdint>
+#include <cstddef>
 #include <cstdlib>
 #include <limits>
 #include <memory>
@@ -42,7 +42,7 @@ bitset::bitset(const bitset &other)
 		return;
 	}
 
-	_begin.reset(static_cast<std::uint32_t *>(std::malloc(_size * sizeof(*_begin))));
+	_begin.reset(static_cast<std::size_t *>(std::malloc(_size * sizeof(*_begin))));
 
 	if (!_begin) {
 		throw std::bad_alloc{};
@@ -74,7 +74,7 @@ auto bitset::operator=(const bitset &other)
 	return *this;
 }
 
-void bitset::insert(const std::uint32_t key)
+void bitset::insert(const std::size_t key)
 {
 	const auto index{index_of(key)};
 
@@ -94,7 +94,7 @@ void bitset::insert(const std::uint32_t key)
 	}
 }
 
-auto bitset::contains(const std::uint32_t key) const noexcept
+auto bitset::contains(const std::size_t key) const noexcept
 	-> bool
 {
 	const auto index{index_of(key)};
@@ -107,12 +107,12 @@ auto bitset::operator==(const bitset &other) const noexcept
 {
 	if (_size < other._size) {
 		return std::equal(_begin.get(), _end, other._begin.get())
-			&& std::none_of(other._begin.get() + _size, other._end, ext::truthy<std::uint32_t>);
+			&& std::none_of(other._begin.get() + _size, other._end, ext::truthy<std::size_t>);
 	}
 
 	if (other._size < _size) {
 		return std::equal(other._begin.get(), other._end, _begin.get())
-			&& std::none_of(_begin.get() + other._size, _end, ext::truthy<std::uint32_t>);
+			&& std::none_of(_begin.get() + other._size, _end, ext::truthy<std::size_t>);
 	}
 
 	return std::equal(_begin.get(), _end, other._begin.get());
@@ -127,8 +127,8 @@ auto bitset::operator!=(const bitset &other) const noexcept
 auto bitset::operator<=(const bitset &other) const noexcept
 	-> bool
 {
-	return (_size <= other._size || std::none_of(_begin.get() + other._size, _end, ext::truthy<std::uint32_t>))
-		&& std::ranges::all_of(std::views::zip(range(), other.range()), ext::zip_subset<std::uint32_t>);
+	return (_size <= other._size || std::none_of(_begin.get() + other._size, _end, ext::truthy<std::size_t>))
+		&& std::ranges::all_of(std::views::zip(range(), other.range()), ext::zip_subset<std::size_t>);
 }
 
 auto bitset::operator>=(const bitset &other) const noexcept
@@ -137,7 +137,7 @@ auto bitset::operator>=(const bitset &other) const noexcept
 	return other <= *this;
 }
 
-void bitset::erase(const std::uint32_t key) noexcept
+void bitset::erase(const std::size_t key) noexcept
 {
 	const auto index{index_of(key)};
 
@@ -153,21 +153,21 @@ void bitset::clear() noexcept
 	}
 }
 
-auto bitset::index_of(const std::uint32_t key) noexcept
-	-> std::uint32_t
+auto bitset::index_of(const std::size_t key) noexcept
+	-> std::size_t
 {
-	return key / std::numeric_limits<std::uint32_t>::digits;
+	return key / std::numeric_limits<std::size_t>::digits;
 }
 
-auto bitset::mask_of(const std::uint32_t key) noexcept
-	-> std::uint32_t
+auto bitset::mask_of(const std::size_t key) noexcept
+	-> std::size_t
 {
-	return std::uint32_t{1} << key % std::numeric_limits<std::uint32_t>::digits;
+	return std::size_t{1} << key % std::numeric_limits<std::size_t>::digits;
 }
 
-void bitset::realloc(const std::uint32_t size)
+void bitset::realloc(const std::size_t size)
 {
-	_begin.reset(static_cast<std::uint32_t *>(std::realloc(_begin.release(), size * sizeof(*_begin))));
+	_begin.reset(static_cast<std::size_t *>(std::realloc(_begin.release(), size * sizeof(*_begin))));
 
 	if (!_begin) {
 		throw std::bad_alloc{};
@@ -175,7 +175,7 @@ void bitset::realloc(const std::uint32_t size)
 }
 
 auto bitset::range() const noexcept
-	-> std::ranges::subrange<std::uint32_t *, std::uint32_t *>
+	-> std::ranges::subrange<std::size_t *, std::size_t *>
 {
 	return std::ranges::subrange{_begin.get(), _end};
 }
