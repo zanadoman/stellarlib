@@ -115,6 +115,18 @@ auto bitset::operator>=(const bitset &other) const noexcept
 	return other <= *this;
 }
 
+auto bitset::operator==(const bitset &other) const noexcept
+	-> bool
+{
+	return *this <= other && other <= *this;
+}
+
+auto bitset::operator!=(const bitset &other) const noexcept
+	-> bool
+{
+	return !(*this == other);
+}
+
 void bitset::erase(const std::uint32_t key) noexcept
 {
 	const auto index{index_of(key)};

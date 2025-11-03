@@ -187,6 +187,10 @@ TEST(ecs_bitset, should_evaluate_equal_subsets)
 	ASSERT_TRUE(set2 <= set1);
 	ASSERT_TRUE(set2 >= set1);
 	ASSERT_TRUE(set1 >= set2);
+	ASSERT_TRUE(set1 == set2);
+	ASSERT_TRUE(set2 == set1);
+	ASSERT_FALSE(set1 != set2);
+	ASSERT_FALSE(set2 != set1);
 }
 
 
@@ -200,6 +204,10 @@ TEST(ecs_bitset, should_evaluate_disjount_sets)
 	ASSERT_FALSE(set2 <= set1);
 	ASSERT_FALSE(set2 >= set1);
 	ASSERT_FALSE(set1 >= set2);
+	ASSERT_FALSE(set1 == set2);
+	ASSERT_FALSE(set2 == set1);
+	ASSERT_TRUE(set1 != set2);
+	ASSERT_TRUE(set2 != set1);
 }
 
 TEST(ecs_bitset, should_clear_values)
