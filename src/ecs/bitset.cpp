@@ -62,13 +62,12 @@ auto bitset::operator=(const bitset &other)
 		realloc(_size);
 		_end = _begin.get() + _size;
 	}
-	else if (other._size < _size) {
-		for (auto &segment : std::ranges::subrange(_begin.get() + other._size, _end)) {
-			segment = 0;
-		}
-	}
 
 	std::copy(other._begin.get(), other._end, _begin.get());
+
+	for (auto &segment : std::ranges::subrange(_begin.get() + other._size, _end)) {
+		segment = 0;
+	}
 
 	return *this;
 }
@@ -87,8 +86,8 @@ void bitset::insert(const std::size_t key)
 			_begin.get()[_size] = 0;
 		}
 
-		_begin.get()[_size] = mask_of(key);
 		++_size;
+		_begin.get()[index] = mask_of(key);
 		_end = _begin.get() + _size;
 	}
 }
