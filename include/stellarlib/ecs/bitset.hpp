@@ -57,6 +57,14 @@ public:
 	auto contains(std::uint32_t key) const noexcept
 		-> bool;
 
+	[[nodiscard]]
+	auto operator<=(const bitset &other) const noexcept
+		-> bool;
+
+	[[nodiscard]]
+	auto operator>=(const bitset &other) const noexcept
+		-> bool;
+
 	void erase(std::uint32_t key) noexcept;
 
 	void clear() noexcept;

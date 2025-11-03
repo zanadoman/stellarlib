@@ -23,6 +23,8 @@
 
 #include <stellarlib/ecs/bitset.hpp>
 
+#include <stellarlib/ext/functional.hpp>
+
 #include <algorithm>
 #include <cstdint>
 #include <cstdlib>
@@ -98,6 +100,19 @@ auto bitset::contains(const std::uint32_t key) const noexcept
 	const auto index{index_of(key)};
 
 	return index < _size && (_begin.get()[index] & mask_of(key)) != 0;
+}
+
+auto bitset::operator<=(const bitset &other) const noexcept
+	-> bool
+{
+	return (_size <= other._size || std::none_of(_begin.get() + other._size, _end, ext::truthy<std::uint32_t>))
+		&& std::ranges::all_of(std::views::zip(range(), other.range()), ext::zip_subset<std::uint32_t>);
+}
+
+auto bitset::operator>=(const bitset &other) const noexcept
+	-> bool
+{
+	return other <= *this;
 }
 
 void bitset::erase(const std::uint32_t key) noexcept

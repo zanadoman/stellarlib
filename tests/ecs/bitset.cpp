@@ -44,7 +44,7 @@ using namespace stellarlib::ecs;
 static const std::vector<std::uint32_t> ELEMS{
 	std::numeric_limits<std::uint32_t>::digits * 3 - 1,
 	0,
-	std::numeric_limits<std::uint32_t>::digits * 3 / 2
+	(std::numeric_limits<std::uint32_t>::digits * 3 - 1) / 2
 };
 
 namespace
@@ -144,6 +144,62 @@ TEST(ecs_bitset, should_insert_and_erase_values)
 		ASSERT_TRUE(set.contains(elem));
 	}
 	check_elems(set);
+}
+
+TEST(ecs_bitset, should_evaluate_tight_subset)
+{
+	bitset subset{};
+	subset.insert(std::ranges::min(ELEMS));
+	bitset superset{};
+	for (const auto elem : ELEMS) {
+		superset.insert(elem);
+	}
+	ASSERT_TRUE(subset <= superset);
+	ASSERT_FALSE(superset <= subset);
+	ASSERT_TRUE(superset >= subset);
+	ASSERT_FALSE(subset >= superset);
+}
+
+TEST(ecs_bitset, should_evaluate_loose_subset)
+{
+	bitset subset{};
+	subset.insert(std::ranges::min(ELEMS));
+	subset.insert(std::ranges::max(ELEMS));
+	subset.erase(std::ranges::max(ELEMS));
+	bitset superset{};
+	superset.insert(std::ranges::min(ELEMS));
+	superset.insert((std::ranges::min(ELEMS) + std::ranges::max(ELEMS)) / 2);
+	ASSERT_TRUE(subset <= superset);
+	ASSERT_FALSE(superset <= subset);
+	ASSERT_TRUE(superset >= subset);
+	ASSERT_FALSE(subset >= superset);
+}
+
+TEST(ecs_bitset, should_evaluate_equal_subsets)
+{
+	bitset set1{};
+	set1.insert(std::ranges::min(ELEMS));
+	bitset set2{};
+	set2.insert(std::ranges::min(ELEMS));
+	set2.insert(std::ranges::max(ELEMS));
+	set2.erase(std::ranges::max(ELEMS));
+	ASSERT_TRUE(set1 <= set2);
+	ASSERT_TRUE(set2 <= set1);
+	ASSERT_TRUE(set2 >= set1);
+	ASSERT_TRUE(set1 >= set2);
+}
+
+
+TEST(ecs_bitset, should_evaluate_disjount_sets)
+{
+	bitset set1{};
+	set1.insert(std::ranges::min(ELEMS));
+	bitset set2{};
+	set2.insert(std::ranges::max(ELEMS));
+	ASSERT_FALSE(set1 <= set2);
+	ASSERT_FALSE(set2 <= set1);
+	ASSERT_FALSE(set2 >= set1);
+	ASSERT_FALSE(set1 >= set2);
 }
 
 TEST(ecs_bitset, should_clear_values)
