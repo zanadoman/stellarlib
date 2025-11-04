@@ -26,9 +26,27 @@
 #include <stellarlib/ecs/any_set.hpp>
 
 #include <cstddef>
+#include <memory>
 
 namespace stellarlib::ecs
 {
+auto sparse_storage::operator=(const sparse_storage &other)
+	-> sparse_storage &
+{
+	if (std::addressof(other) == this) {
+		return *this;
+	}
+
+	_ids = other._ids;
+	_sets.clear();
+
+	for (const auto &set : other._sets) {
+		_sets.emplace_back(set->clone());
+	}
+
+	return *this;
+}
+
 auto sparse_storage::by_id(const std::size_t id) const
 	-> any_set *
 {

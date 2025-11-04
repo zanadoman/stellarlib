@@ -54,6 +54,13 @@ public:
 	auto operator=(sparse_set<T> &&)
 		-> sparse_set<T> & = default;
 
+	[[nodiscard]]
+	auto clone() const
+		-> sparse_set<T> * final
+	{
+		return new sparse_set<T>{*this};
+	}
+
 	~sparse_set() final = default;
 
 	template <typename ...Args>

@@ -132,6 +132,17 @@ TEST(ecs_sparse_set, should_move_via_assignment)
 	check_ranges_const(set2);
 }
 
+TEST(ecs_sparse_set, should_copy_via_clone)
+{
+	sparse_set<std::shared_ptr<std::int32_t>> set1{};
+	for (const auto [key, value] : std::views::zip(KEYS, VALUES)) {
+		set1.insert(key, value);
+	}
+	std::unique_ptr<sparse_set<std::shared_ptr<std::int32_t>>> set2{set1.clone()};
+	check_ranges_mut(*set2);
+	check_ranges_const(*set2);
+}
+
 TEST(ecs_sparse_set, should_insert_and_erase_values)
 {
 	sparse_set<std::shared_ptr<std::int32_t>> set{};

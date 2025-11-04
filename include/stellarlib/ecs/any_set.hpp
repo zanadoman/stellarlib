@@ -36,6 +36,10 @@ public:
 
 	virtual ~any_set();
 
+	[[nodiscard]]
+	virtual auto clone() const
+		-> any_set * = 0;
+
 	virtual void erase(std::uint32_t) = 0;
 
 protected:

@@ -39,6 +39,19 @@ using namespace stellarlib::ecs;
 
 /* NOLINTBEGIN(cert-err58-cpp,performance-unnecessary-copy-initialization) */
 
+TEST(ecs_sparse_storage, should_copy_via_assignment)
+{
+	sparse_storage storage1{};
+	storage1.by_type<std::int32_t>().insert(0, 1);
+	storage1.by_type<std::int64_t>().insert(0, 2);
+	sparse_storage storage2{};
+	storage2 = storage1;
+	ASSERT_TRUE(dynamic_cast<sparse_set<std::int32_t> *>(storage2.by_id(storage2.id_of<std::int32_t>())));
+	ASSERT_EQ((*dynamic_cast<sparse_set<std::int32_t> *>(storage2.by_id(storage2.id_of<std::int32_t>())))[0], 1);
+	ASSERT_TRUE(dynamic_cast<sparse_set<std::int64_t> *>(storage2.by_id(storage2.id_of<std::int64_t>())));
+	ASSERT_EQ((*dynamic_cast<sparse_set<std::int64_t> *>(storage2.by_id(storage2.id_of<std::int64_t>())))[0], 2);
+}
+
 TEST(ecs_sparse_storage, should_generate_ids)
 {
 	sparse_storage storage{};

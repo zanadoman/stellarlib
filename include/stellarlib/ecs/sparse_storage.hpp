@@ -39,6 +39,23 @@ namespace stellarlib::ecs
 class sparse_storage final
 {
 public:
+	[[nodiscard]]
+	explicit sparse_storage() = default;
+
+	[[nodiscard]]
+	sparse_storage(const sparse_storage &) = default;
+
+	[[nodiscard]]
+	sparse_storage(sparse_storage &&) = default;
+
+	auto operator=(const sparse_storage &other)
+		-> sparse_storage &;
+
+	auto operator=(sparse_storage &&)
+		-> sparse_storage & = default;
+
+	~sparse_storage() = default;
+
 	template <typename T>
 	[[nodiscard]]
 	auto id_of()
