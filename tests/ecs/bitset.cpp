@@ -146,7 +146,7 @@ TEST(ecs_bitset, should_insert_and_erase_values)
 	check_elems(set);
 }
 
-TEST(ecs_bitset, should_evaluate_equal_subsets)
+TEST(ecs_bitset, should_evaluate_equal_sets)
 {
 	bitset set1{};
 	set1.insert(std::ranges::min(ELEMS));

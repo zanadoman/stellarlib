@@ -67,7 +67,7 @@ auto bitset::operator=(const bitset &other)
 
 	std::copy(other._begin.get(), other._end, _begin.get());
 
-	for (auto &segment : std::ranges::subrange(_begin.get() + other._size, _end)) {
+	for (auto &segment : std::ranges::subrange{_begin.get() + other._size, _end}) {
 		segment = 0;
 	}
 

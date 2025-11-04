@@ -65,7 +65,7 @@ public:
 	auto by_type()
 		-> sparse_set<T> &
 	{
-		return *dynamic_cast<sparse_set<T> *>(_sets[id_of<T>()]);
+		return *dynamic_cast<sparse_set<T> *>(_sets[id_of<T>()].get());
 	}
 
 private:
