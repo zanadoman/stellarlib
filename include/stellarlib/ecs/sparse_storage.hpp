@@ -26,12 +26,10 @@
 
 #include <stellarlib/ecs/any_set.hpp>
 #include <stellarlib/ecs/sparse_set.hpp>
-#include <stellarlib/ecs/stack_vector.hpp>
 
 #include <cstddef>
 #include <memory>
 #include <unordered_map>
-#include <utility>
 #include <vector>
 
 namespace stellarlib::ecs
@@ -43,7 +41,7 @@ public:
 	explicit sparse_storage() = default;
 
 	[[nodiscard]]
-	sparse_storage(const sparse_storage &);
+	sparse_storage(const sparse_storage &other);
 
 	[[nodiscard]]
 	sparse_storage(sparse_storage &&) = default;
@@ -64,7 +62,7 @@ public:
 
 		if (it == _ids.end()) {
 			const auto id{_sets.size()};
-			_ids.emplace(std::pair<std::size_t, std::size_t>{typeid(T).hash_code(), id});
+			_ids.emplace(typeid(T).hash_code(), id);
 			_sets.emplace_back(std::make_unique<sparse_set<T>>());
 
 			return id;
@@ -82,7 +80,7 @@ public:
 	auto by_type()
 		-> sparse_set<T> &
 	{
-		return dynamic_cast<sparse_set<T> &>(*_sets[id_of<T>()].get());
+		return dynamic_cast<sparse_set<T> &>(*_sets[id_of<T>()]);
 	}
 
 private:
