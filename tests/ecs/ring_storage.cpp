@@ -1,0 +1,74 @@
+/* clang-format off */
+
+/*
+  stellarlib
+  Copyright (C) 2025 Domán Zana
+
+  This software is provided 'as-is', without any express or implied
+  warranty. In no event will the authors be held liable for any damages
+  arising from the use of this software.
+
+  Permission is granted to anyone to use this software for any purpose,
+  including commercial applications, and to alter it and redistribute it
+  freely, subject to the following restrictions:
+
+  1. The origin of this software must not be misrepresented; you must not
+     claim that you wrote the original software. If you use this software
+     in a product, an acknowledgment in the product documentation would be
+     appreciated but is not required.
+  2. Altered source versions must be plainly marked as such, and must not be
+     misrepresented as being the original software.
+  3. This notice may not be removed or altered from any source distribution.
+*/
+
+#include <stellarlib/ecs/ring_storage.hpp>
+
+#include <gtest/gtest.h>
+
+#include <cstdint>
+#include <memory>
+#include <vector>
+
+using namespace stellarlib::ecs;
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wexit-time-destructors"
+#pragma clang diagnostic ignored "-Wglobal-constructors"
+#pragma clang diagnostic ignored "-Wself-assign-overloaded"
+#pragma clang diagnostic ignored "-Wself-move"
+
+/* NOLINTBEGIN(cert-err58-cpp,performance-unnecessary-copy-initialization) */
+
+TEST(ecs_ring_storage, should_reuse_keys)
+{
+	ring_storage<std::shared_ptr<std::int32_t>> storage{};
+	ASSERT_EQ(storage.acquire(), 0);
+	ASSERT_EQ(storage.acquire(), 1);
+	ASSERT_EQ(storage.acquire(), 2);
+	storage.release(2);
+	storage.release(0);
+	storage.release(1);
+	ASSERT_EQ(storage.acquire(), 1);
+	ASSERT_EQ(storage.acquire(), 0);
+	ASSERT_EQ(storage.acquire(), 2);
+}
+
+TEST(ecs_ring_storage, should_acquire_and_release_keys)
+{
+	ring_storage<std::vector<std::uint32_t>> storage{};
+	auto key{storage.acquire()};
+	ASSERT_TRUE(storage.at(key));
+	storage.at(key)->push_back(key);
+	ASSERT_EQ(storage.at(key)->size(), 1);
+	const auto data{storage.at(key)->data()};
+	storage.release(key);
+	ASSERT_FALSE(storage.at(key));
+	key = storage.acquire();
+	ASSERT_TRUE(storage.at(key));
+	ASSERT_TRUE(storage.at(key)->empty());
+	ASSERT_EQ(storage.at(key)->data(), data);
+}
+
+/* NOLINTEND(cert-err58-cpp,performance-unnecessary-copy-initialization) */
+
+#pragma clang diagnostic pop
