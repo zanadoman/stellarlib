@@ -78,10 +78,10 @@ public:
 	void reset();
 
 private:
-	std::size_t                                     _size{};
-	[[maybe_unused]] std::size_t                    _padding{};
-	std::unique_ptr<std::size_t, void (*)(void *)>  _begin{nullptr, std::free};
-	std::size_t                                    *_end{};
+	std::size_t _size{};
+	[[maybe_unused]] std::size_t _padding{};
+	std::unique_ptr<std::size_t, void (*)(void *)> _begin{nullptr, std::free};
+	std::size_t *_end{};
 
 	[[nodiscard]]
 	static auto index_of(std::size_t key)

@@ -140,8 +140,8 @@ public:
 	}
 
 private:
-	stack_vector<T>                            _values;
-	stack_vector<std::uint32_t>                _keys;
+	stack_vector<T> _values;
+	stack_vector<std::uint32_t> _keys;
 	stack_vector<std::optional<std::uint32_t>> _sparse;
 };
 }

@@ -47,8 +47,8 @@ public:
 		}
 
 		_begin = std::allocator<T>::allocate(_capacity);
-		_size  = other._size;
-		_end   = _begin + _size;
+		_size = other._size;
+		_end = _begin + _size;
 
 		for (auto [dst, src] : std::views::zip(*this, other)) {
 			new (std::addressof(dst)) T{src};
@@ -62,8 +62,8 @@ public:
 		, _begin{other._begin}
 		, _end{other._end}
 	{
-		other._end      = nullptr;
-		other._begin    = nullptr;
+		other._end = nullptr;
+		other._begin = nullptr;
 		other._capacity = 0;
 	}
 
@@ -81,11 +81,11 @@ public:
 		if (_capacity < other._size) {
 			std::allocator<T>::deallocate(_begin, _capacity);
 			_capacity = other._capacity;
-			_begin    = std::allocator<T>::allocate(_capacity);
+			_begin = std::allocator<T>::allocate(_capacity);
 		}
 
 		_size = other._size;
-		_end  = _begin + _size;
+		_end = _begin + _size;
 
 		for (auto [dst, src] : std::views::zip(*this, other)) {
 			new (std::addressof(dst)) T{src};
@@ -145,7 +145,7 @@ public:
 			realloc(_capacity + 1);
 			new (_begin + _size) T{std::forward<Args>(args)...};
 			_size = _capacity;
-			_end  = _begin + _size;
+			_end = _begin + _size;
 		}
 	}
 
@@ -182,10 +182,10 @@ public:
 	}
 
 private:
-	std::uint32_t  _capacity{};
-	std::uint32_t  _size{};
-	T             *_begin{};
-	T             *_end{};
+	std::uint32_t _capacity{};
+	std::uint32_t _size{};
+	T *_begin{};
+	T *_end{};
 
 	constexpr void realloc(const std::uint32_t capacity)
 	{
@@ -198,7 +198,7 @@ private:
 
 		std::allocator<T>::deallocate(_begin, _capacity);
 		_capacity = capacity;
-		_begin    = tmp;
+		_begin = tmp;
 	}
 };
 }

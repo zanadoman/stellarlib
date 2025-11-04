@@ -63,7 +63,7 @@ public:
 		const auto it{_ids.find(typeid(T).hash_code())};
 
 		if (it == _ids.end()) {
-			const auto id = _sets.size();
+			const auto id{_sets.size()};
 			_ids.emplace(std::pair<std::size_t, std::size_t>{typeid(T).hash_code(), id});
 			_sets.emplace_back(std::make_unique<sparse_set<T>>());
 
@@ -87,7 +87,7 @@ public:
 
 private:
 	std::unordered_map<std::size_t, std::size_t> _ids;
-	std::vector<std::unique_ptr<any_set>>        _sets;
+	std::vector<std::unique_ptr<any_set>> _sets;
 };
 }
 

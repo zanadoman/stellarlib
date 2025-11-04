@@ -90,7 +90,7 @@ void bitset::insert(const std::size_t key)
 
 		++_size;
 		_begin.get()[index] = mask_of(key);
-		_end                = _begin.get() + _size;
+		_end = _begin.get() + _size;
 	}
 }
 
