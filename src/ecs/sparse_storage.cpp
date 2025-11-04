@@ -30,6 +30,14 @@
 
 namespace stellarlib::ecs
 {
+sparse_storage::sparse_storage(const sparse_storage &other)
+	: _ids{other._ids}
+{
+	for (const auto &set : other._sets) {
+		_sets.emplace_back(set->clone());
+	}
+}
+
 auto sparse_storage::operator=(const sparse_storage &other)
 	-> sparse_storage &
 {

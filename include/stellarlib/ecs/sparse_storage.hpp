@@ -43,7 +43,7 @@ public:
 	explicit sparse_storage() = default;
 
 	[[nodiscard]]
-	sparse_storage(const sparse_storage &) = default;
+	sparse_storage(const sparse_storage &);
 
 	[[nodiscard]]
 	sparse_storage(sparse_storage &&) = default;
@@ -82,7 +82,7 @@ public:
 	auto by_type()
 		-> sparse_set<T> &
 	{
-		return *dynamic_cast<sparse_set<T> *>(_sets[id_of<T>()].get());
+		return dynamic_cast<sparse_set<T> &>(*_sets[id_of<T>()].get());
 	}
 
 private:
