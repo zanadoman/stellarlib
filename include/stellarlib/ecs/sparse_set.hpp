@@ -123,9 +123,9 @@ public:
 		_sparse[key].reset();
 
 		if (index != _keys.size() - 1) {
+			std::swap(_values[index], *(_values.end() - 1));
 			std::swap(_keys[index], *(_keys.end() - 1));
 			_sparse[_keys[index]] = index;
-			std::swap(_values[index], *(_values.end() - 1));
 		}
 
 		_keys.pop();

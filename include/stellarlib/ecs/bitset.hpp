@@ -75,7 +75,7 @@ public:
 
 	void erase(std::size_t key) noexcept;
 
-	void clear() noexcept;
+	void reset() noexcept;
 
 private:
 	std::size_t                                     _size{};

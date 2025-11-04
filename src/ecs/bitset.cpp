@@ -90,7 +90,7 @@ void bitset::insert(const std::size_t key)
 
 		++_size;
 		_begin.get()[index] = mask_of(key);
-		_end = _begin.get() + _size;
+		_end                = _begin.get() + _size;
 	}
 }
 
@@ -146,7 +146,7 @@ void bitset::erase(const std::size_t key) noexcept
 	}
 }
 
-void bitset::clear() noexcept
+void bitset::reset() noexcept
 {
 	for (auto &segment : range()) {
 		segment = 0;
