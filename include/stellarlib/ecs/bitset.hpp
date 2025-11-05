@@ -51,10 +51,10 @@ public:
 
 	~bitset() = default;
 
-	void insert(std::size_t key);
+	void insert(std::size_t elem);
 
 	[[nodiscard]]
-	auto contains(std::size_t key) const
+	auto contains(std::size_t elem) const
 		-> bool;
 
 	[[nodiscard]]
@@ -73,9 +73,9 @@ public:
 	auto operator>=(const bitset &other) const
 		-> bool;
 
-	void erase(std::size_t key);
+	void erase(std::size_t elem);
 
-	void reset();
+	void clear();
 
 private:
 	std::size_t _size{};
@@ -84,11 +84,11 @@ private:
 	std::size_t *_end{};
 
 	[[nodiscard]]
-	static auto index_of(std::size_t key)
+	static auto index_of(std::size_t elem)
 		-> std::size_t;
 
 	[[nodiscard]]
-	static auto mask_of(std::size_t key)
+	static auto mask_of(std::size_t elem)
 		-> std::size_t;
 
 	void realloc(std::size_t size);

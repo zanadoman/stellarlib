@@ -132,7 +132,7 @@ TEST(ecs_bitset, should_move_via_assignment)
 	check_elems(set2);
 }
 
-TEST(ecs_bitset, should_insert_and_erase_values)
+TEST(ecs_bitset, should_insert_and_erase_elems)
 {
 	bitset set{};
 	for (const auto elem : ELEMS) {
@@ -210,13 +210,13 @@ TEST(ecs_bitset, should_evaluate_loose_subset)
 	ASSERT_FALSE(subset >= superset);
 }
 
-TEST(ecs_bitset, should_reset_values)
+TEST(ecs_bitset, should_clear_elems)
 {
 	bitset set{};
 	for (const auto elem : ELEMS) {
 		set.insert(elem);
 	}
-	set.reset();
+	set.clear();
 	for (std::size_t elem{}; elem != std::ranges::max(ELEMS); ++elem) {
 		ASSERT_FALSE(set.contains(elem));
 	}

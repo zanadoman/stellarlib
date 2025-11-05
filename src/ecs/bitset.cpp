@@ -74,12 +74,12 @@ auto bitset::operator=(const bitset &other)
 	return *this;
 }
 
-void bitset::insert(const std::size_t key)
+void bitset::insert(const std::size_t elem)
 {
-	const auto index{index_of(key)};
+	const auto index{index_of(elem)};
 
 	if (index < _size) {
-		_begin.get()[index] |= mask_of(key);
+		_begin.get()[index] |= mask_of(elem);
 	}
 	else {
 		realloc(index + 1);
@@ -89,17 +89,17 @@ void bitset::insert(const std::size_t key)
 		}
 
 		++_size;
-		_begin.get()[index] = mask_of(key);
+		_begin.get()[index] = mask_of(elem);
 		_end = _begin.get() + _size;
 	}
 }
 
-auto bitset::contains(const std::size_t key) const
+auto bitset::contains(const std::size_t elem) const
 	-> bool
 {
-	const auto index{index_of(key)};
+	const auto index{index_of(elem)};
 
-	return index < _size && (_begin.get()[index] & mask_of(key)) != 0;
+	return index < _size && (_begin.get()[index] & mask_of(elem)) != 0;
 }
 
 auto bitset::operator==(const bitset &other) const
@@ -137,32 +137,32 @@ auto bitset::operator>=(const bitset &other) const
 	return other <= *this;
 }
 
-void bitset::erase(const std::size_t key)
+void bitset::erase(const std::size_t elem)
 {
-	const auto index{index_of(key)};
+	const auto index{index_of(elem)};
 
 	if (index < _size) {
-		_begin.get()[index] &= ~mask_of(key);
+		_begin.get()[index] &= ~mask_of(elem);
 	}
 }
 
-void bitset::reset()
+void bitset::clear()
 {
 	for (auto &segment : range()) {
 		segment = 0;
 	}
 }
 
-auto bitset::index_of(const std::size_t key)
+auto bitset::index_of(const std::size_t elem)
 	-> std::size_t
 {
-	return key / std::numeric_limits<std::size_t>::digits;
+	return elem / std::numeric_limits<std::size_t>::digits;
 }
 
-auto bitset::mask_of(const std::size_t key)
+auto bitset::mask_of(const std::size_t elem)
 	-> std::size_t
 {
-	return std::size_t{1} << key % std::numeric_limits<std::size_t>::digits;
+	return std::size_t{1} << elem % std::numeric_limits<std::size_t>::digits;
 }
 
 void bitset::realloc(const std::size_t size)
