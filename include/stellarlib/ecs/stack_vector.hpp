@@ -180,6 +180,16 @@ public:
 		--_size;
 	}
 
+	constexpr void clear()
+	{
+		for (auto &value : *this) {
+			value.~T();
+		}
+
+		_end = _begin;
+		_size = 0;
+	}
+
 private:
 	size_type _capacity{};
 	size_type _size{};

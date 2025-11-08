@@ -136,7 +136,7 @@ TEST(ecs_stack_vector, should_optimize_copy_via_assignment)
 		vector1.push(value);
 	}
 	stack_vector<std::shared_ptr<std::int32_t>> vector2{};
-	for (const auto &value : std::ranges::reverse_view(VALUES)) {
+	for (const auto &value : std::ranges::reverse_view{VALUES}) {
 		vector2.push(value);
 	}
 	const auto begin{vector2.begin()};
@@ -236,6 +236,24 @@ TEST(ecs_stack_vector, should_push_and_pop_values)
 		ASSERT_EQ(vector.end() - vector.begin(), i + 1);
 		ASSERT_EQ(*std::ranges::find(vector, VALUES[i]), VALUES[i]);
 	}
+	check_range_mut(vector);
+	check_range_const(vector);
+}
+
+TEST(ecs_stack_vector, should_clear_values)
+{
+	stack_vector<std::shared_ptr<std::int32_t>> vector{};
+	for (const auto &value : std::ranges::reverse_view{VALUES}) {
+		vector.push(value);
+	}
+	const auto begin{vector.begin()};
+	vector.clear();
+	ASSERT_FALSE(vector.size());
+	ASSERT_EQ(vector.begin(), vector.end());
+	for (const auto &value : VALUES) {
+		vector.push(value);
+	}
+	ASSERT_EQ(vector.begin(), begin);
 	check_range_mut(vector);
 	check_range_const(vector);
 }
