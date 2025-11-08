@@ -45,13 +45,11 @@ public:
 			const auto key{last->first};
 			_sparse[key] = std::move(last->second);
 			_queue.pop();
-
 			return key;
 		}
 
 		const auto key{_sparse.size()};
 		_sparse.push(T{});
-
 		return key;
 	}
 

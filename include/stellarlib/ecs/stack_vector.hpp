@@ -129,7 +129,6 @@ public:
 		}
 
 		_end = _begin + _size;
-
 		return true;
 	}
 

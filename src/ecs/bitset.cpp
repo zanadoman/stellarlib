@@ -98,7 +98,6 @@ auto bitset::contains(const std::size_t elem) const
 	-> bool
 {
 	const auto index{index_of(elem)};
-
 	return index < _size && (_begin.get()[index] & mask_of(elem)) != 0;
 }
 

@@ -64,7 +64,6 @@ public:
 			const auto id{_sets.size()};
 			_ids.emplace(typeid(T).hash_code(), id);
 			_sets.emplace_back(std::make_unique<sparse_set<T>>());
-
 			return id;
 		}
 

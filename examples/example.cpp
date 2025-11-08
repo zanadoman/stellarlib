@@ -30,6 +30,5 @@ auto main([[maybe_unused]] const std::int32_t argc, [[maybe_unused]] const char 
 	-> std::int32_t
 {
 	stellarlib::hello_world();
-
 	return EXIT_SUCCESS;
 }

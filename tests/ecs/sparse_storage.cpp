@@ -97,7 +97,7 @@ TEST(ecs_sparse_storage, should_assign_ids)
 	ASSERT_EQ(storage.id_of<std::int64_t>(), 3);
 }
 
-TEST(ecs_sparse_storagem, should_pick_set_by_id)
+TEST(ecs_sparse_storage, should_pick_set_by_id)
 {
 	sparse_storage storage{};
 	storage.by_type<std::int32_t>().insert(0, 1);
