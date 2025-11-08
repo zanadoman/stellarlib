@@ -139,6 +139,13 @@ public:
 		_values.pop();
 	}
 
+	void clear()
+	{
+		_sparse.clear();
+		_keys.clear();
+		_values.clear();
+	}
+
 private:
 	stack_vector<T> _values;
 	stack_vector<size_type> _keys;

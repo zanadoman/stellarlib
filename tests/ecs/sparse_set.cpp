@@ -190,6 +190,23 @@ TEST(ecs_sparse_set, should_reinsert_value)
 	ASSERT_EQ(set.zip().front(), pair);
 }
 
+TEST(ecs_sparse_set, should_clear_values)
+{
+	sparse_set<std::shared_ptr<std::int32_t>> set{};
+	for (const auto [key, value] : std::ranges::reverse_view{std::views::zip(KEYS, VALUES)}) {
+		set.insert(key, value);
+	}
+	set.clear();
+	ASSERT_TRUE(set.keys().empty());
+	ASSERT_TRUE(set.values().empty());
+	ASSERT_TRUE(set.zip().empty());
+	for (const auto [key, value] : std::views::zip(KEYS, VALUES)) {
+		set.insert(key, value);
+	}
+	check_ranges_mut(set);
+	check_ranges_const(set);
+}
+
 /* NOLINTEND(cert-err58-cpp,performance-unnecessary-copy-initialization) */
 
 #pragma clang diagnostic pop
