@@ -27,7 +27,7 @@
 #include <stellarlib/ecs/any_set.hpp>
 #include <stellarlib/ecs/stack_vector.hpp>
 
-#include <cstdint>
+#include <cstddef>
 #include <optional>
 #include <ranges>
 #include <type_traits>
@@ -35,36 +35,36 @@
 
 namespace stellarlib::ecs
 {
-template <typename T>
-class sparse_set final : public any_set
+template <typename T, typename size_type = std::size_t>
+class sparse_set final : public any_set<size_type>
 {
 public:
 	[[nodiscard]]
 	explicit sparse_set() = default;
 
 	[[nodiscard]]
-	sparse_set(const sparse_set<T> &) = default;
+	sparse_set(const sparse_set<T, size_type> &) = default;
 
 	[[nodiscard]]
-	sparse_set(sparse_set<T> &&) = default;
+	sparse_set(sparse_set<T, size_type> &&) = default;
 
-	auto operator=(const sparse_set<T> &)
-		-> sparse_set<T> & = default;
+	auto operator=(const sparse_set<T, size_type> &)
+		-> sparse_set<T, size_type> & = default;
 
-	auto operator=(sparse_set<T> &&)
-		-> sparse_set<T> & = default;
+	auto operator=(sparse_set<T, size_type> &&)
+		-> sparse_set<T, size_type> & = default;
 
 	[[nodiscard]]
 	auto clone() const
-		-> sparse_set<T> * final
+		-> sparse_set<T, size_type> * final
 	{
-		return new sparse_set<T>{*this};
+		return new sparse_set<T, size_type>{*this};
 	}
 
 	~sparse_set() final = default;
 
 	template <typename ...Args>
-	void insert(const std::uint32_t key, Args &&...args)
+	void insert(const size_type key, Args &&...args)
 	{
 		if (_sparse.extend(key + 1) || !_sparse[key]) {
 			_values.push(std::forward<Args>(args)...);
@@ -84,19 +84,19 @@ public:
 	}
 
 	[[nodiscard]]
-	auto contains(const std::uint32_t key) const
+	auto contains(const size_type key) const
 	{
 		return key < _sparse.size() && _sparse[key];
 	}
 
 	[[nodiscard]]
-	auto at(const std::uint32_t key) const
+	auto at(const size_type key) const
 	{
 		return contains(key) ? _values.begin() + *_sparse[key] : nullptr;
 	}
 
 	[[nodiscard]]
-	auto operator[](const std::uint32_t key) const
+	auto operator[](const size_type key) const
 		-> T &
 	{
 		return _values[*_sparse[key]];
@@ -120,7 +120,7 @@ public:
 		return std::views::zip(keys(), values());
 	}
 
-	void erase(const std::uint32_t key) final
+	void erase(const size_type key) final
 	{
 		if (!contains(key)) {
 			return;
@@ -141,8 +141,8 @@ public:
 
 private:
 	stack_vector<T> _values;
-	stack_vector<std::uint32_t> _keys;
-	stack_vector<std::optional<std::uint32_t>> _sparse;
+	stack_vector<size_type> _keys;
+	stack_vector<std::optional<size_type>> _sparse;
 };
 }
 

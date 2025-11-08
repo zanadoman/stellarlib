@@ -75,7 +75,7 @@ public:
 
 	[[nodiscard]]
 	auto by_id(std::size_t id) const
-		-> any_set &;
+		-> any_set<std::size_t> &;
 
 	template <typename T>
 	[[nodiscard]]
@@ -87,7 +87,7 @@ public:
 
 private:
 	std::unordered_map<std::size_t, std::size_t> _ids;
-	std::vector<std::unique_ptr<any_set>> _sets;
+	std::vector<std::unique_ptr<any_set<std::size_t>>> _sets;
 };
 }
 

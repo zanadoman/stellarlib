@@ -56,7 +56,7 @@ auto sparse_storage::operator=(const sparse_storage &other)
 }
 
 auto sparse_storage::by_id(const std::size_t id) const
-	-> any_set &
+	-> any_set<std::size_t> &
 {
 	return *_sets[id];
 }

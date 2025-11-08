@@ -24,23 +24,24 @@
 #ifndef STELLARLIB_ECS_ANY_SET_HPP
 #define STELLARLIB_ECS_ANY_SET_HPP
 
-#include <cstdint>
+#include <cstddef>
 
 namespace stellarlib::ecs
 {
+template <typename size_type = std::size_t>
 class any_set
 {
 public:
 	[[nodiscard]]
 	explicit any_set() = default;
 
-	virtual ~any_set();
+	virtual ~any_set() = default;
 
 	[[nodiscard]]
 	virtual auto clone() const
 		-> any_set * = 0;
 
-	virtual void erase(std::uint32_t) = 0;
+	virtual void erase(size_type) = 0;
 
 protected:
 	[[nodiscard]]
