@@ -23,6 +23,7 @@
 
 #include <stellarlib/ecs/sparse_storage.hpp>
 
+#include <atomic>
 #include <cstddef>
 #include <memory>
 
@@ -54,7 +55,7 @@ auto sparse_storage::operator=(const sparse_storage &other)
 auto sparse_storage::next_id()
 	-> std::size_t
 {
-	static std::size_t id{};
-	return id++;
+	static std::atomic<std::size_t> id{static_cast<std::size_t>(-1)};
+	return ++id;
 }
 }

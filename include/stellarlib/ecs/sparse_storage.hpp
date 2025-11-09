@@ -60,8 +60,32 @@ public:
 		return id;
 	}
 
+	template <typename T>
+	[[nodiscard]]
+	auto by_type() const
+	{
+		const auto set{_sets.at(id_of<T>())};
+		return set ? static_cast<sparse_set<T> *>(set->get()) : nullptr;
+	}
+
+	template <typename T>
+	[[nodiscard]]
+	auto by_type()
+		-> sparse_set<T> &
+	{
+		const auto id{id_of<T>()};
+
+		if (const auto set{_sets.at(id)}) {
+			return static_cast<sparse_set<T> &>(*set->get());
+		}
+
+		const auto set{new sparse_set<T>{}};
+		_sets.insert(id, set);
+		return *set;
+	}
+
 private:
-	sparse_set<std::unique_ptr<any_set<std::size_t>>, std::size_t, false> _sets;
+	sparse_set<std::unique_ptr<any_set<std::size_t>>> _sets;
 
 	[[nodiscard]]
 	static auto next_id()

@@ -26,6 +26,7 @@
 #include <gtest/gtest.h>
 
 #include <cstdint>
+#include <utility>
 
 using namespace stellarlib::ecs;
 
@@ -37,12 +38,69 @@ using namespace stellarlib::ecs;
 
 /* NOLINTBEGIN(cert-err58-cpp,performance-unnecessary-copy-initialization) */
 
-TEST(ecs_sparse_storage, should_assign_ids)
+namespace
 {
-	ASSERT_EQ(sparse_storage::id_of<std::int8_t>(), 0);
-	ASSERT_EQ(sparse_storage::id_of<std::int16_t>(), 1);
-	ASSERT_EQ(sparse_storage::id_of<std::int32_t>(), 2);
-	ASSERT_EQ(sparse_storage::id_of<std::int64_t>(), 3);
+void check_values(sparse_storage &storage)
+{
+	ASSERT_TRUE(std::as_const(storage).by_type<std::int32_t>());
+	ASSERT_EQ((*std::as_const(storage).by_type<std::int32_t>())[0], 1);
+	ASSERT_EQ(storage.by_type<std::int32_t>()[0], 1);
+	ASSERT_TRUE(std::as_const(storage).by_type<std::int64_t>());
+	ASSERT_EQ((*std::as_const(storage).by_type<std::int64_t>())[0], 2);
+	ASSERT_EQ(storage.by_type<std::int64_t>()[0], 2);
+}
+}
+
+TEST(ecs_sparse_storage, should_init_via_ctor)
+{
+	const sparse_storage storage{};
+	ASSERT_FALSE(std::as_const(storage).by_type<std::int32_t>());
+}
+
+TEST(ecs_sparse_storage, should_copy_via_ctor)
+{
+	sparse_storage storage1{};
+	storage1.by_type<std::int32_t>().insert(0, 1);
+	storage1.by_type<std::int64_t>().insert(0, 2);
+	auto storage2{storage1};
+	check_values(storage2);
+}
+
+TEST(ecs_sparse_storage, should_move_via_ctor)
+{
+	sparse_storage storage1{};
+	storage1.by_type<std::int32_t>().insert(0, 1);
+	storage1.by_type<std::int64_t>().insert(0, 2);
+	auto storage2{std::move(storage1)};
+	check_values(storage2);
+}
+
+TEST(ecs_sparse_storage, should_copy_via_assignment)
+{
+	sparse_storage storage1{};
+	storage1.by_type<std::int32_t>().insert(0, 1);
+	storage1.by_type<std::int64_t>().insert(0, 2);
+	sparse_storage storage2{};
+	storage2 = storage1;
+	check_values(storage2);
+}
+
+TEST(ecs_sparse_storage, should_move_via_assignment)
+{
+	sparse_storage storage1{};
+	storage1.by_type<std::int32_t>().insert(0, 1);
+	storage1.by_type<std::int64_t>().insert(0, 2);
+	sparse_storage storage2{};
+	storage2 = std::move(storage1);
+	check_values(storage2);
+}
+
+TEST(ecs_sparse_storage, should_pick_set_by_type)
+{
+	sparse_storage storage{};
+	storage.by_type<std::int32_t>().insert(0, 1);
+	storage.by_type<std::int64_t>().insert(0, 2);
+	check_values(storage);
 }
 
 /* NOLINTEND(cert-err58-cpp,performance-unnecessary-copy-initialization) */
