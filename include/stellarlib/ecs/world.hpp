@@ -131,18 +131,7 @@ public:
 		);
 	}
 
-	void despawn(const std::uint32_t entity)
-	{
-		if (!_entities.contains(entity)) {
-			return;
-		}
-
-		_entities.release(entity);
-
-		for (auto &set : _components.sets()) {
-			set.erase(entity);
-		}
-	}
+	void despawn(std::uint32_t entity);
 
 private:
 	ring_storage<bitset> _entities;
