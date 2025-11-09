@@ -57,9 +57,15 @@ public:
 	}
 
 	[[nodiscard]]
+	auto contains(const std::uint32_t key) const
+	{
+		return key < _sparse.size() && _sparse[key];
+	}
+
+	[[nodiscard]]
 	auto at(const std::uint32_t key) const
 	{
-		return key < _sparse.size() && _sparse[key] ? std::addressof(*_sparse[key]) : nullptr;
+		return contains(key) ? std::addressof(*_sparse[key]) : nullptr;
 	}
 
 	[[nodiscard]]
@@ -72,7 +78,7 @@ public:
 	[[nodiscard]]
 	auto release(const std::uint32_t key)
 	{
-		if (_sparse.size() <= key || !_sparse[key]) {
+		if (!contains(key)) {
 			return;
 		}
 
