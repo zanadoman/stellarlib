@@ -24,11 +24,10 @@
 #ifndef STELLARLIB_ECS_RING_STORAGE_HPP
 #define STELLARLIB_ECS_RING_STORAGE_HPP
 
+#include <stellarlib/ecs/sparse_set.hpp>
 #include <stellarlib/ecs/stack_vector.hpp>
 
 #include <cstdint>
-#include <memory>
-#include <optional>
 #include <utility>
 
 namespace stellarlib::ecs
@@ -42,15 +41,15 @@ public:
 	{
 		std::uint32_t key{};
 
-		if (_queue.size()) {
-			const auto last{_queue.end() - 1};
+		if (_stack.size()) {
+			const auto last{_stack.end() - 1};
 			key = last->first;
-			_sparse[key] = std::move(last->second);
-			_queue.pop();
+			_set.insert(key, std::move(last->second));
+			_stack.pop();
 		}
 		else {
-			key = _sparse.size();
-			_sparse.push(T{});
+			key = _key++;
+			_set.insert(key);
 		}
 
 		return key;
@@ -59,20 +58,38 @@ public:
 	[[nodiscard]]
 	auto contains(const std::uint32_t key) const
 	{
-		return key < _sparse.size() && _sparse[key];
+		return _set.contains(key);
 	}
 
 	[[nodiscard]]
 	auto at(const std::uint32_t key) const
 	{
-		return contains(key) ? std::addressof(*_sparse[key]) : nullptr;
+		return _set.at(key);
 	}
 
 	[[nodiscard]]
 	auto operator[](const std::uint32_t key) const
 		-> T &
 	{
-		return *_sparse[key];
+		return _set[key];
+	}
+
+	[[nodiscard]]
+	auto keys() const
+	{
+		return _set.keys();
+	}
+
+	[[nodiscard]]
+	auto values() const
+	{
+		return _set.values();
+	}
+
+	[[nodiscard]]
+	auto zip() const
+	{
+		return _set.zip();
 	}
 
 	[[nodiscard]]
@@ -82,20 +99,22 @@ public:
 			return;
 		}
 
-		if constexpr (requires { _sparse[key]->reset(); }) {
-			_sparse[key]->reset();
+		if constexpr (requires { _set[key].reset(); }) {
+			_set[key].reset();
 		}
-		else if constexpr (requires { _sparse[key]->clear(); }) {
-			_sparse[key]->clear();
+		else if constexpr (requires { _set[key].clear(); }) {
+			_set[key].clear();
 		}
 
-		_queue.push(key, std::move(*_sparse[key]));
-		_sparse[key].reset();
+		_stack.push(key, std::move(_set[key]));
+		_set.erase(key);
 	}
 
 private:
-	stack_vector<std::optional<T>, std::uint32_t> _sparse;
-	stack_vector<std::pair<std::uint32_t, T>, std::uint32_t> _queue;
+	uint32_t _key{};
+	uint32_t _padding{};
+	sparse_set<T, std::uint32_t> _set;
+	stack_vector<std::pair<std::uint32_t, T>, std::uint32_t> _stack;
 };
 }
 
