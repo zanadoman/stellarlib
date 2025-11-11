@@ -58,5 +58,9 @@ void world::despawn(const std::uint32_t entity)
 	for (auto &set : _components.sets()) {
 		set.erase(entity);
 	}
+
+	for (auto cache : _caches) {
+		cache.second.erase(entity);
+	}
 }
 }

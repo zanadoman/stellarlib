@@ -45,7 +45,6 @@ public:
 	}
 
 	template <typename ...T>
-	[[nodiscard]]
 	auto spawn(T ...components)
 		-> std::uint32_t
 	{
@@ -60,6 +59,12 @@ public:
 			}(),
 			...
 		);
+
+		for (auto &[archetype, set] : _caches) {
+			if (archetype <= _entities[entity]) {
+				set.insert(entity, entity);
+			}
+		}
 
 		return entity;
 	}
@@ -81,6 +86,12 @@ public:
 			}(),
 			...
 		);
+
+		for (auto [archetype, set] : _caches) {
+			if (!set.contains(entity) && archetype <= _entities[entity]) {
+				set.insert(entity, entity);
+			}
+		}
 	}
 
 	[[nodiscard]]
@@ -165,21 +176,75 @@ public:
 			}(),
 			...
 		);
+
+		for (auto [archetype, set] : _caches) {
+			if (set.contains(entity) && !(archetype <= _entities[entity])) {
+				set.erase(entity);
+			}
+		}
 	}
 
 	void despawn(std::uint32_t entity);
 
-	template <typename T>
 	[[nodiscard]]
 	auto query() const
 	{
-		const auto set{_components.by_type<T>()};
-		return set ? set->zip() : sparse_set<T>{}.zip();
+		return _entities.keys();
+	}
+
+	template <typename T>
+	[[nodiscard]]
+	auto query()
+	{
+		return _components.by_type<T>().zip();
+	}
+
+	template <typename ...T>
+	[[nodiscard]]
+	auto query()
+		requires (1 < sizeof...(T))
+	{
+		if (!_queries.contains(ext::scoped_typeid<world, std::tuple<T...>>())) {
+			bitset archetype{};
+			(archetype.insert(id_of<T>()), ...);
+			const auto it{std::ranges::find_if(_caches, [&](const auto &pair) -> bool
+			{
+				return pair.first == archetype;
+			})};
+			auto id{_caches.size()};
+
+			if (it == _caches.end()) {
+				sparse_set<std::uint32_t> set{};
+
+				for (const auto data : _entities.zip()) {
+					if (archetype <= std::get<1>(data)) {
+						set.insert(std::get<0>(data), std::get<0>(data));
+					}
+				}
+
+				_caches.push(archetype, std::move(set));
+			}
+			else {
+				id = static_cast<std::size_t>(std::distance(_caches.begin(), it));
+			}
+
+			_queries.insert(ext::scoped_typeid<world, std::tuple<T...>>(), id);
+		}
+
+		return std::views::transform(
+			_caches[_queries[ext::scoped_typeid<world, std::tuple<T...>>()]].second.values(),
+			[this](const auto entity) -> std::tuple<std::uint32_t, T *...>
+			{
+				return {entity, std::addressof(_components.by_type<T>()[entity])...};
+			}
+		);
 	}
 
 private:
 	ring_storage<bitset> _entities;
 	sparse_storage<world> _components;
+	sparse_set<std::size_t> _queries;
+	stack_vector<std::pair<bitset, sparse_set<std::uint32_t>>> _caches;
 };
 }
 
