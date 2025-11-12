@@ -127,7 +127,7 @@ auto bitset::operator<=(const bitset &other) const
 	-> bool
 {
 	return (_size <= other._size || std::none_of(_begin.get() + other._size, _end, ext::truthy<std::size_t>))
-		&& std::ranges::all_of(std::views::zip(segments(), other.segments()), ext::zip_subset<std::size_t>);
+		&& std::ranges::all_of(std::views::zip(segments(), other.segments()), ext::zip::subset<std::size_t>);
 }
 
 auto bitset::operator>=(const bitset &other) const

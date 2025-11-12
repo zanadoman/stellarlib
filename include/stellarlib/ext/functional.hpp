@@ -51,23 +51,26 @@ constexpr auto subset(const T &lhs, const T &rhs)
 
 template <typename T>
 [[nodiscard]]
-constexpr auto zip_subset(const std::pair<T, T> &arg)
+constexpr auto superset(const T &lhs, const T &rhs)
+{
+	return (rhs & lhs) == rhs;
+}
+
+namespace zip
+{
+template <typename T>
+[[nodiscard]]
+constexpr auto subset(const std::pair<T, T> &arg)
 {
 	return (arg.first & arg.second) == arg.first;
 }
 
 template <typename T>
 [[nodiscard]]
-constexpr auto superset(const T &lhs, const T &rhs)
-{
-	return (rhs & lhs) == rhs;
-}
-
-template <typename T>
-[[nodiscard]]
-constexpr auto zip_superset(const std::pair<T, T> &arg)
+constexpr auto superset(const std::pair<T, T> &arg)
 {
 	return (arg.second & arg.first) == arg.second;
+}
 }
 }
 

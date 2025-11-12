@@ -178,7 +178,7 @@ public:
 		);
 
 		for (auto [archetype, set] : _caches) {
-			if (set.contains(entity) && !(archetype <= _entities[entity])) {
+			if (set.contains(entity) && (archetype.contains(id_of<T>()) || ...)) {
 				set.erase(entity);
 			}
 		}
