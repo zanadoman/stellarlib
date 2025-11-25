@@ -1,5 +1,6 @@
 i/stellarlib.hpp
 s/stellarlib.cpp
+t/stellarlib.cpp
 
 i/utility.hpp
 t/utility.cpp

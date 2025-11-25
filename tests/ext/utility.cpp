@@ -43,7 +43,7 @@ class bar final { };
 
 class baz final { };
 
-TEST(ext_utility, sequential_id)
+TEST(stellarlib_ext_utility, sequential_id)
 {
 	ASSERT_EQ((sequential_id<foo, std::uint64_t>()), 0);
 	ASSERT_EQ((sequential_id<foo, std::uint64_t>()), 1);
@@ -59,7 +59,7 @@ TEST(ext_utility, sequential_id)
 	ASSERT_EQ((sequential_id<bar, std::uint64_t>()), 3);
 }
 
-TEST(ext_utility, scoped_typeid)
+TEST(stellarlib_ext_utility, scoped_typeid)
 {
 	ASSERT_EQ((scoped_typeid<bar, std::int32_t, std::int64_t>()), 0);
 	ASSERT_EQ((scoped_typeid<bar, std::int32_t, std::int64_t>()), 0);

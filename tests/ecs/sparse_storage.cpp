@@ -51,13 +51,13 @@ void check_values(sparse_storage<void> &storage)
 }
 }
 
-TEST(ecs_sparse_storage, should_init_via_ctor)
+TEST(stellarlib_ecs_sparse_storage, should_init_via_ctor)
 {
 	const sparse_storage<void> storage{};
 	ASSERT_FALSE(std::as_const(storage).by_type<std::int32_t>());
 }
 
-TEST(ecs_sparse_storage, should_copy_via_ctor)
+TEST(stellarlib_ecs_sparse_storage, should_copy_via_ctor)
 {
 	sparse_storage<void> storage1{};
 	storage1.by_type<std::int32_t>().insert(0, 1);
@@ -66,7 +66,7 @@ TEST(ecs_sparse_storage, should_copy_via_ctor)
 	check_values(storage2);
 }
 
-TEST(ecs_sparse_storage, should_move_via_ctor)
+TEST(stellarlib_ecs_sparse_storage, should_move_via_ctor)
 {
 	sparse_storage<void> storage1{};
 	storage1.by_type<std::int32_t>().insert(0, 1);
@@ -75,7 +75,7 @@ TEST(ecs_sparse_storage, should_move_via_ctor)
 	check_values(storage2);
 }
 
-TEST(ecs_sparse_storage, should_copy_via_assignment)
+TEST(stellarlib_ecs_sparse_storage, should_copy_via_assignment)
 {
 	sparse_storage<void> storage1{};
 	storage1.by_type<std::int32_t>().insert(0, 1);
@@ -85,7 +85,7 @@ TEST(ecs_sparse_storage, should_copy_via_assignment)
 	check_values(storage2);
 }
 
-TEST(ecs_sparse_storage, should_move_via_assignment)
+TEST(stellarlib_ecs_sparse_storage, should_move_via_assignment)
 {
 	sparse_storage<void> storage1{};
 	storage1.by_type<std::int32_t>().insert(0, 1);
@@ -95,7 +95,7 @@ TEST(ecs_sparse_storage, should_move_via_assignment)
 	check_values(storage2);
 }
 
-TEST(ecs_sparse_storage, should_pick_set_by_type)
+TEST(stellarlib_ecs_sparse_storage, should_pick_set_by_type)
 {
 	sparse_storage<void> storage{};
 	storage.by_type<std::int32_t>().insert(0, 1);
@@ -103,7 +103,7 @@ TEST(ecs_sparse_storage, should_pick_set_by_type)
 	check_values(storage);
 }
 
-TEST(ecs_sparse_storage, should_iter_sets)
+TEST(stellarlib_ecs_sparse_storage, should_iter_sets)
 {
 	sparse_storage<void> storage{};
 	storage.by_type<std::int32_t>().insert(0, 1);

@@ -21,13 +21,11 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#include <stellarlib/ext/functional.hpp>
+#include <stellarlib/stellarlib.hpp>
 
 #include <gtest/gtest.h>
 
-#include <utility>
-
-using namespace stellarlib::ext;
+using namespace stellarlib;
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wexit-time-destructors"
@@ -37,52 +35,11 @@ using namespace stellarlib::ext;
 
 /* NOLINTBEGIN(cert-err58-cpp,performance-unnecessary-copy-initialization) */
 
-TEST(stellarlib_ext_functional, truthy)
+TEST(stellarlib, hello_world)
 {
-	ASSERT_TRUE(truthy(1));
-	ASSERT_FALSE(truthy(0));
-	ASSERT_TRUE(truthy(true));
-	ASSERT_FALSE(truthy(false));
-	ASSERT_TRUE(truthy("true"));
-	ASSERT_FALSE(truthy(nullptr));
-}
-
-TEST(stellarlib_ext_functional, falsy)
-{
-	ASSERT_TRUE(falsy(0));
-	ASSERT_FALSE(falsy(1));
-	ASSERT_TRUE(falsy(false));
-	ASSERT_FALSE(falsy(true));
-	ASSERT_TRUE(falsy(nullptr));
-	ASSERT_FALSE(falsy("true"));
-}
-
-TEST(stellarlib_ext_functional, subset)
-{
-	ASSERT_TRUE(subset(0xb1100, 0xb1101));
-	ASSERT_TRUE(subset(0xb1101, 0xb1101));
-	ASSERT_FALSE(subset(0xb1101, 0xb1100));
-}
-
-TEST(stellarlib_ext_functional, superset)
-{
-	ASSERT_TRUE(superset(0xb1101, 0xb1100));
-	ASSERT_TRUE(superset(0xb1101, 0xb1101));
-	ASSERT_FALSE(superset(0xb1100, 0xb1101));
-}
-
-TEST(stellarlib_ext_functional, zip_subset)
-{
-	ASSERT_TRUE(zip::subset(std::pair{0xb1100, 0xb1101}));
-	ASSERT_TRUE(zip::subset(std::pair{0xb1101, 0xb1101}));
-	ASSERT_FALSE(zip::subset(std::pair{0xb1101, 0xb1100}));
-}
-
-TEST(stellarlib_ext_functional, zip_superset)
-{
-	ASSERT_TRUE(zip::superset(std::pair{0xb1101, 0xb1100}));
-	ASSERT_TRUE(zip::superset(std::pair{0xb1101, 0xb1101}));
-	ASSERT_FALSE(zip::superset(std::pair{0xb1100, 0xb1101}));
+	testing::internal::CaptureStdout();
+	hello_world();
+	ASSERT_EQ(testing::internal::GetCapturedStdout(), "hello, world\n");
 }
 
 /* NOLINTEND(cert-err58-cpp,performance-unnecessary-copy-initialization) */

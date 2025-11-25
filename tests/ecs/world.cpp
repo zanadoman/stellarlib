@@ -73,7 +73,7 @@ void check_despawn(const world &world, std::uint32_t entity)
 }
 }
 
-TEST(ecs_world, should_spawn_entities)
+TEST(stellarlib_ecs_world, should_spawn_entities)
 {
 	world world{};
 	const auto entity1{world.spawn(std::int32_t{1}, std::int64_t{2})};
@@ -84,7 +84,7 @@ TEST(ecs_world, should_spawn_entities)
 	check_insert(world, entity2, std::int64_t{4});
 }
 
-TEST(ecs_world, should_insert_components)
+TEST(stellarlib_ecs_world, should_insert_components)
 {
 	world world{};
 	const auto entity{world.spawn(std::int8_t{1}, std::int16_t{2})};
@@ -95,7 +95,7 @@ TEST(ecs_world, should_insert_components)
 	check_insert(world, entity, std::int64_t{4});
 }
 
-TEST(ecs_world, should_erase_components)
+TEST(stellarlib_ecs_world, should_erase_components)
 {
 	world world{};
 	const auto entity{world.spawn(std::int32_t{1}, std::int64_t{2})};
@@ -104,7 +104,7 @@ TEST(ecs_world, should_erase_components)
 	check_erase<std::int64_t>(world, entity);
 }
 
-TEST(ecs_world, should_despawn_entities)
+TEST(stellarlib_ecs_world, should_despawn_entities)
 {
 	world world{};
 	const auto entity1{world.spawn(std::int32_t{1}, std::int64_t{2})};
@@ -119,7 +119,7 @@ TEST(ecs_world, should_despawn_entities)
 	check_despawn<std::int64_t>(world, entity2);
 }
 
-TEST(ecs_world, should_evaluate_solo_query)
+TEST(stellarlib_ecs_world, should_evaluate_solo_query)
 {
 	world world{};
 	const auto entity1{world.spawn(std::int32_t{1}, std::int64_t{2})};

@@ -57,20 +57,20 @@ void check_elems(const bitset &set)
 }
 }
 
-TEST(ecs_bitset, should_init_via_ctor)
+TEST(stellarlib_ecs_bitset, should_init_via_ctor)
 {
 	const bitset set{};
 	ASSERT_FALSE(set.contains(0));
 }
 
-TEST(ecs_bitset, should_skip_empty_copy_via_ctor)
+TEST(stellarlib_ecs_bitset, should_skip_empty_copy_via_ctor)
 {
 	const bitset set1{};
 	const auto set2{set1};
 	ASSERT_FALSE(set2.contains(0));
 }
 
-TEST(ecs_bitset, should_copy_via_ctor)
+TEST(stellarlib_ecs_bitset, should_copy_via_ctor)
 {
 	bitset set1{};
 	for (const auto elem : ELEMS) {
@@ -80,7 +80,7 @@ TEST(ecs_bitset, should_copy_via_ctor)
 	check_elems(set2);
 }
 
-TEST(ecs_bitset, should_move_via_ctor)
+TEST(stellarlib_ecs_bitset, should_move_via_ctor)
 {
 	bitset set1{};
 	for (const auto elem : ELEMS) {
@@ -90,7 +90,7 @@ TEST(ecs_bitset, should_move_via_ctor)
 	check_elems(set2);
 }
 
-TEST(ecs_bitset, should_handle_empty_copy_via_assignment_vica)
+TEST(stellarlib_ecs_bitset, should_handle_empty_copy_via_assignment_vica)
 {
 	const bitset set1{};
 	bitset set2{};
@@ -99,7 +99,7 @@ TEST(ecs_bitset, should_handle_empty_copy_via_assignment_vica)
 	ASSERT_FALSE(set2.contains(ELEMS.front()));
 }
 
-TEST(ecs_bitset, should_handle_empty_copy_via_assignment_versa)
+TEST(stellarlib_ecs_bitset, should_handle_empty_copy_via_assignment_versa)
 {
 	bitset set1{};
 	set1.insert(ELEMS.front());
@@ -108,7 +108,7 @@ TEST(ecs_bitset, should_handle_empty_copy_via_assignment_versa)
 	ASSERT_TRUE(set2.contains(ELEMS.front()));
 }
 
-TEST(ecs_bitset, should_copy_via_assignment)
+TEST(stellarlib_ecs_bitset, should_copy_via_assignment)
 {
 	bitset set1{};
 	for (const auto elem : ELEMS) {
@@ -120,7 +120,7 @@ TEST(ecs_bitset, should_copy_via_assignment)
 	check_elems(set2);
 }
 
-TEST(ecs_bitset, should_move_via_assignment)
+TEST(stellarlib_ecs_bitset, should_move_via_assignment)
 {
 	bitset set1{};
 	for (const auto elem : ELEMS) {
@@ -132,7 +132,7 @@ TEST(ecs_bitset, should_move_via_assignment)
 	check_elems(set2);
 }
 
-TEST(ecs_bitset, should_insert_and_erase_elems)
+TEST(stellarlib_ecs_bitset, should_insert_and_erase_elems)
 {
 	bitset set{};
 	for (const auto elem : ELEMS) {
@@ -146,7 +146,7 @@ TEST(ecs_bitset, should_insert_and_erase_elems)
 	check_elems(set);
 }
 
-TEST(ecs_bitset, should_evaluate_equal_sets)
+TEST(stellarlib_ecs_bitset, should_evaluate_equal_sets)
 {
 	bitset set1{};
 	set1.insert(std::ranges::min(ELEMS));
@@ -165,7 +165,7 @@ TEST(ecs_bitset, should_evaluate_equal_sets)
 }
 
 
-TEST(ecs_bitset, should_evaluate_disjoint_sets)
+TEST(stellarlib_ecs_bitset, should_evaluate_disjoint_sets)
 {
 	bitset set1{};
 	set1.insert(std::ranges::min(ELEMS));
@@ -181,7 +181,7 @@ TEST(ecs_bitset, should_evaluate_disjoint_sets)
 	ASSERT_FALSE(set1 >= set2);
 }
 
-TEST(ecs_bitset, should_evaluate_tight_subset)
+TEST(stellarlib_ecs_bitset, should_evaluate_tight_subset)
 {
 	bitset subset{};
 	subset.insert(std::ranges::min(ELEMS));
@@ -195,7 +195,7 @@ TEST(ecs_bitset, should_evaluate_tight_subset)
 	ASSERT_FALSE(subset >= superset);
 }
 
-TEST(ecs_bitset, should_evaluate_loose_subset)
+TEST(stellarlib_ecs_bitset, should_evaluate_loose_subset)
 {
 	bitset subset{};
 	subset.insert(std::ranges::min(ELEMS));
@@ -210,7 +210,7 @@ TEST(ecs_bitset, should_evaluate_loose_subset)
 	ASSERT_FALSE(subset >= superset);
 }
 
-TEST(ecs_bitset, should_clear_elems)
+TEST(stellarlib_ecs_bitset, should_clear_elems)
 {
 	bitset set{};
 	for (const auto elem : ELEMS) {

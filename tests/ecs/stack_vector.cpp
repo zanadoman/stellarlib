@@ -74,7 +74,7 @@ void check_range_const(const stack_vector<std::shared_ptr<std::int32_t>> &vector
 }
 }
 
-TEST(ecs_stack_vector, should_init_via_ctor)
+TEST(stellarlib_ecs_stack_vector, should_init_via_ctor)
 {
 	const stack_vector<std::shared_ptr<std::int32_t>> vector{};
 	ASSERT_FALSE(vector.size());
@@ -82,7 +82,7 @@ TEST(ecs_stack_vector, should_init_via_ctor)
 	ASSERT_FALSE(vector.end());
 }
 
-TEST(ecs_stack_vector, should_skip_empty_copy_via_ctor)
+TEST(stellarlib_ecs_stack_vector, should_skip_empty_copy_via_ctor)
 {
 	const stack_vector<std::shared_ptr<std::int32_t>> vector1{};
 	const auto vector2{vector1};
@@ -91,7 +91,7 @@ TEST(ecs_stack_vector, should_skip_empty_copy_via_ctor)
 	ASSERT_FALSE(vector2.end());
 }
 
-TEST(ecs_stack_vector, should_copy_via_ctor)
+TEST(stellarlib_ecs_stack_vector, should_copy_via_ctor)
 {
 	stack_vector<std::shared_ptr<std::int32_t>> vector1{};
 	for (const auto &value : VALUES) {
@@ -103,7 +103,7 @@ TEST(ecs_stack_vector, should_copy_via_ctor)
 	check_range_const(vector2);
 }
 
-TEST(ecs_stack_vector, should_move_via_ctor)
+TEST(stellarlib_ecs_stack_vector, should_move_via_ctor)
 {
 	stack_vector<std::shared_ptr<std::int32_t>> vector1{};
 	for (const auto &value : VALUES) {
@@ -116,7 +116,7 @@ TEST(ecs_stack_vector, should_move_via_ctor)
 	check_range_const(vector2);
 }
 
-TEST(ecs_stack_vector, should_skip_self_copy_via_assignment)
+TEST(stellarlib_ecs_stack_vector, should_skip_self_copy_via_assignment)
 {
 	stack_vector<std::shared_ptr<std::int32_t>> vector{};
 	for (const auto &value : VALUES) {
@@ -129,7 +129,7 @@ TEST(ecs_stack_vector, should_skip_self_copy_via_assignment)
 	check_range_const(vector);
 }
 
-TEST(ecs_stack_vector, should_optimize_copy_via_assignment)
+TEST(stellarlib_ecs_stack_vector, should_optimize_copy_via_assignment)
 {
 	stack_vector<std::shared_ptr<std::int32_t>> vector1{};
 	for (const auto &value : VALUES) {
@@ -146,7 +146,7 @@ TEST(ecs_stack_vector, should_optimize_copy_via_assignment)
 	check_range_const(vector2);
 }
 
-TEST(ecs_stack_vector, should_copy_via_assignment)
+TEST(stellarlib_ecs_stack_vector, should_copy_via_assignment)
 {
 	stack_vector<std::shared_ptr<std::int32_t>> vector1{};
 	for (const auto &value : VALUES) {
@@ -160,7 +160,7 @@ TEST(ecs_stack_vector, should_copy_via_assignment)
 	check_range_const(vector2);
 }
 
-TEST(ecs_stack_vector, should_skip_self_move_via_assignment)
+TEST(stellarlib_ecs_stack_vector, should_skip_self_move_via_assignment)
 {
 	stack_vector<std::shared_ptr<std::int32_t>> vector{};
 	for (const auto &value : VALUES) {
@@ -173,7 +173,7 @@ TEST(ecs_stack_vector, should_skip_self_move_via_assignment)
 	check_range_const(vector);
 }
 
-TEST(ecs_stack_vector, should_move_via_assignment)
+TEST(stellarlib_ecs_stack_vector, should_move_via_assignment)
 {
 	stack_vector<std::shared_ptr<std::int32_t>> vector1{};
 	for (const auto &value : VALUES) {
@@ -188,7 +188,7 @@ TEST(ecs_stack_vector, should_move_via_assignment)
 	check_range_const(vector2);
 }
 
-TEST(ecs_stack_vector, should_optimize_extend)
+TEST(stellarlib_ecs_stack_vector, should_optimize_extend)
 {
 	stack_vector<std::shared_ptr<std::int32_t>> vector{};
 	for (const auto &value : VALUES) {
@@ -201,7 +201,7 @@ TEST(ecs_stack_vector, should_optimize_extend)
 	check_range_const(vector);
 }
 
-TEST(ecs_stack_vector, should_extend)
+TEST(stellarlib_ecs_stack_vector, should_extend)
 {
 	stack_vector<std::shared_ptr<std::int32_t>> vector{};
 	vector.push(VALUES.front());
@@ -214,7 +214,7 @@ TEST(ecs_stack_vector, should_extend)
 	ASSERT_EQ(vector.end() - vector.begin(), vector.size());
 }
 
-TEST(ecs_stack_vector, should_push_and_pop_values)
+TEST(stellarlib_ecs_stack_vector, should_push_and_pop_values)
 {
 	stack_vector<std::shared_ptr<std::int32_t>> vector{};
 	for (std::size_t i{}; i != VALUES.size(); ++i) {
@@ -240,7 +240,7 @@ TEST(ecs_stack_vector, should_push_and_pop_values)
 	check_range_const(vector);
 }
 
-TEST(ecs_stack_vector, should_clear_values)
+TEST(stellarlib_ecs_stack_vector, should_clear_values)
 {
 	stack_vector<std::shared_ptr<std::int32_t>> vector{};
 	for (const auto &value : std::ranges::reverse_view{VALUES}) {

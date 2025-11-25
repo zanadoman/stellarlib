@@ -39,7 +39,7 @@ using namespace stellarlib::ecs;
 
 /* NOLINTBEGIN(cert-err58-cpp,performance-unnecessary-copy-initialization) */
 
-TEST(ecs_ring_storage, should_reuse_keys)
+TEST(stellarlib_ecs_ring_storage, should_reuse_keys)
 {
 	ring_storage<std::shared_ptr<std::int32_t>> storage{};
 	ASSERT_EQ(storage.acquire(), 0);
@@ -53,7 +53,7 @@ TEST(ecs_ring_storage, should_reuse_keys)
 	ASSERT_EQ(storage.acquire(), 2);
 }
 
-TEST(ecs_ring_storage, should_acquire_and_release_keys)
+TEST(stellarlib_ecs_ring_storage, should_acquire_and_release_keys)
 {
 	ring_storage<std::vector<std::int32_t>> storage{};
 	ASSERT_FALSE(storage.contains(0));
