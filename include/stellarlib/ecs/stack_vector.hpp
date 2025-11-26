@@ -24,9 +24,9 @@
 #ifndef STELLARLIB_ECS_STACK_VECTOR_HPP
 #define STELLARLIB_ECS_STACK_VECTOR_HPP
 
+#include <bit>
 #include <cstddef>
 #include <memory>
-#include <ranges>
 #include <utility>
 
 namespace stellarlib::ecs
@@ -42,16 +42,11 @@ public:
 	constexpr stack_vector(const stack_vector<T, size_type> &other)
 		: _capacity{other._capacity}
 	{
-		if (_capacity == 0) {
-			return;
-		}
-
-		_begin = std::allocator<T>::allocate(_capacity);
-		_size = other._size;
-		_end = _begin + _size;
-
-		for (auto [dst, src] : std::views::zip(*this, other)) {
-			new (std::addressof(dst)) T{src};
+		if (_capacity != 0) {
+			_begin = std::allocator<T>::allocate(_capacity);
+			std::uninitialized_copy(other._begin, other._end, _begin);
+			_size = other._size;
+			_end = _begin + _size;
 		}
 	}
 
@@ -74,23 +69,17 @@ public:
 			return *this;
 		}
 
-		for (auto &value : *this) {
-			value.~T();
-		}
+		std::ranges::destroy(*this);
 
 		if (_capacity < other._size) {
 			std::allocator<T>::deallocate(_begin, _capacity);
-			_capacity = other._capacity;
+			_capacity = std::bit_ceil(other._size);
 			_begin = std::allocator<T>::allocate(_capacity);
 		}
 
+		std::uninitialized_copy(other._begin, other._end, _begin);
 		_size = other._size;
 		_end = _begin + _size;
-
-		for (auto [dst, src] : std::views::zip(*this, other)) {
-			new (std::addressof(dst)) T{src};
-		}
-
 		return *this;
 	}
 
@@ -107,10 +96,7 @@ public:
 
 	constexpr ~stack_vector()
 	{
-		for (const auto &value : *this) {
-			value.~T();
-		}
-
+		std::ranges::destroy(*this);
 		std::allocator<T>::deallocate(_begin, _capacity);
 	}
 
@@ -124,28 +110,23 @@ public:
 			realloc(size);
 		}
 
-		for (; _size != size; ++_size) {
-			new (_begin + _size) T{};
-		}
-
-		_end = _begin + _size;
+		_end = _begin + size;
+		std::uninitialized_default_construct(_begin + _size, _end);
+		_size = size;
 		return true;
 	}
 
 	template <typename ...Args>
 	constexpr void push(Args &&...args)
 	{
-		if (_size < _capacity) {
-			new (_end) T{std::forward<Args>(args)...};
-			++_size;
-			++_end;
-		}
-		else {
+		if (_size == _capacity) {
 			realloc(_capacity + 1);
-			new (_begin + _size) T{std::forward<Args>(args)...};
-			_size = _capacity;
 			_end = _begin + _size;
 		}
+
+		new (_end) T{std::forward<Args>(args)...};
+		++_end;
+		++_size;
 	}
 
 	[[nodiscard]]
@@ -183,11 +164,7 @@ public:
 	constexpr void clear()
 	{
 		_size = 0;
-
-		for (const auto &value : *this) {
-			value.~T();
-		}
-
+		std::ranges::destroy(*this);
 		_end = _begin;
 	}
 
@@ -197,8 +174,9 @@ private:
 	T *_begin{};
 	T *_end{};
 
-	constexpr void realloc(const size_type capacity)
+	constexpr void realloc(size_type capacity)
 	{
+		capacity = std::bit_ceil(capacity);
 		auto tmp{std::allocator<T>::allocate(capacity)};
 
 		for (auto dst{tmp}, src{_begin}; src != _end; ++dst, ++src) {

@@ -19,10 +19,16 @@ member init
 & * { ->
 constexpr
 nodiscard
+++ -- += -=
+!= true false
+return
+<>NEEEEEEEEEEEEEEEEEM
 
 dtor()
+push()
 size()
 operator[]
 begin()
 end()
+pop()
 clear()
