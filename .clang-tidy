@@ -13,6 +13,9 @@ Checks: >
   performance-*,
   portability-*,
   readability-*,
+  -bugprone-easily-swappable-parameters,
+  -bugprone-suspicious-realloc-usage,
+  -cppcoreguidelines-avoid-magic-numbers,
   -cppcoreguidelines-noexcept-move-operations,
   -cppcoreguidelines-no-malloc,
   -cppcoreguidelines-owning-memory,
@@ -22,6 +25,7 @@ Checks: >
   -performance-noexcept-move-constructor,
   -readability-function-cognitive-complexity,
   -readability-identifier-length,
+  -readability-magic-numbers,
   -readability-math-missing-parentheses,
   -readability-qualified-auto,
 HeaderFilterRegex: '^\.\/.*\.hpp$'
