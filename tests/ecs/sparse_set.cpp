@@ -54,7 +54,7 @@ static const std::array<std::shared_ptr<std::int32_t>, KEYS.size()> VALUES{
 
 namespace
 {
-void check_ranges_mut(sparse_set<std::shared_ptr<std::int32_t>> &set)
+void check_ranges_mut(sparse_set<std::size_t, std::shared_ptr<std::int32_t>> &set)
 {
 	for (const auto [key, value] : std::views::zip(KEYS, VALUES)) {
 		ASSERT_TRUE(set.contains(key));
@@ -66,7 +66,7 @@ void check_ranges_mut(sparse_set<std::shared_ptr<std::int32_t>> &set)
 	ASSERT_TRUE(std::ranges::equal(set.zip(), std::views::zip(KEYS, VALUES)));
 }
 
-void check_ranges_const(const sparse_set<std::shared_ptr<std::int32_t>> &set)
+void check_ranges_const(const sparse_set<std::size_t, std::shared_ptr<std::int32_t>> &set)
 {
 	for (const auto [key, value] : std::views::zip(KEYS, VALUES)) {
 		ASSERT_TRUE(set.contains(key));
@@ -81,7 +81,7 @@ void check_ranges_const(const sparse_set<std::shared_ptr<std::int32_t>> &set)
 
 TEST(stellarlib_ecs_sparse_set, should_init_via_ctor)
 {
-	const sparse_set<std::shared_ptr<std::int32_t>> set{};
+	const sparse_set<std::size_t, std::shared_ptr<std::int32_t>> set{};
 	ASSERT_TRUE(set.keys().empty());
 	ASSERT_TRUE(set.values().empty());
 	ASSERT_TRUE(set.zip().empty());
@@ -89,7 +89,7 @@ TEST(stellarlib_ecs_sparse_set, should_init_via_ctor)
 
 TEST(stellarlib_ecs_sparse_set, should_copy_via_ctor)
 {
-	sparse_set<std::shared_ptr<std::int32_t>> set1{};
+	sparse_set<std::size_t, std::shared_ptr<std::int32_t>> set1{};
 	for (const auto [key, value] : std::views::zip(KEYS, VALUES)) {
 		set1.insert(key, value);
 	}
@@ -100,7 +100,7 @@ TEST(stellarlib_ecs_sparse_set, should_copy_via_ctor)
 
 TEST(stellarlib_ecs_sparse_set, should_move_via_ctor)
 {
-	sparse_set<std::shared_ptr<std::int32_t>> set1{};
+	sparse_set<std::size_t, std::shared_ptr<std::int32_t>> set1{};
 	for (const auto [key, value] : std::views::zip(KEYS, VALUES)) {
 		set1.insert(key, value);
 	}
@@ -111,11 +111,11 @@ TEST(stellarlib_ecs_sparse_set, should_move_via_ctor)
 
 TEST(stellarlib_ecs_sparse_set, should_copy_via_assignment)
 {
-	sparse_set<std::shared_ptr<std::int32_t>> set1{};
+	sparse_set<std::size_t, std::shared_ptr<std::int32_t>> set1{};
 	for (const auto [key, value] : std::views::zip(KEYS, VALUES)) {
 		set1.insert(key, value);
 	}
-	sparse_set<std::shared_ptr<std::int32_t>> set2{};
+	sparse_set<std::size_t, std::shared_ptr<std::int32_t>> set2{};
 	set2 = set1;
 	check_ranges_mut(set2);
 	check_ranges_const(set2);
@@ -123,11 +123,11 @@ TEST(stellarlib_ecs_sparse_set, should_copy_via_assignment)
 
 TEST(stellarlib_ecs_sparse_set, should_move_via_assignment)
 {
-	sparse_set<std::shared_ptr<std::int32_t>> set1{};
+	sparse_set<std::size_t, std::shared_ptr<std::int32_t>> set1{};
 	for (const auto [key, value] : std::views::zip(KEYS, VALUES)) {
 		set1.insert(key, value);
 	}
-	sparse_set<std::shared_ptr<std::int32_t>> set2{};
+	sparse_set<std::size_t, std::shared_ptr<std::int32_t>> set2{};
 	set2 = std::move(set1);
 	check_ranges_mut(set2);
 	check_ranges_const(set2);
@@ -135,18 +135,18 @@ TEST(stellarlib_ecs_sparse_set, should_move_via_assignment)
 
 TEST(stellarlib_ecs_sparse_set, should_copy_via_clone)
 {
-	sparse_set<std::shared_ptr<std::int32_t>> set1{};
+	sparse_set<std::size_t, std::shared_ptr<std::int32_t>> set1{};
 	for (const auto [key, value] : std::views::zip(KEYS, VALUES)) {
 		set1.insert(key, value);
 	}
-	std::unique_ptr<sparse_set<std::shared_ptr<std::int32_t>>> set2{set1.clone()};
+	std::unique_ptr<sparse_set<std::size_t, std::shared_ptr<std::int32_t>>> set2{set1.clone()};
 	check_ranges_mut(*set2);
 	check_ranges_const(*set2);
 }
 
 TEST(stellarlib_ecs_sparse_set, should_insert_and_erase_values)
 {
-	sparse_set<std::shared_ptr<std::int32_t>> set{};
+	sparse_set<std::size_t, std::shared_ptr<std::int32_t>> set{};
 	for (const auto pair : std::views::zip(KEYS, VALUES)) {
 		set.insert(std::get<0>(pair), std::get<1>(pair));
 		ASSERT_TRUE(set.contains(std::get<0>(pair)));
@@ -175,7 +175,7 @@ TEST(stellarlib_ecs_sparse_set, should_insert_and_erase_values)
 
 TEST(stellarlib_ecs_sparse_set, should_reinsert_value)
 {
-	sparse_set<std::shared_ptr<std::int32_t>> set{};
+	sparse_set<std::size_t, std::shared_ptr<std::int32_t>> set{};
 	const auto pair{std::views::zip(KEYS, VALUES).front()};
 	set.insert(std::get<0>(pair), std::get<1>(pair));
 	set.insert(std::get<0>(pair), std::get<1>(pair));
@@ -192,7 +192,7 @@ TEST(stellarlib_ecs_sparse_set, should_reinsert_value)
 
 TEST(stellarlib_ecs_sparse_set, should_clear_values)
 {
-	sparse_set<std::shared_ptr<std::int32_t>> set{};
+	sparse_set<std::size_t, std::shared_ptr<std::int32_t>> set{};
 	for (const auto [key, value] : std::ranges::reverse_view{std::views::zip(KEYS, VALUES)}) {
 		set.insert(key, value);
 	}

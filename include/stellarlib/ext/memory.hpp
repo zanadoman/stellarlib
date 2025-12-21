@@ -34,12 +34,12 @@
 
 namespace stellarlib::ext
 {
-template <typename _value_type, typename _size_type>
-class arena_allocator : std::allocator<_value_type>
+template <typename T, typename SizeType>
+class arena_allocator : std::allocator<T>
 {
 public:
-	using value_type = std::allocator<_value_type>::value_type;
-	using size_type = _size_type;
+	using value_type = std::allocator<T>::value_type;
+	using size_type = SizeType;
 	using difference_type = std::allocator<value_type>::difference_type;
 	using propagate_on_container_move_assignment = std::allocator<value_type>::propagate_on_container_move_assignment;
 
@@ -61,7 +61,6 @@ public:
 
 	constexpr void reallocate(size_type size, size_type required, value_type *&begin, size_type &capacity)
 	{
-
 		if constexpr (is_trivially_relocatable_v<value_type>) {
 			capacity = std::bit_ceil(required);
 			begin = static_cast<value_type *>(std::realloc(begin, sizeof(*begin) * capacity));
@@ -92,7 +91,7 @@ public:
 	}
 
 	[[nodiscard]]
-	constexpr auto operator==([[maybe_unused]] const arena_allocator<value_type, size_type> &other) const
+	constexpr auto operator==(const arena_allocator<value_type, size_type> &other) const
 	{
 		return std::allocator<value_type>::operator==(other);
 	}

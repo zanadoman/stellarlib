@@ -214,7 +214,7 @@ public:
 			auto id{_caches.size()};
 
 			if (it == _caches.end()) {
-				sparse_set<std::uint32_t> set{};
+				sparse_set<std::size_t, std::uint32_t> set{};
 
 				for (const auto data : _entities.zip()) {
 					if (archetype <= std::get<1>(data)) {
@@ -243,8 +243,8 @@ public:
 private:
 	ring_storage<bitset> _entities;
 	sparse_storage<world> _components;
-	sparse_set<std::size_t> _queries;
-	stack_vector<std::pair<bitset, sparse_set<std::uint32_t>>> _caches;
+	sparse_set<std::size_t, std::size_t> _queries;
+	stack_vector<std::pair<bitset, sparse_set<std::size_t, std::uint32_t>>> _caches;
 };
 }
 

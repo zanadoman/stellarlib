@@ -75,7 +75,6 @@ public:
 
 private:
 	std::size_t _size{};
-	[[maybe_unused]] std::size_t _padding{};
 	std::unique_ptr<std::size_t, void (*)(void *)> _begin{nullptr, std::free};
 	std::size_t *_end{};
 
