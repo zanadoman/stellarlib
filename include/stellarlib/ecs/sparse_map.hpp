@@ -40,21 +40,6 @@ template <typename Key, typename T>
 class sparse_map final : public any_set<Key>
 {
 public:
-	[[nodiscard]]
-	explicit sparse_map() = default;
-
-	[[nodiscard]]
-	sparse_map(const sparse_map<Key, T> &) = default;
-
-	[[nodiscard]]
-	sparse_map(sparse_map<Key, T> &&) = default;
-
-	auto operator=(const sparse_map<Key, T> &)
-		-> sparse_map<Key, T> & = default;
-
-	auto operator=(sparse_map<Key, T> &&)
-		-> sparse_map<Key, T> & = default;
-
     [[nodiscard]]
     auto clone() const
         -> sparse_map<Key, T> * final
@@ -66,8 +51,6 @@ public:
 			throw std::runtime_error{__FILE_NAME__":" + std::to_string(__LINE__) + ' ' + typeid(T).name() + " is non-copyable"};
 		}
     }
-
-	~sparse_map() final = default;
 
 	template <typename ...Args>
 	void insert(const Key key, Args &&...args)

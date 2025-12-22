@@ -48,7 +48,7 @@ static const std::vector<std::shared_ptr<std::int32_t>> VALUES{
 	std::make_shared<std::int32_t>(5),
 	std::make_shared<std::int32_t>(10),
 	std::make_shared<std::int32_t>(15),
-	std::make_shared<std::int32_t>(25)
+	std::make_shared<std::int32_t>(20)
 };
 
 namespace
