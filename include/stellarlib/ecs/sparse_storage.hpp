@@ -25,7 +25,7 @@
 #define STELLARLIB_ECS_SPARSE_STORAGE_HPP
 
 #include <stellarlib/ecs/any_set.hpp>
-#include <stellarlib/ecs/sparse_set.hpp>
+#include <stellarlib/ecs/sparse_map.hpp>
 #include <stellarlib/ext/utility.hpp>
 
 #include <cstddef>
@@ -85,21 +85,21 @@ public:
 	auto by_type() const
 	{
 		const auto set{_sets.at(id_of<T>())};
-		return set ? static_cast<sparse_set<std::size_t, T> *>(set->get()) : nullptr;
+		return set ? static_cast<sparse_map<std::size_t, T> *>(set->get()) : nullptr;
 	}
 
 	template <typename T>
 	[[nodiscard]]
 	auto by_type()
-		-> sparse_set<std::size_t, T> &
+		-> sparse_map<std::size_t, T> &
 	{
 		const auto id{id_of<T>()};
 
 		if (const auto set{_sets.at(id)}) {
-			return static_cast<sparse_set<std::size_t, T> &>(*set->get());
+			return static_cast<sparse_map<std::size_t, T> &>(*set->get());
 		}
 
-		const auto set{new sparse_set<std::size_t, T>{}};
+		const auto set{new sparse_map<std::size_t, T>{}};
 		_sets.insert(id, set);
 		return *set;
 	}
@@ -114,7 +114,7 @@ public:
 	}
 
 private:
-	sparse_set<std::size_t, std::unique_ptr<any_set<std::size_t>>> _sets;
+	sparse_map<std::size_t, std::unique_ptr<any_set<std::size_t>>> _sets;
 };
 }
 

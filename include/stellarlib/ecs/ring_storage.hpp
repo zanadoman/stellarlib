@@ -24,7 +24,7 @@
 #ifndef STELLARLIB_ECS_RING_STORAGE_HPP
 #define STELLARLIB_ECS_RING_STORAGE_HPP
 
-#include <stellarlib/ecs/sparse_set.hpp>
+#include <stellarlib/ecs/sparse_map.hpp>
 #include <stellarlib/ecs/stack_vector.hpp>
 
 #include <cstdint>
@@ -113,7 +113,7 @@ public:
 private:
 	uint32_t _key{};
 	uint32_t _padding{};
-	sparse_set<std::uint32_t, T> _set;
+	sparse_map<std::uint32_t, T> _set;
 	stack_vector<std::pair<std::uint32_t, T>, std::uint32_t> _stack;
 };
 }

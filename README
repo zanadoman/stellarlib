@@ -27,3 +27,12 @@ else
 const auto
 const correction
 <>
+
+---------------------------
+
+SparseStorage<Component> components;
+
+HashMap<Entity, ArchetypeId> entities;
+Vec<(Archetype, HashSet<Entity>)> archetypes;
+
+HashMap<TypeId, (Archetype, Vec<ArhetypeId>)> queries;

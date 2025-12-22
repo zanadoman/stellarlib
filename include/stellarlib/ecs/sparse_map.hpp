@@ -21,8 +21,8 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef STELLARLIB_ECS_SPARSE_SET_HPP
-#define STELLARLIB_ECS_SPARSE_SET_HPP
+#ifndef STELLARLIB_ECS_SPARSE_MAP_HPP
+#define STELLARLIB_ECS_SPARSE_MAP_HPP
 
 #include <stellarlib/ecs/any_set.hpp>
 #include <stellarlib/ecs/stack_vector.hpp>
@@ -37,37 +37,37 @@
 namespace stellarlib::ecs
 {
 template <typename Key, typename T>
-class sparse_set final : public any_set<Key>
+class sparse_map final : public any_set<Key>
 {
 public:
 	[[nodiscard]]
-	explicit sparse_set() = default;
+	explicit sparse_map() = default;
 
 	[[nodiscard]]
-	sparse_set(const sparse_set<Key, T> &) = default;
+	sparse_map(const sparse_map<Key, T> &) = default;
 
 	[[nodiscard]]
-	sparse_set(sparse_set<Key, T> &&) = default;
+	sparse_map(sparse_map<Key, T> &&) = default;
 
-	auto operator=(const sparse_set<Key, T> &)
-		-> sparse_set<Key, T> & = default;
+	auto operator=(const sparse_map<Key, T> &)
+		-> sparse_map<Key, T> & = default;
 
-	auto operator=(sparse_set<Key, T> &&)
-		-> sparse_set<Key, T> & = default;
+	auto operator=(sparse_map<Key, T> &&)
+		-> sparse_map<Key, T> & = default;
 
     [[nodiscard]]
     auto clone() const
-        -> sparse_set<Key, T> * final
+        -> sparse_map<Key, T> * final
     {
 		if constexpr (std::is_copy_constructible_v<T>) {
-			return new sparse_set<Key, T>{*this};
+			return new sparse_map<Key, T>{*this};
 		}
 		else {
 			throw std::runtime_error{__FILE_NAME__":" + std::to_string(__LINE__) + ' ' + typeid(T).name() + " is non-copyable"};
 		}
     }
 
-	~sparse_set() final = default;
+	~sparse_map() final = default;
 
 	template <typename ...Args>
 	void insert(const Key key, Args &&...args)
