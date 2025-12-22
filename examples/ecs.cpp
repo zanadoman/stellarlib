@@ -23,47 +23,43 @@
 
 #include <stellarlib/ecs/world.hpp>
 
-#include <stellarlib/ecs/bitset.hpp>
-#include <stellarlib/ext/functional.hpp>
-
+#include <cstddef>
 #include <cstdint>
-#include <memory>
 
-namespace stellarlib::ecs
-{
-auto world::contains(const std::uint32_t entity) const
-	-> bool
-{
-	return _entities.contains(entity);
-}
+static constexpr auto ENTITIES = 50'000'000 * 2;
 
-auto world::at(const std::uint32_t entity) const
-	-> const bitset *
+struct position
 {
-	const auto index{_entities.at(entity)};
-	return ext::truthy(index) ? std::addressof(_archetypes[*index].first) : nullptr;
-}
+	float x;
+	float y;
+};
 
-auto world::operator[](const std::uint32_t entity) const
-	-> const bitset &
+struct velocity
 {
-	return _archetypes[_entities[entity]].first;
-}
+	float x;
+	float y;
+};
 
-void world::despawn(const std::uint32_t entity)
+struct health
 {
-	const auto index{_entities.at(entity)};
+	float value;
+};
 
-	if (ext::falsy(index)) {
-		return;
+struct shield
+{
+	float value;
+};
+
+auto main([[maybe_unused]] const std::int32_t argc, [[maybe_unused]] const char *const*argv)
+	-> std::int32_t
+{
+	stellarlib::ecs::world world{};
+
+	for (std::size_t i{}; i != ENTITIES; ++i) {
+		world.spawn(position{}, velocity{}, health{}, shield{});
 	}
 
-	for (auto &set : _components.sets()) {
-		set.erase(entity);
-	}
+	return 0;
+}
 
-	_archetypes[*index].second.erase(entity);
-	_entities.erase(entity);
-	_queue.push(entity);
-}
-}
+/* NOLINTEND(cert-msc51-cpp,cert-msc32-c) */

@@ -27,9 +27,11 @@
 #include <stellarlib/ecs/bitset.hpp>
 #include <stellarlib/ecs/ring_storage.hpp>
 #include <stellarlib/ecs/sparse_map.hpp>
+#include <stellarlib/ecs/sparse_set.hpp>
 #include <stellarlib/ecs/sparse_storage.hpp>
 
 #include <cstdint>
+#include <memory>
 #include <tuple>
 
 namespace stellarlib::ecs
@@ -48,22 +50,40 @@ public:
 	auto spawn(T ...components)
 		-> std::uint32_t
 	{
-		const auto entity{_entities.acquire()};
+		std::uint32_t entity{};
+
+		if (_queue.size()) {
+			entity = *(_queue.end() - 1);
+			_queue.pop();
+		}
+		else {
+			entity = _entities.size();
+		}
+
+		bitset archetype{};
 
 		(
 			[&] -> void
 			{
-				const auto id{_components.id_of<T>()};
-				_entities[entity].insert(id);
 				_components.by_type<T>().insert(entity, components);
+				archetype.insert(_components.id_of<T>());
 			}(),
 			...
 		);
 
-		for (auto &[archetype, set] : _caches) {
-			if (archetype <= _entities[entity]) {
-				set.insert(entity, entity);
-			}
+		const auto it{std::ranges::find_if(_archetypes, [&](const auto pair) -> bool {
+			return pair.first == archetype;
+		})};
+
+		_entities.insert(entity, static_cast<std::uint32_t>(it - _archetypes.begin()));
+
+		if (it == _archetypes.end()) {
+			sparse_set<std::uint32_t> set{};
+			set.insert(entity);
+			_archetypes.push(std::tuple<bitset, sparse_set<std::uint32_t>>{std::move(archetype), std::move(set)});
+		}
+		else {
+			it->second.insert(entity);
 		}
 
 		return entity;
@@ -72,24 +92,30 @@ public:
 	template <typename ...T>
 	void insert(const std::uint32_t entity, T ...components)
 	{
-		const auto data{_entities.at(entity)};
+		const auto index{_entities.at(entity)};
 
-		if (!data) {
+		if (!index) {
 			return;
 		}
+
+		_cache = _archetypes[*index].first;
 
 		(
 			[&] -> void
 			{
-				data->insert(_components.id_of<T>());
 				_components.by_type<T>().insert(entity, components);
+				_cache.insert(_components.id_of<T>());
 			}(),
 			...
 		);
 
-		for (auto [archetype, set] : _caches) {
-			if (!set.contains(entity) && archetype <= _entities[entity]) {
-				set.insert(entity, entity);
+		_archetypes[*index].second.erase(entity);
+
+		for (std::uint32_t i{}; i != _archetypes.size(); ++i) {
+			if (_archetypes[i].first == _cache) {
+				*index = i;
+				_archetypes[i].second.insert(entity);
+				break;
 			}
 		}
 	}
@@ -156,32 +182,32 @@ public:
 	}
 
 	template <typename ...T>
-	void erase(const std::uint32_t entity)
+	void erase([[maybe_unused]] const std::uint32_t entity)
 	{
-		const auto data{_entities.at(entity)};
-
-		if (!data) {
-			return;
-		}
-
-		(
-			[&] -> void
-			{
-				const auto id{_components.id_of<T>()};
-
-				if (data->contains(id)) {
-					data->erase(id);
-					_components.by_type<T>().erase(entity);
-				}
-			}(),
-			...
-		);
-
-		for (auto [archetype, set] : _caches) {
-			if (set.contains(entity) && (archetype.contains(id_of<T>()) || ...)) {
-				set.erase(entity);
-			}
-		}
+		/* const auto data{_entities.at(entity)}; */
+		/**/
+		/* if (!data) { */
+		/* 	return; */
+		/* } */
+		/**/
+		/* ( */
+		/* 	[&] -> void */
+		/* 	{ */
+		/* 		const auto id{_components.id_of<T>()}; */
+		/**/
+		/* 		if (data->contains(id)) { */
+		/* 			data->erase(id); */
+		/* 			_components.by_type<T>().erase(entity); */
+		/* 		} */
+		/* 	}(), */
+		/* 	... */
+		/* ); */
+		/**/
+		/* for (auto [archetype, set] : _caches) { */
+		/* 	if (set.contains(entity) && (archetype.contains(id_of<T>()) || ...)) { */
+		/* 		set.erase(entity); */
+		/* 	} */
+		/* } */
 	}
 
 	void despawn(std::uint32_t entity);
@@ -204,47 +230,41 @@ public:
 	auto query()
 		requires (1 < sizeof...(T))
 	{
-		if (!_queries.contains(ext::scoped_typeid<world, std::tuple<T...>>())) {
+		const auto id = ext::scoped_typeid<world, std::tuple<T...>>();
+		const auto query{_queries.at(id)};
+
+		if (!query) {
 			bitset archetype{};
 			(archetype.insert(id_of<T>()), ...);
-			const auto it{std::ranges::find_if(_caches, [&](const auto &pair) -> bool
-			{
-				return pair.first == archetype;
-			})};
-			auto id{_caches.size()};
+			stack_vector<std::size_t> indices{};
 
-			if (it == _caches.end()) {
-				sparse_map<std::size_t, std::uint32_t> set{};
-
-				for (const auto data : _entities.zip()) {
-					if (archetype <= std::get<1>(data)) {
-						set.insert(std::get<0>(data), std::get<0>(data));
-					}
+			for (std::size_t i{}; i != _archetypes.size(); ++i) {
+				if (archetype <= _archetypes[i].first) {
+					indices.push(i);
 				}
-
-				_caches.push(archetype, std::move(set));
-			}
-			else {
-				id = static_cast<std::size_t>(std::distance(_caches.begin(), it));
 			}
 
-			_queries.insert(ext::scoped_typeid<world, std::tuple<T...>>(), id);
+			_queries.insert(id, {archetype, indices});
+			query = std::addressof(_queries[id]);
 		}
 
-		return std::views::transform(
-			_caches[_queries[ext::scoped_typeid<world, std::tuple<T...>>()]].second.values(),
-			[this](const auto entity) -> std::tuple<std::uint32_t, T *...>
-			{
+		return query->second
+			| std::views::transform([this](const auto index) -> stack_vector<std::uint32_t> & {
+				return _archetypes[index].second.keys();
+			})
+			| std::views::join
+			| std::views::transform([this](const auto entity) -> std::tuple<std::uint32_t, T *...> {
 				return {entity, std::addressof(_components.by_type<T>()[entity])...};
-			}
-		);
+			});
 	}
 
 private:
-	ring_storage<bitset> _entities;
 	sparse_storage<world> _components;
-	sparse_map<std::size_t, std::size_t> _queries;
-	stack_vector<std::pair<bitset, sparse_map<std::size_t, std::uint32_t>>> _caches;
+	sparse_map<std::uint32_t, std::uint32_t> _entities;
+	stack_vector<std::uint32_t> _queue;
+	stack_vector<std::pair<bitset, sparse_set<std::uint32_t>>> _archetypes;
+	sparse_map<std::size_t, std::pair<bitset, stack_vector<std::size_t>>> _queries;
+	bitset _cache;
 };
 }
 

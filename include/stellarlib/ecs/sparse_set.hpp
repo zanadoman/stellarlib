@@ -93,7 +93,7 @@ public:
 	}
 
 private:
-	stack_vector<T> _values;
+	stack_vector<T, T> _values;
 	stack_vector<std::optional<T>, T> _sparse;
 };
 }

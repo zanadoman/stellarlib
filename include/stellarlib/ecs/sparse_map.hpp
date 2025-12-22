@@ -73,6 +73,12 @@ public:
 	}
 
 	[[nodiscard]]
+	auto size() const
+	{
+		return _keys.size();
+	}
+
+	[[nodiscard]]
 	auto contains(const Key key) const
 	{
 		return key < _sparse.size() && _sparse[key];
@@ -136,9 +142,9 @@ public:
 	}
 
 private:
-	stack_vector<T> _values;
-	stack_vector<Key> _keys;
-	stack_vector<std::optional<Key>> _sparse;
+	stack_vector<T, Key> _values;
+	stack_vector<Key, Key> _keys;
+	stack_vector<std::optional<Key>, Key> _sparse;
 };
 }
 
