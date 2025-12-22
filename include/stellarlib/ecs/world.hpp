@@ -71,7 +71,7 @@ public:
 			...
 		);
 
-		const auto it{std::ranges::find_if(_archetypes, [&](const auto pair) -> bool {
+		const auto it{std::ranges::find_if(_archetypes, [&](const auto &pair) -> bool {
 			return pair.first == archetype;
 		})};
 

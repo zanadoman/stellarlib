@@ -28,6 +28,10 @@ const auto
 const correction
 <>
 
+generic names
+pipes
+ctors
+
 ---------------------------
 
 SparseStorage<Component> components;
