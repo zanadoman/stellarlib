@@ -66,4 +66,6 @@ void world::despawn(const std::uint32_t entity)
 	_entities.erase(entity);
 	_queue.push(entity);
 }
+
+thread_local bitset world::_cache{};
 }

@@ -264,7 +264,7 @@ private:
 	stack_vector<std::uint32_t> _queue;
 	stack_vector<std::pair<bitset, sparse_set<std::uint32_t>>> _archetypes;
 	sparse_map<std::size_t, std::pair<bitset, stack_vector<std::size_t>>> _queries;
-	bitset _cache;
+	static thread_local bitset _cache;
 };
 }
 

@@ -7,4 +7,6 @@
 -Werror
 -Weverything
 -Wno-c++98-compat-pedantic
+-Wno-exit-time-destructors
+-Wno-global-constructors
 -Wno-unsafe-buffer-usage
