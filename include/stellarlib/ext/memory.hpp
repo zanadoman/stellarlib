@@ -44,7 +44,7 @@ public:
 	constexpr void allocate(value_type *&begin, size_type &capacity) const
 	{
 		capacity = grow(capacity);
-		begin = reinterpret_cast<value_type *>(std::malloc(sizeof(*begin) * capacity));
+		begin = reinterpret_cast<value_type *>(std::malloc(sizeof(value_type) * capacity));
 	}
 
 	constexpr void reallocate(value_type *&begin, size_type size, size_type &capacity) const
@@ -52,10 +52,10 @@ public:
 		capacity = grow(capacity);
 
 		if constexpr (is_trivially_relocatable_v<value_type>) {
-			begin = reinterpret_cast<value_type *>(std::realloc(begin, sizeof(*begin) * capacity));
+			begin = reinterpret_cast<value_type *>(std::realloc(begin, sizeof(value_type) * capacity));
 		}
 		else {
-			const auto tmp{reinterpret_cast<value_type *>(std::malloc(sizeof(*begin) * capacity))};
+			const auto tmp{reinterpret_cast<value_type *>(std::malloc(sizeof(value_type) * capacity))};
 			std::uninitialized_move_n(begin, size, tmp);
 			std::destroy_n(begin, size);
 			std::free(begin);

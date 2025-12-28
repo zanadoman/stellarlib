@@ -80,10 +80,9 @@ TEST(stellarlib_ext_memory, should_resize_trivial_arena)
 		std::construct_at(arena + i, i);
 	}
 	const auto old{size};
-	++size;
 	allocator.reallocate(arena, old, size);
 	ASSERT_TRUE(arena);
-	ASSERT_EQ(size, 24);
+	ASSERT_EQ(size, 22);
 	std::uninitialized_fill(arena + old, arena + size, -1);
 	for (std::size_t i{}; i != old; ++i) {
 		ASSERT_EQ(arena[i], i);
@@ -102,10 +101,9 @@ TEST(stellarlib_ext_memory, should_resize_non_trivial_arena)
 		std::construct_at(arena + i, std::to_string(i));
 	}
 	const auto old{size};
-	++size;
 	allocator.reallocate(arena, old, size);
 	ASSERT_TRUE(arena);
-	ASSERT_EQ(size, 42);
+	ASSERT_EQ(size, 40);
 	std::uninitialized_fill(arena + old, arena + size, std::to_string(-1));
 	for (std::size_t i{}; i != old; ++i) {
 		ASSERT_EQ(arena[i], std::to_string(i));
