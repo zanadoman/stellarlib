@@ -111,7 +111,7 @@ public:
 
 		if (_capacity < size) {
 			_capacity = size;
-			ext::arena_allocator<T, size_type>::reallocate(_size, _begin, _capacity);
+			ext::arena_allocator<T, size_type>::reallocate(_begin, _size, _capacity);
 		}
 
 		_end = _begin + size;
@@ -125,7 +125,7 @@ public:
 	{
 		if (_size == _capacity) {
 			++_capacity;
-			ext::arena_allocator<T, size_type>::reallocate(_size, _begin, _capacity);
+			ext::arena_allocator<T, size_type>::reallocate(_begin, _size, _capacity);
 			_end = _begin + _size;
 		}
 

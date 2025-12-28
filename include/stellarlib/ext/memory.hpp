@@ -25,7 +25,6 @@
 #define STELLARLIB_EXT_MEMORY_HPP
 
 #include <stellarlib/ext/functional.hpp>
-#include <stellarlib/ext/type_traits.hpp>
 
 #include <cstdlib>
 #include <memory>
@@ -33,7 +32,7 @@
 
 namespace stellarlib::ext
 {
-template <typename T, typename SizeType>
+template <typename T, typename SizeType = std::size_t>
 class arena_allocator : std::allocator<T>
 {
 public:
@@ -52,7 +51,7 @@ public:
 		}
 	}
 
-	constexpr void reallocate(size_type size, value_type *&begin, size_type &capacity) const
+	constexpr void reallocate(value_type *&begin, size_type size, size_type &capacity) const
 	{
 		capacity = grow(capacity);
 
@@ -79,8 +78,9 @@ public:
 
 	[[nodiscard]]
 	constexpr auto operator==(const arena_allocator<value_type, size_type> &other) const
+		-> bool
 	{
-		return std::allocator<value_type>::operator==(other);
+		return static_cast<std::allocator<value_type>>(*this) == static_cast<std::allocator<value_type>>(other);
 	}
 
 private:
