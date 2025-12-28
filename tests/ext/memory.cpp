@@ -25,8 +25,8 @@
 
 #include <gtest/gtest.h>
 
-#include <cstdint>
 #include <cstddef>
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <type_traits>
@@ -50,8 +50,9 @@ TEST(stellarlib_ext_memory, should_acquire_and_release_trivial_arena)
 	std::int32_t *arena{};
 	std::size_t size{10};
 	allocator.allocate(arena, size);
-	std::uninitialized_default_construct_n(arena, size);
+	ASSERT_TRUE(arena);
 	ASSERT_EQ(size, 15);
+	std::uninitialized_default_construct_n(arena, size);
 	std::destroy_n(arena, size);
 	allocator.deallocate(arena);
 }
@@ -62,8 +63,9 @@ TEST(stellarlib_ext_memory, should_acquire_and_release_non_trivial_arena)
 	std::string *arena{};
 	std::size_t size{10};
 	allocator.allocate(arena, size);
-	std::uninitialized_default_construct_n(arena, size);
+	ASSERT_TRUE(arena);
 	ASSERT_EQ(size, 15);
+	std::uninitialized_default_construct_n(arena, size);
 	std::destroy_n(arena, size);
 	allocator.deallocate(arena);
 }
@@ -79,7 +81,9 @@ TEST(stellarlib_ext_memory, should_resize_trivial_arena)
 	}
 	const auto old{size};
 	++size;
-	allocator.reallocate(arena, old, size),
+	allocator.reallocate(arena, old, size);
+	ASSERT_TRUE(arena);
+	ASSERT_EQ(size, 24);
 	std::uninitialized_fill(arena + old, arena + size, -1);
 	for (std::size_t i{}; i != old; ++i) {
 		ASSERT_EQ(arena[i], i);
@@ -99,7 +103,9 @@ TEST(stellarlib_ext_memory, should_resize_non_trivial_arena)
 	}
 	const auto old{size};
 	++size;
-	allocator.reallocate(arena, old, size),
+	allocator.reallocate(arena, old, size);
+	ASSERT_TRUE(arena);
+	ASSERT_EQ(size, 24);
 	std::uninitialized_fill(arena + old, arena + size, std::to_string(-1));
 	for (std::size_t i{}; i != old; ++i) {
 		ASSERT_EQ(arena[i], std::to_string(i));
@@ -108,8 +114,8 @@ TEST(stellarlib_ext_memory, should_resize_non_trivial_arena)
 	allocator.deallocate(arena);
 }
 
-static_assert(arena_allocator<std::int32_t, std::uint32_t>{} == arena_allocator<std::int32_t, std::uint32_t>{});
-static_assert(!(arena_allocator<std::int32_t, std::uint32_t>{} != arena_allocator<std::int32_t, std::uint32_t>{}));
+static_assert(arena_allocator<std::int32_t>{} == arena_allocator<std::int32_t>{});
+static_assert(!(arena_allocator<std::int32_t>{} != arena_allocator<std::int32_t>{}));
 
 /* NOLINTEND(cert-err58-cpp,cppcoreguidelines-non-private-member-variables-in-classes,misc-non-private-member-variables-in-classes,performance-unnecessary-copy-initialization) */
 

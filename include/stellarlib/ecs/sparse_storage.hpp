@@ -85,7 +85,7 @@ public:
 	auto by_type() const
 	{
 		const auto set{_sets.at(id_of<T>())};
-		return set ? static_cast<sparse_map<std::size_t, T> *>(set->get()) : nullptr;
+		return set ? reinterpret_cast<sparse_map<std::size_t, T> *>(set->get()) : nullptr;
 	}
 
 	template <typename T>

@@ -44,7 +44,7 @@ public:
 	constexpr void allocate(value_type *&begin, size_type &capacity) const
 	{
 		capacity = grow(capacity);
-		begin = static_cast<value_type *>(std::malloc(sizeof(*begin) * capacity));
+		begin = reinterpret_cast<value_type *>(std::malloc(sizeof(*begin) * capacity));
 
 		if (falsy(begin)) {
 			throw std::bad_alloc{};
@@ -56,14 +56,14 @@ public:
 		capacity = grow(capacity);
 
 		if constexpr (std::is_trivially_move_constructible_v<T> && std::is_trivially_destructible_v<T>) {
-			begin = static_cast<value_type *>(std::realloc(begin, sizeof(*begin) * capacity));
+			begin = reinterpret_cast<value_type *>(std::realloc(begin, sizeof(*begin) * capacity));
 
 			if (falsy(begin)) {
 				throw std::bad_alloc{};
 			}
 		}
 		else {
-			const auto tmp{static_cast<value_type *>(std::malloc(sizeof(*begin) * capacity))};
+			const auto tmp{reinterpret_cast<value_type *>(std::malloc(sizeof(*begin) * capacity))};
 			std::uninitialized_move_n(begin, size, tmp);
 			std::destroy_n(begin, size);
 			std::free(begin);
@@ -77,11 +77,7 @@ public:
 	}
 
 	[[nodiscard]]
-	constexpr auto operator==(const arena_allocator<value_type, size_type> &other) const
-		-> bool
-	{
-		return static_cast<std::allocator<value_type>>(*this) == static_cast<std::allocator<value_type>>(other);
-	}
+	constexpr auto operator==(const arena_allocator<value_type, size_type> &) const -> bool = default;
 
 private:
 	[[nodiscard]]
