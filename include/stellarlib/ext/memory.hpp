@@ -42,26 +42,21 @@ public:
 	using difference_type = std::allocator<value_type>::difference_type;
 	using propagate_on_container_move_assignment = std::allocator<value_type>::propagate_on_container_move_assignment;
 
-	constexpr void allocate(value_type *&begin, size_type &capacity)
+	constexpr void allocate(value_type *&begin, size_type &capacity) const
 	{
 		capacity = grow(capacity);
+		begin = static_cast<value_type *>(std::malloc(sizeof(*begin) * capacity));
 
-		if constexpr (is_trivially_relocatable_v<value_type>) {
-			begin = static_cast<value_type *>(std::malloc(sizeof(*begin) * capacity));
-
-			if (falsy(begin)) {
-				throw std::bad_alloc{};
-			}
-		}
-		else {
-			begin = std::allocator<value_type>::allocate(capacity);
+		if (falsy(begin)) {
+			throw std::bad_alloc{};
 		}
 	}
 
-	constexpr void reallocate(size_type size, size_type required, value_type *&begin, size_type &capacity)
+	constexpr void reallocate(size_type size, value_type *&begin, size_type &capacity) const
 	{
-		if constexpr (is_trivially_relocatable_v<value_type>) {
-			capacity = grow(required);
+		capacity = grow(capacity);
+
+		if constexpr (std::is_trivially_move_constructible_v<T> && std::is_trivially_destructible_v<T>) {
 			begin = static_cast<value_type *>(std::realloc(begin, sizeof(*begin) * capacity));
 
 			if (falsy(begin)) {
@@ -69,24 +64,17 @@ public:
 			}
 		}
 		else {
-			required = grow(required);
-			const auto tmp{std::allocator<value_type>::allocate(required)};
+			const auto tmp{static_cast<value_type *>(std::malloc(sizeof(*begin) * capacity))};
 			std::uninitialized_move_n(begin, size, tmp);
 			std::destroy_n(begin, size);
-			std::allocator<value_type>::deallocate(begin, capacity);
-			capacity = required;
+			std::free(begin);
 			begin = tmp;
 		}
 	}
 
-	constexpr void deallocate(value_type *begin, const size_type capacity)
+	constexpr void deallocate(value_type *begin) const
 	{
-		if constexpr (is_trivially_relocatable_v<value_type>) {
-			std::free(begin);
-		}
-		else {
-			std::allocator<value_type>::deallocate(begin, capacity);
-		}
+		std::free(begin);
 	}
 
 	[[nodiscard]]

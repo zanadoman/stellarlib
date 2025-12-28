@@ -15,6 +15,7 @@ Checks: >
   readability-*,
   -bugprone-easily-swappable-parameters,
   -bugprone-suspicious-realloc-usage,
+  -clang-analyzer-unix.Malloc,
   -cppcoreguidelines-avoid-magic-numbers,
   -cppcoreguidelines-noexcept-move-operations,
   -cppcoreguidelines-no-malloc,

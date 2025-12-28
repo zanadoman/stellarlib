@@ -75,7 +75,7 @@ public:
 		_size = other._size;
 
 		if (_capacity < _size) {
-			ext::arena_allocator<T, size_type>::deallocate(_begin, _capacity);
+			ext::arena_allocator<T, size_type>::deallocate(_begin);
 			_capacity = _size;
 			ext::arena_allocator<T, size_type>::allocate(_begin, _capacity);
 		}
@@ -99,7 +99,7 @@ public:
 	constexpr ~stack_vector()
 	{
 		std::ranges::destroy(*this);
-		ext::arena_allocator<T, size_type>::deallocate(_begin, _capacity);
+		ext::arena_allocator<T, size_type>::deallocate(_begin);
 	}
 
 	template <typename ...Args>
@@ -110,7 +110,8 @@ public:
 		}
 
 		if (_capacity < size) {
-			ext::arena_allocator<T, size_type>::reallocate(_size, size, _begin, _capacity);
+			_capacity = size;
+			ext::arena_allocator<T, size_type>::reallocate(_size, _begin, _capacity);
 		}
 
 		_end = _begin + size;
@@ -123,7 +124,8 @@ public:
 	constexpr void push(Args &&...args)
 	{
 		if (_size == _capacity) {
-			ext::arena_allocator<T, size_type>::reallocate(_size, _size + 1, _begin, _capacity);
+			++_capacity;
+			ext::arena_allocator<T, size_type>::reallocate(_size, _begin, _capacity);
 			_end = _begin + _size;
 		}
 
