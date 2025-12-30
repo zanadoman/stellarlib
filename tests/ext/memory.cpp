@@ -48,12 +48,10 @@ TEST(stellarlib_ext_memory, should_acquire_and_release_trivial_arena)
 {
 	const arena_allocator<std::int32_t> allocator{};
 	std::int32_t *arena{};
-	std::size_t size{100};
-	allocator.allocate(arena, size);
+	allocator.allocate(arena, 100);
 	ASSERT_TRUE(arena);
-	ASSERT_EQ(size, 100);
-	std::uninitialized_default_construct_n(arena, size);
-	std::destroy_n(arena, size);
+	std::uninitialized_fill_n(arena, 100, -1);
+	std::destroy_n(arena, 100);
 	allocator.deallocate(arena);
 }
 
@@ -61,12 +59,10 @@ TEST(stellarlib_ext_memory, should_acquire_and_release_non_trivial_arena)
 {
 	const arena_allocator<std::string> allocator{};
 	std::string *arena{};
-	std::size_t size{100};
-	allocator.allocate(arena, size);
+	allocator.allocate(arena, 100);
 	ASSERT_TRUE(arena);
-	ASSERT_EQ(size, 100);
-	std::uninitialized_default_construct_n(arena, size);
-	std::destroy_n(arena, size);
+	std::uninitialized_fill_n(arena, 100, std::to_string(-1));
+	std::destroy_n(arena, 100);
 	allocator.deallocate(arena);
 }
 

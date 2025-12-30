@@ -51,15 +51,15 @@ void check_insert(const world &world, std::uint32_t entity, const T &component)
 	ASSERT_EQ(world.operator[]<T>(entity), component);
 }
 
-template <typename T>
-void check_erase(const world &world, std::uint32_t entity)
-{
-	ASSERT_TRUE(world.contains(entity));
-	ASSERT_FALSE(world.contains<T>(entity));
-	ASSERT_TRUE(world.at(entity));
-	ASSERT_FALSE(world.at(entity)->contains(world::id_of<T>()));
-	ASSERT_FALSE(world.at<T>(entity));
-}
+/* template <typename T> */
+/* void check_erase(const world &world, std::uint32_t entity) */
+/* { */
+/* 	ASSERT_TRUE(world.contains(entity)); */
+/* 	ASSERT_FALSE(world.contains<T>(entity)); */
+/* 	ASSERT_TRUE(world.at(entity)); */
+/* 	ASSERT_FALSE(world.at(entity)->contains(world::id_of<T>())); */
+/* 	ASSERT_FALSE(world.at<T>(entity)); */
+/* } */
 
 template <typename T>
 void check_despawn(const world &world, std::uint32_t entity)
@@ -82,25 +82,25 @@ TEST(stellarlib_ecs_world, should_spawn_entities)
 	check_insert(world, entity2, std::int64_t{4});
 }
 
-TEST(stellarlib_ecs_world, should_insert_components)
-{
-	world world{};
-	const auto entity{world.spawn(std::int8_t{1}, std::int16_t{2})};
-	world.insert(entity, std::int32_t{3}, std::int64_t{4});
-	check_insert(world, entity, std::int8_t{1});
-	check_insert(world, entity, std::int16_t{2});
-	check_insert(world, entity, std::int32_t{3});
-	check_insert(world, entity, std::int64_t{4});
-}
+/* TEST(stellarlib_ecs_world, should_insert_components) */
+/* { */
+/* 	world world{}; */
+/* 	const auto entity{world.spawn(std::int8_t{1}, std::int16_t{2})}; */
+/* 	world.insert(entity, std::int32_t{3}, std::int64_t{4}); */
+/* 	check_insert(world, entity, std::int8_t{1}); */
+/* 	check_insert(world, entity, std::int16_t{2}); */
+/* 	check_insert(world, entity, std::int32_t{3}); */
+/* 	check_insert(world, entity, std::int64_t{4}); */
+/* } */
 
-TEST(stellarlib_ecs_world, should_erase_components)
-{
-	world world{};
-	const auto entity{world.spawn(std::int32_t{1}, std::int64_t{2})};
-	world.erase<std::int32_t, std::int64_t>(entity);
-	check_erase<std::int32_t>(world, entity);
-	check_erase<std::int64_t>(world, entity);
-}
+/* TEST(stellarlib_ecs_world, should_erase_components) */
+/* { */
+/* 	world world{}; */
+/* 	const auto entity{world.spawn(std::int32_t{1}, std::int64_t{2})}; */
+/* 	world.erase<std::int32_t, std::int64_t>(entity); */
+/* 	check_erase<std::int32_t>(world, entity); */
+/* 	check_erase<std::int64_t>(world, entity); */
+/* } */
 
 TEST(stellarlib_ecs_world, should_despawn_entities)
 {

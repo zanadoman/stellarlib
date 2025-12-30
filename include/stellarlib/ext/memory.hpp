@@ -29,6 +29,7 @@
 #include <cstddef>
 #include <cstdlib>
 #include <memory>
+#include <utility>
 
 namespace stellarlib::ext
 {
