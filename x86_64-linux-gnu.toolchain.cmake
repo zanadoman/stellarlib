@@ -1,0 +1,1 @@
+set(CMAKE_CXX_COMPILER_TARGET x86_64-linux-gnu)
