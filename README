@@ -8,6 +8,7 @@ t/functional.cpp
 i/any_set.hpp
 i/type_traits.hpp
 t/type_traits.cpp
+i/memory.cpp
 t/memory.cpp
 
 ---------------------------

@@ -48,10 +48,10 @@ TEST(stellarlib_ext_memory, should_acquire_and_release_trivial_arena)
 {
 	const arena_allocator<std::int32_t> allocator{};
 	std::int32_t *arena{};
-	std::size_t size{10};
+	std::size_t size{100};
 	allocator.allocate(arena, size);
 	ASSERT_TRUE(arena);
-	ASSERT_EQ(size, 12);
+	ASSERT_EQ(size, 100);
 	std::uninitialized_default_construct_n(arena, size);
 	std::destroy_n(arena, size);
 	allocator.deallocate(arena);
@@ -61,10 +61,10 @@ TEST(stellarlib_ext_memory, should_acquire_and_release_non_trivial_arena)
 {
 	const arena_allocator<std::string> allocator{};
 	std::string *arena{};
-	std::size_t size{10};
+	std::size_t size{100};
 	allocator.allocate(arena, size);
 	ASSERT_TRUE(arena);
-	ASSERT_EQ(size, 20);
+	ASSERT_EQ(size, 100);
 	std::uninitialized_default_construct_n(arena, size);
 	std::destroy_n(arena, size);
 	allocator.deallocate(arena);
@@ -74,7 +74,7 @@ TEST(stellarlib_ext_memory, should_resize_trivial_arena)
 {
 	const arena_allocator<std::int32_t> allocator{};
 	std::int32_t *arena{};
-	std::size_t size{10};
+	std::size_t size{100};
 	allocator.allocate(arena, size);
 	for (std::size_t i{}; i != size; ++i) {
 		std::construct_at(arena + i, i);
@@ -82,7 +82,7 @@ TEST(stellarlib_ext_memory, should_resize_trivial_arena)
 	const auto old{size};
 	allocator.reallocate(arena, old, size);
 	ASSERT_TRUE(arena);
-	ASSERT_EQ(size, 15);
+	ASSERT_EQ(size, 125);
 	std::uninitialized_fill(arena + old, arena + size, -1);
 	for (std::size_t i{}; i != old; ++i) {
 		ASSERT_EQ(arena[i], i);
@@ -95,7 +95,7 @@ TEST(stellarlib_ext_memory, should_resize_non_trivial_arena)
 {
 	const arena_allocator<std::string> allocator{};
 	std::string *arena{};
-	std::size_t size{10};
+	std::size_t size{100};
 	allocator.allocate(arena, size);
 	for (std::size_t i{}; i != size; ++i) {
 		std::construct_at(arena + i, std::to_string(i));
@@ -103,7 +103,7 @@ TEST(stellarlib_ext_memory, should_resize_non_trivial_arena)
 	const auto old{size};
 	allocator.reallocate(arena, old, size);
 	ASSERT_TRUE(arena);
-	ASSERT_EQ(size, 40);
+	ASSERT_EQ(size, 200);
 	std::uninitialized_fill(arena + old, arena + size, std::to_string(-1));
 	for (std::size_t i{}; i != old; ++i) {
 		ASSERT_EQ(arena[i], std::to_string(i));

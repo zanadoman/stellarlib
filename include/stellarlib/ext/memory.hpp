@@ -41,20 +41,19 @@ public:
 	using difference_type = std::allocator<value_type>::difference_type;
 	using propagate_on_container_move_assignment = std::allocator<value_type>::propagate_on_container_move_assignment;
 
-	constexpr void allocate(value_type *&begin, size_type &capacity) const
+	constexpr void allocate(value_type *&begin, const size_type capacity) const
 	{
-		capacity = grow(capacity);
 		begin = reinterpret_cast<value_type *>(std::malloc(capacity * sizeof(value_type)));
 	}
 
 	constexpr void reallocate(value_type *&begin, const size_type size, size_type &capacity) const
 	{
-		capacity = grow(capacity);
-
 		if constexpr (is_trivially_relocatable_v<value_type>) {
+			capacity += capacity / 4;
 			begin = reinterpret_cast<value_type *>(std::realloc(begin, capacity * sizeof(value_type)));
 		}
 		else {
+			capacity *= 2;
 			const auto tmp{reinterpret_cast<value_type *>(std::malloc(capacity * sizeof(value_type)))};
 			std::uninitialized_move_n(begin, size, tmp);
 			std::destroy_n(begin, size);
@@ -71,18 +70,6 @@ public:
 	[[nodiscard]]
 	constexpr auto operator==(const arena_allocator<value_type, size_type> &) const
 		-> bool = default;
-
-private:
-	[[nodiscard]]
-	static constexpr auto grow(const size_type capacity)
-	{
-		if constexpr (is_trivially_relocatable_v<value_type>) {
-			return capacity + capacity / 4;
-		}
-		else {
-			return capacity * 2;
-		}
-	}
 };
 }
 
