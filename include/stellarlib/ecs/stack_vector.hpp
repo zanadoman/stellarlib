@@ -34,7 +34,7 @@
 namespace stellarlib::ecs
 {
 template <typename T, typename size_type = std::size_t>
-class stack_vector final : ext::arena_allocator<T, size_type>
+class stack_vector final : ext::vector_allocator<T, size_type>
 {
 public:
 	[[nodiscard]]
@@ -46,7 +46,7 @@ public:
 	{
 		if (_size != 0) {
 			_capacity = _size;
-			ext::arena_allocator<T, size_type>::allocate(_begin, _capacity);
+			ext::vector_allocator<T, size_type>::allocate(_begin, _capacity);
 			std::uninitialized_copy(other._begin, other._end, _begin);
 			_end = _begin + _size;
 		}
@@ -75,9 +75,9 @@ public:
 		_size = other._size;
 
 		if (_capacity < _size) {
-			ext::arena_allocator<T, size_type>::deallocate(_begin);
+			ext::vector_allocator<T, size_type>::deallocate(_begin);
 			_capacity = _size;
-			ext::arena_allocator<T, size_type>::allocate(_begin, _capacity);
+			ext::vector_allocator<T, size_type>::allocate(_begin, _capacity);
 		}
 
 		std::uninitialized_copy(other._begin, other._end, _begin);
@@ -99,7 +99,7 @@ public:
 	constexpr ~stack_vector()
 	{
 		std::ranges::destroy(*this);
-		ext::arena_allocator<T, size_type>::deallocate(_begin);
+		ext::vector_allocator<T, size_type>::deallocate(_begin);
 	}
 
 	template <typename ...Args>
@@ -111,7 +111,7 @@ public:
 
 		if (_capacity < size) {
 			_capacity = size;
-			ext::arena_allocator<T, size_type>::reallocate(_begin, _size, _capacity);
+			ext::vector_allocator<T, size_type>::reallocate(_begin, _size, _capacity);
 		}
 
 		_end = _begin + size;
@@ -125,7 +125,7 @@ public:
 	{
 		if (_size == _capacity) {
 			++_capacity;
-			ext::arena_allocator<T, size_type>::reallocate(_begin, _size, _capacity);
+			ext::vector_allocator<T, size_type>::reallocate(_begin, _size, _capacity);
 			_end = _begin + _size;
 		}
 

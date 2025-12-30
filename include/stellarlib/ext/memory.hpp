@@ -34,7 +34,7 @@
 namespace stellarlib::ext
 {
 template <typename T, typename SizeType = std::size_t>
-class arena_allocator : std::allocator<T>
+class vector_allocator : std::allocator<T>
 {
 public:
 	using value_type = std::allocator<T>::value_type;
@@ -74,7 +74,7 @@ public:
 	}
 
 	[[nodiscard]]
-	constexpr auto operator==(const arena_allocator<value_type, size_type> &) const
+	constexpr auto operator==(const vector_allocator<value_type, size_type> &) const
 		-> bool = default;
 };
 }

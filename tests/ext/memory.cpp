@@ -39,38 +39,38 @@ using namespace stellarlib::ext;
 
 /* NOLINTBEGIN(cert-err58-cpp,cppcoreguidelines-non-private-member-variables-in-classes,misc-non-private-member-variables-in-classes,performance-unnecessary-copy-initialization) */
 
-static_assert(std::is_same_v<arena_allocator<std::int32_t>::value_type, std::allocator<std::int32_t>::value_type>);
-static_assert(std::is_same_v<arena_allocator<std::int32_t>::size_type, std::allocator<std::int32_t>::size_type>);
-static_assert(std::is_same_v<arena_allocator<std::int32_t>::difference_type, std::allocator<std::int32_t>::difference_type>);
-static_assert(std::is_same_v<arena_allocator<std::int32_t>::propagate_on_container_move_assignment, std::allocator<std::int32_t>::propagate_on_container_move_assignment>);
+static_assert(std::is_same_v<vector_allocator<std::int32_t>::value_type, std::allocator<std::int32_t>::value_type>);
+static_assert(std::is_same_v<vector_allocator<std::int32_t>::size_type, std::allocator<std::int32_t>::size_type>);
+static_assert(std::is_same_v<vector_allocator<std::int32_t>::difference_type, std::allocator<std::int32_t>::difference_type>);
+static_assert(std::is_same_v<vector_allocator<std::int32_t>::propagate_on_container_move_assignment, std::allocator<std::int32_t>::propagate_on_container_move_assignment>);
 
-TEST(stellarlib_ext_memory, should_acquire_and_release_trivial_arena)
+TEST(stellarlib_ext_memory, vector_allocator_should_acquire_and_release_trivial_arena)
 {
-	const arena_allocator<std::int32_t> allocator{};
+	const vector_allocator<std::int32_t> allocator{};
 	std::int32_t *arena{};
-	const auto capacity{100};
-	allocator.allocate(arena, capacity);
+	const auto size{100};
+	allocator.allocate(arena, size);
 	ASSERT_TRUE(arena);
-	std::uninitialized_fill_n(arena, capacity, -1);
-	std::destroy_n(arena, capacity);
+	std::uninitialized_fill_n(arena, size, -1);
+	std::destroy_n(arena, size);
 	allocator.deallocate(arena);
 }
 
-TEST(stellarlib_ext_memory, should_acquire_and_release_non_trivial_arena)
+TEST(stellarlib_ext_memory, vector_allocator_should_acquire_and_release_non_trivial_arena)
 {
-	const arena_allocator<std::string> allocator{};
+	const vector_allocator<std::string> allocator{};
 	std::string *arena{};
-	const auto capacity{100};
-	allocator.allocate(arena, capacity);
+	const auto size{100};
+	allocator.allocate(arena, size);
 	ASSERT_TRUE(arena);
-	std::uninitialized_fill_n(arena, capacity, std::to_string(-1));
-	std::destroy_n(arena, capacity);
+	std::uninitialized_fill_n(arena, size, std::to_string(-1));
+	std::destroy_n(arena, size);
 	allocator.deallocate(arena);
 }
 
-TEST(stellarlib_ext_memory, should_resize_trivial_arena)
+TEST(stellarlib_ext_memory, vector_allocator_should_resize_trivial_arena)
 {
-	const arena_allocator<std::int32_t> allocator{};
+	const vector_allocator<std::int32_t> allocator{};
 	std::int32_t *arena{};
 	std::size_t capacity{100};
 	allocator.allocate(arena, capacity);
@@ -94,9 +94,9 @@ TEST(stellarlib_ext_memory, should_resize_trivial_arena)
 	allocator.deallocate(arena);
 }
 
-TEST(stellarlib_ext_memory, should_resize_non_trivial_arena)
+TEST(stellarlib_ext_memory, vector_allocator_should_resize_non_trivial_arena)
 {
-	const arena_allocator<std::string> allocator{};
+	const vector_allocator<std::string> allocator{};
 	std::string *arena{};
 	std::size_t capacity{100};
 	allocator.allocate(arena, capacity);
@@ -120,8 +120,8 @@ TEST(stellarlib_ext_memory, should_resize_non_trivial_arena)
 	allocator.deallocate(arena);
 }
 
-static_assert(arena_allocator<std::int32_t>{} == arena_allocator<std::int32_t>{});
-static_assert(!(arena_allocator<std::int32_t>{} != arena_allocator<std::int32_t>{}));
+static_assert(vector_allocator<std::int32_t>{} == vector_allocator<std::int32_t>{});
+static_assert(!(vector_allocator<std::int32_t>{} != vector_allocator<std::int32_t>{}));
 
 /* NOLINTEND(cert-err58-cpp,cppcoreguidelines-non-private-member-variables-in-classes,misc-non-private-member-variables-in-classes,performance-unnecessary-copy-initialization) */
 
