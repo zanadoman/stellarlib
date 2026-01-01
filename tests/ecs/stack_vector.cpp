@@ -202,7 +202,7 @@ TEST(stellarlib_ecs_stack_vector, should_push_and_pop_values)
 		ASSERT_EQ(vector.size(), i + 1);
 		ASSERT_EQ(vector[i], VALUES[i]);
 		ASSERT_EQ(vector.end() - vector.begin(), i + 1);
-		ASSERT_EQ(*std::ranges::find(vector, VALUES[i]), VALUES[i]);
+		ASSERT_NE(std::ranges::find(vector, VALUES[i]), vector.end());
 		const auto begin{vector.begin()};
 		vector.pop();
 		ASSERT_EQ(vector.size(), i);
@@ -214,7 +214,7 @@ TEST(stellarlib_ecs_stack_vector, should_push_and_pop_values)
 		ASSERT_EQ(vector[i], VALUES[i]);
 		ASSERT_EQ(vector.begin(), begin);
 		ASSERT_EQ(vector.end() - vector.begin(), i + 1);
-		ASSERT_EQ(*std::ranges::find(vector, VALUES[i]), VALUES[i]);
+		ASSERT_NE(std::ranges::find(vector, VALUES[i]), vector.end());
 	}
 	check_values(vector);
 }

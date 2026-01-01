@@ -3,8 +3,7 @@
 -fuse-ld=lld
 -O3
 -Qunused-arguments
--static-libstdc++
--std=c++23
+-stdlib=libc++
 -Werror
 -Weverything
 -Wno-c++98-compat-pedantic

@@ -99,7 +99,8 @@ public:
 	[[nodiscard]]
 	auto keys() const
 	{
-		return std::views::as_const(_keys);
+		/* return std::views::as_const(_keys); */
+		return std::views::all(_keys);
 	}
 
 	[[nodiscard]]
