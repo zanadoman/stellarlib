@@ -32,7 +32,7 @@ endif()
 find_package(GTest)
 if(TARGET GTest::gtest_main)
 	file(GLOB_RECURSE TESTS ${CMAKE_SOURCE_DIR}/tests/*.cpp)
-	add_executable(tests ${TESTS})
+	add_executable(tests EXCLUDE_FROM_ALL ${TESTS})
 	target_link_libraries(tests GTest::gtest_main ${PROJECT_NAME})
 	add_custom_command(
 		TARGET tests POST_BUILD
@@ -44,7 +44,7 @@ endif()
 file(GLOB_RECURSE EXAMPLES ${CMAKE_SOURCE_DIR}/examples/*.cpp)
 foreach(SOURCE ${EXAMPLES})
 	get_filename_component(EXAMPLE ${SOURCE} NAME_WLE)
-	add_executable(${EXAMPLE} WIN32 ${SOURCE})
+	add_executable(${EXAMPLE} WIN32 EXCLUDE_FROM_ALL ${SOURCE})
 	target_link_libraries(${EXAMPLE} ${PROJECT_NAME})
 	add_custom_command(
 		TARGET ${EXAMPLE} POST_BUILD
@@ -52,3 +52,7 @@ foreach(SOURCE ${EXAMPLES})
 		COMMAND_EXPAND_LISTS
 	)
 endforeach()
+
+include(GNUInstallDirs)
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(TARGETS ${PROJECT_NAME})
