@@ -11,7 +11,7 @@ if(CLANG_TIDY)
 	set(CMAKE_CXX_CLANG_TIDY ${CLANG_TIDY};-p;${CMAKE_BINARY_DIR})
 endif()
 
-project(stellarlib LANGUAGES CXX)
+project(stellarlib VERSION 0.1.0 LANGUAGES CXX)
 include_directories(${CMAKE_SOURCE_DIR}/include)
 file(GLOB_RECURSE SOURCES ${CMAKE_SOURCE_DIR}/src/*.cpp)
 add_library(${PROJECT_NAME} STATIC ${SOURCES})
@@ -73,7 +73,7 @@ foreach(SOURCE ${EXAMPLES})
 		add_custom_command(
 			TARGET ${EXAMPLE} POST_BUILD
 			COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${EXAMPLE}> ${ANDROID_JNI_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}main${CMAKE_SHARED_LIBRARY_SUFFIX}
-			COMMAND ./gradlew assembleDebug
+			COMMAND ${CMAKE_COMMAND} -E env ANDROID_APPLICATION_ID=org.stellarlib.${EXAMPLE} ANDROID_VERSION_NAME=${PROJECT_VERSION} ANDROID_APP_NAME=sl.${EXAMPLE} ./gradlew assembleDebug
 			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/android/app/build/outputs/apk/debug/app-debug.apk ${CMAKE_BINARY_DIR}/${EXAMPLE}.apk
 			WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/android
 			COMMAND_EXPAND_LISTS
