@@ -45,7 +45,7 @@ auto main([[maybe_unused]] const std::int32_t argc, [[maybe_unused]] char **argv
 	SDL_Window *window{};
 	SDL_Renderer *renderer{};
 
-    if (!SDL_CreateWindowAndRenderer("Android", 1920, 1080, SDL_WINDOW_RESIZABLE, &window, &renderer)) {
+    if (!SDL_CreateWindowAndRenderer("Android", 1920, 1080, SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE, &window, &renderer)) {
 		/* NOLINTNEXTLINE */
         SDL_LogError(SDL_LOG_CATEGORY_ERROR, "%s\n", SDL_GetError());
 		std::abort();
