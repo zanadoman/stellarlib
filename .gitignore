@@ -2,6 +2,8 @@
 /android/app/src/main/jniLibs/*/libmain.so
 /android/app/src/main/jniLibs/*/libSDL3.so
 /android/.gradle/
+/android/.idea/
+/android/local.properties
 /android/**/.project
 /android/**/.settings/
 build/
