@@ -3,6 +3,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_CXX_EXTENSIONS OFF)
+include_directories(${CMAKE_SOURCE_DIR}/include)
 file(READ ${CMAKE_SOURCE_DIR}/compile_flags.txt CMAKE_CXX_FLAGS)
 string(REPLACE \n \  CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
 find_program(CLANG_TIDY clang-tidy)
@@ -11,12 +12,11 @@ if(CLANG_TIDY)
 endif()
 
 project(stellarlib VERSION 0.1.0 LANGUAGES CXX)
-include_directories(${CMAKE_SOURCE_DIR}/include)
 file(GLOB_RECURSE SOURCES ${CMAKE_SOURCE_DIR}/src/*.cpp)
 add_library(${PROJECT_NAME} STATIC ${SOURCES})
 find_package(SDL3 REQUIRED)
 target_link_libraries(${PROJECT_NAME} SDL3::SDL3)
-if(${WIN32})
+if(WIN32)
 	file(
 		GLOB_RECURSE WIN32_RUNTIME_DLLS
 		${CMAKE_FIND_ROOT_PATH}/${CMAKE_SHARED_LIBRARY_PREFIX}gcc*${CMAKE_SHARED_LIBRARY_SUFFIX}
@@ -29,7 +29,7 @@ if(${WIN32})
 		COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:${PROJECT_NAME}> ${WIN32_RUNTIME_DLLS}
 		COMMAND_EXPAND_LISTS
 	)
-elseif(${ANDROID})
+elseif(ANDROID)
 	set(ANDROID_JNI_DIR ${CMAKE_SOURCE_DIR}/android/app/src/main/jniLibs)
 	file(REMOVE_RECURSE ${ANDROID_JNI_DIR})
 	set(ANDROID_JNI_DIR ${ANDROID_JNI_DIR}/${ANDROID_ABI})
@@ -41,7 +41,7 @@ if(TARGET GTest::gtest_main)
 	file(GLOB_RECURSE TESTS ${CMAKE_SOURCE_DIR}/tests/*.cpp)
 	add_executable(tests EXCLUDE_FROM_ALL ${TESTS})
 	target_link_libraries(tests GTest::gtest_main ${PROJECT_NAME})
-	if(${WIN32})
+	if(WIN32)
 		add_custom_command(
 			TARGET tests POST_BUILD
 			COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:tests> $<TARGET_RUNTIME_DLLS:tests>
@@ -53,19 +53,19 @@ endif()
 file(GLOB_RECURSE EXAMPLES ${CMAKE_SOURCE_DIR}/examples/*.cpp)
 foreach(SOURCE ${EXAMPLES})
 	get_filename_component(EXAMPLE ${SOURCE} NAME_WLE)
-	if(${ANDROID})
+	if(ANDROID)
 		add_library(${EXAMPLE} SHARED EXCLUDE_FROM_ALL ${SOURCE})
 	else()
 		add_executable(${EXAMPLE} WIN32 EXCLUDE_FROM_ALL ${SOURCE})
 	endif()
 	target_link_libraries(${EXAMPLE} ${PROJECT_NAME})
-	if(${WIN32})
+	if(WIN32)
 		add_custom_command(
 			TARGET ${EXAMPLE} POST_BUILD
 			COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:${EXAMPLE}> $<TARGET_RUNTIME_DLLS:${EXAMPLE}>
 			COMMAND_EXPAND_LISTS
 		)
-	elseif(${ANDROID})
+	elseif(ANDROID)
 		add_custom_command(
 			TARGET ${EXAMPLE} POST_BUILD
 			COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:SDL3::SDL3> ${ANDROID_JNI_DIR}
@@ -89,5 +89,13 @@ endforeach()
 
 include(GNUInstallDirs)
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-install(TARGETS ${PROJECT_NAME})
+install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Targets)
+install(EXPORT ${PROJECT_NAME}Targets DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME} NAMESPACE ${PROJECT_NAME}::)
+include(CMakePackageConfigHelpers)
+configure_package_config_file(
+	${CMAKE_SOURCE_DIR}/cmake/${PROJECT_NAME}Config.cmake.in
+	${CMAKE_BINARY_DIR}/${PROJECT_NAME}Config.cmake
+	INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+)
+install(FILES ${CMAKE_BINARY_DIR}/${PROJECT_NAME}Config.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
 install(FILES ${CMAKE_SOURCE_DIR}/LICENSE DESTINATION ${CMAKE_INSTALL_DATADIR}/licenses/${PROJECT_NAME})
