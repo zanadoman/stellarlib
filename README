@@ -38,6 +38,7 @@ generic names
 pipes
 ctors
 count * size
+sizeof
 
 ---------------------------
 

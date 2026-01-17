@@ -24,7 +24,6 @@
 #ifndef STELLARLIB_ECS_STACK_VECTOR_HPP
 #define STELLARLIB_ECS_STACK_VECTOR_HPP
 
-#include <stellarlib/ext/functional.hpp>
 #include <stellarlib/ext/memory.hpp>
 
 #include <cstddef>
@@ -33,27 +32,27 @@
 
 namespace stellarlib::ecs::internal
 {
-template <typename T, typename size_type = std::size_t>
-class stack_vector final : ext::vector_allocator<T, size_type>
+template <typename T, typename SizeType = std::size_t>
+class stack_vector final : ext::vector_allocator<T, SizeType>
 {
 public:
 	[[nodiscard]]
 	explicit constexpr stack_vector() = default;
 
 	[[nodiscard]]
-	constexpr stack_vector(const stack_vector<T, size_type> &other)
+	constexpr stack_vector(const stack_vector<T, SizeType> &other)
 		: _size{other._size}
 	{
 		if (_size != 0) {
 			_capacity = _size;
-			ext::vector_allocator<T, size_type>::allocate(_begin, _capacity);
+			ext::vector_allocator<T, SizeType>::allocate(_begin, _capacity);
 			std::uninitialized_copy(other._begin, other._end, _begin);
 			_end = _begin + _size;
 		}
 	}
 
 	[[nodiscard]]
-	constexpr stack_vector(stack_vector<T, size_type> &&other)
+	constexpr stack_vector(stack_vector<T, SizeType> &&other)
 		: _capacity{other._capacity}
 		, _size{other._size}
 		, _begin{other._begin}
@@ -64,8 +63,8 @@ public:
 		other._capacity = 0;
 	}
 
-	constexpr auto operator=(const stack_vector<T, size_type> &other)
-		-> stack_vector<T, size_type> &
+	constexpr auto operator=(const stack_vector<T, SizeType> &other)
+		-> stack_vector<T, SizeType> &
 	{
 		if (std::addressof(other) == this) {
 			return *this;
@@ -75,9 +74,9 @@ public:
 		_size = other._size;
 
 		if (_capacity < _size) {
-			ext::vector_allocator<T, size_type>::deallocate(_begin);
+			ext::vector_allocator<T, SizeType>::deallocate(_begin);
 			_capacity = _size;
-			ext::vector_allocator<T, size_type>::allocate(_begin, _capacity);
+			ext::vector_allocator<T, SizeType>::allocate(_begin, _capacity);
 		}
 
 		std::uninitialized_copy(other._begin, other._end, _begin);
@@ -85,8 +84,8 @@ public:
 		return *this;
 	}
 
-	constexpr auto operator=(stack_vector<T, size_type> &&other)
-		-> stack_vector<T, size_type> &
+	constexpr auto operator=(stack_vector<T, SizeType> &&other)
+		-> stack_vector<T, SizeType> &
 	{
 		if (std::addressof(other) != this) {
 			std::destroy_at(this);
@@ -99,11 +98,11 @@ public:
 	constexpr ~stack_vector()
 	{
 		std::ranges::destroy(*this);
-		ext::vector_allocator<T, size_type>::deallocate(_begin);
+		ext::vector_allocator<T, SizeType>::deallocate(_begin);
 	}
 
 	template <typename ...Args>
-	constexpr auto extend(const size_type size, Args &&...args)
+	constexpr auto extend(const SizeType size, Args &&...args)
 	{
 		if (size <= _size) {
 			return false;
@@ -111,7 +110,7 @@ public:
 
 		if (_capacity < size) {
 			_capacity = size;
-			ext::vector_allocator<T, size_type>::reallocate(_begin, _size, _capacity);
+			ext::vector_allocator<T, SizeType>::reallocate(_begin, _size, _capacity);
 		}
 
 		_end = _begin + size;
@@ -125,7 +124,7 @@ public:
 	{
 		if (_size == _capacity) {
 			++_capacity;
-			ext::vector_allocator<T, size_type>::reallocate(_begin, _size, _capacity);
+			ext::vector_allocator<T, SizeType>::reallocate(_begin, _size, _capacity);
 			_end = _begin + _size;
 		}
 
@@ -141,7 +140,7 @@ public:
 	}
 
 	[[nodiscard]]
-	constexpr auto operator[](const size_type i) const
+	constexpr auto operator[](const SizeType i) const
 		-> T &
 	{
 		return _begin[i];
@@ -174,8 +173,8 @@ public:
 	}
 
 private:
-	size_type _capacity{};
-	size_type _size{};
+	SizeType _capacity{};
+	SizeType _size{};
 	T *_begin{};
 	T *_end{};
 };
