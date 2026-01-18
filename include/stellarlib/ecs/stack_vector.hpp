@@ -53,14 +53,13 @@ public:
 
 	[[nodiscard]]
 	constexpr stack_vector(stack_vector<T, SizeType> &&other)
-		: _capacity{other._capacity}
-		, _size{other._size}
+		: _size{other._size}
+		, _capacity{other._capacity}
 		, _begin{other._begin}
 		, _end{other._end}
 	{
 		other._end = nullptr;
 		other._begin = nullptr;
-		other._capacity = 0;
 	}
 
 	constexpr auto operator=(const stack_vector<T, SizeType> &other)
@@ -74,9 +73,8 @@ public:
 		_size = other._size;
 
 		if (_capacity < _size) {
-			ext::vector_allocator<T, SizeType>::deallocate(_begin);
 			_capacity = _size;
-			ext::vector_allocator<T, SizeType>::allocate(_begin, _capacity);
+			ext::vector_allocator<T, SizeType>::reallocate(_begin, _capacity);
 		}
 
 		std::uninitialized_copy(other._begin, other._end, _begin);
@@ -173,8 +171,8 @@ public:
 	}
 
 private:
-	SizeType _capacity{};
 	SizeType _size{};
+	SizeType _capacity{};
 	T *_begin{};
 	T *_end{};
 };
