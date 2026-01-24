@@ -85,7 +85,7 @@ TEST(stellarlib_ecs_stack_vector, should_copy_via_ctor)
 	for (const auto &value : VALUES) {
 		vector1.push(value);
 	}
-	auto vector2{vector1};
+	const auto vector2{vector1};
 	ASSERT_NE(vector2.begin(), vector1.begin());
 	check_values(vector2);
 }
@@ -97,7 +97,7 @@ TEST(stellarlib_ecs_stack_vector, should_move_via_ctor)
 		vector1.push(value);
 	}
 	const auto begin{vector1.begin()};
-	auto vector2{std::move(vector1)};
+	const auto vector2{std::move(vector1)};
 	ASSERT_EQ(vector2.begin(), begin);
 	check_values(vector2);
 }
@@ -169,7 +169,7 @@ TEST(stellarlib_ecs_stack_vector, should_move_via_assignment)
 	check_values(vector2);
 }
 
-TEST(stellarlib_ecs_stack_vector, should_optimize_extend)
+TEST(stellarlib_ecs_stack_vector, should_skip_extend)
 {
 	ecs::internal::stack_vector<std::shared_ptr<std::int32_t>> vector{};
 	for (const auto &value : VALUES) {
@@ -181,15 +181,28 @@ TEST(stellarlib_ecs_stack_vector, should_optimize_extend)
 	check_values(vector);
 }
 
+TEST(stellarlib_ecs_stack_vector, should_optimize_extend)
+{
+	ecs::internal::stack_vector<std::shared_ptr<std::int32_t>> vector{};
+	for (const auto &value : VALUES) {
+		vector.push(value);
+	}
+	const auto begin{vector.begin()};
+	vector.pop();
+	ASSERT_TRUE(vector.extend(VALUES.size(), VALUES.back()));
+	ASSERT_EQ(vector.begin(), begin);
+	check_values(vector);
+}
+
 TEST(stellarlib_ecs_stack_vector, should_extend)
 {
 	ecs::internal::stack_vector<std::shared_ptr<std::int32_t>> vector{};
 	vector.push(VALUES.front());
-	ASSERT_TRUE(vector.extend(VALUES.size()));
+	ASSERT_TRUE(vector.extend(VALUES.size(), VALUES.back()));
 	ASSERT_EQ(vector.size(), VALUES.size());
 	ASSERT_EQ(vector[0], VALUES.front());
 	for (const auto i : std::views::iota(std::size_t{1}, vector.size())) {
-		ASSERT_EQ(vector[i], std::shared_ptr<std::int32_t>{});
+		ASSERT_EQ(vector[i], VALUES.back());
 	}
 	ASSERT_EQ(vector.end() - vector.begin(), vector.size());
 }
@@ -199,11 +212,11 @@ TEST(stellarlib_ecs_stack_vector, should_push_and_pop_values)
 	ecs::internal::stack_vector<std::shared_ptr<std::int32_t>> vector{};
 	for (const auto i : std::views::iota(std::size_t{}, VALUES.size())) {
 		vector.push(VALUES[i]);
+		const auto begin{vector.begin()};
 		ASSERT_EQ(vector.size(), i + 1);
 		ASSERT_EQ(vector[i], VALUES[i]);
 		ASSERT_EQ(vector.end() - vector.begin(), i + 1);
 		ASSERT_NE(std::ranges::find(vector, VALUES[i]), vector.end());
-		const auto begin{vector.begin()};
 		vector.pop();
 		ASSERT_EQ(vector.size(), i);
 		ASSERT_EQ(vector.begin(), begin);

@@ -40,6 +40,7 @@ pipes
 ctors
 count * size
 sizeof
+views/ranges ctor
 
 ---------------------------
 
