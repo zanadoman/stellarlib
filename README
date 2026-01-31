@@ -12,6 +12,8 @@ i/memory.hpp
 t/memory.cpp
 i/stack_vector.hpp
 t/stack_vector.hpp
+i/sparse_set.hpp
+t/sparse_set.cpp
 
 ---------------------------
 
@@ -35,6 +37,8 @@ const auto
 const correction
 {}
 <>
+
+cast
 
 generic names
 pipes

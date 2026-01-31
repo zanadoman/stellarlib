@@ -40,7 +40,7 @@ public:
 	explicit constexpr stack_vector() = default;
 
 	[[nodiscard]]
-	constexpr stack_vector(const stack_vector<T, SizeType> &other)
+	constexpr stack_vector(const stack_vector &other)
 		: _size{other._size}
 	{
 		if (_size != 0) {
@@ -52,7 +52,7 @@ public:
 	}
 
 	[[nodiscard]]
-	constexpr stack_vector(stack_vector<T, SizeType> &&other)
+	constexpr stack_vector(stack_vector &&other)
 		: _size{other._size}
 		, _capacity{other._capacity}
 		, _begin{other._begin}
@@ -62,8 +62,8 @@ public:
 		other._begin = nullptr;
 	}
 
-	constexpr auto operator=(const stack_vector<T, SizeType> &other)
-		-> stack_vector<T, SizeType> &
+	constexpr auto operator=(const stack_vector &other)
+		-> stack_vector &
 	{
 		if (std::addressof(other) == this) {
 			return *this;
@@ -82,8 +82,8 @@ public:
 		return *this;
 	}
 
-	constexpr auto operator=(stack_vector<T, SizeType> &&other)
-		-> stack_vector<T, SizeType> &
+	constexpr auto operator=(stack_vector &&other)
+		-> stack_vector &
 	{
 		if (std::addressof(other) != this) {
 			std::destroy_at(this);

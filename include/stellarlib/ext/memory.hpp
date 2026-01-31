@@ -97,7 +97,7 @@ public:
 	}
 
 	[[nodiscard]]
-	constexpr auto operator==(const vector_allocator<value_type, size_type> &) const
+	constexpr auto operator==(const vector_allocator &) const
 		-> bool = default;
 };
 }

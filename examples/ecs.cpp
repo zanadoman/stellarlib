@@ -50,7 +50,7 @@ struct shield
 	float value;
 };
 
-auto main([[maybe_unused]] const std::int32_t argc, [[maybe_unused]] const char *const*argv)
+auto main([[maybe_unused]] const std::int32_t argc, [[maybe_unused]] const char **argv)
 	-> std::int32_t
 {
 	stellarlib::ecs::world world{};

@@ -38,16 +38,16 @@ public:
 	explicit constexpr sparse_set() = default;
 
 	[[nodiscard]]
-	constexpr sparse_set(const sparse_set<T> &) = default;
+	constexpr sparse_set(const sparse_set &) = default;
 
 	[[nodiscard]]
-	constexpr sparse_set(sparse_set<T> &&) = default;
+	constexpr sparse_set(sparse_set &&) = default;
 
-	constexpr auto operator=(const sparse_set<T> &)
-		-> sparse_set<T> & = default;
+	constexpr auto operator=(const sparse_set &)
+		-> sparse_set & = default;
 
-	constexpr auto operator=(sparse_set<T> &&)
-		-> sparse_set<T> & = default;
+	constexpr auto operator=(sparse_set &&)
+		-> sparse_set & = default;
 
 	constexpr ~sparse_set() = default;
 
@@ -86,8 +86,8 @@ public:
 	}
 
 private:
-	stack_vector<T, T> _values;
 	stack_vector<T, T> _sparse;
+	stack_vector<T, T> _values;
 };
 }
 
