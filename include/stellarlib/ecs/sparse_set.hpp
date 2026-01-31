@@ -51,43 +51,43 @@ public:
 
 	constexpr ~sparse_set() = default;
 
-	constexpr void insert(const T value)
+	constexpr void insert(const T key)
 	{
-		_sparse.extend(value + 1, static_cast<T>(-1));
-		_sparse[value] = _values.size();
-		_values.push(value);
+		_sparse.extend(key + 1, static_cast<T>(-1));
+		_sparse[key] = _keys.size();
+		_keys.push(key);
 	}
 
 	[[nodiscard]]
 	constexpr auto begin() const
 		-> const T *
 	{
-		return _values.begin();
+		return _keys.begin();
 	}
 
 	[[nodiscard]]
 	constexpr auto end() const
 		-> const T *
 	{
-		return _values.end();
+		return _keys.end();
 	}
 
-	constexpr void erase(const T value)
+	constexpr void erase(const T key)
 	{
-		const auto index{_sparse[value]};
-		_sparse[value] = static_cast<T>(-1);
+		const auto index{_sparse[key]};
+		_sparse[key] = static_cast<T>(-1);
 
-		if (index != _values.size() - 1) {
-			std::swap(_values[index], *(_values.end() - 1));
-			_sparse[_values[index]] = index;
+		if (index != _keys.size() - 1) {
+			std::swap(_keys[index], *(_keys.end() - 1));
+			_sparse[_keys[index]] = index;
 		}
 
-		_values.pop();
+		_keys.pop();
 	}
 
 private:
 	stack_vector<T, T> _sparse;
-	stack_vector<T, T> _values;
+	stack_vector<T, T> _keys;
 };
 }
 

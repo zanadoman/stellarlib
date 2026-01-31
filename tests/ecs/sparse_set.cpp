@@ -39,24 +39,24 @@ using namespace stellarlib::ecs;
 
 /* NOLINTBEGIN(cert-err58-cpp,cppcoreguidelines-non-private-member-variables-in-classes,misc-non-private-member-variables-in-classes,performance-unnecessary-copy-initialization) */
 
-constexpr std::array<std::uint32_t, 5> VALUES{0, 5, 10, 15, 20};
+constexpr std::array<std::uint32_t, 5> KEYS{0, 5, 10, 15, 20};
 
-TEST(stellarlib_ecs_sparse_set, should_insert_and_erase_values)
+TEST(stellarlib_ecs_sparse_set, should_insert_and_erase_keys)
 {
 	internal::sparse_set<std::uint32_t> set{};
-	for (const auto i : std::views::iota(std::size_t{}, VALUES.size())) {
-		set.insert(VALUES[i]);
-		ASSERT_NE(std::ranges::find(set, VALUES[i]), set.end());
-		set.erase(VALUES[i / 2]);
-		ASSERT_EQ(std::ranges::find(set, VALUES[i / 2]), set.end());
-		set.insert(VALUES[i / 2]);
-		ASSERT_NE(std::ranges::find(set, VALUES[i / 2]), set.end());
-		set.erase(VALUES[i]);
-		ASSERT_EQ(std::ranges::find(set, VALUES[i]), set.end());
-		set.insert(VALUES[i]);
-		ASSERT_NE(std::ranges::find(set, VALUES[i]), set.end());
+	for (const auto i : std::views::iota(std::size_t{}, KEYS.size())) {
+		set.insert(KEYS[i]);
+		ASSERT_NE(std::ranges::find(set, KEYS[i]), set.end());
+		set.erase(KEYS[i / 2]);
+		ASSERT_EQ(std::ranges::find(set, KEYS[i / 2]), set.end());
+		set.insert(KEYS[i / 2]);
+		ASSERT_NE(std::ranges::find(set, KEYS[i / 2]), set.end());
+		set.erase(KEYS[i]);
+		ASSERT_EQ(std::ranges::find(set, KEYS[i]), set.end());
+		set.insert(KEYS[i]);
+		ASSERT_NE(std::ranges::find(set, KEYS[i]), set.end());
 	}
-	ASSERT_TRUE(std::ranges::equal(set, VALUES));
+	ASSERT_TRUE(std::ranges::equal(set, KEYS));
 }
 
 /* NOLINTEND(cert-err58-cpp,cppcoreguidelines-non-private-member-variables-in-classes,misc-non-private-member-variables-in-classes,performance-unnecessary-copy-initialization) */
