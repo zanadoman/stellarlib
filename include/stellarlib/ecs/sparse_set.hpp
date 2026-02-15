@@ -26,8 +26,6 @@
 
 #include <stellarlib/ecs/stack_vector.hpp>
 
-#include <utility>
-
 namespace stellarlib::ecs::internal
 {
 template <typename T>
@@ -53,7 +51,7 @@ public:
 
 	constexpr void insert(const T key)
 	{
-		_sparse.extend(key + 1, static_cast<T>(-1));
+		_sparse.extend(key + 1);
 		_sparse[key] = _keys.size();
 		_keys.push(key);
 	}
@@ -75,10 +73,9 @@ public:
 	constexpr void erase(const T key)
 	{
 		const auto index{_sparse[key]};
-		_sparse[key] = static_cast<T>(-1);
 
 		if (index != _keys.size() - 1) {
-			std::swap(_keys[index], *(_keys.end() - 1));
+			_keys[index] = *(_keys.end() - 1);
 			_sparse[_keys[index]] = index;
 		}
 

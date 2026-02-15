@@ -28,6 +28,7 @@
 
 #include <cstddef>
 #include <memory>
+#include <type_traits>
 #include <utility>
 
 namespace stellarlib::ecs::internal
@@ -43,7 +44,7 @@ public:
 	constexpr stack_vector(const stack_vector &other)
 		: _size{other._size}
 	{
-		if (_size != 0) {
+		if (_size) {
 			_capacity = _size;
 			ext::vector_allocator<T, SizeType>::allocate(_begin, _capacity);
 			std::uninitialized_copy(other._begin, other._end, _begin);
@@ -112,7 +113,11 @@ public:
 		}
 
 		_end = _begin + size;
-		 std::uninitialized_fill(_begin + _size, _end, T{std::forward<Args>(args)...});
+
+		if constexpr (!std::is_scalar_v<T> || sizeof...(Args)) {
+			std::uninitialized_fill(_begin + _size, _end, T{std::forward<Args>(args)...});
+		}
+
 		_size = size;
 		return true;
 	}
