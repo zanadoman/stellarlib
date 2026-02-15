@@ -24,14 +24,15 @@
 #ifndef STELLARLIB_ECS_BITSET_HPP
 #define STELLARLIB_ECS_BITSET_HPP
 
-#include <cstdint>
-#include <cstdlib>
+#include <stellarlib/ext/memory.hpp>
+
+#include <cstddef>
 #include <memory>
 #include <ranges>
 
 namespace stellarlib::ecs
 {
-class bitset final
+class bitset final : ext::vector_allocator<std::size_t>
 {
 public:
 	[[nodiscard]]
@@ -51,10 +52,10 @@ public:
 
 	~bitset() = default;
 
-	void insert(std::uintmax_t elem);
+	void insert(std::size_t elem);
 
 	[[nodiscard]]
-	auto contains(std::uintmax_t elem) const
+	auto contains(std::size_t elem) const
 		-> bool;
 
 	[[nodiscard]]
@@ -69,28 +70,27 @@ public:
 	auto operator>=(const bitset &other) const
 		-> bool;
 
-	void erase(std::uintmax_t elem);
+	void erase(std::size_t elem);
 
 	void clear();
 
 private:
-	std::uintmax_t _size{};
-	std::unique_ptr<std::uintmax_t, void (*)(void *)> _begin{nullptr, std::free};
-	std::uintmax_t *_end{};
+	std::size_t _size{};
+	std::size_t _capacity{};
+	std::unique_ptr<std::size_t, void (*)(std::size_t *)> _begin{nullptr, ext::vector_allocator<std::size_t>::deallocate};
+	std::size_t *_end{};
 
 	[[nodiscard]]
-	static auto index_of(std::uintmax_t elem)
-		-> std::uintmax_t;
+	static auto index_of(std::size_t elem)
+		-> std::size_t;
 
 	[[nodiscard]]
-	static auto mask_of(std::uintmax_t elem)
-		-> std::uintmax_t;
+	static auto mask_of(std::size_t elem)
+		-> std::size_t;
 
 	[[nodiscard]]
 	auto segments() const
-		-> std::ranges::subrange<std::uintmax_t *, std::uintmax_t *>;
-
-	void realloc(std::uintmax_t size);
+		-> std::ranges::subrange<std::size_t *, std::size_t *>;
 };
 }
 
