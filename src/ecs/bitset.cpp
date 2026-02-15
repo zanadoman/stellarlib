@@ -30,7 +30,6 @@
 #include <cstdlib>
 #include <limits>
 #include <memory>
-#include <new>
 #include <ranges>
 
 namespace stellarlib::ecs
@@ -38,18 +37,11 @@ namespace stellarlib::ecs
 bitset::bitset(const bitset &other)
 	: _size{other._size}
 {
-	if (_size == 0) {
-		return;
+	if (ext::truthy(_size)) {
+		_begin.reset(reinterpret_cast<std::size_t *>(std::malloc(_size * sizeof(std::size_t))));
+		std::ranges::copy(other.segments(), _begin.get());
+		_end = _begin.get() + _size;
 	}
-
-	_begin.reset(reinterpret_cast<std::size_t *>(std::malloc(_size * sizeof(std::size_t))));
-
-	if (!_begin) {
-		throw std::bad_alloc{};
-	}
-
-	std::ranges::copy(other.segments(), _begin.get());
-	_end = _begin.get() + _size;
 }
 
 auto bitset::operator=(const bitset &other)
@@ -66,11 +58,7 @@ auto bitset::operator=(const bitset &other)
 	}
 
 	std::ranges::copy(other.segments(), _begin.get());
-
-	for (auto &segment : std::ranges::subrange{_begin.get() + other._size, _end}) {
-		segment = 0;
-	}
-
+	std::ranges::fill(std::ranges::subrange{_begin.get() + other._size, _end}, 0);
 	return *this;
 }
 
@@ -98,20 +86,18 @@ auto bitset::contains(const std::size_t elem) const
 	-> bool
 {
 	const auto index{index_of(elem)};
-	return index < _size && (_begin.get()[index] & mask_of(elem)) != 0;
+	return index < _size && ext::truthy((_begin.get()[index] & mask_of(elem)));
 }
 
 auto bitset::operator==(const bitset &other) const
 	-> bool
 {
 	if (_size < other._size) {
-		return std::equal(_begin.get(), _end, other._begin.get())
-			&& std::none_of(other._begin.get() + _size, other._end, ext::truthy<std::size_t>);
+		return std::equal(_begin.get(), _end, other._begin.get()) && std::none_of(other._begin.get() + _size, other._end, ext::truthy<std::size_t>);
 	}
 
 	if (other._size < _size) {
-		return std::equal(other._begin.get(), other._end, _begin.get())
-			&& std::none_of(_begin.get() + other._size, _end, ext::truthy<std::size_t>);
+		return std::equal(other._begin.get(), other._end, _begin.get()) && std::none_of(_begin.get() + other._size, _end, ext::truthy<std::size_t>);
 	}
 
 	return std::equal(_begin.get(), _end, other._begin.get());
@@ -141,9 +127,7 @@ void bitset::erase(const std::size_t elem)
 
 void bitset::clear()
 {
-	for (auto &segment : segments()) {
-		segment = 0;
-	}
+	std::ranges::fill(segments(), 0);
 }
 
 auto bitset::index_of(const std::size_t elem)
@@ -167,9 +151,5 @@ auto bitset::segments() const
 void bitset::realloc(const std::size_t size)
 {
 	_begin.reset(reinterpret_cast<std::size_t *>(std::realloc(_begin.release(), size * sizeof(std::size_t))));
-
-	if (!_begin) {
-		throw std::bad_alloc{};
-	}
 }
 }

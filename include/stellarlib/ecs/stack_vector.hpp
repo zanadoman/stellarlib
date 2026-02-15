@@ -101,6 +101,20 @@ public:
 	}
 
 	template <typename ...Args>
+	constexpr void push(Args &&...args)
+	{
+		if (_size == _capacity) {
+			++_capacity;
+			ext::vector_allocator<T, SizeType>::reallocate(_begin, _size, _capacity);
+			_end = _begin + _size;
+		}
+
+		std::construct_at(_end, std::forward<Args>(args)...);
+		++_end;
+		++_size;
+	}
+
+	template <typename ...Args>
 	constexpr auto extend(const SizeType size, Args &&...args)
 	{
 		if (size <= _size) {
@@ -120,20 +134,6 @@ public:
 
 		_size = size;
 		return true;
-	}
-
-	template <typename ...Args>
-	constexpr void push(Args &&...args)
-	{
-		if (_size == _capacity) {
-			++_capacity;
-			ext::vector_allocator<T, SizeType>::reallocate(_begin, _size, _capacity);
-			_end = _begin + _size;
-		}
-
-		std::construct_at(_end, std::forward<Args>(args)...);
-		++_end;
-		++_size;
 	}
 
 	[[nodiscard]]

@@ -25,7 +25,6 @@
 #define STELLARLIB_ECS_WORLD_HPP
 
 #include <stellarlib/ecs/bitset.hpp>
-#include <stellarlib/ecs/ring_storage.hpp>
 #include <stellarlib/ecs/sparse_map.hpp>
 #include <stellarlib/ecs/sparse_set.hpp>
 #include <stellarlib/ecs/sparse_storage.hpp>
@@ -47,40 +46,30 @@ public:
 	}
 
 	template <typename ...T>
-	auto spawn(T ...components)
+	constexpr auto spawn(const T &...components)
 		-> std::uint32_t
 	{
-		std::uint32_t entity{};
+		std::uint32_t entity{_entities.size()};
 
 		if (_queue.size()) {
 			entity = *(_queue.end() - 1);
 			_queue.pop();
 		}
-		else {
-			entity = _entities.size();
-		}
 
-		bitset archetype{};
+		_cache.clear();
+		(_cache.insert(_components.id_of<T>()), ...);
 
-		(
-			[&] -> void
-			{
-				_components.by_type<T>().insert(entity, components);
-				archetype.insert(_components.id_of<T>());
-			}(),
-			...
-		);
-
-		const auto it{std::ranges::find_if(_archetypes, [&](const auto &pair) -> bool {
-			return pair.first == archetype;
+		const auto it{std::ranges::find_if(_archetypes, [](const auto &pair) -> bool {
+			return pair.first == _cache;
 		})};
 
 		_entities.insert(entity, static_cast<std::uint32_t>(it - _archetypes.begin()));
+		(_components.by_type<T>().insert(entity, components), ...);
 
 		if (it == _archetypes.end()) {
-			sparse_set<std::uint32_t> set{};
+			internal::sparse_set<std::uint32_t> set{};
 			set.insert(entity);
-			_archetypes.push(std::tuple<bitset, sparse_set<std::uint32_t>>{std::move(archetype), std::move(set)});
+			_archetypes.push(_cache, std::move(set));
 		}
 		else {
 			it->second.insert(entity);
@@ -231,7 +220,7 @@ public:
 		requires (1 < sizeof...(T))
 	{
 		const auto id = ext::scoped_typeid<world, std::tuple<T...>>();
-		const auto query{_queries.at(id)};
+		auto query{_queries.at(id)};
 
 		if (!query) {
 			bitset archetype{};
@@ -244,13 +233,13 @@ public:
 				}
 			}
 
-			_queries.insert(id, {archetype, indices});
+			_queries.insert(id, std::pair<bitset, internal::stack_vector<std::size_t>>{archetype, indices});
 			query = std::addressof(_queries[id]);
 		}
 
 		return query->second
 			| std::views::transform([this](const auto index) -> internal::stack_vector<std::uint32_t> & {
-				return _archetypes[index].second.keys();
+				return std::ranges::subrange{_archetypes[index].second.begin(), _archetypes[index].second.end()};
 			})
 			| std::views::join
 			| std::views::transform([this](const auto entity) -> std::tuple<std::uint32_t, T *...> {
