@@ -23,12 +23,12 @@
 
 #include <stellarlib/ecs/bitset.hpp>
 
+#include <stellarlib/ext/bit.hpp>
 #include <stellarlib/ext/functional.hpp>
 #include <stellarlib/ext/memory.hpp>
 
 #include <algorithm>
 #include <cstddef>
-#include <limits>
 #include <memory>
 #include <ranges>
 
@@ -66,10 +66,10 @@ auto bitset::operator=(const bitset &other)
 
 void bitset::insert(const std::size_t elem)
 {
-	const auto index{index_of(elem)};
+	const auto index{ext::bit_index(elem)};
 
 	if (index < _size) {
-		_begin.get()[index] |= mask_of(elem);
+		_begin.get()[index] |= ext::bit_mask(elem);
 		return;
 	}
 
@@ -80,15 +80,15 @@ void bitset::insert(const std::size_t elem)
 	}
 
 	_size = index + 1;
-	_begin.get()[index] = mask_of(elem);
+	_begin.get()[index] = ext::bit_mask(elem);
 	_end = _begin.get() + _size;
 }
 
 auto bitset::contains(const std::size_t elem) const
 	-> bool
 {
-	const auto index{index_of(elem)};
-	return index < _size && ext::truthy((_begin.get()[index] & mask_of(elem)));
+	const auto index{ext::bit_index(elem)};
+	return index < _size && ext::truthy((_begin.get()[index] & ext::bit_mask(elem)));
 }
 
 auto bitset::operator==(const bitset &other) const
@@ -111,13 +111,13 @@ auto bitset::operator>=(const bitset &other) const
 
 void bitset::erase(const std::size_t elem)
 {
-	const auto index{index_of(elem)};
+	const auto index{ext::bit_index(elem)};
 
 	if (_size <= index) {
 		return;
 	}
 
-	_begin.get()[index] &= ~mask_of(elem);
+	_begin.get()[index] &= ~ext::bit_mask(elem);
 
 	if (index != _size - 1) {
 		return;
@@ -131,18 +131,6 @@ void bitset::erase(const std::size_t elem)
 void bitset::clear()
 {
 	std::ranges::fill(segments(), 0);
-}
-
-auto bitset::index_of(const std::size_t elem)
-	-> std::size_t
-{
-	return elem / std::numeric_limits<std::size_t>::digits;
-}
-
-auto bitset::mask_of(const std::size_t elem)
-	-> std::size_t
-{
-	return std::size_t{1} << elem % std::numeric_limits<std::size_t>::digits;
 }
 
 auto bitset::segments() const

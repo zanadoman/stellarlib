@@ -81,14 +81,6 @@ private:
 	std::size_t *_end{};
 
 	[[nodiscard]]
-	static auto index_of(std::size_t elem)
-		-> std::size_t;
-
-	[[nodiscard]]
-	static auto mask_of(std::size_t elem)
-		-> std::size_t;
-
-	[[nodiscard]]
 	auto segments() const
 		-> std::ranges::subrange<std::size_t *, std::size_t *>;
 };

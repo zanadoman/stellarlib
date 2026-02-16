@@ -16,6 +16,8 @@ i/sparse_set.hpp
 t/sparse_set.cpp
 i/sparse_map.hpp
 t/sparse_map.cpp
+i/bit.hpp
+t/bit.cpp
 
 ---------------------------
 
