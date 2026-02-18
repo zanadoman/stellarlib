@@ -57,30 +57,30 @@ TEST(stellarlib_ext_functional, falsy)
 
 TEST(stellarlib_ext_functional, subset)
 {
-	ASSERT_TRUE(ext::subset(0xb1100, 0xb1101));
-	ASSERT_TRUE(ext::subset(0xb1101, 0xb1101));
-	ASSERT_FALSE(ext::subset(0xb1101, 0xb1100));
+	ASSERT_TRUE(ext::subset(0b1100, 0b1101));
+	ASSERT_TRUE(ext::subset(0b1101, 0b1101));
+	ASSERT_FALSE(ext::subset(0b1101, 0b1100));
 }
 
 TEST(stellarlib_ext_functional, superset)
 {
-	ASSERT_TRUE(ext::superset(0xb1101, 0xb1100));
-	ASSERT_TRUE(ext::superset(0xb1101, 0xb1101));
-	ASSERT_FALSE(ext::superset(0xb1100, 0xb1101));
+	ASSERT_TRUE(ext::superset(0b1101, 0b1100));
+	ASSERT_TRUE(ext::superset(0b1101, 0b1101));
+	ASSERT_FALSE(ext::superset(0b1100, 0b1101));
 }
 
 TEST(stellarlib_ext_functional, zip_subset)
 {
-	ASSERT_TRUE(ext::zip::subset(std::pair{0xb1100, 0xb1101}));
-	ASSERT_TRUE(ext::zip::subset(std::pair{0xb1101, 0xb1101}));
-	ASSERT_FALSE(ext::zip::subset(std::pair{0xb1101, 0xb1100}));
+	ASSERT_TRUE(ext::zip::subset(std::pair{0b1100, 0b1101}));
+	ASSERT_TRUE(ext::zip::subset(std::pair{0b1101, 0b1101}));
+	ASSERT_FALSE(ext::zip::subset(std::pair{0b1101, 0b1100}));
 }
 
 TEST(stellarlib_ext_functional, zip_superset)
 {
-	ASSERT_TRUE(ext::zip::superset(std::pair{0xb1101, 0xb1100}));
-	ASSERT_TRUE(ext::zip::superset(std::pair{0xb1101, 0xb1101}));
-	ASSERT_FALSE(ext::zip::superset(std::pair{0xb1100, 0xb1101}));
+	ASSERT_TRUE(ext::zip::superset(std::pair{0b1101, 0b1100}));
+	ASSERT_TRUE(ext::zip::superset(std::pair{0b1101, 0b1101}));
+	ASSERT_FALSE(ext::zip::superset(std::pair{0b1100, 0b1101}));
 }
 
 /* NOLINTEND(cert-err58-cpp,cppcoreguidelines-non-private-member-variables-in-classes,misc-non-private-member-variables-in-classes,performance-unnecessary-copy-initialization) */
