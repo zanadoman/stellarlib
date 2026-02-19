@@ -1,7 +1,5 @@
 -ffast-math
--flto
 -O3
--Qunused-arguments
 -Werror
 -Weverything
 -Wno-c++98-compat-pedantic

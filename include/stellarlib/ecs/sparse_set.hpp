@@ -72,11 +72,9 @@ public:
 
 	constexpr void erase(const T key) noexcept
 	{
-		const auto index{_sparse[key]};
-
-		if (index != _keys.size() - 1) {
-			_keys[index] = *(_keys.end() - 1);
-			_sparse[_keys[index]] = index;
+		if (_sparse[key] != _keys.size() - 1) {
+			_keys[_sparse[key]] = *(_keys.end() - 1);
+			_sparse[_keys[_sparse[key]]] = _sparse[key];
 		}
 
 		_keys.pop();

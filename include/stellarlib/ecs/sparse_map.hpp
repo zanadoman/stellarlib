@@ -77,13 +77,12 @@ public:
 			_keys.push(key);
 			_values.push(std::forward<Args>(args)...);
 		}
-		else if constexpr (sizeof...(Args) == 1 && (std::is_same_v<std::remove_cvref_t<Args>, T> && ...)) {
+		else if constexpr (sizeof...(Args) == 1 && (std::is_assignable_v<T &, Args> && ...)) {
 			(*this)[key] = (std::forward<Args>(args), ...);
 		}
 		else {
-			const auto ptr{_values.begin() + _sparse[key]};
-			std::destroy_at(ptr);
-			std::construct_at(ptr, std::forward<Args>(args)...);
+			std::destroy_at(_values.begin() + _sparse[key]);
+			std::construct_at(_values.begin() + _sparse[key], std::forward<Args>(args)...);
 		}
 	}
 
@@ -136,15 +135,13 @@ public:
 			return;
 		}
 
-		const auto index{_sparse[key]};
-		_sparse[key] = static_cast<Key>(-1);
-
-		if (index != _keys.size() - 1) {
-			_keys[index] = *(_keys.end() - 1);
-			_sparse[_keys[index]] = index;
-			_values[index] = std::move(*(_values.end() - 1));
+		if (_sparse[key] != _keys.size() - 1) {
+			_values[_sparse[key]] = std::move(*(_values.end() - 1));
+			_keys[_sparse[key]] = *(_keys.end() - 1);
+			_sparse[_keys[_sparse[key]]] = _sparse[key];
 		}
 
+		_sparse[key] = static_cast<Key>(-1);
 		_keys.pop();
 		_values.pop();
 	}

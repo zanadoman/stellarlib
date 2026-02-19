@@ -71,6 +71,7 @@ Checks: >
   readability-*,
   -bugprone-exception-escape,
   -bugprone-suspicious-realloc-usage,
+  -clang-analyzer-nullability.NullableDereferenced,
   -clang-analyzer-unix.Malloc,
   -cppcoreguidelines-avoid-magic-numbers,
   -cppcoreguidelines-no-malloc,

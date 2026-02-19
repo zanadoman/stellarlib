@@ -31,7 +31,6 @@
 #include <cstdlib>
 #include <memory>
 #include <ranges>
-#include <type_traits>
 #include <utility>
 
 namespace stellarlib::ext
@@ -65,16 +64,9 @@ public:
 			capacity = std::bit_ceil(capacity);
 			const auto dst{static_cast<value_type *>(std::malloc(capacity * sizeof(value_type)))};
 
-			if constexpr (std::is_trivially_destructible_v<value_type>) {
-				std::uninitialized_move_n(begin, size, dst);
-			}
-			else {
-				const auto diff{dst - begin};
-
-				for (const auto src : std::views::iota(begin, begin + size)) {
-					std::construct_at(src + diff, std::move(*src));
-					std::destroy_at(src);
-				}
+			for (const auto src : std::views::iota(begin, begin + size)) {
+				std::construct_at(src + (dst - begin), std::move(*src));
+				std::destroy_at(src);
 			}
 
 			deallocate(begin);

@@ -31,6 +31,7 @@
 #include <cstdint>
 #include <memory>
 #include <ranges>
+#include <tuple>
 
 using namespace stellarlib::ecs;
 
@@ -92,7 +93,7 @@ TEST(stellarlib_ecs_sparse_map, should_insert_and_erase_pairs)
 		ASSERT_EQ(map[KEYS[i]], VALUES[i]);
 		ASSERT_NE(std::ranges::find(map.keys(), KEYS[i]), map.keys().end());
 		ASSERT_NE(std::ranges::find(map.values(), VALUES[i]), map.values().end());
-		ASSERT_NE(std::ranges::find(map.zip(), {KEYS[i], VALUES[i]}), map.zip().end());
+		ASSERT_NE(std::ranges::find(map.zip(), std::tuple{KEYS[i], VALUES[i]}), map.zip().end());
 		map.erase(KEYS[i / 2]);
 		map.erase(KEYS[i / 2]);
 		ASSERT_EQ(map.size(), i);
@@ -100,7 +101,7 @@ TEST(stellarlib_ecs_sparse_map, should_insert_and_erase_pairs)
 		ASSERT_FALSE(map.at(KEYS[i / 2]));
 		ASSERT_EQ(std::ranges::find(map.keys(), KEYS[i / 2]), map.keys().end());
 		ASSERT_EQ(std::ranges::find(map.values(), VALUES[i / 2]), map.values().end());
-		ASSERT_EQ(std::ranges::find(map.zip(), {KEYS[i / 2], VALUES[i / 2]}), map.zip().end());
+		ASSERT_EQ(std::ranges::find(map.zip(), std::tuple{KEYS[i / 2], VALUES[i / 2]}), map.zip().end());
 		map.insert(KEYS[i / 2], VALUES[i / 2]);
 		map.insert(KEYS[i / 2], std::make_unique<std::int32_t>());
 		map.insert(KEYS[i / 2], VALUES[i / 2]);
@@ -111,7 +112,7 @@ TEST(stellarlib_ecs_sparse_map, should_insert_and_erase_pairs)
 		ASSERT_EQ(map[KEYS[i / 2]], VALUES[i / 2]);
 		ASSERT_NE(std::ranges::find(map.keys(), KEYS[i / 2]), map.keys().end());
 		ASSERT_NE(std::ranges::find(map.values(), VALUES[i / 2]), map.values().end());
-		ASSERT_NE(std::ranges::find(map.zip(), {KEYS[i / 2], VALUES[i / 2]}), map.zip().end());
+		ASSERT_NE(std::ranges::find(map.zip(), std::tuple{KEYS[i / 2], VALUES[i / 2]}), map.zip().end());
 		map.erase(KEYS[i]);
 		map.erase(KEYS[i]);
 		ASSERT_EQ(map.size(), i);
@@ -119,7 +120,7 @@ TEST(stellarlib_ecs_sparse_map, should_insert_and_erase_pairs)
 		ASSERT_FALSE(map.at(KEYS[i]));
 		ASSERT_EQ(std::ranges::find(map.keys(), KEYS[i]), map.keys().end());
 		ASSERT_EQ(std::ranges::find(map.values(), VALUES[i]), map.values().end());
-		ASSERT_EQ(std::ranges::find(map.zip(), {KEYS[i], VALUES[i]}), map.zip().end());
+		ASSERT_EQ(std::ranges::find(map.zip(), std::tuple{KEYS[i], VALUES[i]}), map.zip().end());
 		map.insert(KEYS[i], VALUES[i]);
 		map.insert(KEYS[i], std::make_unique<std::int32_t>());
 		map.insert(KEYS[i], VALUES[i]);
@@ -130,7 +131,7 @@ TEST(stellarlib_ecs_sparse_map, should_insert_and_erase_pairs)
 		ASSERT_EQ(map[KEYS[i]], VALUES[i]);
 		ASSERT_NE(std::ranges::find(map.keys(), KEYS[i]), map.keys().end());
 		ASSERT_NE(std::ranges::find(map.values(), VALUES[i]), map.values().end());
-		ASSERT_NE(std::ranges::find(map.zip(), {KEYS[i], VALUES[i]}), map.zip().end());
+		ASSERT_NE(std::ranges::find(map.zip(), std::tuple{KEYS[i], VALUES[i]}), map.zip().end());
 	}
 	check_pairs(map);
 }

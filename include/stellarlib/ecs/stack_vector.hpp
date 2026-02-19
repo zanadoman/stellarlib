@@ -47,8 +47,8 @@ public:
 		if (_size) {
 			_capacity = _size;
 			ext::vector_allocator<T, SizeType>::allocate(_begin, _capacity);
-			std::uninitialized_copy(other._begin, other._end, _begin);
 			_end = _begin + _size;
+			std::uninitialized_copy(other._begin, other._end, _begin);
 		}
 	}
 
@@ -59,8 +59,8 @@ public:
 		, _begin{other._begin}
 		, _end{other._end}
 	{
-		other._end = nullptr;
 		other._begin = nullptr;
+		other._end = nullptr;
 	}
 
 	constexpr auto operator=(const stack_vector &other) noexcept
@@ -78,8 +78,8 @@ public:
 			ext::vector_allocator<T, SizeType>::reallocate(_begin, _capacity);
 		}
 
-		std::uninitialized_copy(other._begin, other._end, _begin);
 		_end = _begin + _size;
+		std::uninitialized_copy(other._begin, other._end, _begin);
 		return *this;
 	}
 
@@ -109,9 +109,8 @@ public:
 			_end = _begin + _size;
 		}
 
-		std::construct_at(_end, std::forward<Args>(args)...);
-		++_end;
 		++_size;
+		std::construct_at(_end++, std::forward<Args>(args)...);
 	}
 
 	template <typename ...Args>
@@ -170,9 +169,9 @@ public:
 
 	constexpr void clear() noexcept
 	{
-		_size = 0;
 		std::ranges::destroy(*this);
 		_end = _begin;
+		_size = 0;
 	}
 
 private:
