@@ -36,43 +36,43 @@ class bitset final : ext::vector_allocator<std::size_t>
 {
 public:
 	[[nodiscard]]
-	explicit bitset() = default;
+	explicit bitset() noexcept = default;
 
 	[[nodiscard]]
-	bitset(const bitset &other);
+	bitset(const bitset &other) noexcept;
 
 	[[nodiscard]]
-	bitset(bitset &&) = default;
+	bitset(bitset &&) noexcept = default;
 
-	auto operator=(const bitset &other)
+	auto operator=(const bitset &other) noexcept
 		-> bitset &;
 
-	auto operator=(bitset &&)
+	auto operator=(bitset &&) noexcept
 		-> bitset & = default;
 
-	~bitset() = default;
+	~bitset() noexcept = default;
 
-	void insert(std::size_t elem);
+	void insert(std::size_t elem) noexcept;
 
 	[[nodiscard]]
-	auto contains(std::size_t elem) const
+	auto contains(std::size_t elem) const noexcept
 		-> bool;
 
 	[[nodiscard]]
-	auto operator==(const bitset &other) const
+	auto operator==(const bitset &other) const noexcept
 		-> bool;
 
 	[[nodiscard]]
-	auto operator<=(const bitset &other) const
+	auto operator<=(const bitset &other) const noexcept
 		-> bool;
 
 	[[nodiscard]]
-	auto operator>=(const bitset &other) const
+	auto operator>=(const bitset &other) const noexcept
 		-> bool;
 
-	void erase(std::size_t elem);
+	void erase(std::size_t elem) noexcept;
 
-	void clear();
+	void clear() noexcept;
 
 private:
 	std::size_t _size{};
@@ -81,7 +81,7 @@ private:
 	std::size_t *_end{};
 
 	[[nodiscard]]
-	auto segments() const
+	auto segments() const noexcept
 		-> std::ranges::subrange<std::size_t *, std::size_t *>;
 };
 }

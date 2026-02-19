@@ -38,10 +38,10 @@ class stack_vector final : ext::vector_allocator<T, SizeType>
 {
 public:
 	[[nodiscard]]
-	explicit constexpr stack_vector() = default;
+	explicit constexpr stack_vector() noexcept = default;
 
 	[[nodiscard]]
-	constexpr stack_vector(const stack_vector &other)
+	constexpr stack_vector(const stack_vector &other) noexcept
 		: _size{other._size}
 	{
 		if (_size) {
@@ -53,7 +53,7 @@ public:
 	}
 
 	[[nodiscard]]
-	constexpr stack_vector(stack_vector &&other)
+	constexpr stack_vector(stack_vector &&other) noexcept
 		: _size{other._size}
 		, _capacity{other._capacity}
 		, _begin{std::move(other._begin)}
@@ -62,7 +62,7 @@ public:
 		other._end = nullptr;
 	}
 
-	constexpr auto operator=(const stack_vector &other)
+	constexpr auto operator=(const stack_vector &other) noexcept
 		-> stack_vector &
 	{
 		if (std::addressof(other) == this) {
@@ -82,7 +82,7 @@ public:
 		return *this;
 	}
 
-	constexpr auto operator=(stack_vector &&other)
+	constexpr auto operator=(stack_vector &&other) noexcept
 		-> stack_vector &
 	{
 		if (std::addressof(other) != this) {
@@ -93,13 +93,13 @@ public:
 		return *this;
 	}
 
-	constexpr ~stack_vector()
+	constexpr ~stack_vector() noexcept
 	{
 		std::ranges::destroy(*this);
 	}
 
 	template <typename ...Args>
-	constexpr void push(Args &&...args)
+	constexpr void push(Args &&...args) noexcept
 	{
 		if (_size == _capacity) {
 			++_capacity;
@@ -113,7 +113,7 @@ public:
 	}
 
 	template <typename ...Args>
-	constexpr auto extend(const SizeType size, Args &&...args)
+	constexpr auto extend(const SizeType size, Args &&...args) noexcept
 	{
 		if (size <= _size) {
 			return false;
@@ -135,38 +135,38 @@ public:
 	}
 
 	[[nodiscard]]
-	constexpr auto size() const
+	constexpr auto size() const noexcept
 	{
 		return _size;
 	}
 
 	[[nodiscard]]
-	constexpr auto operator[](const SizeType index) const
+	constexpr auto operator[](const SizeType index) const noexcept
 		-> T &
 	{
 		return _begin.get()[index];
 	}
 
 	[[nodiscard]]
-	constexpr auto begin() const
+	constexpr auto begin() const noexcept
 	{
 		return _begin.get();
 	}
 
 	[[nodiscard]]
-	constexpr auto end() const
+	constexpr auto end() const noexcept
 	{
 		return _end;
 	}
 
-	constexpr void pop()
+	constexpr void pop() noexcept
 	{
 		--_size;
 		--_end;
 		std::destroy_at(_end);
 	}
 
-	constexpr void clear()
+	constexpr void clear() noexcept
 	{
 		_size = 0;
 		std::ranges::destroy(*this);

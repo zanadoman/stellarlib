@@ -30,14 +30,14 @@ namespace stellarlib::ext
 {
 template <typename T>
 [[nodiscard]]
-constexpr auto bit_index(const T arg)
+constexpr auto bit_index(const T arg) noexcept
 {
 	return static_cast<T>(arg / std::numeric_limits<T>::digits);
 }
 
 template <typename T>
 [[nodiscard]]
-constexpr auto bit_mask(const T arg)
+constexpr auto bit_mask(const T arg) noexcept
 {
 	return static_cast<T>(static_cast<T>(1) << static_cast<T>(arg % std::numeric_limits<T>::digits));
 }

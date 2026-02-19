@@ -31,7 +31,6 @@
 #include <cstdint>
 #include <memory>
 #include <ranges>
-#include <stdexcept>
 
 using namespace stellarlib::ecs;
 
@@ -45,11 +44,11 @@ using namespace stellarlib::ecs;
 
 constexpr std::array<std::size_t, 5> KEYS{2, 1, 0, 3, 4};
 const std::array<std::shared_ptr<std::int32_t>, KEYS.size()> VALUES{
-	std::make_shared<std::int32_t>(0),
-	std::make_shared<std::int32_t>(5),
-	std::make_shared<std::int32_t>(10),
-	std::make_shared<std::int32_t>(15),
-	std::make_shared<std::int32_t>(25)
+	std::make_unique<std::int32_t>(0),
+	std::make_unique<std::int32_t>(5),
+	std::make_unique<std::int32_t>(10),
+	std::make_unique<std::int32_t>(15),
+	std::make_unique<std::int32_t>(25)
 };
 
 namespace
@@ -69,19 +68,14 @@ constexpr void check_pairs(const internal::sparse_map<std::size_t, std::shared_p
 }
 }
 
-TEST(stellarlib_ecs_sparse_map, should_throw_on_non_copy_constructible_clone)
-{
-	ASSERT_THROW(static_cast<void>(internal::sparse_map<std::size_t, std::unique_ptr<std::int32_t>>{}.clone()), std::runtime_error);
-}
-
 TEST(stellarlib_ecs_sparse_map, should_copy_via_clone)
 {
 	internal::sparse_map<std::size_t, std::shared_ptr<std::int32_t>> map1{};
 	for (const auto [key, value] : std::views::zip(KEYS, VALUES)) {
 		map1.insert(key, value);
 	}
-	const std::unique_ptr<internal::sparse_map<std::size_t, std::shared_ptr<std::int32_t>>> map2{map1.clone()};
-	check_pairs(*map2);
+	const auto map2{map1.clone()};
+	check_pairs(static_cast<const internal::sparse_map<std::size_t, std::shared_ptr<std::int32_t>> &>(*map2));
 }
 
 TEST(stellarlib_ecs_sparse_map, should_insert_and_erase_pairs)
@@ -89,7 +83,7 @@ TEST(stellarlib_ecs_sparse_map, should_insert_and_erase_pairs)
 	internal::sparse_map<std::size_t, std::shared_ptr<std::int32_t>> map{};
 	for (const auto i : std::views::iota(std::size_t{}, KEYS.size())) {
 		map.insert(KEYS[i], VALUES[i]);
-		map.insert(KEYS[i], new std::int32_t{});
+		map.insert(KEYS[i], std::make_unique<std::int32_t>());
 		map.insert(KEYS[i], VALUES[i]);
 		ASSERT_EQ(map.size(), i + 1);
 		ASSERT_TRUE(map.contains(KEYS[i]));
@@ -108,7 +102,7 @@ TEST(stellarlib_ecs_sparse_map, should_insert_and_erase_pairs)
 		ASSERT_EQ(std::ranges::find(map.values(), VALUES[i / 2]), map.values().end());
 		ASSERT_EQ(std::ranges::find(map.zip(), {KEYS[i / 2], VALUES[i / 2]}), map.zip().end());
 		map.insert(KEYS[i / 2], VALUES[i / 2]);
-		map.insert(KEYS[i / 2], new std::int32_t{});
+		map.insert(KEYS[i / 2], std::make_unique<std::int32_t>());
 		map.insert(KEYS[i / 2], VALUES[i / 2]);
 		ASSERT_EQ(map.size(), i + 1);
 		ASSERT_TRUE(map.contains(KEYS[i / 2]));
@@ -127,7 +121,7 @@ TEST(stellarlib_ecs_sparse_map, should_insert_and_erase_pairs)
 		ASSERT_EQ(std::ranges::find(map.values(), VALUES[i]), map.values().end());
 		ASSERT_EQ(std::ranges::find(map.zip(), {KEYS[i], VALUES[i]}), map.zip().end());
 		map.insert(KEYS[i], VALUES[i]);
-		map.insert(KEYS[i], new std::int32_t{});
+		map.insert(KEYS[i], std::make_unique<std::int32_t>());
 		map.insert(KEYS[i], VALUES[i]);
 		ASSERT_EQ(map.size(), i + 1);
 		ASSERT_TRUE(map.contains(KEYS[i]));

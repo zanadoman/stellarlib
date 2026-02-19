@@ -33,23 +33,23 @@ class sparse_set final
 {
 public:
 	[[nodiscard]]
-	explicit constexpr sparse_set() = default;
+	explicit constexpr sparse_set() noexcept = default;
 
 	[[nodiscard]]
-	constexpr sparse_set(const sparse_set &) = default;
+	constexpr sparse_set(const sparse_set &) noexcept = default;
 
 	[[nodiscard]]
-	constexpr sparse_set(sparse_set &&) = default;
+	constexpr sparse_set(sparse_set &&) noexcept = default;
 
-	constexpr auto operator=(const sparse_set &)
+	constexpr auto operator=(const sparse_set &) noexcept
 		-> sparse_set & = default;
 
-	constexpr auto operator=(sparse_set &&)
+	constexpr auto operator=(sparse_set &&) noexcept
 		-> sparse_set & = default;
 
-	constexpr ~sparse_set() = default;
+	constexpr ~sparse_set() noexcept = default;
 
-	constexpr void insert(const T key)
+	constexpr void insert(const T key) noexcept
 	{
 		_sparse.extend(key + 1);
 		_sparse[key] = _keys.size();
@@ -57,20 +57,20 @@ public:
 	}
 
 	[[nodiscard]]
-	constexpr auto begin() const
+	constexpr auto begin() const noexcept
 		-> const T *
 	{
 		return _keys.begin();
 	}
 
 	[[nodiscard]]
-	constexpr auto end() const
+	constexpr auto end() const noexcept
 		-> const T *
 	{
 		return _keys.end();
 	}
 
-	constexpr void erase(const T key)
+	constexpr void erase(const T key) noexcept
 	{
 		const auto index{_sparse[key]};
 

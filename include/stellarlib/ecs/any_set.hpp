@@ -24,34 +24,36 @@
 #ifndef STELLARLIB_ECS_ANY_SET_HPP
 #define STELLARLIB_ECS_ANY_SET_HPP
 
+#include <memory>
+
 namespace stellarlib::ecs::internal
 {
 template <typename Key>
 class any_set
 {
 public:
-	virtual ~any_set() = default;
+	virtual ~any_set() noexcept = default;
 
 	[[nodiscard]]
-	virtual auto clone() const
-		-> any_set * = 0;
+	virtual auto clone() const noexcept
+		-> std::unique_ptr<any_set> = 0;
 
-	virtual void erase(Key) = 0;
+	virtual void erase(Key) noexcept = 0;
 
 protected:
 	[[nodiscard]]
-	explicit any_set() = default;
+	explicit any_set() noexcept = default;
 
 	[[nodiscard]]
-	any_set(const any_set &) = default;
+	any_set(const any_set &) noexcept = default;
 
 	[[nodiscard]]
-	any_set(any_set &&) = default;
+	any_set(any_set &&) noexcept = default;
 
-	auto operator=(const any_set &)
+	auto operator=(const any_set &) noexcept
 		-> any_set & = default;
 
-	auto operator=(any_set &&)
+	auto operator=(any_set &&) noexcept
 		-> any_set & = default;
 };
 }

@@ -34,7 +34,7 @@
 
 namespace stellarlib::ecs
 {
-bitset::bitset(const bitset &other)
+bitset::bitset(const bitset &other) noexcept
 	: _size{other._size}
 {
 	if (ext::truthy(_size)) {
@@ -45,7 +45,7 @@ bitset::bitset(const bitset &other)
 	}
 }
 
-auto bitset::operator=(const bitset &other)
+auto bitset::operator=(const bitset &other) noexcept
 	-> bitset &
 {
 	if (std::addressof(other) == this) {
@@ -64,7 +64,7 @@ auto bitset::operator=(const bitset &other)
 	return *this;
 }
 
-void bitset::insert(const std::size_t elem)
+void bitset::insert(const std::size_t elem) noexcept
 {
 	const auto index{ext::bit_index(elem)};
 
@@ -84,32 +84,32 @@ void bitset::insert(const std::size_t elem)
 	_end = _begin.get() + _size;
 }
 
-auto bitset::contains(const std::size_t elem) const
+auto bitset::contains(const std::size_t elem) const noexcept
 	-> bool
 {
 	const auto index{ext::bit_index(elem)};
 	return index < _size && ext::truthy((_begin.get()[index] & ext::bit_mask(elem)));
 }
 
-auto bitset::operator==(const bitset &other) const
+auto bitset::operator==(const bitset &other) const noexcept
 	-> bool
 {
 	return std::ranges::equal(other.segments(), segments());
 }
 
-auto bitset::operator<=(const bitset &other) const
+auto bitset::operator<=(const bitset &other) const noexcept
 	-> bool
 {
 	return _size <= other._size && std::ranges::all_of(std::views::zip(segments(), other.segments()), ext::zip::subset<std::size_t>);
 }
 
-auto bitset::operator>=(const bitset &other) const
+auto bitset::operator>=(const bitset &other) const noexcept
 	-> bool
 {
 	return other <= *this;
 }
 
-void bitset::erase(const std::size_t elem)
+void bitset::erase(const std::size_t elem) noexcept
 {
 	const auto index{ext::bit_index(elem)};
 
@@ -128,12 +128,12 @@ void bitset::erase(const std::size_t elem)
 	_end = _begin.get() + _size;
 }
 
-void bitset::clear()
+void bitset::clear() noexcept
 {
 	std::ranges::fill(segments(), 0);
 }
 
-auto bitset::segments() const
+auto bitset::segments() const noexcept
 	-> std::ranges::subrange<std::size_t *, std::size_t *>
 {
 	return std::ranges::subrange{_begin.get(), _end};

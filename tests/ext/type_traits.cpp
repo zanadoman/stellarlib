@@ -37,63 +37,63 @@ class trivially_relocatable final
 {
 public:
 	[[nodiscard]]
-	explicit trivially_relocatable();
+	explicit trivially_relocatable() noexcept;
 
 	[[nodiscard]]
-	trivially_relocatable(const trivially_relocatable &);
+	trivially_relocatable(const trivially_relocatable &) noexcept;
 
 	[[nodiscard]]
-	constexpr trivially_relocatable(trivially_relocatable &&) = default;
+	constexpr trivially_relocatable(trivially_relocatable &&) noexcept = default;
 
-	auto operator=(const trivially_relocatable &)
+	auto operator=(const trivially_relocatable &) noexcept
 		-> trivially_relocatable &;
 
-	auto operator=(trivially_relocatable &&)
+	auto operator=(trivially_relocatable &&) noexcept
 		-> trivially_relocatable &;
 
-	constexpr ~trivially_relocatable() = default;
+	constexpr ~trivially_relocatable() noexcept = default;
 };
 
 class non_trivially_move_constructible final
 {
 public:
 	[[nodiscard]]
-	explicit non_trivially_move_constructible();
+	explicit non_trivially_move_constructible() noexcept;
 
 	[[nodiscard]]
-	non_trivially_move_constructible(const non_trivially_move_constructible &);
+	non_trivially_move_constructible(const non_trivially_move_constructible &) noexcept;
 
 	[[nodiscard]]
-	non_trivially_move_constructible(non_trivially_move_constructible &&);
+	non_trivially_move_constructible(non_trivially_move_constructible &&) noexcept;
 
-	auto operator=(const non_trivially_move_constructible &)
+	auto operator=(const non_trivially_move_constructible &) noexcept
 		-> non_trivially_move_constructible &;
 
-	auto operator=(non_trivially_move_constructible &&)
+	auto operator=(non_trivially_move_constructible &&) noexcept
 		-> non_trivially_move_constructible &;
 
-	constexpr ~non_trivially_move_constructible() = default;
+	constexpr ~non_trivially_move_constructible() noexcept = default;
 };
 
 class non_trivially_destructible final
 {
 public:
 	[[nodiscard]]
-	explicit non_trivially_destructible();
+	explicit non_trivially_destructible() noexcept;
 
 	[[nodiscard]]
-	non_trivially_destructible(const non_trivially_destructible &);
+	non_trivially_destructible(const non_trivially_destructible &) noexcept;
 
 	[[nodiscard]]
-	constexpr non_trivially_destructible(non_trivially_destructible &&) = default;
+	constexpr non_trivially_destructible(non_trivially_destructible &&) noexcept = default;
 
-	auto operator=(const non_trivially_destructible &)
+	auto operator=(const non_trivially_destructible &) noexcept
 		-> non_trivially_destructible &;
 
-	auto operator=(non_trivially_destructible &&)
+	auto operator=(non_trivially_destructible &&) noexcept
 		-> non_trivially_destructible &;
 
-	~non_trivially_destructible();
+	~non_trivially_destructible() noexcept;
 };
 
 static_assert(ext::is_trivially_relocatable_v<trivially_relocatable>);

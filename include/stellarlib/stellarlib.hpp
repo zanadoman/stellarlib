@@ -26,7 +26,7 @@
 
 namespace stellarlib
 {
-void hello_world();
+void hello_world() noexcept;
 }
 
 #endif

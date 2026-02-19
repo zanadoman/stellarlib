@@ -41,28 +41,28 @@ class sparse_map final : public any_set<Key>
 {
 public:
 	[[nodiscard]]
-	explicit constexpr sparse_map() = default;
+	explicit constexpr sparse_map() noexcept = default;
 
 	[[nodiscard]]
-	constexpr sparse_map(const sparse_map &) = default;
+	constexpr sparse_map(const sparse_map &) noexcept = default;
 
 	[[nodiscard]]
-	constexpr sparse_map(sparse_map &&) = default;
+	constexpr sparse_map(sparse_map &&) noexcept = default;
 
-	constexpr auto operator=(const sparse_map &)
+	constexpr auto operator=(const sparse_map &) noexcept
 		-> sparse_map & = default;
 
-	constexpr auto operator=(sparse_map &&)
+	constexpr auto operator=(sparse_map &&) noexcept
 		-> sparse_map & = default;
 
-	constexpr ~sparse_map() final = default;
+	constexpr ~sparse_map() noexcept final = default;
 
 	[[nodiscard]]
-	auto clone() const
-		-> sparse_map * final
+	auto clone() const noexcept
+		-> std::unique_ptr<any_set<Key>> final
 	{
 		if constexpr (std::is_copy_constructible_v<T>) {
-			return new sparse_map{*this};
+			return std::make_unique<sparse_map>(*this);
 		}
 		else {
 			throw std::runtime_error{__FILE_NAME__":" + std::to_string(__LINE__) + ' ' + typeid(T).name() + " is not copy constructible"};
@@ -70,7 +70,7 @@ public:
 	}
 
 	template <typename ...Args>
-	void insert(const Key key, Args &&...args)
+	void insert(const Key key, Args &&...args) noexcept
 	{
 		if (_sparse.extend(key + 1, static_cast<Key>(-1)) || _sparse[key] == static_cast<Key>(-1)) {
 			_sparse[key] = _keys.size();
@@ -88,49 +88,49 @@ public:
 	}
 
 	[[nodiscard]]
-	auto size() const
+	auto size() const noexcept
 	{
 		return _keys.size();
 	}
 
 	[[nodiscard]]
-	auto contains(const Key key) const
+	auto contains(const Key key) const noexcept
 	{
 		return key < _sparse.size() && _sparse[key] != static_cast<Key>(-1);
 	}
 
 	[[nodiscard]]
-	auto at(const Key key) const
+	auto at(const Key key) const noexcept
 	{
 		return contains(key) ? _values.begin() + _sparse[key] : nullptr;
 	}
 
 	[[nodiscard]]
-	auto operator[](const Key key) const
+	auto operator[](const Key key) const noexcept
 		-> T &
 	{
 		return _values[_sparse[key]];
 	}
 
 	[[nodiscard]]
-	auto keys() const
+	auto keys() const noexcept
 	{
 		return std::ranges::subrange{static_cast<const Key *>(_keys.begin()), static_cast<const Key *>(_keys.end())};
 	}
 
 	[[nodiscard]]
-	auto values() const
+	auto values() const noexcept
 	{
 		return _values | std::views::all;
 	}
 
 	[[nodiscard]]
-	auto zip() const
+	auto zip() const noexcept
 	{
 		return std::views::zip(keys(), values());
 	}
 
-	void erase(const Key key) final
+	void erase(const Key key) noexcept final
 	{
 		if (!contains(key)) {
 			return;
@@ -149,7 +149,7 @@ public:
 		_values.pop();
 	}
 
-	void clear()
+	void clear() noexcept
 	{
 		_sparse.clear();
 		_keys.clear();

@@ -31,7 +31,7 @@ namespace stellarlib::ext
 {
 template <typename Scope, typename SizeType = std::size_t>
 [[nodiscard]]
-auto sequential_id()
+auto sequential_id() noexcept
 {
 	static std::atomic<SizeType> id{static_cast<SizeType>(-1)};
 	return ++id;
@@ -39,7 +39,7 @@ auto sequential_id()
 
 template <typename Scope, typename T, typename SizeType = std::size_t>
 [[nodiscard]]
-auto scoped_typeid()
+auto scoped_typeid() noexcept
 {
 	static const auto id{sequential_id<Scope, SizeType>()};
 	return id;
