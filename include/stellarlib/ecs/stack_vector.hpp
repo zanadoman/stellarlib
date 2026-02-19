@@ -47,8 +47,8 @@ public:
 		if (_size) {
 			_capacity = _size;
 			ext::vector_allocator<T, SizeType>::allocate(_begin, _capacity);
-			std::uninitialized_copy(other._begin.get(), other._end, _begin.get());
-			_end = _begin.get() + _size;
+			std::uninitialized_copy(other._begin, other._end, _begin);
+			_end = _begin + _size;
 		}
 	}
 
@@ -56,10 +56,11 @@ public:
 	constexpr stack_vector(stack_vector &&other) noexcept
 		: _size{other._size}
 		, _capacity{other._capacity}
-		, _begin{std::move(other._begin)}
+		, _begin{other._begin}
 		, _end{other._end}
 	{
 		other._end = nullptr;
+		other._begin = nullptr;
 	}
 
 	constexpr auto operator=(const stack_vector &other) noexcept
@@ -77,8 +78,8 @@ public:
 			ext::vector_allocator<T, SizeType>::reallocate(_begin, _capacity);
 		}
 
-		std::uninitialized_copy(other._begin.get(), other._end, _begin.get());
-		_end = _begin.get() + _size;
+		std::uninitialized_copy(other._begin, other._end, _begin);
+		_end = _begin + _size;
 		return *this;
 	}
 
@@ -96,6 +97,7 @@ public:
 	constexpr ~stack_vector() noexcept
 	{
 		std::ranges::destroy(*this);
+		ext::vector_allocator<T, SizeType>::deallocate(_begin);
 	}
 
 	template <typename ...Args>
@@ -104,7 +106,7 @@ public:
 		if (_size == _capacity) {
 			++_capacity;
 			ext::vector_allocator<T, SizeType>::reallocate(_begin, _size, _capacity);
-			_end = _begin.get() + _size;
+			_end = _begin + _size;
 		}
 
 		std::construct_at(_end, std::forward<Args>(args)...);
@@ -124,10 +126,10 @@ public:
 			ext::vector_allocator<T, SizeType>::reallocate(_begin, _size, _capacity);
 		}
 
-		_end = _begin.get() + size;
+		_end = _begin + size;
 
 		if constexpr (!std::is_scalar_v<T> || sizeof...(Args)) {
-			std::uninitialized_fill(_begin.get() + _size, _end, T{std::forward<Args>(args)...});
+			std::uninitialized_fill(_begin + _size, _end, T{std::forward<Args>(args)...});
 		}
 
 		_size = size;
@@ -144,13 +146,13 @@ public:
 	constexpr auto operator[](const SizeType index) const noexcept
 		-> T &
 	{
-		return _begin.get()[index];
+		return _begin[index];
 	}
 
 	[[nodiscard]]
 	constexpr auto begin() const noexcept
 	{
-		return _begin.get();
+		return _begin;
 	}
 
 	[[nodiscard]]
@@ -170,13 +172,13 @@ public:
 	{
 		_size = 0;
 		std::ranges::destroy(*this);
-		_end = _begin.get();
+		_end = _begin;
 	}
 
 private:
 	SizeType _size{};
 	SizeType _capacity{};
-	std::unique_ptr<T, void (*)(T *)> _begin{nullptr, ext::vector_allocator<T, SizeType>::deallocate};
+	T *_begin{};
 	T *_end{};
 };
 }

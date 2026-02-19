@@ -31,6 +31,7 @@
 #include <cstddef>
 #include <memory>
 #include <ranges>
+#include <utility>
 
 namespace stellarlib::ecs
 {
@@ -40,9 +41,18 @@ bitset::bitset(const bitset &other) noexcept
 	if (ext::truthy(_size)) {
 		_capacity = _size;
 		ext::vector_allocator<std::size_t>::allocate(_begin, _capacity);
-		std::ranges::copy(other.segments(), _begin.get());
-		_end = _begin.get() + _size;
+		std::ranges::copy(other.segments(), _begin);
+		_end = _begin + _size;
 	}
+}
+
+bitset::bitset(bitset &&other) noexcept
+	: _size{other._size}
+	, _capacity{other._capacity}
+	, _begin{other._begin}
+	, _end{other._end}
+{
+	other._begin = nullptr;
 }
 
 auto bitset::operator=(const bitset &other) noexcept
@@ -59,9 +69,25 @@ auto bitset::operator=(const bitset &other) noexcept
 		ext::vector_allocator<std::size_t>::reallocate(_begin, _capacity);
 	}
 
-	std::ranges::copy(other.segments(), _begin.get());
-	_end = _begin.get() + _size;
+	std::ranges::copy(other.segments(), _begin);
+	_end = _begin + _size;
 	return *this;
+}
+
+auto bitset::operator=(bitset &&other) noexcept
+	-> bitset &
+{
+	if (std::addressof(other) != this) {
+		std::destroy_at(this);
+		std::construct_at(this, std::move(other));
+	}
+
+	return *this;
+}
+
+bitset::~bitset() noexcept
+{
+	ext::vector_allocator<std::size_t>::deallocate(_begin);
 }
 
 void bitset::insert(const std::size_t elem) noexcept
@@ -69,26 +95,26 @@ void bitset::insert(const std::size_t elem) noexcept
 	const auto index{ext::bit_index(elem)};
 
 	if (index < _size) {
-		_begin.get()[index] |= ext::bit_mask(elem);
+		_begin[index] |= ext::bit_mask(elem);
 		return;
 	}
 
 	if (_capacity <= index) {
 		_capacity = index + 1;
 		ext::vector_allocator<std::size_t>::reallocate(_begin, _capacity);
-		std::fill(_begin.get() + _size, _begin.get() + index, 0);
+		std::fill(_begin + _size, _begin + index, 0);
 	}
 
 	_size = index + 1;
-	_begin.get()[index] = ext::bit_mask(elem);
-	_end = _begin.get() + _size;
+	_begin[index] = ext::bit_mask(elem);
+	_end = _begin + _size;
 }
 
 auto bitset::contains(const std::size_t elem) const noexcept
 	-> bool
 {
 	const auto index{ext::bit_index(elem)};
-	return index < _size && ext::truthy((_begin.get()[index] & ext::bit_mask(elem)));
+	return index < _size && ext::truthy((_begin[index] & ext::bit_mask(elem)));
 }
 
 auto bitset::operator==(const bitset &other) const noexcept
@@ -117,15 +143,15 @@ void bitset::erase(const std::size_t elem) noexcept
 		return;
 	}
 
-	_begin.get()[index] &= ~ext::bit_mask(elem);
+	_begin[index] &= ~ext::bit_mask(elem);
 
 	if (index != _size - 1) {
 		return;
 	}
 
-	for (; ext::truthy(_size) && ext::falsy(_begin.get()[_size - 1]); --_size) {}
+	for (; ext::truthy(_size) && ext::falsy(_begin[_size - 1]); --_size) {}
 
-	_end = _begin.get() + _size;
+	_end = _begin + _size;
 }
 
 void bitset::clear() noexcept
@@ -136,6 +162,6 @@ void bitset::clear() noexcept
 auto bitset::segments() const noexcept
 	-> std::ranges::subrange<std::size_t *, std::size_t *>
 {
-	return std::ranges::subrange{_begin.get(), _end};
+	return std::ranges::subrange{_begin, _end};
 }
 }

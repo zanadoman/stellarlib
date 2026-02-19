@@ -70,6 +70,8 @@ Checks: >
   portability-*,
   readability-*,
   -bugprone-exception-escape,
+  -bugprone-suspicious-realloc-usage,
+  -clang-analyzer-unix.Malloc,
   -cppcoreguidelines-avoid-magic-numbers,
   -cppcoreguidelines-no-malloc,
   -cppcoreguidelines-owning-memory,

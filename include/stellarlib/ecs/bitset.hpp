@@ -27,7 +27,6 @@
 #include <stellarlib/ext/memory.hpp>
 
 #include <cstddef>
-#include <memory>
 #include <ranges>
 
 namespace stellarlib::ecs
@@ -42,15 +41,15 @@ public:
 	bitset(const bitset &other) noexcept;
 
 	[[nodiscard]]
-	bitset(bitset &&) noexcept = default;
+	bitset(bitset &&other) noexcept;
 
 	auto operator=(const bitset &other) noexcept
 		-> bitset &;
 
-	auto operator=(bitset &&) noexcept
-		-> bitset & = default;
+	auto operator=(bitset &&other) noexcept
+		-> bitset &;
 
-	~bitset() noexcept = default;
+	~bitset() noexcept;
 
 	void insert(std::size_t elem) noexcept;
 
@@ -77,7 +76,7 @@ public:
 private:
 	std::size_t _size{};
 	std::size_t _capacity{};
-	std::unique_ptr<std::size_t, void (*)(std::size_t *)> _begin{nullptr, ext::vector_allocator<std::size_t>::deallocate};
+	std::size_t *_begin{};
 	std::size_t *_end{};
 
 	[[nodiscard]]

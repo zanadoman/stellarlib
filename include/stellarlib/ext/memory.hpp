@@ -45,17 +45,17 @@ public:
 	using difference_type = std::allocator<value_type>::difference_type;
 	using propagate_on_container_move_assignment = std::allocator<value_type>::propagate_on_container_move_assignment;
 
-	static constexpr void allocate(std::unique_ptr<value_type, void (*)(value_type *)> &begin, const size_type capacity) noexcept
+	static constexpr void allocate(value_type *&begin, const size_type capacity) noexcept
 	{
-		begin.reset(static_cast<value_type *>(std::malloc(capacity * sizeof(value_type))));
+		begin = static_cast<value_type *>(std::malloc(capacity * sizeof(value_type)));
 	}
 
-	static constexpr void reallocate(std::unique_ptr<value_type, void (*)(value_type *)> &begin, const size_type capacity) noexcept
+	static constexpr void reallocate(value_type *&begin, const size_type capacity) noexcept
 	{
-		begin.reset(static_cast<value_type *>(std::realloc(begin.release(), capacity * sizeof(value_type))));
+		begin = static_cast<value_type *>(std::realloc(begin, capacity * sizeof(value_type)));
 	}
 
-	static constexpr void reallocate(std::unique_ptr<value_type, void (*)(value_type *)> &begin, const size_type size, size_type &capacity) noexcept
+	static constexpr void reallocate(value_type *&begin, const size_type size, size_type &capacity) noexcept
 	{
 		if constexpr (is_trivially_relocatable_v<value_type>) {
 			capacity += capacity / 4;
@@ -66,18 +66,19 @@ public:
 			const auto dst{static_cast<value_type *>(std::malloc(capacity * sizeof(value_type)))};
 
 			if constexpr (std::is_trivially_destructible_v<value_type>) {
-				std::uninitialized_move_n(begin.get(), size, dst);
+				std::uninitialized_move_n(begin, size, dst);
 			}
 			else {
-				const auto diff{dst - begin.get()};
+				const auto diff{dst - begin};
 
-				for (const auto src : std::views::iota(begin.get(), begin.get() + size)) {
+				for (const auto src : std::views::iota(begin, begin + size)) {
 					std::construct_at(src + diff, std::move(*src));
 					std::destroy_at(src);
 				}
 			}
 
-			begin.reset(dst);
+			deallocate(begin);
+			begin = dst;
 		}
 	}
 
