@@ -47,12 +47,12 @@ public:
 
 	static constexpr void allocate(std::unique_ptr<value_type, void (*)(value_type *)> &begin, const size_type capacity)
 	{
-		begin.reset(reinterpret_cast<value_type *>(std::malloc(capacity * sizeof(value_type))));
+		begin.reset(static_cast<value_type *>(std::malloc(capacity * sizeof(value_type))));
 	}
 
 	static constexpr void reallocate(std::unique_ptr<value_type, void (*)(value_type *)> &begin, const size_type capacity)
 	{
-		begin.reset(reinterpret_cast<value_type *>(std::realloc(begin.release(), capacity * sizeof(value_type))));
+		begin.reset(static_cast<value_type *>(std::realloc(begin.release(), capacity * sizeof(value_type))));
 	}
 
 	static constexpr void reallocate(std::unique_ptr<value_type, void (*)(value_type *)> &begin, const size_type size, size_type &capacity)
@@ -63,7 +63,7 @@ public:
 		}
 		else {
 			capacity = std::bit_ceil(capacity);
-			const auto dst{reinterpret_cast<value_type *>(std::malloc(capacity * sizeof(value_type)))};
+			const auto dst{static_cast<value_type *>(std::malloc(capacity * sizeof(value_type)))};
 
 			if constexpr (std::is_trivially_destructible_v<value_type>) {
 				std::uninitialized_move_n(begin.get(), size, dst);

@@ -26,10 +26,10 @@
 #include <gtest/gtest.h>
 
 #include <algorithm>
+#include <array>
 #include <cstddef>
 #include <limits>
 #include <utility>
-#include <vector>
 
 using namespace stellarlib::ecs;
 
@@ -41,7 +41,7 @@ using namespace stellarlib::ecs;
 
 /* NOLINTBEGIN(cert-err58-cpp,cppcoreguidelines-non-private-member-variables-in-classes,misc-non-private-member-variables-in-classes,performance-unnecessary-copy-initialization) */
 
-static const std::vector<std::size_t> ELEMS{
+constexpr std::array<std::size_t, 3> ELEMS{
 	std::numeric_limits<std::size_t>::digits * 3 - 1,
 	0,
 	(std::numeric_limits<std::size_t>::digits * 3 - 1) / 2

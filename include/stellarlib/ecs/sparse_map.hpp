@@ -115,7 +115,7 @@ public:
 	[[nodiscard]]
 	auto keys() const
 	{
-		return std::ranges::subrange{reinterpret_cast<const Key *>(_keys.begin()), reinterpret_cast<const Key *>(_keys.end())};
+		return std::ranges::subrange{static_cast<const Key *>(_keys.begin()), static_cast<const Key *>(_keys.end())};
 	}
 
 	[[nodiscard]]
