@@ -44,17 +44,34 @@ public:
 	using difference_type = std::allocator<value_type>::difference_type;
 	using propagate_on_container_move_assignment = std::allocator<value_type>::propagate_on_container_move_assignment;
 
-	static constexpr void allocate(value_type *&begin, const size_type capacity) noexcept
+	[[nodiscard]]
+	explicit constexpr vector_allocator() noexcept = default;
+
+	[[nodiscard]]
+	constexpr vector_allocator(const vector_allocator &) noexcept = default;
+
+	[[nodiscard]]
+	constexpr vector_allocator(vector_allocator &&) noexcept = default;
+
+	constexpr auto operator=(const vector_allocator &) noexcept
+		-> vector_allocator & = default;
+
+	constexpr auto operator=(vector_allocator &&) noexcept
+		-> vector_allocator & = default;
+
+	constexpr ~vector_allocator() noexcept = default;
+
+	constexpr void allocate(value_type *&begin, const size_type capacity) const noexcept
 	{
 		begin = static_cast<value_type *>(std::malloc(capacity * sizeof(value_type)));
 	}
 
-	static constexpr void reallocate(value_type *&begin, const size_type capacity) noexcept
+	constexpr void reallocate(value_type *&begin, const size_type capacity) const noexcept
 	{
 		begin = static_cast<value_type *>(std::realloc(begin, capacity * sizeof(value_type)));
 	}
 
-	static constexpr void reallocate(value_type *&begin, const size_type size, size_type &capacity) noexcept
+	constexpr void reallocate(value_type *&begin, const size_type size, size_type &capacity) const noexcept
 	{
 		if constexpr (is_trivially_relocatable_v<value_type>) {
 			capacity += capacity / 4;
@@ -74,31 +91,14 @@ public:
 		}
 	}
 
-	static constexpr void deallocate(value_type *begin) noexcept
-	{
-		std::free(begin);
-	}
-
-	[[nodiscard]]
-	explicit constexpr vector_allocator() noexcept = default;
-
-	[[nodiscard]]
-	constexpr vector_allocator(const vector_allocator &) noexcept = default;
-
-	[[nodiscard]]
-	constexpr vector_allocator(vector_allocator &&) noexcept = default;
-
-	constexpr auto operator=(const vector_allocator &) noexcept
-		-> vector_allocator & = default;
-
-	constexpr auto operator=(vector_allocator &&) noexcept
-		-> vector_allocator & = default;
-
-	constexpr ~vector_allocator() noexcept = default;
-
 	[[nodiscard]]
 	constexpr auto operator==(const vector_allocator &) const noexcept
 		-> bool = default;
+
+	constexpr void deallocate(value_type *begin) const noexcept
+	{
+		std::free(begin);
+	}
 };
 }
 
