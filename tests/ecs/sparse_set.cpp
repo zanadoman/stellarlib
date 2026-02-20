@@ -31,7 +31,7 @@
 #include <cstdint>
 #include <ranges>
 
-using namespace stellarlib::ecs;
+using namespace stellarlib;
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wexit-time-destructors"
@@ -45,7 +45,7 @@ constexpr std::array<std::uint32_t, 5> KEYS{0, 5, 10, 15, 20};
 
 TEST(stellarlib_ecs_sparse_set, should_insert_and_erase_keys)
 {
-	internal::sparse_set<std::uint32_t> set{};
+	ecs::internal::sparse_set<std::uint32_t> set{};
 	for (const auto i : std::views::iota(std::size_t{}, KEYS.size())) {
 		set.insert(KEYS[i]);
 		ASSERT_NE(std::ranges::find(set, KEYS[i]), set.end());

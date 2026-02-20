@@ -33,7 +33,7 @@
 #include <ranges>
 #include <utility>
 
-namespace stellarlib::ecs
+namespace stellarlib::ecs::internal
 {
 bitset::bitset(const bitset &other) noexcept
 	: _size{other._size}
@@ -41,8 +41,8 @@ bitset::bitset(const bitset &other) noexcept
 	if (ext::truthy(_size)) {
 		_capacity = _size;
 		ext::vector_allocator<std::size_t>::allocate(_begin, _capacity);
-		std::ranges::copy(other.segments(), _begin);
 		_end = _begin + _size;
+		std::ranges::copy(other.segments(), _begin);
 	}
 }
 
@@ -69,8 +69,8 @@ auto bitset::operator=(const bitset &other) noexcept
 		ext::vector_allocator<std::size_t>::reallocate(_begin, _capacity);
 	}
 
-	std::ranges::copy(other.segments(), _begin);
 	_end = _begin + _size;
+	std::ranges::copy(other.segments(), _begin);
 	return *this;
 }
 
@@ -90,12 +90,12 @@ bitset::~bitset() noexcept
 	ext::vector_allocator<std::size_t>::deallocate(_begin);
 }
 
-void bitset::insert(const std::size_t elem) noexcept
+void bitset::insert(const std::size_t bit) noexcept
 {
-	const auto index{ext::bit_index(elem)};
+	const auto index{ext::bit_index(bit)};
 
 	if (index < _size) {
-		_begin[index] |= ext::bit_mask(elem);
+		_begin[index] |= ext::bit_mask(bit);
 		return;
 	}
 
@@ -106,15 +106,15 @@ void bitset::insert(const std::size_t elem) noexcept
 	}
 
 	_size = index + 1;
-	_begin[index] = ext::bit_mask(elem);
+	_begin[index] = ext::bit_mask(bit);
 	_end = _begin + _size;
 }
 
-auto bitset::contains(const std::size_t elem) const noexcept
+auto bitset::contains(const std::size_t bit) const noexcept
 	-> bool
 {
-	const auto index{ext::bit_index(elem)};
-	return index < _size && ext::truthy((_begin[index] & ext::bit_mask(elem)));
+	const auto index{ext::bit_index(bit)};
+	return index < _size && ext::truthy((_begin[index] & ext::bit_mask(bit)));
 }
 
 auto bitset::operator==(const bitset &other) const noexcept
@@ -135,15 +135,15 @@ auto bitset::operator>=(const bitset &other) const noexcept
 	return other <= *this;
 }
 
-void bitset::erase(const std::size_t elem) noexcept
+void bitset::erase(const std::size_t bit) noexcept
 {
-	const auto index{ext::bit_index(elem)};
+	const auto index{ext::bit_index(bit)};
 
 	if (_size <= index) {
 		return;
 	}
 
-	_begin[index] &= ~ext::bit_mask(elem);
+	_begin[index] &= ~ext::bit_mask(bit);
 
 	if (index != _size - 1) {
 		return;
@@ -157,6 +157,8 @@ void bitset::erase(const std::size_t elem) noexcept
 void bitset::clear() noexcept
 {
 	std::ranges::fill(segments(), 0);
+	_end = _begin;
+	_size = 0;
 }
 
 auto bitset::segments() const noexcept

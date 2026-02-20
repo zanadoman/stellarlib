@@ -29,7 +29,7 @@
 #include <cstddef>
 #include <ranges>
 
-namespace stellarlib::ecs
+namespace stellarlib::ecs::internal
 {
 class bitset final : ext::vector_allocator<std::size_t>
 {
@@ -51,10 +51,10 @@ public:
 
 	~bitset() noexcept;
 
-	void insert(std::size_t elem) noexcept;
+	void insert(std::size_t bit) noexcept;
 
 	[[nodiscard]]
-	auto contains(std::size_t elem) const noexcept
+	auto contains(std::size_t bit) const noexcept
 		-> bool;
 
 	[[nodiscard]]
@@ -69,7 +69,7 @@ public:
 	auto operator>=(const bitset &other) const noexcept
 		-> bool;
 
-	void erase(std::size_t elem) noexcept;
+	void erase(std::size_t bit) noexcept;
 
 	void clear() noexcept;
 

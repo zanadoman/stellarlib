@@ -32,6 +32,7 @@ member init
 =
 & * { ->
 constexpr
+noexcept
 nodiscard
 explicit
 ++ -- += -= *= /= %=
