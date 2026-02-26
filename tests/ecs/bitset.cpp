@@ -50,10 +50,10 @@ constexpr std::array<std::uintmax_t, 3> BITS{
 	std::numeric_limits<std::uintmax_t>::digits * 2 - 1
 };
 
-static_assert(ext::bit_index(BITS[0]) > ext::bit_index(BITS[1]));
+static_assert(std::ranges::find(BITS, (std::ranges::min(BITS) + std::ranges::max(BITS)) / 2) != BITS.end());
+static_assert(ext::bit_index(BITS[1]) < ext::bit_index(BITS[0]));
 static_assert(ext::bit_index(BITS[1]) < ext::bit_index(BITS[2]));
 static_assert(ext::bit_index(BITS[2]) < ext::bit_index(BITS[0]));
-static_assert(std::ranges::find(BITS, (std::ranges::min(BITS) + std::ranges::max(BITS)) / 2) != BITS.end());
 
 namespace
 {

@@ -30,8 +30,8 @@ namespace stellarlib::ecs::internal
 {
 sparse_storage::sparse_storage(const sparse_storage &other) noexcept
 {
-	for (const auto [id, set] : other._maps.zip()) {
-		_maps.insert(id, set->clone());
+	for (const auto [id, map] : other._maps.zip()) {
+		_maps.insert(id, map->clone());
 	}
 }
 
@@ -44,8 +44,8 @@ auto sparse_storage::operator=(const sparse_storage &other) noexcept
 
 	_maps.clear();
 
-	for (const auto [id, set] : other._maps.zip()) {
-		_maps.insert(id, set->clone());
+	for (const auto [id, map] : other._maps.zip()) {
+		_maps.insert(id, map->clone());
 	}
 
 	return *this;

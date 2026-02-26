@@ -24,12 +24,24 @@
 #ifndef STELLARLIB_EXT_TYPE_TRAITS_HPP
 #define STELLARLIB_EXT_TYPE_TRAITS_HPP
 
+#include <stellarlib/ext/functional.hpp>
+
+#include <array>
+#include <cstddef>
+#include <tuple>
 #include <type_traits>
 
 namespace stellarlib::ext
 {
 template <typename T>
 constexpr bool is_trivially_relocatable_v{std::is_trivially_move_constructible_v<T> && std::is_trivially_destructible_v<T>};
+
+template <typename AlignTo, typename ...Fields>
+struct padding final
+{
+	static constexpr std::size_t size{(alignof(AlignTo) - (sizeof(Fields) + ...) % alignof(AlignTo)) % alignof(AlignTo)};
+	[[no_unique_address]] std::conditional_t<falsy(size), std::tuple<>, std::array<std::byte, size>> bytes;
+};
 }
 
 #endif
