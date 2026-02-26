@@ -129,13 +129,13 @@ public:
 	}
 
 	[[nodiscard]]
-	constexpr auto contains(const uint32_t entity) const noexcept
+	constexpr auto contains(const std::uint32_t entity) const noexcept
 	{
 		return _entities.contains(entity);
 	}
 
 	[[nodiscard]]
-	constexpr auto at(const uint32_t entity) const noexcept
+	constexpr auto at(const std::uint32_t entity) const noexcept
 		-> const internal::bitset *
 	{
 		if (const auto index{_entities.at(entity)}) {
@@ -147,16 +147,17 @@ public:
 
 	template <typename ...T>
 	[[nodiscard]]
-	constexpr auto at(const uint32_t entity) noexcept
+	constexpr auto at(const std::uint32_t entity) noexcept
+		requires (0 < sizeof...(T))
 	{
 		const auto &ids{world::ids<T...>()};
-		return [&entity, this, &ids]<std::size_t ...I>(std::index_sequence<I...>) -> std::tuple<std::uint32_t, T *...> {
-			return {entity, _components.at<T>(std::get<I>(ids)).at(entity)...};
+		return [&entity, this, &ids]<std::size_t ...I>(std::index_sequence<I...>) -> std::tuple<T *...> {
+			return {_components.at<T>(std::get<I>(ids)).at(entity)...};
 		}(std::index_sequence_for<T...>{});
 	}
 
 	[[nodiscard]]
-	constexpr auto operator[](const uint32_t entity) const noexcept
+	constexpr auto operator[](const std::uint32_t entity) const noexcept
 		-> const internal::bitset &
 	{
 		return _archetypes[_entities[entity]].first;
@@ -164,18 +165,23 @@ public:
 
 	template <typename ...T>
 	[[nodiscard]]
-	constexpr auto operator[](const uint32_t entity) const noexcept
+	constexpr auto operator[](const std::uint32_t entity) const noexcept
+		requires (0 < sizeof...(T))
 	{
 		const auto &ids{world::ids<T...>()};
-		return [&entity, this, &ids]<std::size_t ...I>(std::index_sequence<I...>) -> std::tuple<std::uint32_t, T &...> {
-			return {entity, _components.operator[]<T>(std::get<I>(ids))[entity]...};
+		return [&entity, this, &ids]<std::size_t ...I>(std::index_sequence<I...>) -> std::tuple<T &...> {
+			return {_components.operator[]<T>(std::get<I>(ids))[entity]...};
 		}(std::index_sequence_for<T...>{});
 	}
 
 	[[nodiscard]]
 	constexpr auto query() const noexcept
 	{
-		return _entities.keys();
+		return _archetypes | std::views::transform([](const auto &pair) -> auto {
+				return pair.second | std::views::transform([&pair](const auto entity) -> std::tuple<std::uint32_t, const internal::bitset &> {
+					return {entity, pair.first};
+				});
+			}) | std::views::join;
 	}
 
 	template <typename T>

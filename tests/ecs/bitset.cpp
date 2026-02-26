@@ -46,7 +46,7 @@ using namespace stellarlib;
 
 constexpr std::array<std::uintmax_t, 3> BITS{
 	std::numeric_limits<std::uintmax_t>::digits * 3 - 1,
-	std::numeric_limits<std::uintmax_t>::digits - 1,
+	std::numeric_limits<std::uintmax_t>::digits * 1 - 1,
 	std::numeric_limits<std::uintmax_t>::digits * 2 - 1
 };
 
