@@ -43,7 +43,7 @@ using namespace stellarlib;
 
 /* NOLINTBEGIN(cert-err58-cpp,performance-unnecessary-copy-initialization) */
 
-constexpr std::array<std::size_t, 5> KEYS{2, 1, 0, 3, 4};
+constexpr std::array<std::size_t, 5> KEYS{1, 2, 0, 4, 3};
 const std::array<std::shared_ptr<std::int32_t>, KEYS.size()> VALUES{
 	std::make_unique<std::int32_t>(0),
 	std::make_unique<std::int32_t>(5),

@@ -45,15 +45,15 @@ using namespace stellarlib;
 /* NOLINTBEGIN(cert-err58-cpp,performance-unnecessary-copy-initialization) */
 
 constexpr std::array<std::uintmax_t, 3> BITS{
-	std::numeric_limits<std::uintmax_t>::digits * 3 - 1,
 	std::numeric_limits<std::uintmax_t>::digits * 1 - 1,
+	std::numeric_limits<std::uintmax_t>::digits * 3 - 1,
 	std::numeric_limits<std::uintmax_t>::digits * 2 - 1
 };
 
 static_assert(std::ranges::find(BITS, (std::ranges::min(BITS) + std::ranges::max(BITS)) / 2) != BITS.end());
-static_assert(ext::bit_index(BITS[1]) < ext::bit_index(BITS[0]));
-static_assert(ext::bit_index(BITS[1]) < ext::bit_index(BITS[2]));
-static_assert(ext::bit_index(BITS[2]) < ext::bit_index(BITS[0]));
+static_assert(ext::bit_index(BITS[0]) < ext::bit_index(BITS[1]));
+static_assert(ext::bit_index(BITS[0]) < ext::bit_index(BITS[2]));
+static_assert(ext::bit_index(BITS[2]) < ext::bit_index(BITS[1]));
 
 namespace
 {
@@ -134,11 +134,28 @@ TEST(stellarlib_ecs_bitset, should_insert_and_erase_bits)
 		set.insert(bit);
 		ASSERT_TRUE(set.contains(bit));
 		set.erase(bit);
+		set.erase(bit);
 		ASSERT_FALSE(set.contains(bit));
 		set.insert(bit);
 		ASSERT_TRUE(set.contains(bit));
 	}
 	check_bits(set);
+}
+
+TEST(stellarlib_ecs_bitset, should_insert_bitset)
+{
+	ecs::internal::bitset set1{};
+	set1.insert(std::ranges::min(BITS) / 2);
+	set1.insert((std::ranges::min(BITS) + std::ranges::max(BITS)) / 2);
+	set1.erase((std::ranges::min(BITS) + std::ranges::max(BITS)) / 2);
+	ecs::internal::bitset set2{};
+	for (const auto bit : BITS) {
+		set2.insert(bit);
+	}
+	set1.insert(set2);
+	ASSERT_TRUE(set1.contains(std::ranges::min(BITS) / 2));
+	set1.erase(std::ranges::min(BITS) / 2);
+	ASSERT_EQ(set1, set2);
 }
 
 TEST(stellarlib_ecs_bitset, should_evaluate_equal_sets)
@@ -187,6 +204,24 @@ TEST(stellarlib_ecs_bitset, should_evaluate_subset_and_superset)
 	ASSERT_FALSE(superset <= subset);
 	ASSERT_TRUE(superset >= subset);
 	ASSERT_FALSE(subset >= superset);
+}
+
+TEST(stellarlib_ecs_bitset, should_erase_bitset)
+{
+	ecs::internal::bitset set1{};
+	for (const auto bit : BITS) {
+		set1.insert(bit);
+	}
+	const auto set2{set1};
+	set1.insert(std::ranges::min(BITS) / 2);
+	set1.erase(set2);
+	set1.erase(set2);
+	for (const auto bit : std::views::iota(std::uintmax_t{}, std::ranges::max(BITS))) {
+		ASSERT_EQ(set1.contains(bit), bit == std::ranges::min(BITS) / 2);
+	}
+	set1.erase(set1);
+	set1.erase(set1);
+	ASSERT_EQ(set1, ecs::internal::bitset{});
 }
 
 TEST(stellarlib_ecs_bitset, should_clear_bits)

@@ -52,6 +52,8 @@ public:
 
 	void insert(std::uintmax_t bit) noexcept;
 
+	void insert(const bitset &other) noexcept;
+
 	[[nodiscard]]
 	auto contains(std::uintmax_t bit) const noexcept
 		-> bool;
@@ -69,6 +71,8 @@ public:
 		-> bool;
 
 	void erase(std::uintmax_t bit) noexcept;
+
+	void erase(const bitset &other) noexcept;
 
 	void clear() noexcept;
 

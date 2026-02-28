@@ -41,7 +41,7 @@ using namespace stellarlib;
 
 /* NOLINTBEGIN(cert-err58-cpp,performance-unnecessary-copy-initialization) */
 
-constexpr std::array<std::uint32_t, 5> KEYS{0, 5, 10, 15, 20};
+constexpr std::array<std::uint32_t, 5> KEYS{1, 2, 0, 4, 3};
 
 TEST(stellarlib_ecs_sparse_set, should_insert_and_erase_keys)
 {

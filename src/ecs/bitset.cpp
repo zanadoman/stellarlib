@@ -108,6 +108,23 @@ void bitset::insert(const std::uintmax_t bit) noexcept
 	_begin[ext::bit_index(bit)] = ext::bit_mask(bit);
 }
 
+void bitset::insert(const bitset &other) noexcept
+{
+	for (const auto [lhs, rhs] : std::views::zip(std::ranges::subrange{_begin, _end}, std::ranges::subrange{other._begin, other._end})) {
+		lhs |= rhs;
+	}
+
+	if (_capacity < other._size) {
+		_capacity = other._size;
+		ext::vector_allocator<std::uintmax_t>::reallocate(_begin, _capacity);
+		_end = _begin + _capacity;
+	}
+
+	while (_size < other._size) {
+		_begin[_size++] = other._begin[_size];
+	}
+}
+
 auto bitset::contains(const std::uintmax_t bit) const noexcept
 	-> bool
 {
@@ -134,9 +151,30 @@ auto bitset::operator>=(const bitset &other) const noexcept
 
 void bitset::erase(const std::uintmax_t bit) noexcept
 {
+	if (_size <= ext::bit_index(bit)) {
+		return;
+	}
+
 	_begin[ext::bit_index(bit)] &= ~ext::bit_mask(bit);
 
-	for (; ext::falsy(_begin[_size - 1]) && 0 < _size; --_size) {}
+	while (ext::falsy(_begin[_size - 1])) {
+		if (ext::falsy(--_size)) {
+			break;
+		}
+	}
+
+	_end = _begin + _size;
+}
+
+void bitset::erase(const bitset &other) noexcept
+{
+	for (const auto [lhs, rhs] : std::views::zip(std::ranges::subrange{_begin, _end}, std::ranges::subrange{other._begin, other._end})) {
+		lhs &= ~rhs;
+	}
+
+	while (ext::truthy(_size) && ext::falsy(_begin[_size - 1])) {
+		--_size;
+	}
 
 	_end = _begin + _size;
 }
