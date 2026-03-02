@@ -30,10 +30,11 @@
 #include <algorithm>
 #include <cstdint>
 #include <memory>
+#include <ostream>
 #include <ranges>
 #include <utility>
 
-namespace stellarlib::ecs::internal
+namespace stellarlib::ecs
 {
 bitset::bitset(const bitset &other) noexcept
 	: _size{other._size}
@@ -184,5 +185,24 @@ void bitset::clear() noexcept
 	std::fill(_begin, _end, 0);
 	_end = _begin;
 	_size = 0;
+}
+
+auto operator<<(std::ostream &stream, const bitset &set)
+	-> std::ostream &
+{
+	stream << '{';
+	auto bits{set.bits()};
+	auto begin{bits.begin()};
+
+	if (begin != bits.end()) {
+		stream << ' ' << *begin++;
+
+		for (const auto bit : std::ranges::subrange{begin, bits.end()}) {
+			stream << ", " << bit;
+		}
+	}
+
+	stream << " }";
+	return stream;
 }
 }

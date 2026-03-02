@@ -57,17 +57,17 @@ public:
 	template <typename ...T>
 	[[nodiscard]]
 	static constexpr auto archetype() noexcept
-		-> const internal::bitset &
+		-> const bitset &
 	{
-		static const auto archetype{[] -> const internal::bitset & {
-			bitset.clear();
+		static const auto archetype{[] -> const bitset & {
+			cache.clear();
 			const auto &ids{world::ids<T...>()};
 
 			[ids]<std::size_t ...I>(std::index_sequence<I...>) -> void {
-				(bitset.insert(ids[I]), ...);
+				(cache.insert(ids[I]), ...);
 			}(std::index_sequence_for<T...>{});
 
-			return bitset;
+			return cache;
 		}()};
 		return archetype;
 	}
@@ -147,21 +147,21 @@ public:
 		}(std::index_sequence_for<T...>{});
 
 		const auto &extension{archetype<T...>()};
-		bitset = _archetypes[*i].first;
-		bitset.insert(extension);
+		cache = _archetypes[*i].first;
+		cache.insert(extension);
 
 		const auto it{std::ranges::find_if(_archetypes, [](const auto &pair) -> bool {
-			return pair.first == bitset;
+			return pair.first == cache;
 		})};
 
 		if (it == _archetypes.end()) {
 			_archetypes[*i].second.erase(entity);
 			_entities[entity] = _archetypes.size();
-			_archetypes.push(std::pair{bitset, internal::sparse_set<std::uint32_t>{}});
+			_archetypes.push(std::pair{cache, internal::sparse_set<std::uint32_t>{}});
 			(_archetypes.end() - 1)->second.insert(entity);
 
 			for (auto &index : _indices) {
-				if (index.first <= bitset) {
+				if (index.first <= cache) {
 					index.second.push(_archetypes.size() - 1);
 				}
 			}
@@ -183,7 +183,7 @@ public:
 
 	[[nodiscard]]
 	constexpr auto at(const std::uint32_t entity) const noexcept
-		-> const internal::bitset *
+		-> const bitset *
 	{
 		if (const auto index{_entities.at(entity)}) {
 			return std::addressof(_archetypes[*index].first);
@@ -205,7 +205,7 @@ public:
 
 	[[nodiscard]]
 	constexpr auto operator[](const std::uint32_t entity) const noexcept
-		-> const internal::bitset &
+		-> const bitset &
 	{
 		return _archetypes[_entities[entity]].first;
 	}
@@ -225,7 +225,7 @@ public:
 	constexpr auto query() const noexcept
 	{
 		return _archetypes | std::views::transform([](const auto &pair) -> auto {
-				return pair.second | std::views::transform([&pair](const auto entity) -> std::tuple<std::uint32_t, const internal::bitset &> {
+				return pair.second | std::views::transform([&pair](const auto entity) -> std::tuple<std::uint32_t, const bitset &> {
 					return {entity, pair.first};
 				});
 			}) | std::views::join;
@@ -295,21 +295,21 @@ public:
 		}(std::index_sequence_for<T...>{});
 
 		const auto &extension{archetype<T...>()};
-		bitset = _archetypes[*i].first;
-		bitset.erase(extension);
+		cache = _archetypes[*i].first;
+		cache.erase(extension);
 
 		const auto it{std::ranges::find_if(_archetypes, [](const auto &pair) -> bool {
-			return pair.first == bitset;
+			return pair.first == cache;
 		})};
 
 		if (it == _archetypes.end()) {
 			_archetypes[*i].second.erase(entity);
 			_entities[entity] = _archetypes.size();
-			_archetypes.push(std::pair{bitset, internal::sparse_set<std::uint32_t>{}});
+			_archetypes.push(std::pair{cache, internal::sparse_set<std::uint32_t>{}});
 			(_archetypes.end() - 1)->second.insert(entity);
 
 			for (auto &index : _indices) {
-				if (index.first <= bitset) {
+				if (index.first <= cache) {
 					index.second.push(_archetypes.size() - 1);
 				}
 			}
@@ -342,13 +342,13 @@ public:
 	}
 
 private:
-	static thread_local internal::bitset bitset;
+	static thread_local bitset cache;
 	internal::stack_vector<std::uint32_t, std::uint32_t> _queue;
 	internal::sparse_map<std::uint32_t, std::uint16_t> _entities;
-	internal::stack_vector<std::pair<internal::bitset, internal::sparse_set<std::uint32_t>>, std::uint16_t> _archetypes;
+	internal::stack_vector<std::pair<bitset, internal::sparse_set<std::uint32_t>>, std::uint16_t> _archetypes;
 	internal::sparse_storage _components;
 	internal::stack_vector<std::uint16_t, std::uint16_t> _queries;
-	internal::stack_vector<std::pair<internal::bitset, internal::stack_vector<std::uint16_t>>, std::uint16_t> _indices;
+	internal::stack_vector<std::pair<bitset, internal::stack_vector<std::uint16_t>>, std::uint16_t> _indices;
 };
 }
 

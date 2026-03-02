@@ -30,6 +30,7 @@
 #include <algorithm>
 #include <array>
 #include <cstdint>
+#include <iostream>
 #include <limits>
 #include <ranges>
 #include <utility>
@@ -57,17 +58,20 @@ static_assert(ext::bit_index(BITS[2]) < ext::bit_index(BITS[1]));
 
 namespace
 {
-constexpr void check_bits(const ecs::internal::bitset &set)
+constexpr void check_bits(const ecs::bitset &set)
 {
 	for (const auto bit : std::views::iota(std::uintmax_t{}, std::ranges::max(BITS))) {
 		ASSERT_EQ(set.contains(bit), std::ranges::find(BITS, bit) != BITS.end());
 	}
+	auto bits{BITS};
+	std::ranges::sort(bits);
+	ASSERT_TRUE(std::ranges::equal(set.bits(), bits));
 }
 }
 
 TEST(stellarlib_ecs_bitset, should_copy_via_ctor)
 {
-	ecs::internal::bitset set1{};
+	ecs::bitset set1{};
 	for (const auto bit : BITS) {
 		set1.insert(bit);
 	}
@@ -77,7 +81,7 @@ TEST(stellarlib_ecs_bitset, should_copy_via_ctor)
 
 TEST(stellarlib_ecs_bitset, should_move_via_ctor)
 {
-	ecs::internal::bitset set1{};
+	ecs::bitset set1{};
 	for (const auto bit : BITS) {
 		set1.insert(bit);
 	}
@@ -87,7 +91,7 @@ TEST(stellarlib_ecs_bitset, should_move_via_ctor)
 
 TEST(stellarlib_ecs_bitset, should_skip_self_copy_via_assignment)
 {
-	ecs::internal::bitset set{};
+	ecs::bitset set{};
 	for (const auto bit : BITS) {
 		set.insert(bit);
 	}
@@ -97,18 +101,18 @@ TEST(stellarlib_ecs_bitset, should_skip_self_copy_via_assignment)
 
 TEST(stellarlib_ecs_bitset, should_copy_via_assignment)
 {
-	ecs::internal::bitset set1{};
+	ecs::bitset set1{};
 	for (const auto bit : BITS) {
 		set1.insert(bit);
 	}
-	ecs::internal::bitset set2{};
+	ecs::bitset set2{};
 	set2 = set1;
 	check_bits(set2);
 }
 
 TEST(stellarlib_ecs_bitset, should_skip_self_move_via_assignment)
 {
-	ecs::internal::bitset set{};
+	ecs::bitset set{};
 	for (const auto bit : BITS) {
 		set.insert(bit);
 	}
@@ -118,37 +122,43 @@ TEST(stellarlib_ecs_bitset, should_skip_self_move_via_assignment)
 
 TEST(stellarlib_ecs_bitset, should_move_via_assignment)
 {
-	ecs::internal::bitset set1{};
+	ecs::bitset set1{};
 	for (const auto bit : BITS) {
 		set1.insert(bit);
 	}
-	ecs::internal::bitset set2{};
+	ecs::bitset set2{};
 	set2 = std::move(set1);
 	check_bits(set2);
 }
 
 TEST(stellarlib_ecs_bitset, should_insert_and_erase_bits)
 {
-	ecs::internal::bitset set{};
+	ecs::bitset set{};
 	for (const auto bit : BITS) {
 		set.insert(bit);
 		ASSERT_TRUE(set.contains(bit));
+		auto bits{set.bits()};
+		ASSERT_NE(std::ranges::find(bits, bit), bits.end());
 		set.erase(bit);
 		set.erase(bit);
 		ASSERT_FALSE(set.contains(bit));
+		bits = set.bits();
+		ASSERT_EQ(std::ranges::find(bits, bit), bits.end());
 		set.insert(bit);
 		ASSERT_TRUE(set.contains(bit));
+		bits = set.bits();
+		ASSERT_NE(std::ranges::find(bits, bit), bits.end());
 	}
 	check_bits(set);
 }
 
-TEST(stellarlib_ecs_bitset, should_insert_bitset)
+TEST(stellarlib_ecs_bitset, should_insert_set)
 {
-	ecs::internal::bitset set1{};
+	ecs::bitset set1{};
 	set1.insert(std::ranges::min(BITS) / 2);
 	set1.insert((std::ranges::min(BITS) + std::ranges::max(BITS)) / 2);
 	set1.erase((std::ranges::min(BITS) + std::ranges::max(BITS)) / 2);
-	ecs::internal::bitset set2{};
+	ecs::bitset set2{};
 	for (const auto bit : BITS) {
 		set2.insert(bit);
 	}
@@ -160,11 +170,11 @@ TEST(stellarlib_ecs_bitset, should_insert_bitset)
 
 TEST(stellarlib_ecs_bitset, should_evaluate_equal_sets)
 {
-	ecs::internal::bitset set1{};
+	ecs::bitset set1{};
 	set1.insert((std::ranges::min(BITS) + std::ranges::max(BITS)) / 2);
 	set1.insert(std::ranges::min(BITS));
 	set1.erase(std::ranges::min(BITS));
-	ecs::internal::bitset set2{};
+	ecs::bitset set2{};
 	set2.insert((std::ranges::min(BITS) + std::ranges::max(BITS)) / 2);
 	set2.insert(std::ranges::max(BITS));
 	set2.erase(std::ranges::max(BITS));
@@ -179,9 +189,9 @@ TEST(stellarlib_ecs_bitset, should_evaluate_equal_sets)
 
 TEST(stellarlib_ecs_bitset, should_evaluate_disjoint_sets)
 {
-	ecs::internal::bitset set1{};
+	ecs::bitset set1{};
 	set1.insert(std::ranges::min(BITS));
-	ecs::internal::bitset set2{};
+	ecs::bitset set2{};
 	set2.insert(std::ranges::max(BITS));
 	ASSERT_NE(set1, set2);
 	ASSERT_NE(set2, set1);
@@ -193,11 +203,11 @@ TEST(stellarlib_ecs_bitset, should_evaluate_disjoint_sets)
 
 TEST(stellarlib_ecs_bitset, should_evaluate_subset_and_superset)
 {
-	ecs::internal::bitset subset{};
+	ecs::bitset subset{};
 	subset.insert(std::ranges::min(BITS));
 	subset.insert(std::ranges::max(BITS));
 	subset.erase(std::ranges::max(BITS));
-	ecs::internal::bitset superset{};
+	ecs::bitset superset{};
 	superset.insert(std::ranges::min(BITS));
 	superset.insert((std::ranges::min(BITS) + std::ranges::max(BITS)) / 2);
 	ASSERT_TRUE(subset <= superset);
@@ -206,9 +216,9 @@ TEST(stellarlib_ecs_bitset, should_evaluate_subset_and_superset)
 	ASSERT_FALSE(subset >= superset);
 }
 
-TEST(stellarlib_ecs_bitset, should_erase_bitset)
+TEST(stellarlib_ecs_bitset, should_erase_set)
 {
-	ecs::internal::bitset set1{};
+	ecs::bitset set1{};
 	for (const auto bit : BITS) {
 		set1.insert(bit);
 	}
@@ -221,12 +231,12 @@ TEST(stellarlib_ecs_bitset, should_erase_bitset)
 	}
 	set1.erase(set1);
 	set1.erase(set1);
-	ASSERT_EQ(set1, ecs::internal::bitset{});
+	ASSERT_EQ(set1, ecs::bitset{});
 }
 
 TEST(stellarlib_ecs_bitset, should_clear_bits)
 {
-	ecs::internal::bitset set{};
+	ecs::bitset set{};
 	for (const auto bit : std::views::iota(std::uintmax_t{}, std::ranges::max(BITS))) {
 		set.insert(bit);
 	}
@@ -235,6 +245,20 @@ TEST(stellarlib_ecs_bitset, should_clear_bits)
 		set.insert(bit);
 	}
 	check_bits(set);
+}
+
+TEST(stellarlib_ecs_bitset, should_print_set)
+{
+	ecs::bitset set{};
+	testing::internal::CaptureStdout();
+	std::cout << set << '\n';
+	ASSERT_EQ(testing::internal::GetCapturedStdout(), "{ }\n");
+	set.insert(0);
+	set.insert(1);
+	set.insert(2);
+	testing::internal::CaptureStdout();
+	std::cout << set << '\n';
+	ASSERT_EQ(testing::internal::GetCapturedStdout(), "{ 0, 1, 2 }\n");
 }
 
 /* NOLINTEND(cert-err58-cpp,performance-unnecessary-copy-initialization) */

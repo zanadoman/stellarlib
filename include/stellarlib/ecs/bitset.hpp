@@ -24,11 +24,15 @@
 #ifndef STELLARLIB_ECS_BITSET_HPP
 #define STELLARLIB_ECS_BITSET_HPP
 
+#include <stellarlib/ext/bit.hpp>
 #include <stellarlib/ext/memory.hpp>
 
 #include <cstdint>
+#include <limits>
+#include <ostream>
+#include <ranges>
 
-namespace stellarlib::ecs::internal
+namespace stellarlib::ecs
 {
 class bitset final : ext::vector_allocator<std::uintmax_t>
 {
@@ -70,6 +74,14 @@ public:
 	auto operator>=(const bitset &other) const noexcept
 		-> bool;
 
+	[[nodiscard]]
+	constexpr auto bits() const noexcept
+	{
+		return std::views::iota(std::uintmax_t{}, _size * std::numeric_limits<std::uintmax_t>::digits) | std::views::filter([this](const auto bit) -> auto {
+			return _begin[ext::bit_index(bit)] & ext::bit_mask(bit);
+		});
+	}
+
 	void erase(std::uintmax_t bit) noexcept;
 
 	void erase(const bitset &other) noexcept;
@@ -82,6 +94,9 @@ private:
 	std::uintmax_t *_begin{};
 	std::uintmax_t *_end{};
 };
+
+auto operator<<(std::ostream &stream, const bitset &set)
+	-> std::ostream &;
 }
 
 #endif

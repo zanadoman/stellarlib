@@ -27,5 +27,5 @@
 
 namespace stellarlib::ecs
 {
-thread_local internal::bitset world::bitset{};
+thread_local bitset world::cache{};
 }
