@@ -25,7 +25,9 @@
 
 #include <gtest/gtest.h>
 
+#include <algorithm>
 #include <cstdint>
+#include <initializer_list>
 
 using namespace stellarlib;
 
@@ -43,6 +45,8 @@ TEST(stellarlib_ecs_sparse_storage, should_assign_ids)
 	ASSERT_EQ(ecs::internal::sparse_storage::id<std::int32_t>(), 0);
 	ASSERT_EQ(ecs::internal::sparse_storage::id<std::int64_t>(), 1);
 	ASSERT_EQ(ecs::internal::sparse_storage::id<std::int64_t>(), 1);
+	ASSERT_TRUE(std::ranges::equal(ecs::internal::sparse_storage::ids<std::int32_t, std::int64_t>(), std::initializer_list<std::uint16_t>{0, 1}));
+	ASSERT_TRUE(std::ranges::equal(ecs::internal::sparse_storage::ids<std::int32_t, std::int64_t>(), std::initializer_list<std::uint16_t>{0, 1}));
 }
 
 TEST(stellarlib_ecs_sparse_storage, should_copy_via_ctor)

@@ -28,6 +28,7 @@
 #include <stellarlib/ecs/sparse_map.hpp>
 #include <stellarlib/ext/utility.hpp>
 
+#include <array>
 #include <cstdint>
 #include <memory>
 
@@ -41,6 +42,15 @@ public:
 	static constexpr auto id() noexcept
 	{
 		return ext::scoped_typeid<sparse_storage, T, std::uint16_t>();
+	}
+
+	template <typename ...T>
+	[[nodiscard]]
+	static constexpr auto ids() noexcept
+		-> const std::array<std::uint16_t, sizeof...(T)> &
+	{
+		static const std::array<std::uint16_t, sizeof...(T)> ids{id<T>()...};
+		return ids;
 	}
 
 	[[nodiscard]]
