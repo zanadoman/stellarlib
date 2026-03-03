@@ -28,6 +28,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <initializer_list>
+#include <memory>
 
 using namespace stellarlib;
 
@@ -39,14 +40,21 @@ using namespace stellarlib;
 
 /* NOLINTBEGIN(cert-err58-cpp,performance-unnecessary-copy-initialization) */
 
+class foo final {};
+
+class bar final {};
+
 TEST(stellarlib_ecs_sparse_storage, should_assign_ids)
 {
-	ASSERT_EQ(ecs::internal::sparse_storage::id<std::int32_t>(), 0);
-	ASSERT_EQ(ecs::internal::sparse_storage::id<std::int32_t>(), 0);
-	ASSERT_EQ(ecs::internal::sparse_storage::id<std::int64_t>(), 1);
-	ASSERT_EQ(ecs::internal::sparse_storage::id<std::int64_t>(), 1);
-	ASSERT_TRUE(std::ranges::equal(ecs::internal::sparse_storage::ids<std::int32_t, std::int64_t>(), std::initializer_list<std::uint16_t>{0, 1}));
-	ASSERT_TRUE(std::ranges::equal(ecs::internal::sparse_storage::ids<std::int32_t, std::int64_t>(), std::initializer_list<std::uint16_t>{0, 1}));
+	const auto id1{ecs::internal::sparse_storage::id<foo>()};
+	ASSERT_EQ(ecs::internal::sparse_storage::id<foo>(), id1);
+	const auto id2{ecs::internal::sparse_storage::id<bar>()};
+	ASSERT_EQ(ecs::internal::sparse_storage::id<bar>(), id2);
+	ASSERT_EQ(id1 + 1, id2);
+	ASSERT_EQ(std::addressof(ecs::internal::sparse_storage::ids<foo, bar>()), std::addressof(ecs::internal::sparse_storage::ids<foo, bar>()));
+	ASSERT_TRUE(std::ranges::equal(ecs::internal::sparse_storage::ids<foo, bar>(), std::initializer_list<std::uint16_t>{id1, id2}));
+	ASSERT_EQ(std::addressof(ecs::internal::sparse_storage::ids<bar, foo>()), std::addressof(ecs::internal::sparse_storage::ids<bar, foo>()));
+	ASSERT_TRUE(std::ranges::equal(ecs::internal::sparse_storage::ids<bar, foo>(), std::initializer_list<std::uint16_t>{id2, id1}));
 }
 
 TEST(stellarlib_ecs_sparse_storage, should_copy_via_ctor)

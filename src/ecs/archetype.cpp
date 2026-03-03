@@ -90,22 +90,10 @@ archetype::~archetype() noexcept
 	ext::vector_allocator<std::uintmax_t>::deallocate(_begin);
 }
 
-void archetype::insert(const std::uintmax_t bit) noexcept
+void archetype::insert(const std::uintmax_t id) noexcept
 {
-	if (ext::bit_index(bit) < _size) {
-		_begin[ext::bit_index(bit)] |= ext::bit_mask(bit);
-		return;
-	}
-
-	if (_capacity <= ext::bit_index(bit)) {
-		_capacity = ext::bit_index(bit) + 1;
-		ext::vector_allocator<std::uintmax_t>::reallocate(_begin, _capacity);
-		std::fill(_begin + _size, _begin + ext::bit_index(bit), 0);
-	}
-
-	_size = ext::bit_index(bit) + 1;
+	insert(ext::bit_index(id), ext::bit_mask(id));
 	_end = _begin + _size;
-	_begin[ext::bit_index(bit)] = ext::bit_mask(bit);
 }
 
 void archetype::insert(const archetype &other) noexcept
@@ -125,10 +113,10 @@ void archetype::insert(const archetype &other) noexcept
 	}
 }
 
-auto archetype::contains(const std::uintmax_t bit) const noexcept
+auto archetype::contains(const std::uintmax_t id) const noexcept
 	-> bool
 {
-	return ext::bit_index(bit) < _size && ext::truthy(_begin[ext::bit_index(bit)] & ext::bit_mask(bit));
+	return ext::bit_index(id) < _size && ext::truthy(_begin[ext::bit_index(id)] & ext::bit_mask(id));
 }
 
 auto archetype::operator==(const archetype &other) const noexcept
@@ -149,13 +137,13 @@ auto archetype::operator>=(const archetype &other) const noexcept
 	return other <= *this;
 }
 
-void archetype::erase(const std::uintmax_t bit) noexcept
+void archetype::erase(const std::uintmax_t id) noexcept
 {
-	if (_size <= ext::bit_index(bit)) {
+	if (_size <= ext::bit_index(id)) {
 		return;
 	}
 
-	_begin[ext::bit_index(bit)] &= ~ext::bit_mask(bit);
+	_begin[ext::bit_index(id)] &= ~ext::bit_mask(id);
 
 	while (ext::falsy(_begin[_size - 1])) {
 		if (ext::falsy(--_size)) {
@@ -184,5 +172,22 @@ void archetype::clear() noexcept
 	std::fill(_begin, _end, 0);
 	_end = _begin;
 	_size = 0;
+}
+
+void archetype::insert(const std::uintmax_t index, const std::uintmax_t mask) noexcept
+{
+	if (index < _size) {
+		_begin[index] |= mask;
+		return;
+	}
+
+	if (_capacity <= index) {
+		_capacity = index + 1;
+		ext::vector_allocator<std::uintmax_t>::reallocate(_begin, _capacity);
+		std::fill(_begin + _size, _begin + index, 0);
+	}
+
+	_begin[index] = mask;
+	_size = index + 1;
 }
 }

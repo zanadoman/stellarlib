@@ -54,24 +54,6 @@ public:
 		return ids;
 	}
 
-	template <typename ...T>
-	[[nodiscard]]
-	static constexpr auto get_archetype() noexcept
-		-> const archetype &
-	{
-		static const auto cache{[] -> const archetype & {
-			bitset.clear();
-			const auto &ids{world::ids<T...>()};
-
-			[ids]<std::size_t ...I>(std::index_sequence<I...>) -> void {
-				(bitset.insert(ids[I]), ...);
-			}(std::index_sequence_for<T...>{});
-
-			return bitset;
-		}()};
-		return cache;
-	}
-
 	[[nodiscard]]
 	explicit constexpr world() noexcept = default;
 
@@ -105,7 +87,7 @@ public:
 			(_components.at<T>(ids[I]).insert(entity, std::forward<T>(components)), ...);
 		}(std::index_sequence_for<T...>{});
 
-		const auto &archetype{get_archetype<T...>()};
+		const auto &archetype{archetype::of<T...>()};
 		const auto it{std::ranges::find_if(_archetypes, [&archetype](const auto &pair) -> bool {
 			return pair.first == archetype;
 		})};
@@ -146,7 +128,7 @@ public:
 			(_components.at<T>(ids[I]).insert(entity, std::forward<T>(components)), ...);
 		}(std::index_sequence_for<T...>{});
 
-		const auto &extension{get_archetype<T...>()};
+		const auto &extension{archetype::of<T...>()};
 		bitset = _archetypes[*i].first;
 		bitset.insert(extension);
 
@@ -246,7 +228,7 @@ public:
 		const auto id{ext::scoped_typeid<world, std::tuple<T...>, std::uint16_t>()};
 
 		if (_queries.extend(id + 1, static_cast<std::uint16_t>(-1)) || _queries[id] == static_cast<std::uint16_t>(-1)) {
-			const auto &archetype{get_archetype<T...>()};
+			const auto &archetype{archetype::of<T...>()};
 			const auto it{std::ranges::find_if(_indices, [&archetype](const auto &pair) -> bool {
 				return pair.first == archetype;
 			})};
@@ -294,7 +276,7 @@ public:
 			(_components.at<T>(ids[I]).erase(entity), ...);
 		}(std::index_sequence_for<T...>{});
 
-		const auto &extension{get_archetype<T...>()};
+		const auto &extension{archetype::of<T...>()};
 		bitset = _archetypes[*i].first;
 		bitset.erase(extension);
 

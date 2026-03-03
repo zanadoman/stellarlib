@@ -38,6 +38,19 @@ endif()
 find_package(GTest)
 if(TARGET GTest::gtest_main)
 	file(GLOB_RECURSE TESTS ${CMAKE_SOURCE_DIR}/tests/*.cpp)
+	foreach(SOURCE ${TESTS})
+		get_filename_component(TEST ${SOURCE} NAME_WLE)
+		set(TEST test_${TEST})
+		add_executable(${TEST} EXCLUDE_FROM_ALL ${SOURCE})
+		target_link_libraries(${TEST} GTest::gtest_main ${PROJECT_NAME})
+		if(WIN32)
+			add_custom_command(
+				TARGET ${TEST} POST_BUILD
+				COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:tests> $<TARGET_RUNTIME_DLLS:tests>
+				COMMAND_EXPAND_LISTS
+			)
+		endif()
+	endforeach()
 	add_executable(tests EXCLUDE_FROM_ALL ${TESTS})
 	target_link_libraries(tests GTest::gtest_main ${PROJECT_NAME})
 	if(WIN32)

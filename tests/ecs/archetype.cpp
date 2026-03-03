@@ -23,6 +23,7 @@
 
 #include <stellarlib/ecs/archetype.hpp>
 
+#include <stellarlib/ecs/sparse_storage.hpp>
 #include <stellarlib/ext/bit.hpp>
 
 #include <gtest/gtest.h>
@@ -31,6 +32,7 @@
 #include <array>
 #include <cstdint>
 #include <limits>
+#include <memory>
 #include <ranges>
 #include <utility>
 
@@ -44,130 +46,145 @@ using namespace stellarlib;
 
 /* NOLINTBEGIN(cert-err58-cpp,performance-unnecessary-copy-initialization) */
 
-constexpr std::array<std::uintmax_t, 3> BITS{
+class foo final {};
+
+class bar final {};
+
+class baz final {};
+
+constexpr std::array<std::uintmax_t, 3> IDS{
 	std::numeric_limits<std::uintmax_t>::digits * 1 - 1,
 	std::numeric_limits<std::uintmax_t>::digits * 3 - 1,
 	std::numeric_limits<std::uintmax_t>::digits * 2 - 1
 };
 
-static_assert(std::ranges::find(BITS, (std::ranges::min(BITS) + std::ranges::max(BITS)) / 2) != BITS.end());
-static_assert(ext::bit_index(BITS[0]) < ext::bit_index(BITS[1]));
-static_assert(ext::bit_index(BITS[0]) < ext::bit_index(BITS[2]));
-static_assert(ext::bit_index(BITS[2]) < ext::bit_index(BITS[1]));
+static_assert(std::ranges::find(IDS, (std::ranges::min(IDS) + std::ranges::max(IDS)) / 2) != IDS.end());
+static_assert(ext::bit_index(IDS[0]) < ext::bit_index(IDS[1]));
+static_assert(ext::bit_index(IDS[0]) < ext::bit_index(IDS[2]));
+static_assert(ext::bit_index(IDS[2]) < ext::bit_index(IDS[1]));
 
 namespace
 {
-constexpr void check_bits(const ecs::archetype &archetype)
+constexpr void check_ids(const ecs::archetype &archetype)
 {
-	for (const auto bit : std::views::iota(std::uintmax_t{}, std::ranges::max(BITS))) {
-		ASSERT_EQ(archetype.contains(bit), std::ranges::find(BITS, bit) != BITS.end());
+	for (const auto id : std::views::iota(std::uintmax_t{}, std::ranges::max(IDS))) {
+		ASSERT_EQ(archetype.contains(id), std::ranges::find(IDS, id) != IDS.end());
 	}
 }
+}
+
+TEST(stellarlib_ecs_archetype, should_cache_archetype)
+{
+	static_cast<void>(ecs::internal::sparse_storage::ids<foo, bar, baz>());
+	ASSERT_EQ(std::addressof(ecs::archetype::of<foo, baz>()), std::addressof(ecs::archetype::of<foo, baz>()));
+	ASSERT_TRUE((ecs::archetype::of<foo, baz>)().contains(ecs::internal::sparse_storage::id<foo>()));
+	ASSERT_FALSE((ecs::archetype::of<foo, baz>)().contains(ecs::internal::sparse_storage::id<bar>()));
+	ASSERT_TRUE((ecs::archetype::of<foo, baz>)().contains(ecs::internal::sparse_storage::id<baz>()));
 }
 
 TEST(stellarlib_ecs_archetype, should_copy_via_ctor)
 {
 	ecs::archetype archetype1{};
-	for (const auto bit : BITS) {
-		archetype1.insert(bit);
+	for (const auto id : IDS) {
+		archetype1.insert(id);
 	}
 	const auto archetype2{archetype1};
-	check_bits(archetype2);
+	check_ids(archetype2);
 }
 
 TEST(stellarlib_ecs_archetype, should_move_via_ctor)
 {
 	ecs::archetype archetype1{};
-	for (const auto bit : BITS) {
-		archetype1.insert(bit);
+	for (const auto id : IDS) {
+		archetype1.insert(id);
 	}
 	const auto archetype2{std::move(archetype1)};
-	check_bits(archetype2);
+	check_ids(archetype2);
 }
 
 TEST(stellarlib_ecs_archetype, should_skip_self_copy_via_assignment)
 {
 	ecs::archetype archetype{};
-	for (const auto bit : BITS) {
-		archetype.insert(bit);
+	for (const auto id : IDS) {
+		archetype.insert(id);
 	}
 	archetype = archetype;
-	check_bits(archetype);
+	check_ids(archetype);
 }
 
 TEST(stellarlib_ecs_archetype, should_copy_via_assignment)
 {
 	ecs::archetype archetype1{};
-	for (const auto bit : BITS) {
-		archetype1.insert(bit);
+	for (const auto id : IDS) {
+		archetype1.insert(id);
 	}
 	ecs::archetype archetype2{};
 	archetype2 = archetype1;
-	check_bits(archetype2);
+	check_ids(archetype2);
 }
 
 TEST(stellarlib_ecs_archetype, should_skip_self_move_via_assignment)
 {
 	ecs::archetype archetype{};
-	for (const auto bit : BITS) {
-		archetype.insert(bit);
+	for (const auto id : IDS) {
+		archetype.insert(id);
 	}
 	archetype = std::move(archetype);
-	check_bits(archetype);
+	check_ids(archetype);
 }
 
 TEST(stellarlib_ecs_archetype, should_move_via_assignment)
 {
 	ecs::archetype archetype1{};
-	for (const auto bit : BITS) {
-		archetype1.insert(bit);
+	for (const auto id : IDS) {
+		archetype1.insert(id);
 	}
 	ecs::archetype archetype2{};
 	archetype2 = std::move(archetype1);
-	check_bits(archetype2);
+	check_ids(archetype2);
 }
 
-TEST(stellarlib_ecs_archetype, should_insert_and_erase_bits)
+TEST(stellarlib_ecs_archetype, should_insert_and_erase_ids)
 {
 	ecs::archetype archetype{};
-	for (const auto bit : BITS) {
-		archetype.insert(bit);
-		ASSERT_TRUE(archetype.contains(bit));
-		archetype.erase(bit);
-		archetype.erase(bit);
-		ASSERT_FALSE(archetype.contains(bit));
-		archetype.insert(bit);
-		ASSERT_TRUE(archetype.contains(bit));
+	for (const auto id : IDS) {
+		archetype.insert(id);
+		ASSERT_TRUE(archetype.contains(id));
+		archetype.erase(id);
+		archetype.erase(id);
+		ASSERT_FALSE(archetype.contains(id));
+		archetype.insert(id);
+		ASSERT_TRUE(archetype.contains(id));
 	}
-	check_bits(archetype);
+	check_ids(archetype);
 }
 
 TEST(stellarlib_ecs_archetype, should_insert_archetype)
 {
 	ecs::archetype archetype1{};
-	archetype1.insert(std::ranges::min(BITS) / 2);
-	archetype1.insert((std::ranges::min(BITS) + std::ranges::max(BITS)) / 2);
-	archetype1.erase((std::ranges::min(BITS) + std::ranges::max(BITS)) / 2);
+	archetype1.insert(std::ranges::min(IDS) / 2);
+	archetype1.insert((std::ranges::min(IDS) + std::ranges::max(IDS)) / 2);
+	archetype1.erase((std::ranges::min(IDS) + std::ranges::max(IDS)) / 2);
 	ecs::archetype archetype2{};
-	for (const auto bit : BITS) {
-		archetype2.insert(bit);
+	for (const auto id : IDS) {
+		archetype2.insert(id);
 	}
 	archetype1.insert(archetype2);
-	ASSERT_TRUE(archetype1.contains(std::ranges::min(BITS) / 2));
-	archetype1.erase(std::ranges::min(BITS) / 2);
+	ASSERT_TRUE(archetype1.contains(std::ranges::min(IDS) / 2));
+	archetype1.erase(std::ranges::min(IDS) / 2);
 	ASSERT_EQ(archetype1, archetype2);
 }
 
 TEST(stellarlib_ecs_archetype, should_evaluate_equal_archetypes)
 {
 	ecs::archetype archetype1{};
-	archetype1.insert((std::ranges::min(BITS) + std::ranges::max(BITS)) / 2);
-	archetype1.insert(std::ranges::min(BITS));
-	archetype1.erase(std::ranges::min(BITS));
+	archetype1.insert((std::ranges::min(IDS) + std::ranges::max(IDS)) / 2);
+	archetype1.insert(std::ranges::min(IDS));
+	archetype1.erase(std::ranges::min(IDS));
 	ecs::archetype archetype2{};
-	archetype2.insert((std::ranges::min(BITS) + std::ranges::max(BITS)) / 2);
-	archetype2.insert(std::ranges::max(BITS));
-	archetype2.erase(std::ranges::max(BITS));
+	archetype2.insert((std::ranges::min(IDS) + std::ranges::max(IDS)) / 2);
+	archetype2.insert(std::ranges::max(IDS));
+	archetype2.erase(std::ranges::max(IDS));
 	ASSERT_EQ(archetype1, archetype2);
 	ASSERT_EQ(archetype2, archetype1);
 	ASSERT_TRUE(archetype1 <= archetype2);
@@ -177,12 +194,12 @@ TEST(stellarlib_ecs_archetype, should_evaluate_equal_archetypes)
 }
 
 
-TEST(stellarlib_ecs_archetype, should_evaluate_disjoint_archetypes)
+TEST(stellarlib_ecs_archetype, should_evaluate_unequal_archetypes)
 {
 	ecs::archetype archetype1{};
-	archetype1.insert(std::ranges::min(BITS));
+	archetype1.insert(std::ranges::min(IDS));
 	ecs::archetype archetype2{};
-	archetype2.insert(std::ranges::max(BITS));
+	archetype2.insert(std::ranges::max(IDS));
 	ASSERT_NE(archetype1, archetype2);
 	ASSERT_NE(archetype2, archetype1);
 	ASSERT_FALSE(archetype1 <= archetype2);
@@ -191,15 +208,15 @@ TEST(stellarlib_ecs_archetype, should_evaluate_disjoint_archetypes)
 	ASSERT_FALSE(archetype1 >= archetype2);
 }
 
-TEST(stellarlib_ecs_archetype, should_evaluate_subset_and_superset)
+TEST(stellarlib_ecs_archetype, should_evaluate_subtype_and_supertype)
 {
 	ecs::archetype subarchetype{};
-	subarchetype.insert(std::ranges::min(BITS));
-	subarchetype.insert(std::ranges::max(BITS));
-	subarchetype.erase(std::ranges::max(BITS));
+	subarchetype.insert(std::ranges::min(IDS));
+	subarchetype.insert(std::ranges::max(IDS));
+	subarchetype.erase(std::ranges::max(IDS));
 	ecs::archetype superarchetype{};
-	superarchetype.insert(std::ranges::min(BITS));
-	superarchetype.insert((std::ranges::min(BITS) + std::ranges::max(BITS)) / 2);
+	superarchetype.insert(std::ranges::min(IDS));
+	superarchetype.insert((std::ranges::min(IDS) + std::ranges::max(IDS)) / 2);
 	ASSERT_TRUE(subarchetype <= superarchetype);
 	ASSERT_FALSE(superarchetype <= subarchetype);
 	ASSERT_TRUE(superarchetype >= subarchetype);
@@ -209,32 +226,32 @@ TEST(stellarlib_ecs_archetype, should_evaluate_subset_and_superset)
 TEST(stellarlib_ecs_archetype, should_erase_archetype)
 {
 	ecs::archetype archetype1{};
-	for (const auto bit : BITS) {
-		archetype1.insert(bit);
+	for (const auto id : IDS) {
+		archetype1.insert(id);
 	}
 	const auto archetype2{archetype1};
-	archetype1.insert(std::ranges::min(BITS) / 2);
+	archetype1.insert(std::ranges::min(IDS) / 2);
 	archetype1.erase(archetype2);
 	archetype1.erase(archetype2);
-	for (const auto bit : std::views::iota(std::uintmax_t{}, std::ranges::max(BITS))) {
-		ASSERT_EQ(archetype1.contains(bit), bit == std::ranges::min(BITS) / 2);
+	for (const auto id : std::views::iota(std::uintmax_t{}, std::ranges::max(IDS))) {
+		ASSERT_EQ(archetype1.contains(id), id == std::ranges::min(IDS) / 2);
 	}
 	archetype1.erase(archetype1);
 	archetype1.erase(archetype1);
 	ASSERT_EQ(archetype1, ecs::archetype{});
 }
 
-TEST(stellarlib_ecs_archetype, should_clear_bits)
+TEST(stellarlib_ecs_archetype, should_clear_ids)
 {
 	ecs::archetype archetype{};
-	for (const auto bit : std::views::iota(std::uintmax_t{}, std::ranges::max(BITS))) {
-		archetype.insert(bit);
+	for (const auto id : std::views::iota(std::uintmax_t{}, std::ranges::max(IDS))) {
+		archetype.insert(id);
 	}
 	archetype.clear();
-	for (const auto bit : BITS) {
-		archetype.insert(bit);
+	for (const auto id : IDS) {
+		archetype.insert(id);
 	}
-	check_bits(archetype);
+	check_ids(archetype);
 }
 
 /* NOLINTEND(cert-err58-cpp,performance-unnecessary-copy-initialization) */

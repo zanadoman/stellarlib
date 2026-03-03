@@ -24,6 +24,8 @@
 #ifndef STELLARLIB_ECS_ARCHETYPE_HPP
 #define STELLARLIB_ECS_ARCHETYPE_HPP
 
+#include <stellarlib/ecs/sparse_storage.hpp>
+#include <stellarlib/ext/bit.hpp>
 #include <stellarlib/ext/memory.hpp>
 
 #include <cstdint>
@@ -33,6 +35,25 @@ namespace stellarlib::ecs
 class archetype final : ext::vector_allocator<std::uintmax_t>
 {
 public:
+	template <typename ...T>
+	[[nodiscard]]
+	static constexpr auto of() noexcept
+		-> const archetype &
+	{
+		static const auto cache{[] -> archetype {
+			archetype archetype{};
+
+			for (const auto id : internal::sparse_storage::ids<T...>()) {
+				archetype.insert(ext::bit_index(id), ext::bit_mask(id));
+			}
+
+			archetype._end = archetype._begin + archetype._size;
+			return archetype;
+		}()};
+
+		return cache;
+	}
+
 	[[nodiscard]]
 	explicit constexpr archetype() noexcept = default;
 
@@ -50,12 +71,12 @@ public:
 
 	~archetype() noexcept;
 
-	void insert(std::uintmax_t bit) noexcept;
+	void insert(std::uintmax_t id) noexcept;
 
 	void insert(const archetype &other) noexcept;
 
 	[[nodiscard]]
-	auto contains(std::uintmax_t bit) const noexcept
+	auto contains(std::uintmax_t id) const noexcept
 		-> bool;
 
 	[[nodiscard]]
@@ -70,7 +91,7 @@ public:
 	auto operator>=(const archetype &other) const noexcept
 		-> bool;
 
-	void erase(std::uintmax_t bit) noexcept;
+	void erase(std::uintmax_t id) noexcept;
 
 	void erase(const archetype &other) noexcept;
 
@@ -81,6 +102,8 @@ private:
 	std::uintmax_t _capacity{};
 	std::uintmax_t *_begin{};
 	std::uintmax_t *_end{};
+
+	void insert(std::uintmax_t index, std::uintmax_t mask) noexcept;
 };
 }
 
