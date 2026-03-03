@@ -28,7 +28,7 @@
 
 #include <cstdint>
 
-namespace stellarlib::ecs::internal
+namespace stellarlib::ecs
 {
 class bitset final : ext::vector_allocator<std::uintmax_t>
 {

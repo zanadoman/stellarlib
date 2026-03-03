@@ -33,7 +33,7 @@
 #include <ranges>
 #include <utility>
 
-namespace stellarlib::ecs::internal
+namespace stellarlib::ecs
 {
 bitset::bitset(const bitset &other) noexcept
 	: _size{other._size}
