@@ -45,21 +45,21 @@ class world final
 {
 public:
 	[[nodiscard]]
-	explicit constexpr world() noexcept = default;
+	explicit world() noexcept;
 
 	[[nodiscard]]
-	constexpr world(const world &) noexcept = default;
+	world(const world &) noexcept;
 
 	[[nodiscard]]
-	constexpr world(world &&) noexcept = default;
+	world(world &&) noexcept;
 
-	constexpr auto operator=(const world &) noexcept
-		-> world & = default;
+	auto operator=(const world &) noexcept
+		-> world &;
 
-	constexpr auto operator=(world &&) noexcept
-		-> world & = default;
+	auto operator=(world &&) noexcept
+		-> world &;
 
-	constexpr ~world() noexcept = default;
+	~world() noexcept;
 
 	template <typename ...T>
 	constexpr auto spawn(T &&...components) noexcept

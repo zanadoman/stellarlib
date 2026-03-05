@@ -30,6 +30,20 @@
 
 namespace stellarlib::ecs
 {
+world::world() noexcept = default;
+
+world::world(const world &) noexcept = default;
+
+world::world(world &&) noexcept = default;
+
+auto world::operator=(const world &) noexcept
+	-> world & = default;
+
+auto world::operator=(world &&) noexcept
+	-> world & = default;
+
+world::~world() noexcept = default;
+
 auto world::contains(const std::uint32_t entity) const noexcept
 	-> bool
 {

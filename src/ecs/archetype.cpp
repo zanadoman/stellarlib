@@ -35,6 +35,8 @@
 
 namespace stellarlib::ecs
 {
+archetype::archetype() noexcept = default;
+
 archetype::archetype(const archetype &other) noexcept
 	: _size{other._size}
 {

@@ -28,12 +28,16 @@
 
 namespace stellarlib::ecs::internal
 {
+sparse_storage::sparse_storage() noexcept = default;
+
 sparse_storage::sparse_storage(const sparse_storage &other) noexcept
 {
 	for (const auto [id, map] : other._maps.zip()) {
 		_maps.insert(id, map->clone());
 	}
 }
+
+sparse_storage::sparse_storage(sparse_storage &&) noexcept = default;
 
 auto sparse_storage::operator=(const sparse_storage &other) noexcept
 	-> sparse_storage &
@@ -50,6 +54,11 @@ auto sparse_storage::operator=(const sparse_storage &other) noexcept
 
 	return *this;
 }
+
+auto sparse_storage::operator=(sparse_storage &&) noexcept
+	-> sparse_storage & = default;
+
+sparse_storage::~sparse_storage() noexcept = default;
 
 void sparse_storage::erase(const std::uint32_t key) const noexcept
 {

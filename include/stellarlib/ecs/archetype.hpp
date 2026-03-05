@@ -61,7 +61,7 @@ public:
 	}
 
 	[[nodiscard]]
-	explicit constexpr archetype() noexcept = default;
+	explicit archetype() noexcept;
 
 	[[nodiscard]]
 	archetype(const archetype &other) noexcept;

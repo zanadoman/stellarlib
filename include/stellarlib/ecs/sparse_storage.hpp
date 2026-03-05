@@ -53,21 +53,21 @@ public:
 	}
 
 	[[nodiscard]]
-	explicit constexpr sparse_storage() noexcept = default;
+	explicit sparse_storage() noexcept;
 
 	[[nodiscard]]
 	sparse_storage(const sparse_storage &other) noexcept;
 
 	[[nodiscard]]
-	constexpr sparse_storage(sparse_storage &&) noexcept = default;
+	sparse_storage(sparse_storage &&) noexcept;
 
 	auto operator=(const sparse_storage &other) noexcept
 		-> sparse_storage &;
 
-	constexpr auto operator=(sparse_storage &&) noexcept
-		-> sparse_storage & = default;
+	auto operator=(sparse_storage &&) noexcept
+		-> sparse_storage &;
 
-	constexpr ~sparse_storage() noexcept = default;
+	~sparse_storage() noexcept;
 
 	template <typename T>
 	[[nodiscard]]
