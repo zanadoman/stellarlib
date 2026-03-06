@@ -33,8 +33,17 @@
 
 namespace stellarlib::ext
 {
+template <typename Pack, typename Output>
+using expand_as = Output;
+
+template <typename Pack, auto VALUE>
+static constexpr auto expand_as_v{VALUE};
+
 template <typename T>
-constexpr bool is_trivially_relocatable_v{std::is_trivially_move_constructible_v<T> && std::is_trivially_destructible_v<T>};
+using is_trivially_relocatable = std::bool_constant<std::is_trivially_move_constructible_v<T> && std::is_trivially_destructible_v<T>>;
+
+template <typename T>
+constexpr bool is_trivially_relocatable_v{is_trivially_relocatable<T>::value};
 
 template <typename AlignTo, typename ...Fields>
 struct padding final

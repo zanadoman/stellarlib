@@ -29,6 +29,7 @@
 #include <stellarlib/ecs/sparse_set.hpp>
 #include <stellarlib/ecs/sparse_storage.hpp>
 #include <stellarlib/ecs/stack_vector.hpp>
+#include <stellarlib/ext/type_traits.hpp>
 #include <stellarlib/ext/utility.hpp>
 
 #include <algorithm>
@@ -71,33 +72,12 @@ public:
 			_queue.pop();
 		}
 
-		const auto &ids{internal::sparse_storage::ids<T...>()};
-
-		[this, &ids, &entity, &components...]<std::size_t ...I>(std::index_sequence<I...>) -> void {
+		[&]<std::size_t ...I>(std::index_sequence<I...>) -> void {
+			const auto &ids{internal::sparse_storage::ids<T...>()};
 			(_components.at<T>(ids[I]).insert(entity, std::forward<T>(components)), ...);
 		}(std::index_sequence_for<T...>{});
 
-		const auto &archetype{archetype::of<T...>()};
-		const auto it{std::ranges::find_if(_archetypes, [&archetype](const auto &pair) -> bool {
-			return pair.first == archetype;
-		})};
-
-		if (it == _archetypes.end()) {
-			_entities.insert(entity, _archetypes.size());
-			_archetypes.push(std::pair{archetype, internal::sparse_set<std::uint32_t>{}});
-			(_archetypes.end() - 1)->second.insert(entity);
-
-			for (auto &index : _indices) {
-				if (index.first <= archetype) {
-					index.second.push(_archetypes.size() - 1);
-				}
-			}
-		}
-		else {
-			it->second.insert(entity);
-			_entities.insert(entity, static_cast<std::uint16_t>(it - _archetypes.begin()));
-		}
-
+		relocate(entity, archetype::of<T...>());
 		return entity;
 	}
 
@@ -107,49 +87,27 @@ public:
 		-> std::expected<void, std::tuple<T...>>
 		requires (0 < sizeof...(T))
 	{
-		const auto i{_entities.at(entity)};
+		const auto it{_entities.at(entity)};
 
-		if (!i) {
+		if (!it) {
 			return std::unexpected(std::forward<T>(components)...);
 		}
 
-		const auto &ids{internal::sparse_storage::ids<T...>()};
-
-		[this, &ids, &entity, &components...]<std::size_t ...I>(std::index_sequence<I...>) -> void {
+		[&]<std::size_t ...I>(std::index_sequence<I...>) -> void {
+			const auto &ids{internal::sparse_storage::ids<T...>()};
 			(_components.at<T>(ids[I]).insert(entity, std::forward<T>(components)), ...);
 		}(std::index_sequence_for<T...>{});
 
-		cache = _archetypes[*i].first;
+		cache = _archetypes[*it].first;
 
 		if constexpr (sizeof...(T) == 1) {
-			cache.insert(ids.front());
+			cache.insert(internal::sparse_storage::ids<T...>().front());
 		}
 		else {
 			cache.insert(archetype::of<T...>());
 		}
 
-		const auto it{std::ranges::find_if(_archetypes, [](const auto &pair) -> bool {
-			return pair.first == cache;
-		})};
-
-		if (it == _archetypes.end()) {
-			_archetypes[*i].second.erase(entity);
-			_entities[entity] = _archetypes.size();
-			_archetypes.push(std::pair{cache, internal::sparse_set<std::uint32_t>{}});
-			(_archetypes.end() - 1)->second.insert(entity);
-
-			for (auto &index : _indices) {
-				if (index.first <= cache) {
-					index.second.push(_archetypes.size() - 1);
-				}
-			}
-		}
-		else {
-			_archetypes[*i].second.erase(entity);
-			_entities[entity] = static_cast<std::uint16_t>(it - _archetypes.begin());
-			it->second.insert(entity);
-		}
-
+		relocate(entity, it);
 		return {};
 	}
 
@@ -162,9 +120,13 @@ public:
 	constexpr auto contains(const std::uint32_t entity) const noexcept
 		requires (0 < sizeof...(T))
 	{
-		const auto &ids{internal::sparse_storage::ids<T...>()};
-		return [this, &entity, &ids]<std::size_t ...I>(std::index_sequence<I...>) -> auto {
-			return std::tuple{_archetypes[_entities[entity]].first.contains(std::get<I>(ids))...};
+		return [&]<std::size_t ...I>(std::index_sequence<I...>) -> auto {
+			if (const auto it{_entities.at(entity)}) {
+				const auto &ids{internal::sparse_storage::ids<T...>()};
+				return std::tuple{_archetypes[*it].first.contains(std::get<I>(ids))...};
+			}
+
+			return std::tuple{ext::expand_as_v<T, false>...};
 		}(std::index_sequence_for<T...>{});
 	}
 
@@ -177,9 +139,9 @@ public:
 	constexpr auto at(const std::uint32_t entity) noexcept
 		requires (0 < sizeof...(T))
 	{
-		const auto &ids{internal::sparse_storage::ids<T...>()};
-		return [this, &ids, &entity]<std::size_t ...I>(std::index_sequence<I...>) -> std::tuple<T *...> {
-			return {_components.at<T>(std::get<I>(ids)).at(entity)...};
+		return [&]<std::size_t ...I>(std::index_sequence<I...>) -> auto {
+			const auto &ids{internal::sparse_storage::ids<T...>()};
+			return std::tuple{_components.at<T>(std::get<I>(ids)).at(entity)...};
 		}(std::index_sequence_for<T...>{});
 	}
 
@@ -192,8 +154,8 @@ public:
 	constexpr auto operator[](const std::uint32_t entity) const noexcept
 		requires (0 < sizeof...(T))
 	{
-		const auto &ids{internal::sparse_storage::ids<T...>()};
-		return [this, &ids, &entity]<std::size_t ...I>(std::index_sequence<I...>) -> std::tuple<T &...> {
+		return [&]<std::size_t ...I>(std::index_sequence<I...>) -> std::tuple<T &...> {
+			const auto &ids{internal::sparse_storage::ids<T...>()};
 			return {_components.operator[]<T>(std::get<I>(ids))[entity]...};
 		}(std::index_sequence_for<T...>{});
 	}
@@ -202,7 +164,7 @@ public:
 	constexpr auto query() const noexcept
 	{
 		return _archetypes | std::views::transform([](const auto &pair) -> auto {
-			return pair.second | std::views::transform([&pair](const auto entity) -> std::tuple<std::uint32_t, const archetype &> {
+			return pair.second | std::views::transform([&](const auto entity) -> std::tuple<std::uint32_t, const archetype &> {
 				return {entity, pair.first};
 			});
 		}) | std::views::join;
@@ -224,7 +186,8 @@ public:
 
 		if (_queries.extend(id + 1, static_cast<std::uint16_t>(-1)) || _queries[id] == static_cast<std::uint16_t>(-1)) {
 			const auto &archetype{archetype::of<T...>()};
-			const auto it{std::ranges::find_if(_indices, [&archetype](const auto &pair) -> bool {
+
+			const auto it{std::ranges::find_if(_indices, [&](const auto &pair) -> auto {
 				return pair.first == archetype;
 			})};
 
@@ -243,65 +206,45 @@ public:
 			}
 		}
 
-		const auto &ids{internal::sparse_storage::ids<T...>()};
-		const auto components{[this, &ids]<std::size_t ...I>(std::index_sequence<I...>) -> std::tuple<const internal::sparse_map<std::uint32_t, T> &...> {
+		const auto components{[this]<std::size_t ...I>(std::index_sequence<I...>) -> std::tuple<const internal::sparse_map<std::uint32_t, T> &...> {
+			const auto &ids{internal::sparse_storage::ids<T...>()};
 			return {_components.operator[]<T>(ids[I])...};
 		}(std::index_sequence_for<T...>{})};
+
 		return _indices[_queries[id]].second | std::views::transform([this](const auto index) -> const internal::sparse_set<std::uint32_t> & {
-				return _archetypes[index].second;
-			}) | std::views::join | std::views::transform([components](const auto entity) -> std::tuple<std::uint32_t, T &...> {
-				return [&entity, &components]<std::size_t ...I>(std::index_sequence<I...>) -> std::tuple<std::uint32_t, T &...> {
-					return {entity, std::get<I>(components)[entity]...};
-				}(std::index_sequence_for<T...>{});
-			});
+			return _archetypes[index].second;
+		}) | std::views::join | std::views::transform([=](const auto entity) -> std::tuple<std::uint32_t, T &...> {
+			return [&]<std::size_t ...I>(std::index_sequence<I...>) -> std::tuple<std::uint32_t, T &...> {
+				return {entity, std::get<I>(components)[entity]...};
+			}(std::index_sequence_for<T...>{});
+		});
 	}
 
 	template <typename ...T>
 	constexpr void erase(const std::uint32_t entity) noexcept
 		requires (0 < sizeof...(T))
 	{
-		const auto i{_entities.at(entity)};
+		const auto it{_entities.at(entity)};
 
-		if (!i) {
+		if (!it) {
 			return;
 		}
 
-		const auto &ids{internal::sparse_storage::ids<T...>()};
-
-		[this, &ids, &entity]<std::size_t ...I>(std::index_sequence<I...>) -> void {
+		[&]<std::size_t ...I>(std::index_sequence<I...>) -> void {
+			const auto &ids{internal::sparse_storage::ids<T...>()};
 			(_components.at<T>(ids[I]).erase(entity), ...);
 		}(std::index_sequence_for<T...>{});
 
-		cache = _archetypes[*i].first;
+		cache = _archetypes[*it].first;
 
 		if constexpr (sizeof...(T) == 1) {
-			cache.erase(ids.front());
+			cache.erase(internal::sparse_storage::ids<T...>().front());
 		}
 		else {
 			cache.erase(archetype::of<T...>());
 		}
 
-		const auto it{std::ranges::find_if(_archetypes, [](const auto &pair) -> bool {
-			return pair.first == cache;
-		})};
-
-		if (it == _archetypes.end()) {
-			_archetypes[*i].second.erase(entity);
-			_entities[entity] = _archetypes.size();
-			_archetypes.push(std::pair{cache, internal::sparse_set<std::uint32_t>{}});
-			(_archetypes.end() - 1)->second.insert(entity);
-
-			for (auto &index : _indices) {
-				if (index.first <= cache) {
-					index.second.push(_archetypes.size() - 1);
-				}
-			}
-		}
-		else {
-			_archetypes[*i].second.erase(entity);
-			_entities[entity] = static_cast<std::uint16_t>(it - _archetypes.begin());
-			it->second.insert(entity);
-		}
+		relocate(entity, it);
 	}
 
 	void despawn(std::uint32_t entity) noexcept;
@@ -316,6 +259,52 @@ private:
 	internal::sparse_storage _components;
 	internal::stack_vector<std::pair<archetype, internal::stack_vector<std::uint16_t>>, std::uint16_t> _indices;
 	internal::stack_vector<std::uint16_t, std::uint16_t> _queries;
+
+	template <typename T>
+	constexpr void relocate(const std::uint32_t entity, const T &arg) noexcept
+	{
+		const auto it{std::ranges::find_if(_archetypes, [&](const auto &pair) -> auto {
+			if constexpr (std::is_same_v<T, archetype>) {
+				return pair.first == arg;
+			}
+			else if constexpr (std::is_same_v<T, std::uint16_t *>) {
+				return pair.first == cache;
+			}
+		})};
+
+		if constexpr (std::is_same_v<T, std::uint16_t *>) {
+			_archetypes[*arg].second.erase(entity);
+		}
+
+		if (it == _archetypes.end()) {
+			if constexpr (std::is_same_v<T, archetype>) {
+				_entities.insert(entity, _archetypes.size());
+				_archetypes.push(std::pair{arg, internal::sparse_set<std::uint32_t>{}});
+			}
+			else if constexpr (std::is_same_v<T, std::uint16_t *>) {
+				_entities[entity] = _archetypes.size();
+				_archetypes.push(std::pair{cache, internal::sparse_set<std::uint32_t>{}});
+			}
+
+			(_archetypes.end() - 1)->second.insert(entity);
+
+			for (auto &index : _indices) {
+				if (index.first <= cache) {
+					index.second.push(_archetypes.size() - 1);
+				}
+			}
+		}
+		else {
+			if constexpr (std::is_same_v<T, archetype>) {
+				_entities.insert(entity, static_cast<std::uint16_t>(it - _archetypes.begin()));
+			}
+			else if constexpr (std::is_same_v<T, std::uint16_t *>) {
+				_entities[entity] = static_cast<std::uint16_t>(it - _archetypes.begin());
+			}
+
+			it->second.insert(entity);
+		}
+	}
 };
 }
 

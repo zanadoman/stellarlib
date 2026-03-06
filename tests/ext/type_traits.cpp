@@ -26,6 +26,7 @@
 #include <stellarlib/ext/functional.hpp>
 
 #include <cstdint>
+#include <type_traits>
 
 using namespace stellarlib;
 
@@ -99,6 +100,10 @@ public:
 
 	~non_trivially_destructible() noexcept;
 };
+
+static_assert(std::is_same_v<ext::is_trivially_relocatable<trivially_relocatable>, std::true_type>);
+static_assert(std::is_same_v<ext::is_trivially_relocatable<non_trivially_move_constructible>, std::false_type>);
+static_assert(std::is_same_v<ext::is_trivially_relocatable<non_trivially_destructible>, std::false_type>);
 
 static_assert(ext::is_trivially_relocatable_v<trivially_relocatable>);
 static_assert(!ext::is_trivially_relocatable_v<non_trivially_move_constructible>);

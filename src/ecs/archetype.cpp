@@ -25,7 +25,6 @@
 
 #include <stellarlib/ext/bit.hpp>
 #include <stellarlib/ext/functional.hpp>
-#include <stellarlib/ext/memory.hpp>
 
 #include <algorithm>
 #include <cstdint>
@@ -42,7 +41,7 @@ archetype::archetype(const archetype &other) noexcept
 {
 	if (ext::truthy(_size)) {
 		_capacity = _size;
-		ext::vector_allocator<std::uintmax_t>::allocate(_begin, _capacity);
+		allocate(_begin, _capacity);
 		_end = _begin + _size;
 		std::copy(other._begin, other._end, _begin);
 	}
@@ -68,7 +67,7 @@ auto archetype::operator=(const archetype &other) noexcept
 
 	if (_capacity < _size) {
 		_capacity = _size;
-		ext::vector_allocator<std::uintmax_t>::reallocate(_begin, _capacity);
+		reallocate(_begin, _capacity);
 	}
 
 	_end = _begin + _size;
@@ -89,7 +88,7 @@ auto archetype::operator=(archetype &&other) noexcept
 
 archetype::~archetype() noexcept
 {
-	ext::vector_allocator<std::uintmax_t>::deallocate(_begin);
+	deallocate(_begin);
 }
 
 void archetype::insert(const std::uintmax_t id) noexcept
@@ -106,7 +105,7 @@ void archetype::insert(const archetype &other) noexcept
 
 	if (_capacity < other._size) {
 		_capacity = other._size;
-		ext::vector_allocator<std::uintmax_t>::reallocate(_begin, _capacity);
+		reallocate(_begin, _capacity);
 		_end = _begin + _capacity;
 	}
 
@@ -185,7 +184,7 @@ void archetype::insert(const std::uintmax_t index, const std::uintmax_t mask) no
 
 	if (_capacity <= index) {
 		_capacity = index + 1;
-		ext::vector_allocator<std::uintmax_t>::reallocate(_begin, _capacity);
+		reallocate(_begin, _capacity);
 		std::fill(_begin + _size, _begin + index, 0);
 	}
 

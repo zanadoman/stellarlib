@@ -62,8 +62,15 @@ constexpr void check_entities(ecs::world &world) noexcept
 {
 	for (const auto [entity, archetype] : world.query()) {
 		ASSERT_TRUE(world.contains(entity));
+		ASSERT_TRUE(std::get<0>(world.contains<std::int32_t>(entity)));
+		ASSERT_TRUE(std::get<0>(world.contains<std::string>(entity)));
+		ASSERT_TRUE(std::get<0>(world.contains<std::int32_t, std::string>(entity)));
+		ASSERT_TRUE(std::get<1>(world.contains<std::int32_t, std::string>(entity)));
+		ASSERT_TRUE(std::get<0>(world.contains<std::string, std::int32_t>(entity)));
+		ASSERT_TRUE(std::get<1>(world.contains<std::string, std::int32_t>(entity)));
 		ASSERT_EQ(archetype, (ecs::archetype::of<std::int32_t, std::string>)());
 		ASSERT_EQ(archetype, (ecs::archetype::of<std::string, std::int32_t>)());
+		ASSERT_TRUE(world.at(entity));
 		ASSERT_EQ(*world.at(entity), (ecs::archetype::of<std::int32_t, std::string>)());
 		ASSERT_EQ(*world.at(entity), (ecs::archetype::of<std::string, std::int32_t>)());
 		ASSERT_TRUE(std::get<0>(world.at<std::int32_t>(entity)));
@@ -121,6 +128,12 @@ TEST(stellarlib_ecs_world, should_spawn_and_despawn_entities)
 		world.despawn(i);
 		ASSERT_EQ(std::ranges::distance(world.query()), i);
 		ASSERT_FALSE(world.contains(i));
+		ASSERT_FALSE(std::get<0>(world.contains<std::int32_t>(i)));
+		ASSERT_FALSE(std::get<0>(world.contains<std::string>(i)));
+		ASSERT_FALSE(std::get<0>(world.contains<std::int32_t, std::string>(i)));
+		ASSERT_FALSE(std::get<1>(world.contains<std::int32_t, std::string>(i)));
+		ASSERT_FALSE(std::get<0>(world.contains<std::string, std::int32_t>(i)));
+		ASSERT_FALSE(std::get<1>(world.contains<std::string, std::int32_t>(i)));
 		ASSERT_FALSE(world.at(i));
 		ASSERT_FALSE(std::get<0>(world.at<std::int32_t>(i)));
 		ASSERT_FALSE(std::get<0>(world.at<std::string>(i)));
