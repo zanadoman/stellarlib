@@ -90,7 +90,7 @@ public:
 		const auto it{_entities.at(entity)};
 
 		if (!it) {
-			return std::unexpected(std::forward<T>(components)...);
+			return std::unexpected(std::make_tuple(std::forward<T>(components)...));
 		}
 
 		[&]<std::size_t ...I>(std::index_sequence<I...>) -> void {
@@ -100,11 +100,11 @@ public:
 
 		cache = _archetypes[*it].first;
 
-		if constexpr (sizeof...(T) == 1) {
-			cache.insert(internal::sparse_storage::ids<T...>().front());
+		if constexpr (1 < sizeof...(T)) {
+			cache.insert(archetype::of<T...>());
 		}
 		else {
-			cache.insert(archetype::of<T...>());
+			cache.insert(internal::sparse_storage::ids<T...>().front());
 		}
 
 		relocate(entity, it);
@@ -237,11 +237,11 @@ public:
 
 		cache = _archetypes[*it].first;
 
-		if constexpr (sizeof...(T) == 1) {
-			cache.erase(internal::sparse_storage::ids<T...>().front());
+		if constexpr (1 < sizeof...(T)) {
+			cache.erase(archetype::of<T...>());
 		}
 		else {
-			cache.erase(archetype::of<T...>());
+			cache.erase(internal::sparse_storage::ids<T...>().front());
 		}
 
 		relocate(entity, it);
@@ -289,7 +289,7 @@ private:
 			(_archetypes.end() - 1)->second.insert(entity);
 
 			for (auto &index : _indices) {
-				if (index.first <= cache) {
+				if (index.first <= (_archetypes.end() - 1)->first) {
 					index.second.push(_archetypes.size() - 1);
 				}
 			}

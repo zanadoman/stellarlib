@@ -31,6 +31,7 @@
 #include <ranges>
 #include <string>
 #include <tuple>
+#include <utility>
 
 #include <gtest/gtest.h>
 
@@ -113,6 +114,98 @@ constexpr void check_entities(ecs::world &world) noexcept
 }
 }
 
+TEST(stellarlib_ecs_world, should_copy_via_ctor)
+{
+	ecs::world world1{};
+	for (const auto i : std::views::iota(std::uint32_t{}, std::uint32_t{10})) {
+		if (ext::truthy(i % 2)) {
+			world1.spawn(get_number(i), get_string(i));
+		}
+		else {
+			world1.spawn(get_string(i), get_number(i));
+		}
+	}
+	auto world2{world1};
+	check_entities(world2);
+}
+
+TEST(stellarlib_ecs_world, should_move_via_ctor)
+{
+	ecs::world world1{};
+	for (const auto i : std::views::iota(std::uint32_t{}, std::uint32_t{10})) {
+		if (ext::truthy(i % 2)) {
+			world1.spawn(get_number(i), get_string(i));
+		}
+		else {
+			world1.spawn(get_string(i), get_number(i));
+		}
+	}
+	auto world2{std::move(world1)};
+	check_entities(world2);
+}
+
+TEST(stellarlib_ecs_world, should_skip_self_copy_via_assignment)
+{
+	ecs::world world{};
+	for (const auto i : std::views::iota(std::uint32_t{}, std::uint32_t{10})) {
+		if (ext::truthy(i % 2)) {
+			world.spawn(get_number(i), get_string(i));
+		}
+		else {
+			world.spawn(get_string(i), get_number(i));
+		}
+	}
+	world = world;
+	check_entities(world);
+}
+
+TEST(stellarlib_ecs_world, should_copy_via_assignment)
+{
+	ecs::world world1{};
+	for (const auto i : std::views::iota(std::uint32_t{}, std::uint32_t{10})) {
+		if (ext::truthy(i % 2)) {
+			world1.spawn(get_number(i), get_string(i));
+		}
+		else {
+			world1.spawn(get_string(i), get_number(i));
+		}
+	}
+	ecs::world world2{};
+	world2 = world1;
+	check_entities(world2);
+}
+
+TEST(stellarlib_ecs_world, should_skip_self_move_via_assignment)
+{
+	ecs::world world{};
+	for (const auto i : std::views::iota(std::uint32_t{}, std::uint32_t{10})) {
+		if (ext::truthy(i % 2)) {
+			world.spawn(get_number(i), get_string(i));
+		}
+		else {
+			world.spawn(get_string(i), get_number(i));
+		}
+	}
+	world = std::move(world);
+	check_entities(world);
+}
+
+TEST(stellarlib_ecs_world, should_move_via_assignment)
+{
+	ecs::world world1{};
+	for (const auto i : std::views::iota(std::uint32_t{}, std::uint32_t{10})) {
+		if (ext::truthy(i % 2)) {
+			world1.spawn(get_number(i), get_string(i));
+		}
+		else {
+			world1.spawn(get_string(i), get_number(i));
+		}
+	}
+	ecs::world world2{};
+	world2 = std::move(world1);
+	check_entities(world2);
+}
+
 TEST(stellarlib_ecs_world, should_spawn_and_despawn_entities)
 {
 	ecs::world world{};
@@ -126,7 +219,6 @@ TEST(stellarlib_ecs_world, should_spawn_and_despawn_entities)
 		ASSERT_EQ(std::ranges::distance(world.query()), i + 1);
 		check_entities(world);
 		world.despawn(i);
-		ASSERT_EQ(std::ranges::distance(world.query()), i);
 		ASSERT_FALSE(world.contains(i));
 		ASSERT_FALSE(std::get<0>(world.contains<std::int32_t>(i)));
 		ASSERT_FALSE(std::get<0>(world.contains<std::string>(i)));
@@ -141,6 +233,7 @@ TEST(stellarlib_ecs_world, should_spawn_and_despawn_entities)
 		ASSERT_FALSE(std::get<1>(world.at<std::int32_t, std::string>(i)));
 		ASSERT_FALSE(std::get<0>(world.at<std::string, std::int32_t>(i)));
 		ASSERT_FALSE(std::get<1>(world.at<std::string, std::int32_t>(i)));
+		ASSERT_EQ(std::ranges::distance(world.query()), i);
 		check_entities(world);
 		if (ext::truthy(i % 2)) {
 			world.spawn(get_string(i), get_number(i));
@@ -165,6 +258,66 @@ TEST(stellarlib_ecs_world, should_reuse_entities)
 	ASSERT_EQ(world.spawn(), entity3);
 	ASSERT_EQ(world.spawn(), entity1);
 	ASSERT_EQ(world.spawn(), entity2);
+}
+
+TEST(stellarlib_ecs_world, should_insert_and_erase_components)
+{
+	ecs::world world{};
+	for (const auto i : std::views::iota(std::uint32_t{}, std::uint32_t{10})) {
+		if (ext::truthy(i % 2)) {
+			const auto entity{world.spawn(get_number(i))};
+			*world.insert(entity, get_string(i));
+		}
+		else {
+			const auto entity{world.spawn()};
+			*world.insert(entity, get_string(i), get_number(i));
+		}
+	}
+	check_entities(world);
+}
+
+TEST(stellarlib_ecs_world, should_clear_entities)
+{
+	ecs::world world{};
+	for (const auto i : std::views::iota(std::uint32_t{}, std::uint32_t{10})) {
+		if (ext::truthy(i % 2)) {
+			world.spawn(get_number(i), get_string(i));
+		}
+		else {
+			world.spawn(get_string(i), get_number(i));
+		}
+	}
+	world.clear();
+	for (const auto i : std::views::iota(std::uint32_t{}, std::uint32_t{10})) {
+		ASSERT_FALSE(world.contains(i));
+		ASSERT_FALSE(std::get<0>(world.contains<std::int32_t>(i)));
+		ASSERT_FALSE(std::get<0>(world.contains<std::string>(i)));
+		ASSERT_FALSE(std::get<0>(world.contains<std::int32_t, std::string>(i)));
+		ASSERT_FALSE(std::get<1>(world.contains<std::int32_t, std::string>(i)));
+		ASSERT_FALSE(std::get<0>(world.contains<std::string, std::int32_t>(i)));
+		ASSERT_FALSE(std::get<1>(world.contains<std::string, std::int32_t>(i)));
+		ASSERT_FALSE(world.at(i));
+		ASSERT_FALSE(std::get<0>(world.at<std::int32_t>(i)));
+		ASSERT_FALSE(std::get<0>(world.at<std::string>(i)));
+		ASSERT_FALSE(std::get<0>(world.at<std::int32_t, std::string>(i)));
+		ASSERT_FALSE(std::get<1>(world.at<std::int32_t, std::string>(i)));
+		ASSERT_FALSE(std::get<0>(world.at<std::string, std::int32_t>(i)));
+		ASSERT_FALSE(std::get<1>(world.at<std::string, std::int32_t>(i)));
+	}
+	ASSERT_FALSE(std::ranges::distance(world.query()));
+	ASSERT_FALSE(std::ranges::distance(world.query<std::uint32_t>()));
+	ASSERT_FALSE(std::ranges::distance(world.query<std::string>()));
+	ASSERT_FALSE(std::ranges::distance(world.query<std::uint32_t, std::string>()));
+	ASSERT_FALSE(std::ranges::distance(world.query<std::string, std::uint32_t>()));
+	for (const auto i : std::views::iota(std::uint32_t{}, std::uint32_t{10})) {
+		if (ext::truthy(i % 2)) {
+			world.spawn(get_string(i), get_number(i));
+		}
+		else {
+			world.spawn(get_number(i), get_string(i));
+		}
+	}
+	check_entities(world);
 }
 
 /* NOLINTEND(cert-err58-cpp,performance-unnecessary-copy-initialization) */
