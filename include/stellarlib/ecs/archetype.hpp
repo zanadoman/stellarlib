@@ -25,7 +25,6 @@
 #define STELLARLIB_ECS_ARCHETYPE_HPP
 
 #include <stellarlib/ecs/sparse_storage.hpp>
-#include <stellarlib/ext/bit.hpp>
 #include <stellarlib/ext/memory.hpp>
 
 #include <cstdint>
@@ -46,10 +45,9 @@ public:
 				archetype archetype{};
 
 				for (const auto id : internal::sparse_storage::ids<T...>()) {
-					archetype.insert(ext::bit_index(id), ext::bit_mask(id));
+					archetype.insert(id);
 				}
 
-				archetype._end = archetype._begin + archetype._size;
 				return archetype;
 			}()};
 
@@ -108,8 +106,6 @@ private:
 	std::uintmax_t _capacity{};
 	std::uintmax_t *_begin{};
 	std::uintmax_t *_end{};
-
-	void insert(std::uintmax_t index, std::uintmax_t mask) noexcept;
 };
 }
 

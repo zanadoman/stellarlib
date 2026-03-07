@@ -267,9 +267,14 @@ TEST(stellarlib_ecs_world, should_insert_and_erase_components)
 		if (ext::truthy(i % 2)) {
 			const auto entity{world.spawn(get_number(i))};
 			*world.insert(entity, get_string(i));
+			world.erase<std::string, std::int32_t>(entity);
+			*world.insert(entity, get_number(i), get_string(i));
 		}
 		else {
 			const auto entity{world.spawn()};
+			*world.insert(entity, get_string(i), get_number(i));
+			world.erase<std::int32_t>(entity);
+			world.erase<std::string>(entity);
 			*world.insert(entity, get_string(i), get_number(i));
 		}
 	}

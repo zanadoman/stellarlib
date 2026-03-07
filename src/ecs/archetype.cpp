@@ -71,6 +71,7 @@ auto archetype::operator=(const archetype &other) noexcept
 	}
 
 	_end = _begin + _size;
+	std::fill(_end, _begin + _capacity, 0);
 	std::copy(other._begin, other._end, _begin);
 	return *this;
 }
@@ -93,7 +94,20 @@ archetype::~archetype() noexcept
 
 void archetype::insert(const std::uintmax_t id) noexcept
 {
-	insert(ext::bit_index(id), ext::bit_mask(id));
+	if (ext::bit_index(id) < _size) {
+		_begin[ext::bit_index(id)] |= ext::bit_mask(id);
+		return;
+	}
+
+	if (_capacity <= ext::bit_index(id)) {
+		_capacity = ext::bit_index(id) + 1;
+		reallocate(_begin, _capacity);
+		_end = _begin + _size;
+	}
+
+	_begin[ext::bit_index(id)] = ext::bit_mask(id);
+	std::fill(_end, _begin + ext::bit_index(id), 0);
+	_size = ext::bit_index(id) + 1;
 	_end = _begin + _size;
 }
 
@@ -106,12 +120,13 @@ void archetype::insert(const archetype &other) noexcept
 	if (_capacity < other._size) {
 		_capacity = other._size;
 		reallocate(_begin, _capacity);
-		_end = _begin + _capacity;
 	}
 
 	while (_size < other._size) {
 		_begin[_size++] = other._begin[_size];
 	}
+
+	_end = _begin + _size;
 }
 
 auto archetype::contains(const std::uintmax_t id) const noexcept
@@ -173,22 +188,5 @@ void archetype::clear() noexcept
 	std::fill(_begin, _end, 0);
 	_end = _begin;
 	_size = 0;
-}
-
-void archetype::insert(const std::uintmax_t index, const std::uintmax_t mask) noexcept
-{
-	if (index < _size) {
-		_begin[index] |= mask;
-		return;
-	}
-
-	if (_capacity <= index) {
-		_capacity = index + 1;
-		reallocate(_begin, _capacity);
-		std::fill(_begin + _size, _begin + index, 0);
-	}
-
-	_begin[index] = mask;
-	_size = index + 1;
 }
 }
