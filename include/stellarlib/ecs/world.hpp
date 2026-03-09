@@ -112,6 +112,10 @@ public:
 	}
 
 	[[nodiscard]]
+	auto size() const noexcept
+		-> std::size_t;
+
+	[[nodiscard]]
 	auto contains(std::uint32_t entity) const noexcept
 		-> bool;
 
@@ -136,7 +140,7 @@ public:
 
 	template <typename ...T>
 	[[nodiscard]]
-	constexpr auto at(const std::uint32_t entity) noexcept
+	constexpr auto at(const std::uint32_t entity) const noexcept
 		requires (0 < sizeof...(T))
 	{
 		return [&]<std::size_t ...I>(std::index_sequence<I...>) -> auto {
@@ -211,7 +215,7 @@ public:
 			return {_components.operator[]<T>(ids[I])...};
 		}(std::index_sequence_for<T...>{})};
 
-		return _indices[_queries[id]].second | std::views::transform([this](const auto index) -> const internal::sparse_set<std::uint32_t> & {
+		return std::ranges::subrange{_indices[_queries[id]].second} | std::views::transform([this](const auto index) -> const internal::sparse_set<std::uint32_t> & {
 			return _archetypes[index].second;
 		}) | std::views::join | std::views::transform([=](const auto entity) -> std::tuple<std::uint32_t, T &...> {
 			return [&]<std::size_t ...I>(std::index_sequence<I...>) -> std::tuple<std::uint32_t, T &...> {

@@ -25,6 +25,7 @@
 
 #include <stellarlib/ecs/archetype.hpp>
 
+#include <cstddef>
 #include <cstdint>
 #include <memory>
 
@@ -43,6 +44,12 @@ auto world::operator=(world &&) noexcept
 	-> world & = default;
 
 world::~world() noexcept = default;
+
+auto world::size() const noexcept
+	-> std::size_t
+{
+	return _entities.size();
+}
 
 auto world::contains(const std::uint32_t entity) const noexcept
 	-> bool

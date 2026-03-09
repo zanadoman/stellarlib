@@ -71,6 +71,19 @@ public:
 
 	template <typename T>
 	[[nodiscard]]
+	constexpr auto at(const std::uint16_t id) const noexcept
+		-> const sparse_map<std::uint32_t, T> &
+	{
+		if (const auto map{_maps.at(id)}) {
+			return static_cast<sparse_map<std::uint32_t, T> &>(**map);
+		}
+
+		static const sparse_map<std::uint32_t, T> map{};
+		return map;
+	}
+
+	template <typename T>
+	[[nodiscard]]
 	constexpr auto at(const std::uint16_t id) noexcept
 		-> sparse_map<std::uint32_t, T> &
 	{

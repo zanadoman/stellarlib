@@ -63,7 +63,7 @@ public:
 
 	constexpr void allocate(value_type *&begin, const size_type capacity) const noexcept
 	{
-		begin = static_cast<value_type *>(std::malloc(capacity * sizeof(value_type)));
+		begin = static_cast<value_type *>(std::aligned_alloc(alignof(value_type), capacity * sizeof(value_type)));
 	}
 
 	constexpr void reallocate(value_type *&begin, const size_type capacity) const noexcept
@@ -79,7 +79,7 @@ public:
 		}
 		else {
 			capacity = std::bit_ceil(capacity);
-			const auto dst{static_cast<value_type *>(std::malloc(capacity * sizeof(value_type)))};
+			const auto dst{static_cast<value_type *>(std::aligned_alloc(alignof(value_type), capacity * sizeof(value_type)))};
 
 			for (const auto src : std::views::iota(begin, begin + size)) {
 				std::construct_at(src + (dst - begin), std::move(*src));
