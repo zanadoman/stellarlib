@@ -100,6 +100,49 @@ public:
 		std::free(begin);
 	}
 };
+
+class arena final
+{
+public:
+	[[nodiscard]]
+	explicit arena() noexcept;
+
+	[[nodiscard]]
+	constexpr arena(const arena &) noexcept = delete;
+
+	[[nodiscard]]
+	arena(arena &&other) noexcept;
+
+	constexpr auto operator=(const arena &) noexcept
+		-> arena & = delete;
+
+	auto operator=(arena &&other) noexcept
+		-> arena &;
+
+	~arena() noexcept;
+
+	template <typename T>
+	[[nodiscard]]
+	constexpr auto allocate() noexcept
+	{
+		if (const auto ptr{std::align(alignof(T), sizeof(T), _cursor, _capacity)}) {
+			_cursor = static_cast<T *>(_cursor) + 1;
+			_capacity -= sizeof(T);
+			return static_cast<T *>(ptr);
+		}
+
+		return static_cast<T *>(nullptr);
+	}
+
+	void deallocate() noexcept;
+
+private:
+	static std::size_t capacity;
+	static std::size_t alignment;
+	void *_begin{std::aligned_alloc(alignment, capacity)};
+	void *_cursor{_begin};
+	std::size_t _capacity{capacity};
+};
 }
 
 #endif

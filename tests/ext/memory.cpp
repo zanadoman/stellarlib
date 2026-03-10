@@ -23,14 +23,19 @@
 
 #include <stellarlib/ext/memory.hpp>
 
+#include <stellarlib/ext/type_traits.hpp>
+
 #include <gtest/gtest.h>
 
+#include <array>
 #include <cstddef>
 #include <cstdint>
+#include <limits>
 #include <memory>
 #include <ranges>
 #include <string>
 #include <type_traits>
+#include <utility>
 
 using namespace stellarlib;
 
@@ -214,6 +219,123 @@ static_assert(ext::vector_allocator<std::int32_t>{} == ext::vector_allocator<std
 static_assert(!(ext::vector_allocator<std::int32_t>{} != ext::vector_allocator<std::int32_t>{}));
 static_assert(ext::vector_allocator<std::string>{} == ext::vector_allocator<std::string>{});
 static_assert(!(ext::vector_allocator<std::string>{} != ext::vector_allocator<std::string>{}));
+
+TEST(stellarlib_ext_memory, arena_should_move_via_ctor)
+{
+	ext::arena arena1{};
+	const auto number1{arena1.allocate<std::int32_t>()};
+	const auto string1{arena1.allocate<std::string>()};
+	const auto string2{arena1.allocate<std::string>()};
+	const auto number2{arena1.allocate<std::int32_t>()};
+	auto arena2{std::move(arena1)};
+	std::construct_at(number1, 5);
+	std::construct_at(string1, "hello");
+	std::construct_at(string2, "world");
+	std::construct_at(number2, 10);
+	ASSERT_EQ(*number1, 5);
+	ASSERT_EQ(*string1, "hello");
+	ASSERT_EQ(*string2, "world");
+	ASSERT_EQ(*number2, 10);
+	std::destroy_at(number2);
+	std::destroy_at(string2);
+	std::destroy_at(string1);
+	std::destroy_at(number1);
+	arena2.deallocate();
+	ASSERT_EQ(arena2.allocate<std::int32_t>(), number1);
+	ASSERT_EQ(arena2.allocate<std::string>(), string1);
+	ASSERT_EQ(arena2.allocate<std::string>(), string2);
+	ASSERT_EQ(arena2.allocate<std::int32_t>(), number2);
+}
+
+TEST(stellarlib_ext_memory, arena_should_skip_self_move_via_assignment)
+{
+	ext::arena arena{};
+	const auto number1{arena.allocate<std::int32_t>()};
+	const auto string1{arena.allocate<std::string>()};
+	const auto string2{arena.allocate<std::string>()};
+	const auto number2{arena.allocate<std::int32_t>()};
+	arena = std::move(arena);
+	std::construct_at(number1, 5);
+	std::construct_at(string1, "hello");
+	std::construct_at(string2, "world");
+	std::construct_at(number2, 10);
+	ASSERT_EQ(*number1, 5);
+	ASSERT_EQ(*string1, "hello");
+	ASSERT_EQ(*string2, "world");
+	ASSERT_EQ(*number2, 10);
+	std::destroy_at(number2);
+	std::destroy_at(string2);
+	std::destroy_at(string1);
+	std::destroy_at(number1);
+	arena.deallocate();
+	ASSERT_EQ(arena.allocate<std::int32_t>(), number1);
+	ASSERT_EQ(arena.allocate<std::string>(), string1);
+	ASSERT_EQ(arena.allocate<std::string>(), string2);
+	ASSERT_EQ(arena.allocate<std::int32_t>(), number2);
+}
+
+TEST(stellarlib_ext_memory, arena_should_move_via_assignment)
+{
+	ext::arena arena1{};
+	const auto number1{arena1.allocate<std::int32_t>()};
+	const auto string1{arena1.allocate<std::string>()};
+	const auto string2{arena1.allocate<std::string>()};
+	const auto number2{arena1.allocate<std::int32_t>()};
+	ext::arena arena2{};
+	arena2 = std::move(arena1);
+	std::construct_at(number1, 5);
+	std::construct_at(string1, "hello");
+	std::construct_at(string2, "world");
+	std::construct_at(number2, 10);
+	ASSERT_EQ(*number1, 5);
+	ASSERT_EQ(*string1, "hello");
+	ASSERT_EQ(*string2, "world");
+	ASSERT_EQ(*number2, 10);
+	std::destroy_at(number2);
+	std::destroy_at(string2);
+	std::destroy_at(string1);
+	std::destroy_at(number1);
+	arena2.deallocate();
+	ASSERT_EQ(arena2.allocate<std::int32_t>(), number1);
+	ASSERT_EQ(arena2.allocate<std::string>(), string1);
+	ASSERT_EQ(arena2.allocate<std::string>(), string2);
+	ASSERT_EQ(arena2.allocate<std::int32_t>(), number2);
+}
+
+TEST(stellarlib_ext_memory, arena_should_allocate_and_deallocate)
+{
+	ext::arena arena{};
+	const auto number1{arena.allocate<std::int32_t>()};
+	ASSERT_TRUE(number1);
+	ASSERT_FALSE(reinterpret_cast<std::size_t>(number1) % alignof(std::int32_t));
+	const auto string1{arena.allocate<std::string>()};
+	ASSERT_TRUE(string1);
+	ASSERT_EQ(reinterpret_cast<const std::byte *>(string1) - reinterpret_cast<const std::byte *>(number1), sizeof(std::int32_t) + (ext::padding<std::string, std::int32_t>::size));
+	ASSERT_FALSE((arena.allocate<std::array<std::byte, std::numeric_limits<std::uint16_t>::max()>>)());
+	const auto string2{arena.allocate<std::string>()};
+	ASSERT_TRUE(string2);
+	ASSERT_EQ(reinterpret_cast<const std::byte *>(string2) - reinterpret_cast<const std::byte *>(string1), sizeof(std::string) + (ext::padding<std::string, std::string>::size));
+	const auto number2{arena.allocate<std::int32_t>()};
+	ASSERT_TRUE(number2);
+	ASSERT_EQ(reinterpret_cast<const std::byte *>(number2) - reinterpret_cast<const std::byte *>(string2), sizeof(std::string) + (ext::padding<std::int32_t, std::string>::size));
+	std::construct_at(number1, 5);
+	std::construct_at(string1, "hello");
+	std::construct_at(string2, "world");
+	std::construct_at(number2, 10);
+	ASSERT_EQ(*number1, 5);
+	ASSERT_EQ(*string1, "hello");
+	ASSERT_EQ(*string2, "world");
+	ASSERT_EQ(*number2, 10);
+	std::destroy_at(number2);
+	std::destroy_at(string2);
+	std::destroy_at(string1);
+	std::destroy_at(number1);
+	arena.deallocate();
+	ASSERT_EQ(arena.allocate<std::int32_t>(), number1);
+	ASSERT_EQ(arena.allocate<std::string>(), string1);
+	ASSERT_EQ(arena.allocate<std::string>(), string2);
+	ASSERT_EQ(arena.allocate<std::int32_t>(), number2);
+}
 
 /* NOLINTEND(cert-err58-cpp,performance-unnecessary-copy-initialization) */
 

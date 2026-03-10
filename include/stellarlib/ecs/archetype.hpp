@@ -41,7 +41,7 @@ public:
 		-> std::conditional_t<0 < sizeof...(T), const archetype &, archetype>
 	{
 		if constexpr (0 < sizeof...(T)) {
-			static const auto cache{[] -> archetype {
+			static const auto cache{[] [[nodiscard]] noexcept -> archetype {
 				archetype archetype{};
 
 				for (const auto id : internal::sparse_storage::ids<T...>()) {
