@@ -28,7 +28,6 @@
 
 #include <algorithm>
 #include <cstdint>
-#include <iterator>
 #include <ranges>
 #include <string>
 #include <tuple>
@@ -105,12 +104,14 @@ constexpr void check_entity_with_number(ecs::world &world, const std::uint32_t e
 	ASSERT_EQ(world.operator[]<std::int32_t>(entity), std::tuple{number_of(entity)});
 	auto query1{world.query()};
 	ASSERT_NE(std::ranges::find(query1, std::tuple{entity, ecs::archetype::of<std::int32_t>()}), query1.end());
-	ASSERT_NE(std::ranges::find(world.query<std::int32_t>(), std::tuple{entity, number_of(entity)}), world.query<std::int32_t>().end());
-	ASSERT_EQ(std::ranges::find(world.query<std::string>(), std::tuple{entity, string_of(entity)}), world.query<std::string>().end());
-	const auto query2{world.query<std::int32_t, std::string>()};
-	ASSERT_EQ(std::ranges::find(query2, std::tuple{entity, number_of(entity), string_of(entity)}), query2.end());
-	const auto query3{world.query<std::string, std::int32_t>()};
-	ASSERT_EQ(std::ranges::find(query3, std::tuple{entity, string_of(entity), number_of(entity)}), query3.end());
+	auto query2{world.query<std::int32_t>()};
+	ASSERT_NE(std::ranges::find(query2, std::tuple{entity, number_of(entity)}), query2.end());
+	auto query3{world.query<std::string>()};
+	ASSERT_EQ(std::ranges::find(query3, std::tuple{entity, string_of(entity)}), query3.end());
+	auto query4{world.query<std::int32_t, std::string>()};
+	ASSERT_EQ(std::ranges::find(query4, std::tuple{entity, number_of(entity), string_of(entity)}), query4.end());
+	auto query5{world.query<std::string, std::int32_t>()};
+	ASSERT_EQ(std::ranges::find(query5, std::tuple{entity, string_of(entity), number_of(entity)}), query5.end());
 }
 
 constexpr void check_entity_with_string(ecs::world &world, const std::uint32_t entity)
@@ -137,12 +138,14 @@ constexpr void check_entity_with_string(ecs::world &world, const std::uint32_t e
 	ASSERT_EQ(world.operator[]<std::string>(entity), std::tuple{string_of(entity)});
 	auto query1{world.query()};
 	ASSERT_NE(std::ranges::find(query1, std::tuple{entity, ecs::archetype::of<std::string>()}), query1.end());
-	ASSERT_EQ(std::ranges::find(world.query<std::int32_t>(), std::tuple{entity, number_of(entity)}), world.query<std::int32_t>().end());
-	ASSERT_NE(std::ranges::find(world.query<std::string>(), std::tuple{entity, string_of(entity)}), world.query<std::string>().end());
-	const auto query2{world.query<std::int32_t, std::string>()};
-	ASSERT_EQ(std::ranges::find(query2, std::tuple{entity, number_of(entity), string_of(entity)}), query2.end());
-	const auto query3{world.query<std::string, std::int32_t>()};
-	ASSERT_EQ(std::ranges::find(query3, std::tuple{entity, string_of(entity), number_of(entity)}), query3.end());
+	auto query2{world.query<std::int32_t>()};
+	ASSERT_EQ(std::ranges::find(query2, std::tuple{entity, number_of(entity)}), query2.end());
+	auto query3{world.query<std::string>()};
+	ASSERT_NE(std::ranges::find(query3, std::tuple{entity, string_of(entity)}), query3.end());
+	auto query4{world.query<std::int32_t, std::string>()};
+	ASSERT_EQ(std::ranges::find(query4, std::tuple{entity, number_of(entity), string_of(entity)}), query4.end());
+	auto query5{world.query<std::string, std::int32_t>()};
+	ASSERT_EQ(std::ranges::find(query5, std::tuple{entity, string_of(entity), number_of(entity)}), query5.end());
 }
 
 constexpr void check_entity_with_components(ecs::world &world, const std::uint32_t entity)
@@ -178,17 +181,19 @@ constexpr void check_entity_with_components(ecs::world &world, const std::uint32
 	auto query1{world.query()};
 	ASSERT_NE(std::ranges::find(query1, std::tuple{entity, ecs::archetype::of<std::int32_t, std::string>()}), query1.end());
 	ASSERT_NE(std::ranges::find(query1, std::tuple{entity, ecs::archetype::of<std::string, std::int32_t>()}), query1.end());
-	ASSERT_NE(std::ranges::find(world.query<std::int32_t>(), std::tuple{entity, number_of(entity)}), world.query<std::int32_t>().end());
-	ASSERT_NE(std::ranges::find(world.query<std::string>(), std::tuple{entity, string_of(entity)}), world.query<std::string>().end());
-	const auto query2{world.query<std::int32_t, std::string>()};
-	ASSERT_NE(std::ranges::find(query2, std::tuple{entity, number_of(entity), string_of(entity)}), query2.end());
-	const auto query3{world.query<std::string, std::int32_t>()};
-	ASSERT_NE(std::ranges::find(query3, std::tuple{entity, string_of(entity), number_of(entity)}), query3.end());
+	auto query2{world.query<std::int32_t>()};
+	ASSERT_NE(std::ranges::find(query2, std::tuple{entity, number_of(entity)}), query2.end());
+	auto query3{world.query<std::string>()};
+	ASSERT_NE(std::ranges::find(query3, std::tuple{entity, string_of(entity)}), query3.end());
+	auto query4{world.query<std::int32_t, std::string>()};
+	ASSERT_NE(std::ranges::find(query4, std::tuple{entity, number_of(entity), string_of(entity)}), query4.end());
+	auto query5{world.query<std::string, std::int32_t>()};
+	ASSERT_NE(std::ranges::find(query5, std::tuple{entity, string_of(entity), number_of(entity)}), query5.end());
 }
 
 constexpr void check_entities(ecs::world &world)
 {
-	ASSERT_EQ(std::ranges::distance(world.query()), world.size());
+	ASSERT_EQ(world.query().size(), world.size());
 	for (const auto [entity, archetype] : world.query()) {
 		ASSERT_EQ(archetype, (ecs::archetype::of<std::int32_t, std::string>)());
 		ASSERT_EQ(archetype, (ecs::archetype::of<std::string, std::int32_t>)());
@@ -202,12 +207,12 @@ constexpr void check_entities(ecs::world &world)
 	for (const auto [entity, string] : world.query<std::string>()) {
 		ASSERT_EQ(string, string_of(entity));
 	}
-	ASSERT_EQ(std::ranges::distance(world.query<std::int32_t, std::string>()), world.size());
+	ASSERT_EQ((world.query<std::int32_t, std::string>)().size(), world.size());
 	for (const auto [entity, number, string] : world.query<std::int32_t, std::string>()) {
 		ASSERT_EQ(number, number_of(entity));
 		ASSERT_EQ(string, string_of(entity));
 	}
-	ASSERT_EQ(std::ranges::distance(world.query<std::string, std::int32_t>()), world.size());
+	ASSERT_EQ((world.query<std::string, std::int32_t>)().size(), world.size());
 	for (const auto [entity, string, number] : world.query<std::string, std::int32_t>()) {
 		ASSERT_EQ(string, string_of(entity));
 		ASSERT_EQ(number, number_of(entity));
@@ -373,11 +378,11 @@ TEST(stellarlib_ecs_world, should_clear_entities)
 		check_despawned_entity(world, entity);
 	}
 	ASSERT_FALSE(world.size());
-	ASSERT_FALSE(std::ranges::distance(world.query()));
+	ASSERT_FALSE(world.query().size());
 	ASSERT_FALSE(world.query<std::uint32_t>().size());
 	ASSERT_FALSE(world.query<std::string>().size());
-	ASSERT_FALSE(std::ranges::distance(world.query<std::uint32_t, std::string>()));
-	ASSERT_FALSE(std::ranges::distance(world.query<std::string, std::uint32_t>()));
+	ASSERT_FALSE((world.query<std::uint32_t, std::string>)().size());
+	ASSERT_FALSE((world.query<std::string, std::uint32_t>)().size());
 	for (const auto entity : std::views::iota(std::uint32_t{}, std::uint32_t{10})) {
 		if (ext::truthy(entity % 2)) {
 			world.spawn(string_of(entity), number_of(entity));

@@ -25,6 +25,7 @@
 #define STELLARLIB_ECS_WORLD_HPP
 
 #include <stellarlib/ecs/archetype.hpp>
+#include <stellarlib/ecs/query.hpp>
 #include <stellarlib/ecs/sparse_map.hpp>
 #include <stellarlib/ecs/sparse_set.hpp>
 #include <stellarlib/ecs/sparse_storage.hpp>
@@ -165,20 +166,20 @@ public:
 	}
 
 	[[nodiscard]]
-	constexpr auto query() const noexcept
+	constexpr auto query() noexcept
 	{
-		return _archetypes | std::views::transform([](const auto &pair) -> auto {
+		return internal::query{_archetypes | std::views::transform([](const auto &pair) -> auto {
 			return pair.second | std::views::transform([&](const auto entity) -> std::tuple<std::uint32_t, const archetype &> {
 				return {entity, pair.first};
 			});
-		}) | std::views::join;
+		}) | std::views::join};
 	}
 
 	template <typename T>
 	[[nodiscard]]
 	constexpr auto query() noexcept
 	{
-		return _components.at<T>(internal::sparse_storage::ids<T>().front()).zip();
+		return internal::query{_components.at<T>(internal::sparse_storage::ids<T>().front()).zip()};
 	}
 
 	template <typename ...T>
@@ -215,13 +216,13 @@ public:
 			return {_components.operator[]<T>(ids[I])...};
 		}(std::index_sequence_for<T...>{})};
 
-		return std::ranges::subrange{_indices[_queries[id]].second} | std::views::transform([this](const auto index) -> const internal::sparse_set<std::uint32_t> & {
+		return internal::query{std::ranges::subrange{_indices[_queries[id]].second} | std::views::transform([this](const auto index) -> const internal::sparse_set<std::uint32_t> & {
 			return _archetypes[index].second;
 		}) | std::views::join | std::views::transform([=](const auto entity) -> std::tuple<std::uint32_t, T &...> {
 			return [&]<std::size_t ...I>(std::index_sequence<I...>) -> std::tuple<std::uint32_t, T &...> {
 				return {entity, std::get<I>(components)[entity]...};
 			}(std::index_sequence_for<T...>{});
-		});
+		})};
 	}
 
 	template <typename ...T>
