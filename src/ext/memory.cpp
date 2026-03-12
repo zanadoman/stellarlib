@@ -78,8 +78,8 @@ void arena::deallocate() noexcept
 }
 
 arena::size_type arena::capacity{[] [[nodiscard]] noexcept -> auto {
-	const auto page{SDL_GetSystemPageSize()};
-	return 0 < page ? static_cast<size_type>(page) : 4096;
+	const auto capacity{SDL_GetSystemPageSize()};
+	return 0 < capacity ? static_cast<size_type>(capacity) : 4096;
 }()};
 
 arena::size_type arena::alignment{truthy(capacity % alignof(std::max_align_t)) ? alignof(std::max_align_t) : capacity};

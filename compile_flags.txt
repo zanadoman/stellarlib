@@ -7,4 +7,5 @@
 -Wno-exceptions
 -Wno-exit-time-destructors
 -Wno-global-constructors
+-Wno-shadow-uncaptured-local
 -Wno-unsafe-buffer-usage

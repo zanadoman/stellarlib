@@ -69,6 +69,7 @@ Checks: >
   portability-*,
   readability-*,
   -bugprone-exception-escape,
+  -bugprone-multi-level-implicit-pointer-conversion,
   -bugprone-suspicious-realloc-usage,
   -cert-err58-cpp,
   -clang-analyzer-nullability.NullableDereferenced,
