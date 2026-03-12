@@ -51,9 +51,21 @@ public:
 
 	constexpr void insert(const T key) noexcept
 	{
-		_sparse.extend(key + 1);
+		_sparse.extend(key + 1, static_cast<T>(-1));
 		_sparse[key] = _keys.size();
 		_keys.push(key);
+	}
+
+	[[nodiscard]]
+	constexpr auto size() const noexcept
+	{
+		return _keys.size();
+	}
+
+	[[nodiscard]]
+	constexpr auto contains(const T key) const noexcept
+	{
+		return key < _sparse.size() && _sparse[key] != static_cast<T>(-1);
 	}
 
 	[[nodiscard]]
@@ -75,6 +87,7 @@ public:
 			_sparse[_keys[_sparse[key]]] = _sparse[key];
 		}
 
+		_sparse[key] = static_cast<T>(-1);
 		_keys.pop();
 	}
 

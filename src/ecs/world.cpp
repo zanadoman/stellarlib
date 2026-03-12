@@ -79,7 +79,7 @@ void world::despawn(const std::uint32_t entity) noexcept
 		_entities.erase(entity);
 		_archetypes[*id].second.erase(entity);
 		_components.erase(entity);
-		_queue.push(entity);
+		_queue.insert(entity);
 	}
 }
 

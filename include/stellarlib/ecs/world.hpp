@@ -34,7 +34,6 @@
 #include <stellarlib/ext/utility.hpp>
 
 #include <algorithm>
-#include <expected>
 #include <cstddef>
 #include <cstdint>
 #include <utility>
@@ -70,7 +69,7 @@ public:
 
 		if (_queue.size()) {
 			entity = *(_queue.end() - 1);
-			_queue.pop();
+			_queue.erase(entity);
 		}
 
 		[&]<std::size_t ...I>(std::index_sequence<I...>) -> void {
@@ -83,33 +82,35 @@ public:
 	}
 
 	template <typename ...T>
-	[[nodiscard]]
-	constexpr auto insert(const std::uint32_t entity, T &&...components) noexcept
-		-> std::expected<void, std::tuple<T...>>
+	constexpr void insert(const std::uint32_t entity, T &&...components) noexcept
 		requires (0 < sizeof...(T))
 	{
 		const auto it{_entities.at(entity)};
-
-		if (!it) {
-			return std::unexpected(std::tuple{std::forward<T>(components)...});
-		}
 
 		[&]<std::size_t ...I>(std::index_sequence<I...>) -> void {
 			const auto &ids{internal::sparse_storage::ids<T...>()};
 			(_components.at<T>(ids[I]).insert(entity, std::forward<T>(components)), ...);
 		}(std::index_sequence_for<T...>{});
 
-		cache = _archetypes[*it].first;
+		if (it) {
+			cache = _archetypes[*it].first;
 
-		if constexpr (1 < sizeof...(T)) {
-			cache.insert(archetype::of<T...>());
+			if constexpr (1 < sizeof...(T)) {
+				cache.insert(archetype::of<T...>());
+			}
+			else {
+				cache.insert(internal::sparse_storage::ids<T...>().front());
+			}
+
+			relocate(entity, it);
 		}
 		else {
-			cache.insert(internal::sparse_storage::ids<T...>().front());
-		}
+			if (_queue.contains(entity)) {
+				_queue.erase(entity);
+			}
 
-		relocate(entity, it);
-		return {};
+			relocate(entity, archetype::of<T...>());
+		}
 	}
 
 	[[nodiscard]]
@@ -258,7 +259,7 @@ public:
 
 private:
 	static thread_local archetype cache;
-	internal::stack_vector<std::uint32_t, std::uint32_t> _queue;
+	internal::sparse_set<std::uint32_t> _queue;
 	internal::sparse_map<std::uint32_t, std::uint16_t> _entities;
 	internal::stack_vector<std::pair<archetype, internal::sparse_set<std::uint32_t>>, std::uint16_t> _archetypes;
 	internal::sparse_storage _components;

@@ -56,7 +56,7 @@ auto main([[maybe_unused]] const std::int32_t argc, [[maybe_unused]] const char 
 		std::cout << entity << ": { name: " << name << ", score: " << static_cast<std::uint16_t>(score) << " }\n";
 	}
 
-	*world.insert(player1, std::string{"Player 1"});
+	world.insert(player1, std::string{"Player 1"});
 	std::puts("--------------------------------------------------------------------------------");
 
 	for (const auto [entity, score, name] : world.query<std::uint8_t, std::string>()) {

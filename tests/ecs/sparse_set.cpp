@@ -43,22 +43,44 @@ using namespace stellarlib;
 
 constexpr std::array<std::uint32_t, 5> KEYS{1, 2, 0, 4, 3};
 
+namespace
+{
+constexpr void check_keys(const ecs::internal::sparse_set<std::uint32_t> &set)
+{
+	ASSERT_EQ(set.size(), KEYS.size());
+	for (const auto key : KEYS) {
+		ASSERT_TRUE(set.contains(key));
+	}
+	ASSERT_TRUE(std::ranges::equal(set, KEYS));
+}
+}
+
 TEST(stellarlib_ecs_sparse_set, should_insert_and_erase_keys)
 {
 	ecs::internal::sparse_set<std::uint32_t> set{};
 	for (const auto i : std::views::iota(std::size_t{}, KEYS.size())) {
 		set.insert(KEYS[i]);
+		ASSERT_EQ(set.size(), i + 1);
+		ASSERT_TRUE(set.contains(KEYS[i]));
 		ASSERT_EQ(*(set.end() - 1), KEYS[i]);
 		set.erase(KEYS[i / 2]);
+		ASSERT_EQ(set.size(), i);
+		ASSERT_FALSE(set.contains(KEYS[i / 2]));
 		ASSERT_EQ(std::ranges::find(set, KEYS[i / 2]), set.end());
 		set.insert(KEYS[i / 2]);
+		ASSERT_EQ(set.size(), i + 1);
+		ASSERT_TRUE(set.contains(KEYS[i / 2]));
 		ASSERT_EQ(*(set.end() - 1), KEYS[i / 2]);
 		set.erase(KEYS[i]);
+		ASSERT_EQ(set.size(), i);
+		ASSERT_FALSE(set.contains(KEYS[i]));
 		ASSERT_EQ(std::ranges::find(set, KEYS[i]), set.end());
 		set.insert(KEYS[i]);
+		ASSERT_EQ(set.size(), i + 1);
+		ASSERT_TRUE(set.contains(KEYS[i]));
 		ASSERT_EQ(*(set.end() - 1), KEYS[i]);
 	}
-	ASSERT_TRUE(std::ranges::equal(set, KEYS));
+	check_keys(set);
 }
 
 TEST(stellarlib_ecs_sparse_set, should_clear_keys)
@@ -68,11 +90,15 @@ TEST(stellarlib_ecs_sparse_set, should_clear_keys)
 		set.insert(key);
 	}
 	set.clear();
+	ASSERT_FALSE(set.size());
+	for (const auto key : KEYS) {
+		ASSERT_FALSE(set.contains(key));
+	}
 	ASSERT_EQ(set.begin(), set.end());
 	for (const auto key : KEYS) {
 		set.insert(key);
 	}
-	ASSERT_TRUE(std::ranges::equal(set, KEYS));
+	check_keys(set);
 }
 
 /* NOLINTEND(cert-err58-cpp,performance-unnecessary-copy-initialization) */

@@ -283,29 +283,25 @@ TEST(stellarlib_ecs_world, should_reuse_entities)
 TEST(stellarlib_ecs_world, should_insert_and_erase_components)
 {
 	ecs::world world{};
-	ASSERT_EQ(world.insert({}, number_of({})).error(), std::tuple{number_of({})});
-	ASSERT_EQ(world.insert({}, string_of({})).error(), std::tuple{string_of({})});
-	ASSERT_EQ(world.insert({}, number_of({}), string_of({})).error(), (std::tuple{number_of({}), string_of({})}));
-	ASSERT_EQ(world.insert({}, string_of({}), number_of({})).error(), (std::tuple{string_of({}), number_of({})}));
 	for (const auto entity : std::views::iota(std::uint32_t{}, std::uint32_t{10})) {
 		if (ext::truthy(entity % 2)) {
 			world.spawn(number_of(entity));
 			check_entity_with_number(world, entity);
-			*world.insert(entity, string_of(entity));
-			*world.insert(entity, string_of(entity));
+			world.insert(entity, string_of(entity));
+			world.insert(entity, string_of(entity));
 			check_entity_with_components(world, entity);
 			world.erase<std::string, std::int32_t>(entity);
 			world.erase<std::string, std::int32_t>(entity);
 			check_entity_without_components(world, entity);
-			*world.insert(entity, number_of(entity), string_of(entity));
-			*world.insert(entity, number_of(entity), string_of(entity));
+			world.insert(entity, number_of(entity), string_of(entity));
+			world.insert(entity, number_of(entity), string_of(entity));
 			check_entity_with_components(world, entity);
 		}
 		else {
 			world.spawn();
 			check_entity_without_components(world, entity);
-			*world.insert(entity, string_of(entity), number_of(entity));
-			*world.insert(entity, string_of(entity), number_of(entity));
+			world.insert(entity, string_of(entity), number_of(entity));
+			world.insert(entity, string_of(entity), number_of(entity));
 			check_entity_with_components(world, entity);
 			world.erase<std::int32_t>(entity);
 			world.erase<std::int32_t>(entity);
@@ -313,8 +309,8 @@ TEST(stellarlib_ecs_world, should_insert_and_erase_components)
 			world.erase<std::string>(entity);
 			world.erase<std::string>(entity);
 			check_entity_without_components(world, entity);
-			*world.insert(entity, string_of(entity), number_of(entity));
-			*world.insert(entity, string_of(entity), number_of(entity));
+			world.insert(entity, string_of(entity), number_of(entity));
+			world.insert(entity, string_of(entity), number_of(entity));
 			check_entity_with_components(world, entity);
 		}
 	}
