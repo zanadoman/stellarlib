@@ -30,10 +30,17 @@
 #include <cstddef>
 #include <cstdlib>
 #include <memory>
+#include <ranges>
 #include <utility>
 
 namespace stellarlib::ext
 {
+auto arena::size() noexcept
+	-> size_type
+{
+	return capacity;
+}
+
 arena::arena() noexcept = default;
 
 arena::arena(arena &&other) noexcept
@@ -58,16 +65,65 @@ arena::~arena() noexcept
 	std::free(_begin);
 }
 
+auto arena::operator==(const arena &other) const noexcept
+	-> bool
+{
+	return std::addressof(other) == this;
+}
+
 void arena::deallocate() noexcept
 {
 	_cursor = _begin;
 	_capacity = capacity;
 }
 
-std::size_t arena::capacity{[] [[nodiscard]] noexcept -> auto {
+arena::size_type arena::capacity{[] [[nodiscard]] noexcept -> auto {
 	const auto page{SDL_GetSystemPageSize()};
-	return 0 < page ? static_cast<std::size_t>(page) : 4096;
+	return 0 < page ? static_cast<size_type>(page) : 4096;
 }()};
 
-std::size_t arena::alignment{truthy(capacity % alignof(std::max_align_t)) ? alignof(std::max_align_t) : capacity};
+arena::size_type arena::alignment{truthy(capacity % alignof(std::max_align_t)) ? alignof(std::max_align_t) : capacity};
+
+arena_allocator::arena_allocator() noexcept
+{
+	std::construct_at(_begin);
+}
+
+arena_allocator::arena_allocator(arena_allocator &&other) noexcept
+	: _begin{std::exchange(other._begin, {})}
+	, _cursor{std::exchange(other._cursor, {})}
+	, _capacity{std::exchange(other._capacity, {})}
+{}
+
+auto arena_allocator::operator=(arena_allocator &&other) noexcept
+	-> arena_allocator &
+{
+	if (std::addressof(other) != this) {
+		std::destroy_at(this);
+		std::construct_at(this, std::move(other));
+	}
+
+	return *this;
+}
+
+arena_allocator::~arena_allocator() noexcept
+{
+	std::destroy_n(_begin, _capacity);
+	std::free(_begin);
+}
+
+auto arena_allocator::operator==(const arena_allocator &other) const noexcept
+	-> bool
+{
+	return std::addressof(other) == this;
+}
+
+void arena_allocator::deallocate() noexcept
+{
+	for (const auto arena : std::views::iota(_begin, _begin + _cursor + 1)) {
+		arena->deallocate();
+	}
+
+	_cursor = 0;
+}
 }

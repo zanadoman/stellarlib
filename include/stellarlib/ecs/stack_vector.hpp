@@ -102,8 +102,7 @@ public:
 	constexpr void push(Args &&...args) noexcept
 	{
 		if (_size == _capacity) {
-			++_capacity;
-			ext::vector_allocator<T, SizeType>::reallocate(_begin, _size, _capacity);
+			ext::vector_allocator<T, SizeType>::reallocate(_begin, _size, ++_capacity);
 			_end = _begin + _size;
 		}
 
@@ -164,8 +163,7 @@ public:
 	constexpr void pop() noexcept
 	{
 		--_size;
-		--_end;
-		std::destroy_at(_end);
+		std::destroy_at(--_end);
 	}
 
 	constexpr void clear() noexcept

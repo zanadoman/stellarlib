@@ -101,9 +101,18 @@ public:
 	}
 };
 
-class arena final
+class arena : std::allocator<void>
 {
 public:
+	using value_type = std::allocator<void>::value_type;
+	using size_type = std::allocator<void>::size_type;
+	using difference_type = std::allocator<void>::difference_type;
+	using propagate_on_container_move_assignment = std::allocator<void>::propagate_on_container_move_assignment;
+
+	[[nodiscard]]
+	static auto size() noexcept
+		-> size_type;
+
 	[[nodiscard]]
 	explicit arena() noexcept;
 
@@ -134,14 +143,83 @@ public:
 		return static_cast<T *>(nullptr);
 	}
 
+	[[nodiscard]]
+	auto operator==(const arena &other) const noexcept
+		-> bool;
+
 	void deallocate() noexcept;
 
 private:
-	static std::size_t capacity;
-	static std::size_t alignment;
-	void *_begin{std::aligned_alloc(alignment, capacity)};
-	void *_cursor{_begin};
-	std::size_t _capacity{capacity};
+	static size_type capacity;
+	static size_type alignment;
+	value_type *_begin{std::aligned_alloc(alignment, capacity)};
+	value_type *_cursor{_begin};
+	size_type _capacity{capacity};
+};
+
+class arena_allocator : std::allocator<void>
+{
+public:
+	using value_type = std::allocator<void>::value_type;
+	using size_type = std::allocator<void>::size_type;
+	using difference_type = std::allocator<void>::difference_type;
+	using propagate_on_container_move_assignment = std::allocator<void>::propagate_on_container_move_assignment;
+
+	[[nodiscard]]
+	explicit arena_allocator() noexcept;
+
+	[[nodiscard]]
+	constexpr arena_allocator(const arena_allocator &) noexcept = delete;
+
+	[[nodiscard]]
+	arena_allocator(arena_allocator &&other) noexcept;
+
+	constexpr auto operator=(const arena_allocator &) noexcept
+		-> arena_allocator & = delete;
+
+	auto operator=(arena_allocator &&other) noexcept
+		-> arena_allocator &;
+
+	~arena_allocator() noexcept;
+
+	template <typename T>
+	[[nodiscard]]
+	constexpr auto allocate() noexcept
+	{
+		if (const auto ptr{_begin[_cursor].allocate<T>()}) {
+			return ptr;
+		}
+
+		if (arena::size() < sizeof(T)) {
+			return static_cast<T *>(nullptr);
+		}
+
+		if (++_cursor == _capacity) {
+			const auto dst{static_cast<arena *>(std::aligned_alloc(alignof(arena), (_capacity + 1) * sizeof(arena)))};
+
+			for (const auto src : std::views::iota(_begin, _begin + _capacity++)) {
+				std::construct_at(src + (dst - _begin), std::move(*src));
+				std::destroy_at(src);
+			}
+
+			std::free(_begin);
+			_begin = dst;
+			std::construct_at(_begin + _cursor);
+		}
+
+		return _begin[_cursor].allocate<T>();
+	}
+
+	[[nodiscard]]
+	auto operator==(const arena_allocator &other) const noexcept
+		-> bool;
+
+	void deallocate() noexcept;
+
+private:
+	arena *_begin{static_cast<arena *>(std::aligned_alloc(alignof(arena), sizeof(arena)))};
+	size_type _cursor{};
+	size_type _capacity{1};
 };
 }
 
