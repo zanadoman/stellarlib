@@ -35,6 +35,7 @@
 #include <stellarlib/ext/utility.hpp>
 
 #include <algorithm>
+#include <expected>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -84,35 +85,33 @@ public:
 	}
 
 	template <typename ...T>
-	constexpr void insert(const std::uint32_t entity, T &&...components) noexcept
+	[[nodiscard]]
+	constexpr auto insert(const std::uint32_t entity, T &&...components) noexcept
+		-> std::expected<void, std::tuple<T...>>
 		requires (0 < sizeof...(T))
 	{
 		const auto it{_entities.at(entity)};
+
+		if (!it) {
+			return std::unexpected(std::tuple{std::forward<T>(components)...});
+		}
 
 		[&]<std::size_t ...I>(std::index_sequence<I...>) -> void {
 			const auto &ids{internal::sparse_storage::ids<T...>()};
 			(_components.at<T>(ids[I]).insert(entity, std::forward<T>(components)), ...);
 		}(std::index_sequence_for<T...>{});
 
-		if (it) {
-			cache = _archetypes[*it].first;
+		cache = _archetypes[*it].first;
 
-			if constexpr (1 < sizeof...(T)) {
-				cache.insert(archetype::of<T...>());
-			}
-			else {
-				cache.insert(internal::sparse_storage::ids<T...>().front());
-			}
-
-			relocate(entity, it);
+		if constexpr (1 < sizeof...(T)) {
+			cache.insert(archetype::of<T...>());
 		}
 		else {
-			if (_queue.contains(entity)) {
-				_queue.erase(entity);
-			}
-
-			relocate(entity, archetype::of<T...>());
+			cache.insert(internal::sparse_storage::ids<T...>().front());
 		}
+
+		relocate(entity, it);
+		return {};
 	}
 
 	[[nodiscard]]
