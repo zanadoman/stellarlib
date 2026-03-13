@@ -25,6 +25,7 @@
 #define STELLARLIB_ECS_WORLD_HPP
 
 #include <stellarlib/ecs/archetype.hpp>
+#include <stellarlib/ecs/command_queue.hpp>
 #include <stellarlib/ecs/query.hpp>
 #include <stellarlib/ecs/sparse_map.hpp>
 #include <stellarlib/ecs/sparse_set.hpp>
@@ -36,6 +37,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <utility>
 #include <tuple>
 #include <ranges>
@@ -49,13 +51,13 @@ public:
 	explicit world() noexcept;
 
 	[[nodiscard]]
-	world(const world &) noexcept;
+	constexpr world(const world &) noexcept = delete;
 
 	[[nodiscard]]
 	world(world &&) noexcept;
 
-	auto operator=(const world &) noexcept
-		-> world &;
+	constexpr auto operator=(const world &) noexcept
+		-> world & = delete;
 
 	auto operator=(world &&) noexcept
 		-> world &;
@@ -169,18 +171,20 @@ public:
 	[[nodiscard]]
 	constexpr auto query() noexcept
 	{
+		++_lock;
 		return internal::query{_archetypes | std::views::transform([](const auto &pair) -> auto {
 			return pair.second | std::views::transform([&](const auto entity) -> std::tuple<std::uint32_t, const archetype &> {
 				return {entity, pair.first};
 			});
-		}) | std::views::join};
+		}) | std::views::join, std::as_const(_callback)};
 	}
 
 	template <typename T>
 	[[nodiscard]]
 	constexpr auto query() noexcept
 	{
-		return internal::query{_components.at<T>(internal::sparse_storage::ids<T>().front()).zip()};
+		++_lock;
+		return internal::query{_components.at<T>(internal::sparse_storage::ids<T>().front()).zip(), std::as_const(_callback)};
 	}
 
 	template <typename ...T>
@@ -217,13 +221,14 @@ public:
 			return {_components.operator[]<T>(ids[I])...};
 		}(std::index_sequence_for<T...>{})};
 
+		++_lock;
 		return internal::query{std::ranges::subrange{_indices[_queries[id]].second} | std::views::transform([this](const auto index) -> const internal::sparse_set<std::uint32_t> & {
 			return _archetypes[index].second;
 		}) | std::views::join | std::views::transform([=](const auto entity) -> std::tuple<std::uint32_t, T &...> {
 			return [&]<std::size_t ...I>(std::index_sequence<I...>) -> std::tuple<std::uint32_t, T &...> {
 				return {entity, std::get<I>(components)[entity]...};
 			}(std::index_sequence_for<T...>{});
-		})};
+		}), std::as_const(_callback)};
 	}
 
 	template <typename ...T>
@@ -265,6 +270,14 @@ private:
 	internal::sparse_storage _components;
 	internal::stack_vector<std::pair<archetype, internal::stack_vector<std::uint16_t>>, std::uint16_t> _indices;
 	internal::stack_vector<std::uint16_t, std::uint16_t> _queries;
+	internal::command_queue _commands;
+	std::size_t _lock{};
+
+	std::function<void ()> _callback{[this] noexcept -> void {
+		if (!--_lock) {
+			_commands.execute();
+		}
+	}};
 
 	template <typename T>
 	constexpr void relocate(const std::uint32_t entity, const T &arg) noexcept
