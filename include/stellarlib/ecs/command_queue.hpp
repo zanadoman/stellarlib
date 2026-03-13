@@ -60,7 +60,7 @@ public:
 
 		_commands.push(
 			[](void *callback) noexcept -> void {
-				(*static_cast<const Callback *>(callback))();
+				(*static_cast<Callback *>(callback))();
 				std::destroy_at(static_cast<const Callback *>(callback));
 			},
 			ptr
