@@ -1,6 +1,6 @@
 # stellarlib
 
-**NOTE**: *stellarlib is a slop-free handmade software*
+**NOTE**: *stellarlib is a slop-free hand-crafted software*
 
 ## ⚙️ Prerequisites
 
@@ -18,3 +18,5 @@ cmake -B build --toolchain cmake/x86_64-linux-gnu.cmake     # Configure
 cmake --build build -t example                              # Build
 build/example                                               # Run
 ```
+
+## [🖼️ Renderer](https://github.com/zanadoman/flygpu)
