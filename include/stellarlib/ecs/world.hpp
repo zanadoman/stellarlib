@@ -101,7 +101,7 @@ public:
 			(_components.at<T>(ids[I]).insert(entity, std::forward<T>(components)), ...);
 		}(std::index_sequence_for<T...>{});
 
-		cache = _archetypes[*it].first;
+		cache = _archetypes[it->first].first;
 
 		if constexpr (1 < sizeof...(T)) {
 			cache.insert(archetype::of<T...>());
@@ -110,7 +110,7 @@ public:
 			cache.insert(internal::sparse_storage::ids<T...>().front());
 		}
 
-		relocate(entity, it);
+		relocate(entity, it->first);
 		return {};
 	}
 
@@ -130,7 +130,7 @@ public:
 		return [&]<std::size_t ...I>(std::index_sequence<I...>) -> auto {
 			if (const auto it{_entities.at(entity)}) {
 				const auto &ids{internal::sparse_storage::ids<T...>()};
-				return std::tuple{_archetypes[*it].first.contains(std::get<I>(ids))...};
+				return std::tuple{_archetypes[it->first].first.contains(std::get<I>(ids))...};
 			}
 
 			return std::tuple{ext::expand_as_v<T, false>...};
@@ -245,7 +245,7 @@ public:
 			(_components.at<T>(ids[I]).erase(entity), ...);
 		}(std::index_sequence_for<T...>{});
 
-		cache = _archetypes[*it].first;
+		cache = _archetypes[it->first].first;
 
 		if constexpr (1 < sizeof...(T)) {
 			cache.erase(archetype::of<T...>());
@@ -254,7 +254,7 @@ public:
 			cache.erase(internal::sparse_storage::ids<T...>().front());
 		}
 
-		relocate(entity, it);
+		relocate(entity, it->first);
 	}
 
 	void despawn(std::uint32_t entity) noexcept;
@@ -264,7 +264,7 @@ public:
 private:
 	static thread_local archetype cache;
 	internal::sparse_set<std::uint32_t> _queue;
-	internal::sparse_map<std::uint32_t, std::uint16_t> _entities;
+	internal::sparse_map<std::uint32_t, std::pair<std::uint16_t, bool>> _entities;
 	internal::stack_vector<std::pair<archetype, internal::sparse_set<std::uint32_t>>, std::uint16_t> _archetypes;
 	internal::sparse_storage _components;
 	internal::stack_vector<std::pair<archetype, internal::stack_vector<std::uint16_t>>, std::uint16_t> _indices;
@@ -285,22 +285,22 @@ private:
 			if constexpr (std::is_same_v<T, archetype>) {
 				return pair.first == arg;
 			}
-			else if constexpr (std::is_same_v<T, std::uint16_t *>) {
+			else if constexpr (std::is_same_v<T, std::uint16_t>) {
 				return pair.first == cache;
 			}
 		})};
 
-		if constexpr (std::is_same_v<T, std::uint16_t *>) {
-			_archetypes[*arg].second.erase(entity);
+		if constexpr (std::is_same_v<T, std::uint16_t>) {
+			_archetypes[arg].second.erase(entity);
 		}
 
 		if (it == _archetypes.end()) {
 			if constexpr (std::is_same_v<T, archetype>) {
-				_entities.insert(entity, _archetypes.size());
+				_entities.insert(entity, std::pair{_archetypes.size(), false});
 				_archetypes.push(std::pair{arg, internal::sparse_set<std::uint32_t>{}});
 			}
-			else if constexpr (std::is_same_v<T, std::uint16_t *>) {
-				_entities[entity] = _archetypes.size();
+			else if constexpr (std::is_same_v<T, std::uint16_t>) {
+				_entities[entity].first = _archetypes.size();
 				_archetypes.push(std::pair{cache, internal::sparse_set<std::uint32_t>{}});
 			}
 
@@ -314,10 +314,10 @@ private:
 		}
 		else {
 			if constexpr (std::is_same_v<T, archetype>) {
-				_entities.insert(entity, static_cast<std::uint16_t>(it - _archetypes.begin()));
+				_entities.insert(entity, std::pair{static_cast<std::uint16_t>(it - _archetypes.begin()), false});
 			}
-			else if constexpr (std::is_same_v<T, std::uint16_t *>) {
-				_entities[entity] = static_cast<std::uint16_t>(it - _archetypes.begin());
+			else if constexpr (std::is_same_v<T, std::uint16_t>) {
+				_entities[entity].first = static_cast<std::uint16_t>(it - _archetypes.begin());
 			}
 
 			it->second.insert(entity);

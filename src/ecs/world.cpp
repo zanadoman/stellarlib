@@ -56,7 +56,7 @@ auto world::at(const std::uint32_t entity) const noexcept
 	-> const archetype *
 {
 	if (const auto id{_entities.at(entity)}) {
-		return std::addressof(_archetypes[*id].first);
+		return std::addressof(_archetypes[id->first].first);
 	}
 
 	return nullptr;
@@ -65,14 +65,14 @@ auto world::at(const std::uint32_t entity) const noexcept
 auto world::operator[](const std::uint32_t entity) const noexcept
 	-> const archetype &
 {
-	return _archetypes[_entities[entity]].first;
+	return _archetypes[_entities[entity].first].first;
 }
 
 void world::despawn(const std::uint32_t entity) noexcept
 {
 	if (const auto id{_entities.at(entity)}) {
 		_entities.erase(entity);
-		_archetypes[*id].second.erase(entity);
+		_archetypes[id->first].second.erase(entity);
 		_components.erase(entity);
 		_queue.insert(entity);
 	}
