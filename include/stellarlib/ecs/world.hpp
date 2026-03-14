@@ -68,19 +68,40 @@ public:
 	template <typename ...T>
 	constexpr auto spawn(T &&...components) noexcept
 	{
-		auto entity{_entities.size()};
+		auto entity{static_cast<uint32_t>(_entities.size() + _pending.size())};
 
 		if (_queue.size()) {
 			entity = *(_queue.end() - 1);
 			_queue.erase(entity);
 		}
 
-		[&]<std::size_t ...I>(std::index_sequence<I...>) -> void {
-			const auto &ids{internal::sparse_storage::ids<T...>()};
-			(_components.at<T>(ids[I]).insert(entity, std::forward<T>(components)), ...);
-		}(std::index_sequence_for<T...>{});
+		if (_lock) {
+			if (const auto it{_entities.at(entity)}) {
+				it->second = false;
+			}
+			else {
+				_pending.insert(entity);
+			}
+		}
 
-		relocate(entity, archetype::of<T...>());
+		auto const command{[this](const auto entity, auto &&...components) noexcept -> void {
+			[&]<std::size_t ...I>(std::index_sequence<I...>) -> void {
+				const auto &ids{internal::sparse_storage::ids<T...>()};
+				(_components.at<T>(ids[I]).insert(entity, std::forward<T>(components)), ...);
+			}(std::index_sequence_for<T...>{});
+
+			relocate(entity, archetype::of<T...>());
+		}};
+
+		if (_lock) {
+			_commands.enqueue([env = std::tuple{command, std::tuple{entity, std::forward<T>(components)...}}] mutable -> void {
+				std::apply(std::get<0>(env), std::move(std::get<1>(env)));
+			});
+		}
+		else {
+			command(entity, std::forward<T>(components)...);
+		}
+
 		return entity;
 	}
 
@@ -92,25 +113,37 @@ public:
 	{
 		const auto it{_entities.at(entity)};
 
-		if (!it) {
+		if ((!it || it->second) && !_pending.contains(entity)) {
 			return std::unexpected(std::tuple{std::forward<T>(components)...});
 		}
 
-		[&]<std::size_t ...I>(std::index_sequence<I...>) -> void {
-			const auto &ids{internal::sparse_storage::ids<T...>()};
-			(_components.at<T>(ids[I]).insert(entity, std::forward<T>(components)), ...);
-		}(std::index_sequence_for<T...>{});
+		const auto command{[this](const auto entity, auto &&...components) noexcept -> void {
+			[&]<std::size_t ...I>(std::index_sequence<I...>) -> void {
+				const auto &ids{internal::sparse_storage::ids<T...>()};
+				(_components.at<T>(ids[I]).insert(entity, std::forward<T>(components)), ...);
+			}(std::index_sequence_for<T...>{});
 
-		cache = _archetypes[it->first].first;
+			cache = _archetypes[_entities[entity].first].first;
 
-		if constexpr (1 < sizeof...(T)) {
-			cache.insert(archetype::of<T...>());
+			if constexpr (1 < sizeof...(T)) {
+				cache.insert(archetype::of<T...>());
+			}
+			else {
+				cache.insert(internal::sparse_storage::ids<T...>().front());
+			}
+
+			relocate(entity, _entities[entity].first);
+		}};
+
+		if (_lock) {
+			_commands.enqueue([env = std::tuple{command, std::tuple{entity, std::forward<T>(components)...}}] mutable -> void {
+				std::apply(std::get<0>(env), std::move(std::get<1>(env)));
+			});
 		}
 		else {
-			cache.insert(internal::sparse_storage::ids<T...>().front());
+			command(entity, std::forward<T>(components)...);
 		}
 
-		relocate(entity, it->first);
 		return {};
 	}
 
@@ -234,27 +267,38 @@ public:
 	constexpr void erase(const std::uint32_t entity) noexcept
 		requires (0 < sizeof...(T))
 	{
-		const auto it{_entities.at(entity)};
+		const auto id{_entities.at(entity)};
 
-		if (!it) {
+		if ((!id || id->second) && !_pending.contains(entity)) {
 			return;
 		}
 
-		[&]<std::size_t ...I>(std::index_sequence<I...>) -> void {
-			const auto &ids{internal::sparse_storage::ids<T...>()};
-			(_components.at<T>(ids[I]).erase(entity), ...);
-		}(std::index_sequence_for<T...>{});
+		const auto command{[this](const auto entity) noexcept -> void {
+			[&]<std::size_t ...I>(std::index_sequence<I...>) -> void {
+				const auto &ids{internal::sparse_storage::ids<T...>()};
+				(_components.at<T>(ids[I]).erase(entity), ...);
+			}(std::index_sequence_for<T...>{});
 
-		cache = _archetypes[it->first].first;
+			cache = _archetypes[_entities[entity].first].first;
 
-		if constexpr (1 < sizeof...(T)) {
-			cache.erase(archetype::of<T...>());
+			if constexpr (1 < sizeof...(T)) {
+				cache.erase(archetype::of<T...>());
+			}
+			else {
+				cache.erase(internal::sparse_storage::ids<T...>().front());
+			}
+
+			relocate(entity, _entities[entity].first);
+		}};
+
+		if (_lock) {
+			_commands.enqueue([command, entity, _ = 0] noexcept -> void {
+				command(entity);
+			});
 		}
 		else {
-			cache.erase(internal::sparse_storage::ids<T...>().front());
+			command(entity);
 		}
-
-		relocate(entity, it->first);
 	}
 
 	void despawn(std::uint32_t entity) noexcept;
@@ -271,10 +315,12 @@ private:
 	internal::stack_vector<std::uint16_t, std::uint16_t> _queries;
 	internal::command_queue _commands;
 	std::size_t _lock{};
+	internal::sparse_set<std::uint32_t> _pending;
 
 	std::function<void ()> _callback{[this] noexcept -> void {
 		if (!--_lock) {
 			_commands.execute();
+			_pending.clear();
 		}
 	}};
 

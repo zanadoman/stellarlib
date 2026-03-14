@@ -24,6 +24,7 @@
 #include <stellarlib/ecs/world.hpp>
 
 #include <stellarlib/ecs/archetype.hpp>
+#include <stellarlib/ext/functional.hpp>
 
 #include <cstddef>
 #include <cstdint>
@@ -70,12 +71,34 @@ auto world::operator[](const std::uint32_t entity) const noexcept
 
 void world::despawn(const std::uint32_t entity) noexcept
 {
-	if (const auto id{_entities.at(entity)}) {
-		_entities.erase(entity);
-		_archetypes[id->first].second.erase(entity);
-		_components.erase(entity);
-		_queue.insert(entity);
+	const auto id{_entities.at(entity)};
+
+	if (_pending.contains(entity)) {
+		_pending.erase(entity);
 	}
+	else if (ext::falsy(id) || id->second) {
+		return;
+	}
+	else if (ext::truthy(_lock)) {
+		id->second = true;
+	}
+
+	const auto command{[this](const auto entity) noexcept -> void {
+		_archetypes[_entities[entity].first].second.erase(entity);
+		_entities.erase(entity);
+		_components.erase(entity);
+	}};
+
+	if (ext::truthy(_lock)) {
+		_commands.enqueue([command, entity, _ = 0] noexcept -> void {
+			command(entity);
+		});
+	}
+	else {
+		command(entity);
+	}
+
+	_queue.insert(entity);
 }
 
 void world::clear() noexcept
