@@ -58,6 +58,16 @@ static_assert(std::is_same_v<ext::vector_allocator<std::string>::size_type, std:
 static_assert(std::is_same_v<ext::vector_allocator<std::string>::difference_type, std::allocator<std::string>::difference_type>);
 static_assert(std::is_same_v<ext::vector_allocator<std::string>::propagate_on_container_move_assignment, std::allocator<std::string>::propagate_on_container_move_assignment>);
 
+TEST(stellarlib_ext_memory, page_capacity)
+{
+	ASSERT_TRUE(ext::page_capacity());
+}
+
+TEST(stellarlib_ext_memory, page_alignment)
+{
+	ASSERT_GE(ext::page_alignment(), alignof(std::max_align_t));
+}
+
 TEST(stellarlib_ext_memory, vector_allocator_should_acquire_and_release_trivial_arena)
 {
 	const ext::vector_allocator<std::int32_t> allocator{};
@@ -217,14 +227,9 @@ static_assert(std::is_same_v<ext::arena::size_type, std::allocator<void>::size_t
 static_assert(std::is_same_v<ext::arena::difference_type, std::allocator<void>::difference_type>);
 static_assert(std::is_same_v<ext::arena::propagate_on_container_move_assignment, std::allocator<void>::propagate_on_container_move_assignment>);
 
-TEST(stellarlib_ext_memory, arena_should_have_size)
-{
-	ASSERT_TRUE(ext::arena::size());
-}
-
 TEST(stellarlib_ext_memory, arena_should_move_via_ctor)
 {
-	ext::arena arena1{};
+	ext::arena arena1{0};
 	const auto number1{arena1.allocate<std::int32_t>()};
 	const auto string1{arena1.allocate<std::string>()};
 	const auto string2{arena1.allocate<std::string>()};
@@ -251,7 +256,7 @@ TEST(stellarlib_ext_memory, arena_should_move_via_ctor)
 
 TEST(stellarlib_ext_memory, arena_should_skip_self_move_via_assignment)
 {
-	ext::arena arena{};
+	ext::arena arena{0};
 	const auto number1{arena.allocate<std::int32_t>()};
 	const auto string1{arena.allocate<std::string>()};
 	const auto string2{arena.allocate<std::string>()};
@@ -278,12 +283,12 @@ TEST(stellarlib_ext_memory, arena_should_skip_self_move_via_assignment)
 
 TEST(stellarlib_ext_memory, arena_should_move_via_assignment)
 {
-	ext::arena arena1{};
+	ext::arena arena1{0};
 	const auto number1{arena1.allocate<std::int32_t>()};
 	const auto string1{arena1.allocate<std::string>()};
 	const auto string2{arena1.allocate<std::string>()};
 	const auto number2{arena1.allocate<std::int32_t>()};
-	ext::arena arena2{};
+	ext::arena arena2{0};
 	arena2 = std::move(arena1);
 	std::construct_at(number1, 5);
 	std::construct_at(string1, "hello");
@@ -304,9 +309,18 @@ TEST(stellarlib_ext_memory, arena_should_move_via_assignment)
 	ASSERT_EQ(arena2.allocate<std::int32_t>(), number2);
 }
 
+TEST(stellarlib_ext_memory, arena_should_have_capacity)
+{
+	ASSERT_EQ(ext::arena{0}.capacity(), ext::page_capacity());
+	ASSERT_EQ(ext::arena{1}.capacity(), ext::page_capacity());
+	ASSERT_EQ(ext::arena{ext::page_capacity() / 2}.capacity(), ext::page_capacity());
+	ASSERT_EQ(ext::arena{ext::page_capacity()}.capacity(), ext::page_capacity());
+	ASSERT_EQ(ext::arena{ext::page_capacity() + ext::page_capacity() / 2}.capacity(), ext::page_capacity() * 2);
+}
+
 TEST(stellarlib_ext_memory, arena_should_allocate_and_deallocate)
 {
-	ext::arena arena{};
+	ext::arena arena{0};
 	const auto number1{arena.allocate<std::int32_t>()};
 	ASSERT_TRUE(number1);
 	ASSERT_FALSE(reinterpret_cast<std::size_t>(number1) % alignof(std::int32_t));
@@ -341,8 +355,8 @@ TEST(stellarlib_ext_memory, arena_should_allocate_and_deallocate)
 
 TEST(stellarlib_ext_memory, arena_should_evaluate_equality)
 {
-	const ext::arena arena1{};
-	const ext::arena arena2{};
+	const ext::arena arena1{0};
+	const ext::arena arena2{0};
 	ASSERT_EQ(arena1, arena1);
 	ASSERT_EQ(arena2, arena2);
 	ASSERT_NE(arena1, arena2);

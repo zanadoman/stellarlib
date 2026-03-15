@@ -35,6 +35,14 @@
 
 namespace stellarlib::ext
 {
+[[nodiscard]]
+auto page_capacity() noexcept
+	-> std::size_t;
+
+[[nodiscard]]
+auto page_alignment() noexcept
+	-> std::size_t;
+
 template <typename T, typename SizeType = std::size_t>
 class vector_allocator : std::allocator<T>
 {
@@ -110,11 +118,7 @@ public:
 	using propagate_on_container_move_assignment = std::allocator<void>::propagate_on_container_move_assignment;
 
 	[[nodiscard]]
-	static auto size() noexcept
-		-> size_type;
-
-	[[nodiscard]]
-	explicit arena() noexcept;
+	explicit arena(size_type capacity) noexcept;
 
 	[[nodiscard]]
 	constexpr arena(const arena &) noexcept = delete;
@@ -130,13 +134,17 @@ public:
 
 	~arena() noexcept;
 
+	[[nodiscard]]
+	auto capacity() const noexcept
+		-> size_type;
+
 	template <typename T>
 	[[nodiscard]]
 	constexpr auto allocate() noexcept
 	{
-		if (const auto ptr{std::align(alignof(T), sizeof(T), _cursor, _capacity)}) {
+		if (const auto ptr{std::align(alignof(T), sizeof(T), _cursor, _size)}) {
 			_cursor = static_cast<T *>(_cursor) + 1;
-			_capacity -= sizeof(T);
+			_size -= sizeof(T);
 			return static_cast<T *>(ptr);
 		}
 
@@ -150,11 +158,10 @@ public:
 	void deallocate() noexcept;
 
 private:
-	static size_type capacity;
-	static size_type alignment;
-	value_type *_begin{std::aligned_alloc(alignment, capacity)};
+	size_type _capacity;
+	value_type *_begin{std::aligned_alloc(page_alignment(), _capacity)};
 	value_type *_cursor{_begin};
-	size_type _capacity{capacity};
+	size_type _size{_capacity};
 };
 
 class arena_allocator : std::allocator<void>
@@ -190,7 +197,7 @@ public:
 			return ptr;
 		}
 
-		if (arena::size() < sizeof(T)) {
+		if (_begin[_cursor].capacity() < sizeof(T)) {
 			return static_cast<T *>(nullptr);
 		}
 
@@ -204,7 +211,7 @@ public:
 
 			std::free(_begin);
 			_begin = dst;
-			std::construct_at(_begin + _cursor);
+			std::construct_at(_begin + _cursor, 0);
 		}
 
 		return _begin[_cursor].allocate<T>();

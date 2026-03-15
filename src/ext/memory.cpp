@@ -35,18 +35,33 @@
 
 namespace stellarlib::ext
 {
-auto arena::size() noexcept
-	-> size_type
+auto page_capacity() noexcept
+	-> std::size_t
 {
+	static const auto capacity{[] [[nodiscard]] noexcept -> auto {
+		const auto capacity{SDL_GetSystemPageSize()};
+		return 0 < capacity ? static_cast<std::size_t>(capacity) : 4096;
+	}()};
+
 	return capacity;
 }
 
-arena::arena() noexcept = default;
+auto page_alignment() noexcept
+	-> std::size_t
+{
+	static const auto alignment{truthy(page_capacity() % alignof(std::max_align_t)) ? alignof(std::max_align_t) : page_capacity()};
+	return alignment;
+}
+
+arena::arena(const size_type capacity) noexcept
+	: _capacity{ext::truthy(capacity) ? (capacity + page_capacity() - 1) / page_capacity() * page_capacity() : page_capacity()}
+{}
 
 arena::arena(arena &&other) noexcept
-	: _begin{std::exchange(other._begin, {})}
+	: _capacity{std::exchange(other._capacity, {})}
+	, _begin{std::exchange(other._begin, {})}
 	, _cursor{std::exchange(other._cursor, {})}
-	, _capacity{std::exchange(other._capacity, {})}
+	, _size{std::exchange(other._size, {})}
 {}
 
 auto arena::operator=(arena &&other) noexcept
@@ -65,6 +80,12 @@ arena::~arena() noexcept
 	std::free(_begin);
 }
 
+auto arena::capacity() const noexcept
+	-> size_type
+{
+	return _capacity;
+}
+
 auto arena::operator==(const arena &other) const noexcept
 	-> bool
 {
@@ -74,19 +95,12 @@ auto arena::operator==(const arena &other) const noexcept
 void arena::deallocate() noexcept
 {
 	_cursor = _begin;
-	_capacity = capacity;
+	_size = _capacity;
 }
-
-arena::size_type arena::capacity{[] [[nodiscard]] noexcept -> auto {
-	const auto capacity{SDL_GetSystemPageSize()};
-	return 0 < capacity ? static_cast<size_type>(capacity) : 4096;
-}()};
-
-arena::size_type arena::alignment{truthy(capacity % alignof(std::max_align_t)) ? alignof(std::max_align_t) : capacity};
 
 arena_allocator::arena_allocator() noexcept
 {
-	std::construct_at(_begin);
+	std::construct_at(_begin, 0);
 }
 
 arena_allocator::arena_allocator(arena_allocator &&other) noexcept

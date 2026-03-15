@@ -187,10 +187,10 @@ TEST(stellarlib_ecs_archetype, should_evaluate_equal_archetypes)
 	archetype2.erase(std::ranges::max(IDS));
 	ASSERT_EQ(archetype1, archetype2);
 	ASSERT_EQ(archetype2, archetype1);
-	ASSERT_TRUE(archetype1 <= archetype2);
-	ASSERT_TRUE(archetype2 <= archetype1);
-	ASSERT_TRUE(archetype2 >= archetype1);
-	ASSERT_TRUE(archetype1 >= archetype2);
+	ASSERT_LE(archetype1, archetype2);
+	ASSERT_LE(archetype2, archetype1);
+	ASSERT_GE(archetype2, archetype1);
+	ASSERT_GE(archetype1, archetype2);
 }
 
 
@@ -210,17 +210,17 @@ TEST(stellarlib_ecs_archetype, should_evaluate_unequal_archetypes)
 
 TEST(stellarlib_ecs_archetype, should_evaluate_subtype_and_supertype)
 {
-	ecs::archetype subarchetype{};
-	subarchetype.insert(std::ranges::min(IDS));
-	subarchetype.insert(std::ranges::max(IDS));
-	subarchetype.erase(std::ranges::max(IDS));
-	ecs::archetype superarchetype{};
-	superarchetype.insert(std::ranges::min(IDS));
-	superarchetype.insert((std::ranges::min(IDS) + std::ranges::max(IDS)) / 2);
-	ASSERT_TRUE(subarchetype <= superarchetype);
-	ASSERT_FALSE(superarchetype <= subarchetype);
-	ASSERT_TRUE(superarchetype >= subarchetype);
-	ASSERT_FALSE(subarchetype >= superarchetype);
+	ecs::archetype subtype{};
+	subtype.insert(std::ranges::min(IDS));
+	subtype.insert(std::ranges::max(IDS));
+	subtype.erase(std::ranges::max(IDS));
+	ecs::archetype supertype{};
+	supertype.insert(std::ranges::min(IDS));
+	supertype.insert((std::ranges::min(IDS) + std::ranges::max(IDS)) / 2);
+	ASSERT_LE(subtype, supertype);
+	ASSERT_GE(supertype, subtype);
+	ASSERT_GE(supertype, subtype);
+	ASSERT_LE(subtype, supertype);
 }
 
 TEST(stellarlib_ecs_archetype, should_erase_archetype)
