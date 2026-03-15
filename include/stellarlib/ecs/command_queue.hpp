@@ -55,15 +55,12 @@ public:
 	template <typename Callback>
 	constexpr void enqueue(Callback &&callback) noexcept
 	{
-		const auto ptr{allocate<Callback>()};
-		std::construct_at(ptr, std::forward<Callback>(callback));
-
 		_commands.push(
 			[](void *callback) noexcept -> void {
 				(*static_cast<Callback *>(callback))();
 				std::destroy_at(static_cast<const Callback *>(callback));
 			},
-			ptr
+			std::construct_at(allocate<Callback>(), std::forward<Callback>(callback))
 		);
 	}
 

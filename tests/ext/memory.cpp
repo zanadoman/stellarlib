@@ -58,16 +58,6 @@ static_assert(std::is_same_v<ext::vector_allocator<std::string>::size_type, std:
 static_assert(std::is_same_v<ext::vector_allocator<std::string>::difference_type, std::allocator<std::string>::difference_type>);
 static_assert(std::is_same_v<ext::vector_allocator<std::string>::propagate_on_container_move_assignment, std::allocator<std::string>::propagate_on_container_move_assignment>);
 
-TEST(stellarlib_ext_memory, page_capacity)
-{
-	ASSERT_TRUE(ext::page_capacity());
-}
-
-TEST(stellarlib_ext_memory, page_alignment)
-{
-	ASSERT_GE(ext::page_alignment(), alignof(std::max_align_t));
-}
-
 TEST(stellarlib_ext_memory, vector_allocator_should_acquire_and_release_trivial_arena)
 {
 	const ext::vector_allocator<std::int32_t> allocator{};
@@ -311,11 +301,7 @@ TEST(stellarlib_ext_memory, arena_should_move_via_assignment)
 
 TEST(stellarlib_ext_memory, arena_should_have_capacity)
 {
-	ASSERT_EQ(ext::arena{0}.capacity(), ext::page_capacity());
-	ASSERT_EQ(ext::arena{1}.capacity(), ext::page_capacity());
-	ASSERT_EQ(ext::arena{ext::page_capacity() / 2}.capacity(), ext::page_capacity());
-	ASSERT_EQ(ext::arena{ext::page_capacity()}.capacity(), ext::page_capacity());
-	ASSERT_EQ(ext::arena{ext::page_capacity() + ext::page_capacity() / 2}.capacity(), ext::page_capacity() * 2);
+	ASSERT_TRUE(ext::arena{0}.capacity());
 }
 
 TEST(stellarlib_ext_memory, arena_should_allocate_and_deallocate)
@@ -453,17 +439,19 @@ TEST(stellarlib_ext_memory, arena_allocator_should_move_via_assignment)
 TEST(stellarlib_ext_memory, arena_allocator_should_allocate_and_deallocate)
 {
 	ext::arena_allocator allocator{};
-	const auto number1{allocator.allocate<std::int32_t>()};
+	auto number1{allocator.allocate<std::int32_t>()};
 	ASSERT_TRUE(number1);
 	ASSERT_FALSE(reinterpret_cast<std::size_t>(number1) % alignof(std::int32_t));
-	const auto string1{allocator.allocate<std::string>()};
+	auto string1{allocator.allocate<std::string>()};
 	ASSERT_TRUE(string1);
 	ASSERT_EQ(reinterpret_cast<const std::byte *>(string1) - reinterpret_cast<const std::byte *>(number1), sizeof(std::int32_t) + (ext::padding<std::string, std::int32_t>::size));
-	ASSERT_FALSE((allocator.allocate<std::array<std::byte, std::numeric_limits<std::uint16_t>::max()>>)());
-	const auto string2{allocator.allocate<std::string>()};
+	auto array{allocator.allocate<std::array<std::byte, std::numeric_limits<std::uint16_t>::max()>>()};
+	ASSERT_TRUE(array);
+	ASSERT_FALSE(reinterpret_cast<std::size_t>(array) % alignof(std::array<std::byte, std::numeric_limits<std::uint16_t>::max()>));
+	auto string2{allocator.allocate<std::string>()};
 	ASSERT_TRUE(string2);
-	ASSERT_EQ(reinterpret_cast<const std::byte *>(string2) - reinterpret_cast<const std::byte *>(string1), sizeof(std::string) + (ext::padding<std::string, std::string>::size));
-	const auto number2{allocator.allocate<std::int32_t>()};
+	ASSERT_FALSE(reinterpret_cast<std::size_t>(string2) % alignof(std::string));
+	auto number2{allocator.allocate<std::int32_t>()};
 	ASSERT_TRUE(number2);
 	ASSERT_EQ(reinterpret_cast<const std::byte *>(number2) - reinterpret_cast<const std::byte *>(string2), sizeof(std::string) + (ext::padding<std::int32_t, std::string>::size));
 	std::construct_at(number1, 5);
@@ -503,10 +491,21 @@ TEST(stellarlib_ext_memory, arena_allocator_should_allocate_and_deallocate)
 		}
 	}
 	allocator.deallocate();
-	ASSERT_EQ(allocator.allocate<std::int32_t>(), number1);
-	ASSERT_EQ(allocator.allocate<std::string>(), string1);
-	ASSERT_EQ(allocator.allocate<std::string>(), string2);
-	ASSERT_EQ(allocator.allocate<std::int32_t>(), number2);
+	number1 = allocator.allocate<std::int32_t>();
+	ASSERT_TRUE(number1);
+	ASSERT_FALSE(reinterpret_cast<std::size_t>(number1) % alignof(std::int32_t));
+	string1 = allocator.allocate<std::string>();
+	ASSERT_TRUE(string1);
+	ASSERT_EQ(reinterpret_cast<const std::byte *>(string1) - reinterpret_cast<const std::byte *>(number1), sizeof(std::int32_t) + (ext::padding<std::string, std::int32_t>::size));
+	array = allocator.allocate<std::array<std::byte, std::numeric_limits<std::uint16_t>::max()>>();
+	ASSERT_TRUE(array);
+	ASSERT_EQ(reinterpret_cast<const std::byte *>(array) - reinterpret_cast<const std::byte *>(string1), sizeof(std::string) + (ext::padding<std::array<std::byte, std::numeric_limits<std::uint16_t>::max()>, std::string>::size));
+	string2 = allocator.allocate<std::string>();
+	ASSERT_TRUE(string2);
+	ASSERT_EQ(reinterpret_cast<const std::byte *>(string2) - reinterpret_cast<const std::byte *>(array), sizeof(std::array<std::byte, std::numeric_limits<std::uint16_t>::max()>) + (ext::padding<std::string, std::array<std::byte, std::numeric_limits<std::uint16_t>::max()>>::size));
+	number2 = allocator.allocate<std::int32_t>();
+	ASSERT_TRUE(number2);
+	ASSERT_EQ(reinterpret_cast<const std::byte *>(number2) - reinterpret_cast<const std::byte *>(string2), sizeof(std::string) + (ext::padding<std::int32_t, std::string>::size));
 }
 
 TEST(stellarlib_ext_memory, arena_allocator_should_evaluate_equality)

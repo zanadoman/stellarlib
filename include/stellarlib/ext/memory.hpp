@@ -35,14 +35,6 @@
 
 namespace stellarlib::ext
 {
-[[nodiscard]]
-auto page_capacity() noexcept
-	-> std::size_t;
-
-[[nodiscard]]
-auto page_alignment() noexcept
-	-> std::size_t;
-
 template <typename T, typename SizeType = std::size_t>
 class vector_allocator : std::allocator<T>
 {
@@ -158,8 +150,10 @@ public:
 	void deallocate() noexcept;
 
 private:
+	static size_type page_capacity;
+	static size_type page_alignment;
 	size_type _capacity;
-	value_type *_begin{std::aligned_alloc(page_alignment(), _capacity)};
+	value_type *_begin{std::aligned_alloc(page_alignment, _capacity)};
 	value_type *_cursor{_begin};
 	size_type _size{_capacity};
 };
@@ -197,23 +191,9 @@ public:
 			return ptr;
 		}
 
-		if (_begin[_cursor].capacity() < sizeof(T)) {
-			return static_cast<T *>(nullptr);
-		}
-
-		if (++_cursor == _capacity) {
-			const auto dst{static_cast<arena *>(std::aligned_alloc(alignof(arena), (_capacity + 1) * sizeof(arena)))};
-
-			for (const auto src : std::views::iota(_begin, _begin + _capacity++)) {
-				std::construct_at(src + (dst - _begin), std::move(*src));
-				std::destroy_at(src);
-			}
-
-			std::free(_begin);
-			_begin = dst;
-			std::construct_at(_begin + _cursor, 0);
-		}
-
+		_begin = static_cast<arena *>(std::realloc(_begin, (++_cursor + 1) * sizeof(arena)));
+		std::construct_at(_begin + _cursor, sizeof(T) <= _capacity ? _capacity : sizeof(T));
+		_capacity += _begin[_cursor].capacity();
 		return _begin[_cursor].allocate<T>();
 	}
 
@@ -224,9 +204,9 @@ public:
 	void deallocate() noexcept;
 
 private:
-	arena *_begin{static_cast<arena *>(std::aligned_alloc(alignof(arena), sizeof(arena)))};
+	arena *_begin{std::construct_at(static_cast<arena *>(std::aligned_alloc(alignof(arena), sizeof(arena))), 0)};
 	size_type _cursor{};
-	size_type _capacity{1};
+	size_type _capacity{_begin->capacity()};
 };
 }
 

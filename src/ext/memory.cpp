@@ -35,26 +35,8 @@
 
 namespace stellarlib::ext
 {
-auto page_capacity() noexcept
-	-> std::size_t
-{
-	static const auto capacity{[] [[nodiscard]] noexcept -> auto {
-		const auto capacity{SDL_GetSystemPageSize()};
-		return 0 < capacity ? static_cast<std::size_t>(capacity) : 4096;
-	}()};
-
-	return capacity;
-}
-
-auto page_alignment() noexcept
-	-> std::size_t
-{
-	static const auto alignment{truthy(page_capacity() % alignof(std::max_align_t)) ? alignof(std::max_align_t) : page_capacity()};
-	return alignment;
-}
-
 arena::arena(const size_type capacity) noexcept
-	: _capacity{ext::truthy(capacity) ? (capacity + page_capacity() - 1) / page_capacity() * page_capacity() : page_capacity()}
+	: _capacity{truthy(capacity) ? (capacity + page_capacity - 1) / page_capacity * page_capacity : page_capacity}
 {}
 
 arena::arena(arena &&other) noexcept
@@ -98,10 +80,14 @@ void arena::deallocate() noexcept
 	_size = _capacity;
 }
 
-arena_allocator::arena_allocator() noexcept
-{
-	std::construct_at(_begin, 0);
-}
+arena::size_type arena::page_capacity{[] [[nodiscard]] noexcept -> auto {
+	const auto capacity{SDL_GetSystemPageSize()};
+	return 0 < capacity ? static_cast<size_type>(capacity) : 4096;
+}()};
+
+arena::size_type arena::page_alignment{truthy(page_capacity % alignof(std::max_align_t)) ? alignof(std::max_align_t) : page_capacity};
+
+arena_allocator::arena_allocator() noexcept = default;
 
 arena_allocator::arena_allocator(arena_allocator &&other) noexcept
 	: _begin{std::exchange(other._begin, {})}
@@ -122,8 +108,10 @@ auto arena_allocator::operator=(arena_allocator &&other) noexcept
 
 arena_allocator::~arena_allocator() noexcept
 {
-	std::destroy_n(_begin, _capacity);
-	std::free(_begin);
+	if (truthy(_begin)) {
+		std::destroy_n(_begin, _cursor + 1);
+		std::free(_begin);
+	}
 }
 
 auto arena_allocator::operator==(const arena_allocator &other) const noexcept
@@ -134,10 +122,16 @@ auto arena_allocator::operator==(const arena_allocator &other) const noexcept
 
 void arena_allocator::deallocate() noexcept
 {
-	for (const auto arena : std::views::iota(_begin, _begin + _cursor + 1)) {
-		arena->deallocate();
-	}
+	if (truthy(_cursor)) {
+		for (const auto arena : std::views::iota(_begin, _begin + _cursor + 1)) {
+			std::destroy_at(arena);
+		}
 
-	_cursor = 0;
+		_begin = std::construct_at(static_cast<arena *>(std::realloc(_begin, sizeof(arena))), _capacity);
+		_cursor = 0;
+	}
+	else {
+		_begin->deallocate();
+	}
 }
 }
