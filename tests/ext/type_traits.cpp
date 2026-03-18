@@ -38,6 +38,8 @@ using namespace stellarlib;
 
 /* NOLINTBEGIN(cert-err58-cpp,performance-unnecessary-copy-initialization) */
 
+namespace
+{
 class trivially_relocatable final
 {
 public:
@@ -100,6 +102,7 @@ public:
 
 	~non_trivially_destructible() noexcept;
 };
+}
 
 static_assert(std::is_same_v<ext::is_trivially_relocatable<trivially_relocatable>, std::true_type>);
 static_assert(std::is_same_v<ext::is_trivially_relocatable<non_trivially_move_constructible>, std::false_type>);

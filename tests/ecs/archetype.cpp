@@ -46,11 +46,14 @@ using namespace stellarlib;
 
 /* NOLINTBEGIN(cert-err58-cpp,performance-unnecessary-copy-initialization) */
 
-class foo final {};
+namespace
+{
+struct foo final {};
 
-class bar final {};
+struct bar final {};
 
-class baz final {};
+struct baz final {};
+}
 
 constexpr std::array<std::uintmax_t, 3> IDS{
 	std::numeric_limits<std::uintmax_t>::digits * 1 - 1,

@@ -29,6 +29,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <ranges>
 
 namespace stellarlib::ecs
 {
@@ -103,14 +104,33 @@ void world::despawn(const std::uint32_t entity) noexcept
 
 void world::clear() noexcept
 {
-	_queue.clear();
-	_entities.clear();
+	_pending.clear();
 
-	for (auto &pair : _archetypes) {
-		pair.second.clear();
+	for (const auto [entity, data] : _entities.zip() | std::views::reverse) {
+		if (!data.second) {
+			_queue.insert(entity);
+			data.second = true;
+		}
 	}
 
-	_components.clear();
+	const auto command{[this] noexcept -> void {
+		_entities.clear();
+
+		for (auto &pair : _archetypes) {
+			pair.second.clear();
+		}
+
+		_components.clear();
+	}};
+
+	if (ext::truthy(_lock)) {
+		_commands.enqueue([command] noexcept -> void {
+			command();
+		});
+	}
+	else {
+		command();
+	}
 }
 
 thread_local archetype world::cache{};

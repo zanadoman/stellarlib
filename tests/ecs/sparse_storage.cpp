@@ -40,9 +40,12 @@ using namespace stellarlib;
 
 /* NOLINTBEGIN(cert-err58-cpp,performance-unnecessary-copy-initialization) */
 
-class foo final {};
+namespace
+{
+struct foo final {};
 
-class bar final {};
+struct bar final {};
+}
 
 TEST(stellarlib_ecs_sparse_storage, should_assign_and_cache_ids)
 {
