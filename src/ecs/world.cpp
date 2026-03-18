@@ -80,13 +80,17 @@ void world::despawn(const std::uint32_t entity) noexcept
 	else if (ext::falsy(id) || id->second) {
 		return;
 	}
-	else if (ext::truthy(_lock)) {
+	else {
 		id->second = true;
 	}
 
 	const auto command{[this](const auto entity) noexcept -> void {
 		_archetypes[_entities[entity].first].second.erase(entity);
-		_entities.erase(entity);
+
+		if (_entities[entity].second) {
+			_entities.erase(entity);
+		}
+
 		_components.erase(entity);
 	}};
 
