@@ -74,8 +74,8 @@ void world::despawn(const std::uint32_t entity) noexcept
 {
 	const auto id{_entities.at(entity)};
 
-	if (_pending.contains(entity)) {
-		_pending.erase(entity);
+	if (_spawned.contains(entity)) {
+		_spawned.erase(entity);
 	}
 	else if (ext::falsy(id) || id->second) {
 		return;
@@ -103,16 +103,16 @@ void world::despawn(const std::uint32_t entity) noexcept
 		command(entity);
 	}
 
-	_queue.insert(entity);
+	_despawned.push(entity);
 }
 
 void world::clear() noexcept
 {
-	_pending.clear();
+	_spawned.clear();
 
 	for (const auto [entity, data] : _entities.zip() | std::views::reverse) {
 		if (!data.second) {
-			_queue.insert(entity);
+			_despawned.push(entity);
 			data.second = true;
 		}
 	}

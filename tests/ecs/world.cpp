@@ -21,9 +21,9 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#include <stellarlib/ecs/archetype.hpp>
 #include <stellarlib/ecs/world.hpp>
 
+#include <stellarlib/ecs/archetype.hpp>
 #include <stellarlib/ext/functional.hpp>
 
 #include <algorithm>

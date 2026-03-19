@@ -35,13 +35,14 @@
 #include <stellarlib/ext/utility.hpp>
 
 #include <algorithm>
-#include <expected>
 #include <cstddef>
 #include <cstdint>
+#include <expected>
 #include <functional>
-#include <utility>
-#include <tuple>
 #include <ranges>
+#include <tuple>
+#include <type_traits>
+#include <utility>
 
 namespace stellarlib::ecs
 {
@@ -68,33 +69,33 @@ public:
 	template <typename ...T>
 	constexpr auto spawn(T &&...components) noexcept
 	{
-		auto entity{static_cast<uint32_t>(_entities.size() + _pending.size())};
+		auto entity{_entities.size() + _spawned.size()};
 
-		if (_queue.size()) {
-			entity = *(_queue.end() - 1);
-			_queue.erase(entity);
+		if (_despawned.size()) {
+			entity = *(_despawned.end() - 1);
+			_despawned.pop();
 		}
 
 		if (_lock) {
-			if (const auto it{_entities.at(entity)}) {
-				it->second = false;
+			if (const auto pair{_entities.at(entity)}) {
+				pair->second = false;
 			}
 			else {
-				_pending.insert(entity);
+				_spawned.insert(entity);
 			}
 		}
 
-		auto const command{[this](const auto entity, auto &&...components) noexcept -> void {
-			[&]<std::size_t ...I>(std::index_sequence<I...>) -> void {
+		const auto command{[this] (const auto entity, auto &&...components) noexcept -> void {
+			[this] <std::size_t ...I> (const auto entity, T &&...components, const std::index_sequence<I...>) noexcept -> void {
 				const auto &ids{internal::sparse_storage::ids<T...>()};
 				(_components.at<T>(ids[I]).insert(entity, std::forward<T>(components)), ...);
-			}(std::index_sequence_for<T...>{});
+			}(entity, std::forward<T>(components)..., std::index_sequence_for<T...>{});
 
-			relocate(entity, archetype::of<T...>());
+			relocate<const archetype &>(entity, archetype::of<T...>());
 		}};
 
 		if (_lock) {
-			_commands.enqueue([env = std::tuple{command, std::tuple{entity, std::forward<T>(components)...}}] mutable -> void {
+			_commands.enqueue([env = std::tuple{command, std::tuple{entity, std::forward<T>(components)...}}] mutable noexcept -> void {
 				std::apply(std::get<0>(env), std::move(std::get<1>(env)));
 			});
 		}
@@ -111,17 +112,17 @@ public:
 		-> std::expected<void, std::tuple<T...>>
 		requires (0 < sizeof...(T))
 	{
-		const auto it{_entities.at(entity)};
+		const auto pair{_entities.at(entity)};
 
-		if ((!it || it->second) && !_pending.contains(entity)) {
-			return std::unexpected(std::tuple{std::forward<T>(components)...});
+		if ((!pair || pair->second) && !_spawned.contains(entity)) {
+			return std::unexpected{std::tuple{std::forward<T>(components)...}};
 		}
 
-		const auto command{[this](const auto entity, auto &&...components) noexcept -> void {
-			[&]<std::size_t ...I>(std::index_sequence<I...>) -> void {
+		const auto command{[this] (const auto entity, auto &&...components) noexcept -> void {
+			[this] <std::size_t ...I> (const auto entity, T &&...components, const std::index_sequence<I...>) noexcept -> void {
 				const auto &ids{internal::sparse_storage::ids<T...>()};
 				(_components.at<T>(ids[I]).insert(entity, std::forward<T>(components)), ...);
-			}(std::index_sequence_for<T...>{});
+			}(entity, std::forward<T>(components)..., std::index_sequence_for<T...>{});
 
 			cache = _archetypes[_entities[entity].first].first;
 
@@ -136,7 +137,7 @@ public:
 		}};
 
 		if (_lock) {
-			_commands.enqueue([env = std::tuple{command, std::tuple{entity, std::forward<T>(components)...}}] mutable -> void {
+			_commands.enqueue([env = std::tuple{command, std::tuple{entity, std::forward<T>(components)...}}] mutable noexcept -> void {
 				std::apply(std::get<0>(env), std::move(std::get<1>(env)));
 			});
 		}
@@ -160,14 +161,14 @@ public:
 	constexpr auto contains(const std::uint32_t entity) const noexcept
 		requires (0 < sizeof...(T))
 	{
-		return [&]<std::size_t ...I>(std::index_sequence<I...>) -> auto {
-			if (const auto it{_entities.at(entity)}) {
+		if (const auto pair{_entities.at(entity)}) {
+			return [] <std::size_t ...I> [[nodiscard]] (const auto &archetype, const std::index_sequence<I...>) noexcept -> auto {
 				const auto &ids{internal::sparse_storage::ids<T...>()};
-				return std::tuple{_archetypes[it->first].first.contains(std::get<I>(ids))...};
-			}
+				return std::tuple{archetype.contains(ids[I])...};
+			}(_archetypes[pair->first].first, std::index_sequence_for<T...>{});
+		}
 
-			return std::tuple{ext::expand_as_v<T, false>...};
-		}(std::index_sequence_for<T...>{});
+		return std::tuple{ext::expand_as_v<T, false>...};
 	}
 
 	[[nodiscard]]
@@ -179,10 +180,10 @@ public:
 	constexpr auto at(const std::uint32_t entity) const noexcept
 		requires (0 < sizeof...(T))
 	{
-		return [&]<std::size_t ...I>(std::index_sequence<I...>) -> auto {
+		return [this] <std::size_t ...I> [[nodiscard]] (const auto entity, const std::index_sequence<I...>) noexcept -> auto {
 			const auto &ids{internal::sparse_storage::ids<T...>()};
-			return std::tuple{_components.at<T>(std::get<I>(ids)).at(entity)...};
-		}(std::index_sequence_for<T...>{});
+			return std::tuple{_components.at<T>(ids[I]).at(entity)...};
+		}(entity, std::index_sequence_for<T...>{});
 	}
 
 	[[nodiscard]]
@@ -194,21 +195,21 @@ public:
 	constexpr auto operator[](const std::uint32_t entity) const noexcept
 		requires (0 < sizeof...(T))
 	{
-		return [&]<std::size_t ...I>(std::index_sequence<I...>) -> std::tuple<T &...> {
+		return [this] <std::size_t ...I> [[nodiscard]] (const auto entity, const std::index_sequence<I...>) noexcept -> auto {
 			const auto &ids{internal::sparse_storage::ids<T...>()};
-			return {_components.operator[]<T>(std::get<I>(ids))[entity]...};
-		}(std::index_sequence_for<T...>{});
+			return std::tuple<T &...>{_components.operator[]<T>(ids[I])[entity]...};
+		}(entity, std::index_sequence_for<T...>{});
 	}
 
 	[[nodiscard]]
 	constexpr auto query() noexcept
 	{
 		++_lock;
-		return internal::query{_archetypes | std::views::transform([](const auto &pair) -> auto {
-			return pair.second | std::views::transform([&](const auto entity) -> std::tuple<std::uint32_t, const archetype &> {
-				return {entity, pair.first};
+		return internal::query{_archetypes | std::views::transform([] [[nodiscard]] (const auto &pair) noexcept -> auto {
+			return pair.second | std::views::transform([&] [[nodiscard]] (const auto entity) noexcept -> auto {
+				return std::tuple<std::uint32_t, const archetype &>{entity, pair.first};
 			});
-		}) | std::views::join, std::as_const(_callback)};
+		}) | std::views::join, _execute};
 	}
 
 	template <typename T>
@@ -216,7 +217,7 @@ public:
 	constexpr auto query() noexcept
 	{
 		++_lock;
-		return internal::query{_components.at<T>(internal::sparse_storage::ids<T>().front()).zip(), std::as_const(_callback)};
+		return internal::query{_components.at<T>(internal::sparse_storage::ids<T>().front()).zip(), _execute};
 	}
 
 	template <typename ...T>
@@ -226,58 +227,56 @@ public:
 	{
 		const auto id{ext::scoped_typeid<world, std::tuple<T...>, std::uint16_t>()};
 
-		if (_queries.extend(id + 1, static_cast<std::uint16_t>(-1)) || _queries[id] == static_cast<std::uint16_t>(-1)) {
+		if (_queries.extend(id + 1, static_cast<std::uint16_t>(-1)) || _queries[id] == -1) {
 			const auto &archetype{archetype::of<T...>()};
 
-			const auto it{std::ranges::find_if(_indices, [&](const auto &pair) -> auto {
+			const auto pair{std::ranges::find_if(_indices, [&] [[nodiscard]] (const auto &pair) noexcept -> auto {
 				return pair.first == archetype;
 			})};
 
-			if (it == _indices.end()) {
+			if (pair == _indices.end()) {
 				_queries[id] = _indices.size();
-				_indices.push(std::pair{archetype, internal::stack_vector<std::uint16_t>{}});
+				_indices.push(archetype, internal::stack_vector<std::uint16_t>{});
 
-				for (const auto i : std::views::iota(std::uint16_t{}, _archetypes.size())) {
-					if (archetype <= _archetypes[i].first) {
-						(_indices.end() - 1)->second.push(i);
+				for (const auto index : std::views::iota(std::uint16_t{}, _archetypes.size())) {
+					if (archetype <= _archetypes[index].first) {
+						(_indices.end() - 1)->second.push(index);
 					}
 				}
 			}
 			else {
-				_queries[id] = static_cast<std::uint16_t>(it - _indices.begin());
+				_queries[id] = static_cast<std::uint16_t>(pair - _indices.begin());
 			}
 		}
 
-		const auto components{[this]<std::size_t ...I>(std::index_sequence<I...>) -> std::tuple<const internal::sparse_map<std::uint32_t, T> &...> {
-			const auto &ids{internal::sparse_storage::ids<T...>()};
-			return {_components.operator[]<T>(ids[I])...};
-		}(std::index_sequence_for<T...>{})};
-
 		++_lock;
-		return internal::query{std::ranges::subrange{_indices[_queries[id]].second} | std::views::transform([this](const auto index) -> const internal::sparse_set<std::uint32_t> & {
+		return internal::query{std::ranges::subrange{_indices[_queries[id]].second} | std::views::transform([this] [[nodiscard]] (const auto index) noexcept -> const auto & {
 			return _archetypes[index].second;
-		}) | std::views::join | std::views::transform([=](const auto entity) -> std::tuple<std::uint32_t, T &...> {
-			return [&]<std::size_t ...I>(std::index_sequence<I...>) -> std::tuple<std::uint32_t, T &...> {
-				return {entity, std::get<I>(components)[entity]...};
-			}(std::index_sequence_for<T...>{});
-		}), std::as_const(_callback)};
+		}) | std::views::join | std::views::transform([components = [this] <std::size_t ...I> [[nodiscard]] (const std::index_sequence<I...>) noexcept -> auto {
+			const auto &ids{internal::sparse_storage::ids<T...>()};
+			return std::tuple<const internal::sparse_map<std::uint32_t, T> &...>{_components.operator[]<T>(ids[I])...};
+		}(std::index_sequence_for<T...>{})] [[nodiscard]] (const auto entity) noexcept -> auto {
+			return [] <std::size_t ...I> [[nodiscard]] (const auto entity, const auto &components, const std::index_sequence<I...>) noexcept -> auto {
+				return std::tuple<std::uint32_t, T &...>{entity, std::get<I>(components)[entity]...};
+			}(entity, components, std::index_sequence_for<T...>{});
+		}), _execute};
 	}
 
 	template <typename ...T>
 	constexpr void erase(const std::uint32_t entity) noexcept
 		requires (0 < sizeof...(T))
 	{
-		const auto id{_entities.at(entity)};
+		const auto pair{_entities.at(entity)};
 
-		if ((!id || id->second) && !_pending.contains(entity)) {
+		if ((!pair || pair->second) && !_spawned.contains(entity)) {
 			return;
 		}
 
-		const auto command{[this](const auto entity) noexcept -> void {
-			[&]<std::size_t ...I>(std::index_sequence<I...>) -> void {
+		const auto command{[this] (const auto entity) noexcept -> void {
+			[this] <std::size_t ...I> (const auto entity, const std::index_sequence<I...>) noexcept -> void {
 				const auto &ids{internal::sparse_storage::ids<T...>()};
 				(_components.at<T>(ids[I]).erase(entity), ...);
-			}(std::index_sequence_for<T...>{});
+			}(entity, std::index_sequence_for<T...>{});
 
 			cache = _archetypes[_entities[entity].first].first;
 
@@ -292,8 +291,8 @@ public:
 		}};
 
 		if (_lock) {
-			_commands.enqueue([command, entity, _ = 0] noexcept -> void {
-				command(entity);
+			_commands.enqueue([env = std::tuple{command, entity}] noexcept -> void {
+				std::get<0>(env)(std::get<1>(env));
 			});
 		}
 		else {
@@ -307,28 +306,32 @@ public:
 
 private:
 	static thread_local archetype cache;
-	internal::sparse_set<std::uint32_t> _queue;
+	internal::sparse_set<std::uint32_t> _spawned;
+	internal::stack_vector<std::uint32_t, std::uint32_t> _despawned;
 	internal::sparse_map<std::uint32_t, std::pair<std::uint16_t, bool>> _entities;
 	internal::stack_vector<std::pair<archetype, internal::sparse_set<std::uint32_t>>, std::uint16_t> _archetypes;
 	internal::sparse_storage _components;
-	internal::stack_vector<std::pair<archetype, internal::stack_vector<std::uint16_t>>, std::uint16_t> _indices;
 	internal::stack_vector<std::uint16_t, std::uint16_t> _queries;
+	internal::stack_vector<std::pair<archetype, internal::stack_vector<std::uint16_t>>, std::uint16_t> _indices;
 	internal::command_queue _commands;
 	std::size_t _lock{};
-	internal::sparse_set<std::uint32_t> _pending;
 
-	std::function<void ()> _callback{[this] noexcept -> void {
+	std::function<void ()> _execute{[this] noexcept -> void {
 		if (!--_lock) {
 			_commands.execute();
-			_pending.clear();
+			_spawned.clear();
 		}
 	}};
 
 	template <typename T>
-	constexpr void relocate(const std::uint32_t entity, const T &arg) noexcept
+	constexpr void relocate(const std::uint32_t entity, T arg) noexcept
 	{
-		const auto it{std::ranges::find_if(_archetypes, [&](const auto &pair) -> auto {
-			if constexpr (std::is_same_v<T, archetype>) {
+		if constexpr (std::is_same_v<T, std::uint16_t>) {
+			_archetypes[arg].second.erase(entity);
+		}
+
+		const auto pair{std::ranges::find_if(_archetypes, [&] [[nodiscard]] (const auto &pair) noexcept -> auto {
+			if constexpr (std::is_same_v<T, const archetype &>) {
 				return pair.first == arg;
 			}
 			else if constexpr (std::is_same_v<T, std::uint16_t>) {
@@ -336,37 +339,33 @@ private:
 			}
 		})};
 
-		if constexpr (std::is_same_v<T, std::uint16_t>) {
-			_archetypes[arg].second.erase(entity);
-		}
-
-		if (it == _archetypes.end()) {
-			if constexpr (std::is_same_v<T, archetype>) {
-				_entities.insert(entity, std::pair{_archetypes.size(), false});
-				_archetypes.push(std::pair{arg, internal::sparse_set<std::uint32_t>{}});
+		if (pair == _archetypes.end()) {
+			if constexpr (std::is_same_v<T, const archetype &>) {
+				_entities.insert(entity, _archetypes.size(), false);
+				_archetypes.push(arg, internal::sparse_set<std::uint32_t>{});
 			}
 			else if constexpr (std::is_same_v<T, std::uint16_t>) {
 				_entities[entity].first = _archetypes.size();
-				_archetypes.push(std::pair{cache, internal::sparse_set<std::uint32_t>{}});
+				_archetypes.push(cache, internal::sparse_set<std::uint32_t>{});
 			}
 
 			(_archetypes.end() - 1)->second.insert(entity);
 
-			for (auto &index : _indices) {
-				if (index.first <= (_archetypes.end() - 1)->first) {
-					index.second.push(_archetypes.size() - 1);
+			for (auto &pair : _indices) {
+				if (pair.first <= (_archetypes.end() - 1)->first) {
+					pair.second.push(_archetypes.size() - 1);
 				}
 			}
 		}
 		else {
-			if constexpr (std::is_same_v<T, archetype>) {
-				_entities.insert(entity, std::pair{static_cast<std::uint16_t>(it - _archetypes.begin()), false});
+			if constexpr (std::is_same_v<T, const archetype &>) {
+				_entities.insert(entity, pair - _archetypes.begin(), false);
 			}
 			else if constexpr (std::is_same_v<T, std::uint16_t>) {
-				_entities[entity].first = static_cast<std::uint16_t>(it - _archetypes.begin());
+				_entities[entity].first = static_cast<std::uint16_t>(pair - _archetypes.begin());
 			}
 
-			it->second.insert(entity);
+			pair->second.insert(entity);
 		}
 	}
 };

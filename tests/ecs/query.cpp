@@ -44,11 +44,11 @@ TEST(stellarlib_ecs_query, should_execute_callback)
 {
 	auto executed{false};
 	{
-		ecs::internal::query query{std::views::iota(std::uint8_t{}, std::numeric_limits<std::uint8_t>::max()), [&executed] noexcept -> void {
+		ecs::internal::query query{std::views::iota(std::uint32_t{}, std::numeric_limits<std::uint32_t>::max()), [&executed] noexcept -> void {
 			executed = true;
 		}};
-		ASSERT_EQ(query.size(), std::views::iota(std::uint8_t{}, std::numeric_limits<std::uint8_t>::max()).size());
-		ASSERT_TRUE(std::ranges::equal(query, std::views::iota(std::uint8_t{}, std::numeric_limits<std::uint8_t>::max())));
+		ASSERT_EQ(query.size(), std::views::iota(std::uint32_t{}, std::numeric_limits<std::uint32_t>::max()).size());
+		ASSERT_TRUE(std::ranges::equal(query, std::views::iota(std::uint32_t{}, std::numeric_limits<std::uint32_t>::max())));
 		ASSERT_FALSE(executed);
 	}
 	ASSERT_TRUE(executed);

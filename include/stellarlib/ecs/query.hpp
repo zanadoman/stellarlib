@@ -24,8 +24,6 @@
 #ifndef STELLARLIB_ECS_QUERY_HPP
 #define STELLARLIB_ECS_QUERY_HPP
 
-#include <stellarlib/ext/type_traits.hpp>
-
 #include <iterator>
 #include <utility>
 
@@ -36,7 +34,7 @@ class query final
 {
 public:
 	[[nodiscard]]
-	explicit constexpr query(Query &&query, Callback &&callback) noexcept
+	explicit constexpr query(Query &&query, Callback callback) noexcept
 		: _query{std::move(query)}
 		, _callback{std::move(callback)}
 	{}
@@ -78,12 +76,11 @@ public:
 
 private:
 	Query _query;
-	[[no_unique_address]] ext::padding<Callback, Query> _padding{};
 	Callback _callback;
 };
 
 template <typename Query, typename Callback>
-query(Query &&, Callback &&) -> query<Query, Callback>;
+query(Query &&, Callback) -> query<Query, Callback>;
 }
 
 #endif
