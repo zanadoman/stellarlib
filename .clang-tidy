@@ -84,6 +84,7 @@ Checks: >
   -cppcoreguidelines-pro-type-reinterpret-cast,
   -cppcoreguidelines-pro-type-static-cast-downcast,
   -hicpp-no-malloc,
+  -modernize-use-integer-sign-comparison,
   -portability-template-virtual-member-function,
   -readability-function-cognitive-complexity,
   -readability-identifier-length,

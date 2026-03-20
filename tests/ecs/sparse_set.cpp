@@ -45,7 +45,7 @@ constexpr std::array<std::uint32_t, 5> KEYS{1, 2, 0, 4, 3};
 
 namespace
 {
-constexpr void check_keys(const ecs::internal::sparse_set<std::uint32_t> &set)
+constexpr void check_keys(const ecs::internal::sparse_set &set)
 {
 	ASSERT_EQ(set.size(), KEYS.size());
 	for (const auto key : KEYS) {
@@ -57,7 +57,7 @@ constexpr void check_keys(const ecs::internal::sparse_set<std::uint32_t> &set)
 
 TEST(stellarlib_ecs_sparse_set, should_insert_and_erase_keys)
 {
-	ecs::internal::sparse_set<std::uint32_t> set{};
+	ecs::internal::sparse_set set{};
 	for (const auto i : std::views::iota(std::size_t{}, KEYS.size())) {
 		set.insert(KEYS[i]);
 		ASSERT_EQ(set.size(), i + 1);
@@ -85,7 +85,7 @@ TEST(stellarlib_ecs_sparse_set, should_insert_and_erase_keys)
 
 TEST(stellarlib_ecs_sparse_set, should_clear_keys)
 {
-	ecs::internal::sparse_set<std::uint32_t> set{};
+	ecs::internal::sparse_set set{};
 	for (const auto key : KEYS | std::views::reverse) {
 		set.insert(key);
 	}

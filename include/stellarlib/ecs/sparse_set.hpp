@@ -26,80 +26,55 @@
 
 #include <stellarlib/ecs/stack_vector.hpp>
 
+#include <cstdint>
+
 namespace stellarlib::ecs::internal
 {
-template <typename T>
 class sparse_set final
 {
 public:
 	[[nodiscard]]
-	explicit constexpr sparse_set() noexcept = default;
+	explicit sparse_set() noexcept;
 
 	[[nodiscard]]
 	constexpr sparse_set(const sparse_set &) noexcept = delete;
 
 	[[nodiscard]]
-	constexpr sparse_set(sparse_set &&) noexcept = default;
+	sparse_set(sparse_set &&) noexcept;
 
 	constexpr auto operator=(const sparse_set &) noexcept
 		-> sparse_set & = delete;
 
-	constexpr auto operator=(sparse_set &&) noexcept
-		-> sparse_set & = default;
+	auto operator=(sparse_set &&) noexcept
+		-> sparse_set &;
 
-	constexpr ~sparse_set() noexcept = default;
+	~sparse_set() noexcept;
 
-	constexpr void insert(const T key) noexcept
-	{
-		_sparse.extend(key + 1, static_cast<T>(-1));
-		_sparse[key] = _keys.size();
-		_keys.push(key);
-	}
+	void insert(std::uint32_t key) noexcept;
 
 	[[nodiscard]]
-	constexpr auto size() const noexcept
-	{
-		return _keys.size();
-	}
+	auto size() const noexcept
+		-> std::uint32_t;
 
 	[[nodiscard]]
-	constexpr auto contains(const T key) const noexcept
-	{
-		return key < _sparse.size() && _sparse[key] != static_cast<T>(-1);
-	}
+	auto contains(std::uint32_t key) const noexcept
+		-> bool;
 
 	[[nodiscard]]
-	constexpr auto begin() const noexcept
-	{
-		return static_cast<const T *>(_keys.begin());
-	}
+	auto begin() const noexcept
+		-> const std::uint32_t *;
 
 	[[nodiscard]]
-	constexpr auto end() const noexcept
-	{
-		return static_cast<const T *>(_keys.end());
-	}
+	auto end() const noexcept
+		-> const std::uint32_t *;
 
-	constexpr void erase(const T key) noexcept
-	{
-		if (_sparse[key] != _keys.size() - 1) {
-			_keys[_sparse[key]] = *(_keys.end() - 1);
-			_sparse[_keys[_sparse[key]]] = _sparse[key];
-		}
+	void erase(std::uint32_t key) noexcept;
 
-		_sparse[key] = static_cast<T>(-1);
-		_keys.pop();
-	}
-
-	constexpr void clear() noexcept
-	{
-		_sparse.clear();
-		_keys.clear();
-	}
+	void clear() noexcept;
 
 private:
-	stack_vector<T, T> _sparse;
-	stack_vector<T, T> _keys;
+	stack_vector<std::uint32_t, std::uint32_t> _sparse;
+	stack_vector<std::uint32_t, std::uint32_t> _keys;
 };
 }
 

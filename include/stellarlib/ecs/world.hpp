@@ -306,10 +306,10 @@ public:
 
 private:
 	static thread_local archetype cache;
-	internal::sparse_set<std::uint32_t> _spawned;
+	internal::sparse_set _spawned;
 	internal::stack_vector<std::uint32_t, std::uint32_t> _despawned;
 	internal::sparse_map<std::uint32_t, std::pair<std::uint16_t, bool>> _entities;
-	internal::stack_vector<std::pair<archetype, internal::sparse_set<std::uint32_t>>, std::uint16_t> _archetypes;
+	internal::stack_vector<std::pair<archetype, internal::sparse_set>, std::uint16_t> _archetypes;
 	internal::sparse_storage _components;
 	internal::stack_vector<std::uint16_t, std::uint16_t> _queries;
 	internal::stack_vector<std::pair<archetype, internal::stack_vector<std::uint16_t>>, std::uint16_t> _indices;
@@ -342,11 +342,11 @@ private:
 		if (pair == _archetypes.end()) {
 			if constexpr (std::is_same_v<T, const archetype &>) {
 				_entities.insert(entity, _archetypes.size(), false);
-				_archetypes.push(arg, internal::sparse_set<std::uint32_t>{});
+				_archetypes.push(arg, internal::sparse_set{});
 			}
 			else if constexpr (std::is_same_v<T, std::uint16_t>) {
 				_entities[entity].first = _archetypes.size();
-				_archetypes.push(cache, internal::sparse_set<std::uint32_t>{});
+				_archetypes.push(cache, internal::sparse_set{});
 			}
 
 			(_archetypes.end() - 1)->second.insert(entity);
