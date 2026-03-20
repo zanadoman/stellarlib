@@ -26,6 +26,7 @@
 #include <stellarlib/ext/functional.hpp>
 
 #include <SDL3/SDL_cpuinfo.h>
+#include <SDL3/SDL_stdinc.h>
 
 #include <cstddef>
 #include <cstdlib>
@@ -59,7 +60,7 @@ auto arena::operator=(arena &&other) noexcept
 
 arena::~arena() noexcept
 {
-	std::free(_begin);
+	SDL_aligned_free(_begin);
 }
 
 auto arena::capacity() const noexcept

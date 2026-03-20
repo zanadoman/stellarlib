@@ -26,6 +26,8 @@
 
 #include <stellarlib/ext/type_traits.hpp>
 
+#include <SDL3/SDL_stdinc.h>
+
 #include <bit>
 #include <cstddef>
 #include <cstdlib>
@@ -63,7 +65,7 @@ public:
 
 	constexpr void allocate(value_type *&begin, const size_type capacity) const noexcept
 	{
-		begin = static_cast<value_type *>(std::aligned_alloc(alignof(value_type), capacity * sizeof(value_type)));
+		begin = static_cast<value_type *>(std::malloc(capacity * sizeof(value_type)));
 	}
 
 	constexpr void reallocate(value_type *&begin, const size_type capacity) const noexcept
@@ -79,7 +81,7 @@ public:
 		}
 		else {
 			capacity = std::bit_ceil(capacity);
-			const auto dst{static_cast<value_type *>(std::aligned_alloc(alignof(value_type), capacity * sizeof(value_type)))};
+			const auto dst{static_cast<value_type *>(std::malloc(capacity * sizeof(value_type)))};
 
 			for (const auto src : std::views::iota(begin, begin + size)) {
 				std::construct_at(src + (dst - begin), std::move(*src));
@@ -153,7 +155,7 @@ private:
 	static size_type page_capacity;
 	static size_type page_alignment;
 	size_type _capacity;
-	value_type *_begin{std::aligned_alloc(page_alignment, _capacity)};
+	value_type *_begin{SDL_aligned_alloc(page_alignment, _capacity)};
 	value_type *_cursor{_begin};
 	size_type _size{_capacity};
 };
@@ -204,7 +206,7 @@ public:
 	void deallocate() noexcept;
 
 private:
-	arena *_begin{std::construct_at(static_cast<arena *>(std::aligned_alloc(alignof(arena), sizeof(arena))), 0)};
+	arena *_begin{std::construct_at(static_cast<arena *>(std::malloc(sizeof(arena))), 0)};
 	size_type _cursor{};
 	size_type _capacity{_begin->capacity()};
 };

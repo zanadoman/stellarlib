@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId System.getenv("ANDROID_APPLICATION_ID") ?: "com.example.myapplication"
-        minSdk 21
+        minSdk System.getenv("ANDROID_PLATFORM")?.isInteger() ? System.getenv("ANDROID_PLATFORM").toInteger() : 21
         targetSdk 36
         versionCode 1
         versionName System.getenv("ANDROID_VERSION_NAME") ?: "1.0"

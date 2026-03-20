@@ -24,6 +24,8 @@
 #ifndef STELLARLIB_ECS_QUERY_HPP
 #define STELLARLIB_ECS_QUERY_HPP
 
+#include <stellarlib/ext/type_traits.hpp>
+
 #include <iterator>
 #include <utility>
 
@@ -76,6 +78,7 @@ public:
 
 private:
 	Query _query;
+	[[no_unique_address]] ext::padding<Callback, Query> _padding{};
 	Callback _callback;
 };
 
