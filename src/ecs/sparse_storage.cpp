@@ -24,36 +24,12 @@
 #include <stellarlib/ecs/sparse_storage.hpp>
 
 #include <cstdint>
-#include <memory>
 
 namespace stellarlib::ecs::internal
 {
 sparse_storage::sparse_storage() noexcept = default;
 
-sparse_storage::sparse_storage(const sparse_storage &other) noexcept
-{
-	for (const auto [id, map] : other._maps.zip()) {
-		_maps.insert(id, map->clone());
-	}
-}
-
 sparse_storage::sparse_storage(sparse_storage &&) noexcept = default;
-
-auto sparse_storage::operator=(const sparse_storage &other) noexcept
-	-> sparse_storage &
-{
-	if (std::addressof(other) == this) {
-		return *this;
-	}
-
-	_maps.clear();
-
-	for (const auto [id, map] : other._maps.zip()) {
-		_maps.insert(id, map->clone());
-	}
-
-	return *this;
-}
 
 auto sparse_storage::operator=(sparse_storage &&) noexcept
 	-> sparse_storage & = default;

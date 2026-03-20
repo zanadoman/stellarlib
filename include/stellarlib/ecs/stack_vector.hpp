@@ -42,16 +42,7 @@ public:
 	explicit constexpr stack_vector() noexcept = default;
 
 	[[nodiscard]]
-	constexpr stack_vector(const stack_vector &other) noexcept
-		: _size{other._size}
-	{
-		if (_size) {
-			_capacity = _size;
-			ext::vector_allocator<T, SizeType>::allocate(_begin, _capacity);
-			_end = _begin + _size;
-			std::uninitialized_copy(other._begin, other._end, _begin);
-		}
-	}
+	constexpr stack_vector(const stack_vector &) noexcept = delete;
 
 	[[nodiscard]]
 	constexpr stack_vector(stack_vector &&other) noexcept
@@ -61,25 +52,8 @@ public:
 		, _end{std::exchange(other._end, {})}
 	{}
 
-	constexpr auto operator=(const stack_vector &other) noexcept
-		-> stack_vector &
-	{
-		if (std::addressof(other) == this) {
-			return *this;
-		}
-
-		std::ranges::destroy(*this);
-		_size = other._size;
-
-		if (_capacity < _size) {
-			_capacity = _size;
-			ext::vector_allocator<T, SizeType>::reallocate(_begin, _capacity);
-		}
-
-		_end = _begin + _size;
-		std::uninitialized_copy(other._begin, other._end, _begin);
-		return *this;
-	}
+	constexpr auto operator=(const stack_vector &) noexcept
+		-> stack_vector & = delete;
 
 	constexpr auto operator=(stack_vector &&other) noexcept
 		-> stack_vector &

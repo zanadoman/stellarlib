@@ -29,8 +29,6 @@
 
 #include <memory>
 #include <ranges>
-#include <stdexcept>
-#include <string>
 #include <type_traits>
 #include <utility>
 
@@ -44,30 +42,18 @@ public:
 	explicit constexpr sparse_map() noexcept = default;
 
 	[[nodiscard]]
-	constexpr sparse_map(const sparse_map &) noexcept = default;
+	constexpr sparse_map(const sparse_map &) noexcept = delete;
 
 	[[nodiscard]]
 	constexpr sparse_map(sparse_map &&) noexcept = default;
 
 	constexpr auto operator=(const sparse_map &) noexcept
-		-> sparse_map & = default;
+		-> sparse_map & = delete;
 
 	constexpr auto operator=(sparse_map &&) noexcept
 		-> sparse_map & = default;
 
 	constexpr ~sparse_map() noexcept final = default;
-
-	[[nodiscard]]
-	constexpr auto clone() const noexcept
-		-> std::unique_ptr<any_set<Key>> final
-	{
-		if constexpr (std::is_copy_constructible_v<T>) {
-			return std::make_unique<sparse_map>(*this);
-		}
-		else {
-			throw std::runtime_error{__FILE_NAME__":" + std::to_string(__LINE__) + ' ' + typeid(T).name() + " is not copy constructible"};
-		}
-	}
 
 	template <typename ...Args>
 	constexpr void insert(const Key key, Args &&...args) noexcept

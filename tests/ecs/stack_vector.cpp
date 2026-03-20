@@ -64,26 +64,6 @@ constexpr void check_values(const ecs::internal::stack_vector<std::shared_ptr<st
 }
 }
 
-TEST(stellarlib_ecs_stack_vector, should_skip_empty_copy_via_ctor)
-{
-	const ecs::internal::stack_vector<std::shared_ptr<std::int32_t>> vector1{};
-	const auto vector2{vector1};
-	ASSERT_FALSE(vector2.size());
-	ASSERT_FALSE(vector2.begin());
-	ASSERT_FALSE(vector2.end());
-}
-
-TEST(stellarlib_ecs_stack_vector, should_copy_via_ctor)
-{
-	ecs::internal::stack_vector<std::shared_ptr<std::int32_t>> vector1{};
-	for (const auto &value : VALUES) {
-		vector1.push(value);
-	}
-	const auto vector2{vector1};
-	ASSERT_NE(vector2.begin(), vector1.begin());
-	check_values(vector2);
-}
-
 TEST(stellarlib_ecs_stack_vector, should_move_via_ctor)
 {
 	ecs::internal::stack_vector<std::shared_ptr<std::int32_t>> vector1{};
@@ -93,47 +73,6 @@ TEST(stellarlib_ecs_stack_vector, should_move_via_ctor)
 	const auto begin{vector1.begin()};
 	const auto vector2{std::move(vector1)};
 	ASSERT_EQ(vector2.begin(), begin);
-	check_values(vector2);
-}
-
-TEST(stellarlib_ecs_stack_vector, should_skip_self_copy_via_assignment)
-{
-	ecs::internal::stack_vector<std::shared_ptr<std::int32_t>> vector{};
-	for (const auto &value : VALUES) {
-		vector.push(value);
-	}
-	const auto begin{vector.begin()};
-	vector = vector;
-	ASSERT_EQ(vector.begin(), begin);
-	check_values(vector);
-}
-
-TEST(stellarlib_ecs_stack_vector, should_optimize_copy_via_assignment)
-{
-	ecs::internal::stack_vector<std::shared_ptr<std::int32_t>> vector1{};
-	for (const auto &value : VALUES) {
-		vector1.push(value);
-	}
-	ecs::internal::stack_vector<std::shared_ptr<std::int32_t>> vector2{};
-	for (const auto &value : VALUES | std::views::reverse) {
-		vector2.push(value);
-	}
-	const auto begin{vector2.begin()};
-	vector2 = vector1;
-	ASSERT_EQ(vector2.begin(), begin);
-	check_values(vector2);
-}
-
-TEST(stellarlib_ecs_stack_vector, should_copy_via_assignment)
-{
-	ecs::internal::stack_vector<std::shared_ptr<std::int32_t>> vector1{};
-	for (const auto &value : VALUES) {
-		vector1.push(value);
-	}
-	ecs::internal::stack_vector<std::shared_ptr<std::int32_t>> vector2{};
-	vector2.push(VALUES.front());
-	vector2 = vector1;
-	ASSERT_NE(vector2.begin(), vector1.begin());
 	check_values(vector2);
 }
 

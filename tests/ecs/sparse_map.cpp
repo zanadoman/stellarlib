@@ -69,16 +69,6 @@ constexpr void check_pairs(const ecs::internal::sparse_map<std::size_t, std::sha
 }
 }
 
-TEST(stellarlib_ecs_sparse_map, should_copy_via_clone)
-{
-	ecs::internal::sparse_map<std::size_t, std::shared_ptr<std::int32_t>> map1{};
-	for (const auto [key, value] : std::views::zip(KEYS, VALUES)) {
-		map1.insert(key, value);
-	}
-	const auto map2{map1.clone()};
-	check_pairs(static_cast<const ecs::internal::sparse_map<std::size_t, std::shared_ptr<std::int32_t>> &>(*map2));
-}
-
 TEST(stellarlib_ecs_sparse_map, should_insert_and_erase_pairs)
 {
 	ecs::internal::sparse_map<std::size_t, std::shared_ptr<std::int32_t>> map{};

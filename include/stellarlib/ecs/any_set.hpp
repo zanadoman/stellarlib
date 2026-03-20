@@ -24,8 +24,6 @@
 #ifndef STELLARLIB_ECS_ANY_SET_HPP
 #define STELLARLIB_ECS_ANY_SET_HPP
 
-#include <memory>
-
 namespace stellarlib::ecs::internal
 {
 template <typename Key>
@@ -33,10 +31,6 @@ class any_set
 {
 public:
 	virtual constexpr ~any_set() noexcept = default;
-
-	[[nodiscard]]
-	virtual constexpr auto clone() const noexcept
-		-> std::unique_ptr<any_set> = 0;
 
 	virtual constexpr void erase(Key) noexcept = 0;
 

@@ -60,37 +60,6 @@ TEST(stellarlib_ecs_sparse_storage, should_assign_and_cache_ids)
 	ASSERT_TRUE(std::ranges::equal(ecs::internal::sparse_storage::ids<bar, foo>(), std::initializer_list<std::uint16_t>{id2, id1}));
 }
 
-TEST(stellarlib_ecs_sparse_storage, should_copy_via_ctor)
-{
-	ecs::internal::sparse_storage storage1{};
-	storage1.at<std::int32_t>(ecs::internal::sparse_storage::ids<std::int32_t>().front()).insert(0, 5);
-	storage1.at<std::int64_t>(ecs::internal::sparse_storage::ids<std::int64_t>().front()).insert(10, 15);
-	const auto storage2{storage1};
-	ASSERT_EQ(storage2.operator[]<std::int32_t>(ecs::internal::sparse_storage::ids<std::int32_t>().front())[0], 5);
-	ASSERT_EQ(storage2.operator[]<std::int64_t>(ecs::internal::sparse_storage::ids<std::int64_t>().front())[10], 15);
-}
-
-TEST(stellarlib_ecs_sparse_storage, should_skip_self_copy_via_assignment)
-{
-	ecs::internal::sparse_storage storage{};
-	storage.at<std::int32_t>(ecs::internal::sparse_storage::ids<std::int32_t>().front()).insert(0, 5);
-	storage.at<std::int64_t>(ecs::internal::sparse_storage::ids<std::int64_t>().front()).insert(10, 15);
-	storage = storage;
-	ASSERT_EQ(storage.operator[]<std::int32_t>(ecs::internal::sparse_storage::ids<std::int32_t>().front())[0], 5);
-	ASSERT_EQ(storage.operator[]<std::int64_t>(ecs::internal::sparse_storage::ids<std::int64_t>().front())[10], 15);
-}
-
-TEST(stellarlib_ecs_sparse_storage, should_copy_via_assignment)
-{
-	ecs::internal::sparse_storage storage1{};
-	storage1.at<std::int32_t>(ecs::internal::sparse_storage::ids<std::int32_t>().front()).insert(0, 5);
-	storage1.at<std::int64_t>(ecs::internal::sparse_storage::ids<std::int64_t>().front()).insert(10, 15);
-	ecs::internal::sparse_storage storage2{};
-	storage2 = storage1;
-	ASSERT_EQ(storage2.operator[]<std::int32_t>(ecs::internal::sparse_storage::ids<std::int32_t>().front())[0], 5);
-	ASSERT_EQ(storage2.operator[]<std::int64_t>(ecs::internal::sparse_storage::ids<std::int64_t>().front())[10], 15);
-}
-
 TEST(stellarlib_ecs_sparse_storage, should_insert_and_erase_pairs)
 {
 	ecs::internal::sparse_storage storage{};

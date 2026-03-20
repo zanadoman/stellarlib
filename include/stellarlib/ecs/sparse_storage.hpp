@@ -56,13 +56,13 @@ public:
 	explicit sparse_storage() noexcept;
 
 	[[nodiscard]]
-	sparse_storage(const sparse_storage &other) noexcept;
+	constexpr sparse_storage(const sparse_storage &) noexcept = delete;
 
 	[[nodiscard]]
 	sparse_storage(sparse_storage &&) noexcept;
 
-	auto operator=(const sparse_storage &other) noexcept
-		-> sparse_storage &;
+	constexpr auto operator=(const sparse_storage &) noexcept
+		-> sparse_storage & = delete;
 
 	auto operator=(sparse_storage &&) noexcept
 		-> sparse_storage &;

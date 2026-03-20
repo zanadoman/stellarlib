@@ -36,13 +36,13 @@ public:
 	explicit constexpr sparse_set() noexcept = default;
 
 	[[nodiscard]]
-	constexpr sparse_set(const sparse_set &) noexcept = default;
+	constexpr sparse_set(const sparse_set &) noexcept = delete;
 
 	[[nodiscard]]
 	constexpr sparse_set(sparse_set &&) noexcept = default;
 
 	constexpr auto operator=(const sparse_set &) noexcept
-		-> sparse_set & = default;
+		-> sparse_set & = delete;
 
 	constexpr auto operator=(sparse_set &&) noexcept
 		-> sparse_set & = default;
