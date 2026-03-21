@@ -21,16 +21,26 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
+/**
+ * @example examples/example.cpp
+ * @details Blank example
+ */
+
 #include <stellarlib/stellarlib.hpp>
 
-#include <cstdint>
-#include <cstdio>
-#include <cstdlib>
+#include <SDL3/SDL_init.h>
+#include <SDL3/SDL_log.h>
+#include <SDL3/SDL_main.h> /* IWYU pragma: keep */
 
-auto main([[maybe_unused]] const std::int32_t argc, [[maybe_unused]] const char **argv)
+#include <cstdint>
+#include <cstdlib>
+#include <string>
+
+auto main([[maybe_unused]] const std::int32_t argc, [[maybe_unused]] char **argv)
 	-> std::int32_t
 {
-	stellarlib::world world{};
-	std::puts(std::get<0>(world.operator[]<const char *>(world.spawn(static_cast<const char *>("hello, world")))));
+	stellarlib::ecs::world world{};
+	SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%s\n", std::get<0>(world.operator[]<std::string>(world.spawn(std::string{"hello, world"}))).c_str());
+	SDL_Quit();
 	return EXIT_SUCCESS;
 }

@@ -24,13 +24,9 @@
 #ifndef STELLARLIB_STELLARLIB_HPP
 #define STELLARLIB_STELLARLIB_HPP
 
+/* IWYU pragma: begin_exports */
 #include <stellarlib/ecs/archetype.hpp>
 #include <stellarlib/ecs/world.hpp>
-
-namespace stellarlib
-{
-using archetype = ecs::archetype;
-using world = ecs::world;
-}
+/* IWYU pragma: end_exports */
 
 #endif

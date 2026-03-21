@@ -8,6 +8,9 @@ insert_final_newline = true
 spelling_language = en-US
 trim_trailing_whitespace = true
 
-[.clang-*]
+[{.clang-*,README.md}]
 indent_size = 2
+indent_style = space
+
+[Doxyfile]
 indent_style = space
