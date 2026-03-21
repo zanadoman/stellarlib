@@ -21,54 +21,14 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#include <stellarlib/ecs/world.hpp>
 #include <stellarlib/stellarlib.hpp>
 
 #include <cstdint>
-#include <cstdio>
 #include <cstdlib>
-#include <iostream>
-#include <string>
 
 auto main([[maybe_unused]] const std::int32_t argc, [[maybe_unused]] const char **argv)
 	-> std::int32_t
 {
 	stellarlib::hello_world();
-	stellarlib::ecs::world world{};
-	world.spawn(std::string{"Player 0"}, std::uint8_t{0});
-	std::puts("--------------------------------------------------------------------------------");
-
-	for (const auto [entity, name, score] : world.query<std::string, std::uint8_t>()) {
-		std::cout << entity << ": { name: " << name << ", score: " << static_cast<std::uint16_t>(score) << " }\n";
-	}
-
-	const auto player1{world.spawn(std::uint8_t{5}, std::string{"Player 1"})};
-	std::puts("--------------------------------------------------------------------------------");
-
-	for (const auto [entity, score, name] : world.query<std::uint8_t, std::string>()) {
-		std::cout << entity << ": { name: " << name << ", score: " << static_cast<std::uint16_t>(score) << " }\n";
-	}
-
-	world.erase<std::string>(player1);
-	std::puts("--------------------------------------------------------------------------------");
-
-	for (const auto [entity, name, score] : world.query<std::string, std::uint8_t>()) {
-		std::cout << entity << ": { name: " << name << ", score: " << static_cast<std::uint16_t>(score) << " }\n";
-	}
-
-	*world.insert(player1, std::string{"Player 1"});
-	std::puts("--------------------------------------------------------------------------------");
-
-	for (const auto [entity, score, name] : world.query<std::uint8_t, std::string>()) {
-		std::cout << entity << ": { name: " << name << ", score: " << static_cast<std::uint16_t>(score) << " }\n";
-	}
-
-	world.spawn(std::string{"Player 2"}, std::uint8_t{10});
-	std::puts("--------------------------------------------------------------------------------");
-
-	for (const auto [entity, name, score] : world.query<std::string, std::uint8_t>()) {
-		std::cout << entity << ": { name: " << name << ", score: " << static_cast<std::uint16_t>(score) << " }\n";
-	}
-
 	return EXIT_SUCCESS;
 }

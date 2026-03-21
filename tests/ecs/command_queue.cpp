@@ -50,12 +50,12 @@ TEST(stellarlib_ecs_command_queue, should_enqueue_and_execute_commands)
 	const auto value1{std::make_shared<std::size_t>(1)};
 	for (const auto i : std::views::iota(std::uint16_t{}, std::numeric_limits<std::uint16_t>::max())) {
 		if (ext::truthy(i % 2)) {
-			commands.enqueue([&count] noexcept -> void {
+			commands.enqueue([&] noexcept -> void {
 				++count;
 			});
 		}
 		else {
-			commands.enqueue([&count, value1] noexcept -> void {
+			commands.enqueue([&] noexcept -> void {
 				count += *value1;
 			});
 		}
@@ -65,12 +65,12 @@ TEST(stellarlib_ecs_command_queue, should_enqueue_and_execute_commands)
 	const auto value2{std::make_shared<std::size_t>(2)};
 	for (const auto i : std::views::iota(std::uint16_t{}, std::numeric_limits<std::uint16_t>::max())) {
 		if (ext::truthy(i % 2)) {
-			commands.enqueue([&count, value2] noexcept -> void {
+			commands.enqueue([&] noexcept -> void {
 				count += *value2;
 			});
 		}
 		else {
-			commands.enqueue([&count] noexcept -> void {
+			commands.enqueue([&] noexcept -> void {
 				count += 2;
 			});
 		}

@@ -29,7 +29,6 @@
 
 #include <cstddef>
 #include <memory>
-#include <type_traits>
 #include <utility>
 
 namespace stellarlib::ecs::internal
@@ -97,14 +96,7 @@ public:
 		}
 
 		_end = _begin + size;
-
-		if constexpr (sizeof...(Args)) {
-			std::uninitialized_fill(_begin + _size, _end, T{std::forward<Args>(args)...});
-		}
-		else if constexpr (!std::is_trivially_copy_constructible_v<T> || !ext::is_trivially_relocatable_v<T>) {
-			std::uninitialized_default_construct(_begin + _size, _end);
-		}
-
+		std::uninitialized_fill(_begin + _size, _end, T{std::forward<Args>(args)...});
 		_size = size;
 		return true;
 	}

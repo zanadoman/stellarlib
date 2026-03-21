@@ -63,7 +63,6 @@ constexpr void check_pairs(const ecs::internal::sparse_map<std::size_t, std::sha
 		ASSERT_EQ(*map.at(key), value);
 		ASSERT_EQ(map[key], value);
 	}
-	ASSERT_TRUE(std::ranges::equal(map.keys(), KEYS));
 	ASSERT_TRUE(std::ranges::equal(map.values(), VALUES));
 	ASSERT_TRUE(std::ranges::equal(map.zip(), std::views::zip(KEYS, VALUES)));
 }
@@ -81,7 +80,6 @@ TEST(stellarlib_ecs_sparse_map, should_insert_and_erase_pairs)
 		ASSERT_TRUE(map.at(KEYS[i]));
 		ASSERT_EQ(*map.at(KEYS[i]), VALUES[i]);
 		ASSERT_EQ(map[KEYS[i]], VALUES[i]);
-		ASSERT_EQ(map.keys().back(), KEYS[i]);
 		ASSERT_EQ(map.values().back(), VALUES[i]);
 		ASSERT_EQ(map.zip().back(), (std::tuple{KEYS[i], VALUES[i]}));
 		map.erase(KEYS[i / 2]);
@@ -89,7 +87,6 @@ TEST(stellarlib_ecs_sparse_map, should_insert_and_erase_pairs)
 		ASSERT_EQ(map.size(), i);
 		ASSERT_FALSE(map.contains(KEYS[i / 2]));
 		ASSERT_FALSE(map.at(KEYS[i / 2]));
-		ASSERT_EQ(std::ranges::find(map.keys(), KEYS[i / 2]), map.keys().end());
 		ASSERT_EQ(std::ranges::find(map.values(), VALUES[i / 2]), map.values().end());
 		ASSERT_EQ(std::ranges::find(map.zip(), std::tuple{KEYS[i / 2], VALUES[i / 2]}), map.zip().end());
 		map.insert(KEYS[i / 2], VALUES[i / 2]);
@@ -100,7 +97,6 @@ TEST(stellarlib_ecs_sparse_map, should_insert_and_erase_pairs)
 		ASSERT_TRUE(map.at(KEYS[i / 2]));
 		ASSERT_EQ(*map.at(KEYS[i / 2]), VALUES[i / 2]);
 		ASSERT_EQ(map[KEYS[i / 2]], VALUES[i / 2]);
-		ASSERT_EQ(map.keys().back(), KEYS[i / 2]);
 		ASSERT_EQ(map.values().back(), VALUES[i / 2]);
 		ASSERT_EQ(map.zip().back(), (std::tuple{KEYS[i / 2], VALUES[i / 2]}));
 		map.erase(KEYS[i]);
@@ -108,7 +104,6 @@ TEST(stellarlib_ecs_sparse_map, should_insert_and_erase_pairs)
 		ASSERT_EQ(map.size(), i);
 		ASSERT_FALSE(map.contains(KEYS[i]));
 		ASSERT_FALSE(map.at(KEYS[i]));
-		ASSERT_EQ(std::ranges::find(map.keys(), KEYS[i]), map.keys().end());
 		ASSERT_EQ(std::ranges::find(map.values(), VALUES[i]), map.values().end());
 		ASSERT_EQ(std::ranges::find(map.zip(), std::tuple{KEYS[i], VALUES[i]}), map.zip().end());
 		map.insert(KEYS[i], VALUES[i]);
@@ -119,7 +114,6 @@ TEST(stellarlib_ecs_sparse_map, should_insert_and_erase_pairs)
 		ASSERT_TRUE(map.at(KEYS[i]));
 		ASSERT_EQ(*map.at(KEYS[i]), VALUES[i]);
 		ASSERT_EQ(map[KEYS[i]], VALUES[i]);
-		ASSERT_EQ(map.keys().back(), KEYS[i]);
 		ASSERT_EQ(map.values().back(), VALUES[i]);
 		ASSERT_EQ(map.zip().back(), (std::tuple{KEYS[i], VALUES[i]}));
 	}
@@ -138,7 +132,6 @@ TEST(stellarlib_ecs_sparse_map, should_clear_pairs)
 		ASSERT_FALSE(map.contains(key));
 		ASSERT_FALSE(map.at(key));
 	}
-	ASSERT_TRUE(map.keys().empty());
 	ASSERT_TRUE(map.values().empty());
 	ASSERT_TRUE(map.zip().empty());
 	for (const auto [key, value] : std::views::zip(KEYS, VALUES)) {

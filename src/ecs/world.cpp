@@ -30,6 +30,7 @@
 #include <cstdint>
 #include <memory>
 #include <ranges>
+#include <utility>
 
 namespace stellarlib::ecs
 {
@@ -57,8 +58,8 @@ auto world::contains(const std::uint32_t entity) const noexcept
 auto world::at(const std::uint32_t entity) const noexcept
 	-> const archetype *
 {
-	if (const auto id{_entities.at(entity)}) {
-		return std::addressof(_archetypes[id->first].first);
+	if (const auto pair{_entities.at(entity)}) {
+		return std::addressof(_archetypes[pair->first].first);
 	}
 
 	return nullptr;
@@ -72,59 +73,56 @@ auto world::operator[](const std::uint32_t entity) const noexcept
 
 void world::despawn(const std::uint32_t entity) noexcept
 {
-	const auto id{_entities.at(entity)};
+	const auto pair{_entities.at(entity)};
 
 	if (_spawned.contains(entity)) {
 		_spawned.erase(entity);
 	}
-	else if (ext::falsy(id) || id->second) {
+	else if (ext::falsy(pair) || pair->second) {
 		return;
 	}
 	else {
-		id->second = true;
-	}
-
-	const auto command{[this](const auto entity) noexcept -> void {
-		_archetypes[_entities[entity].first].second.erase(entity);
-
-		if (_entities[entity].second) {
-			_entities.erase(entity);
-		}
-
-		_components.erase(entity);
-	}};
-
-	if (ext::truthy(_lock)) {
-		_commands.enqueue([command, entity, _ = 0] noexcept -> void {
-			command(entity);
-		});
-	}
-	else {
-		command(entity);
+		pair->second = true;
 	}
 
 	_despawned.push(entity);
+
+	if (ext::truthy(_lock)) {
+		_commands.enqueue([cpt = std::pair{this, entity}] noexcept -> void {
+			cpt.first->_components.erase(cpt.second);
+			cpt.first->_archetypes[cpt.first->_entities[cpt.second].first].second.erase(cpt.second);
+
+			if (cpt.first->_entities[cpt.second].second) {
+				cpt.first->_entities.erase(cpt.second);
+			}
+		});
+	}
+	else {
+		_components.erase(entity);
+		_archetypes[_entities[entity].first].second.erase(entity);
+		_entities.erase(entity);
+	}
 }
 
 void world::clear() noexcept
 {
 	_spawned.clear();
 
-	for (const auto [entity, data] : _entities.zip() | std::views::reverse) {
-		if (!data.second) {
+	for (const auto [entity, pair] : _entities.zip() | std::views::reverse) {
+		if (!pair.second) {
+			pair.second = true;
 			_despawned.push(entity);
-			data.second = true;
 		}
 	}
 
 	const auto command{[this] noexcept -> void {
-		_entities.clear();
+		_components.clear();
 
 		for (auto &pair : _archetypes) {
 			pair.second.clear();
 		}
 
-		_components.clear();
+		_entities.clear();
 	}};
 
 	if (ext::truthy(_lock)) {

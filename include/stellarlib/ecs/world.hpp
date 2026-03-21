@@ -95,8 +95,8 @@ public:
 		}};
 
 		if (_lock) {
-			_commands.enqueue([env = std::tuple{command, std::tuple{entity, std::forward<T>(components)...}}] mutable noexcept -> void {
-				std::apply(std::get<0>(env), std::move(std::get<1>(env)));
+			_commands.enqueue([cpt = std::pair{command, std::tuple{entity, std::forward<T>(components)...}}] mutable noexcept -> void {
+				std::apply(cpt.first, std::move(cpt.second));
 			});
 		}
 		else {
@@ -112,9 +112,7 @@ public:
 		-> std::expected<void, std::tuple<T...>>
 		requires (0 < sizeof...(T))
 	{
-		const auto pair{_entities.at(entity)};
-
-		if ((!pair || pair->second) && !_spawned.contains(entity)) {
+		if (const auto pair{_entities.at(entity)}; (!pair || pair->second) && !_spawned.contains(entity)) {
 			return std::unexpected{std::tuple{std::forward<T>(components)...}};
 		}
 
@@ -137,8 +135,8 @@ public:
 		}};
 
 		if (_lock) {
-			_commands.enqueue([env = std::tuple{command, std::tuple{entity, std::forward<T>(components)...}}] mutable noexcept -> void {
-				std::apply(std::get<0>(env), std::move(std::get<1>(env)));
+			_commands.enqueue([cpt = std::pair{command, std::tuple{entity, std::forward<T>(components)...}}] mutable noexcept -> void {
+				std::apply(cpt.first, std::move(cpt.second));
 			});
 		}
 		else {
@@ -266,9 +264,7 @@ public:
 	constexpr void erase(const std::uint32_t entity) noexcept
 		requires (0 < sizeof...(T))
 	{
-		const auto pair{_entities.at(entity)};
-
-		if ((!pair || pair->second) && !_spawned.contains(entity)) {
+		if (const auto pair{_entities.at(entity)}; (!pair || pair->second) && !_spawned.contains(entity)) {
 			return;
 		}
 
@@ -291,8 +287,8 @@ public:
 		}};
 
 		if (_lock) {
-			_commands.enqueue([env = std::tuple{command, entity}] noexcept -> void {
-				std::get<0>(env)(std::get<1>(env));
+			_commands.enqueue([cpt = std::pair{command, entity}] noexcept -> void {
+				cpt.first(cpt.second);
 			});
 		}
 		else {
@@ -306,15 +302,15 @@ public:
 
 private:
 	static thread_local archetype cache;
+	internal::sparse_storage _components;
 	internal::sparse_set _spawned;
 	internal::stack_vector<std::uint32_t, std::uint32_t> _despawned;
 	internal::sparse_map<std::uint32_t, std::pair<std::uint16_t, bool>> _entities;
 	internal::stack_vector<std::pair<archetype, internal::sparse_set>, std::uint16_t> _archetypes;
-	internal::sparse_storage _components;
 	internal::stack_vector<std::uint16_t, std::uint16_t> _queries;
 	internal::stack_vector<std::pair<archetype, internal::stack_vector<std::uint16_t>>, std::uint16_t> _indices;
-	internal::command_queue _commands;
 	std::size_t _lock{};
+	internal::command_queue _commands;
 
 	std::function<void ()> _execute{[this] noexcept -> void {
 		if (!--_lock) {

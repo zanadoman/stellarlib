@@ -27,6 +27,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <functional>
 #include <limits>
 #include <ranges>
 
@@ -43,10 +44,11 @@ using namespace stellarlib;
 TEST(stellarlib_ecs_query, should_execute_callback)
 {
 	auto executed{false};
+	const std::function callback{[&] noexcept -> void {
+		executed = true;
+	}};
 	{
-		ecs::internal::query query{std::views::iota(std::uint32_t{}, std::numeric_limits<std::uint32_t>::max()), [&executed] noexcept -> void {
-			executed = true;
-		}};
+		ecs::internal::query query{std::views::iota(std::uint32_t{}, std::numeric_limits<std::uint32_t>::max()), callback};
 		ASSERT_EQ(query.size(), std::views::iota(std::uint32_t{}, std::numeric_limits<std::uint32_t>::max()).size());
 		ASSERT_TRUE(std::ranges::equal(query, std::views::iota(std::uint32_t{}, std::numeric_limits<std::uint32_t>::max())));
 		ASSERT_FALSE(executed);

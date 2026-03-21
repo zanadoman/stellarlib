@@ -98,12 +98,6 @@ public:
 	}
 
 	[[nodiscard]]
-	constexpr auto keys() const noexcept
-	{
-		return std::ranges::subrange{static_cast<const Key *>(_keys.begin()), static_cast<const Key *>(_keys.end())};
-	}
-
-	[[nodiscard]]
 	constexpr auto values() const noexcept
 	{
 		return _values | std::views::all;
@@ -112,7 +106,7 @@ public:
 	[[nodiscard]]
 	constexpr auto zip() const noexcept
 	{
-		return std::views::zip(keys(), values());
+		return std::views::zip(std::ranges::subrange{static_cast<const Key *>(_keys.begin()), static_cast<const Key *>(_keys.end())}, values());
 	}
 
 	constexpr void erase(const Key key) noexcept final
