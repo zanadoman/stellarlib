@@ -11,3 +11,6 @@ trim_trailing_whitespace = true
 [.clang-*]
 indent_size = 2
 indent_style = space
+
+[Doxyfile]
+indent_style = space

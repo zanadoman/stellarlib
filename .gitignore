@@ -8,4 +8,5 @@
 /android/**/.settings/
 build/
 /.cache/
+/html/
 *.vim
