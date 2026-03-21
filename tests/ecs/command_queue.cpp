@@ -23,8 +23,6 @@
 
 #include <stellarlib/ecs/command_queue.hpp>
 
-#include <stellarlib/ext/functional.hpp>
-
 #include <gtest/gtest.h>
 
 #include <cstddef>
@@ -49,7 +47,7 @@ TEST(stellarlib_ecs_command_queue, should_enqueue_and_execute_commands)
 	std::size_t count{};
 	const auto value1{std::make_shared<std::size_t>(1)};
 	for (const auto i : std::views::iota(std::uint16_t{}, std::numeric_limits<std::uint16_t>::max())) {
-		if (ext::truthy(i % 2)) {
+		if (static_cast<bool>(i % 2)) {
 			commands.enqueue([&] noexcept -> void {
 				++count;
 			});
@@ -64,7 +62,7 @@ TEST(stellarlib_ecs_command_queue, should_enqueue_and_execute_commands)
 	ASSERT_EQ(count, std::numeric_limits<std::uint16_t>::max());
 	const auto value2{std::make_shared<std::size_t>(2)};
 	for (const auto i : std::views::iota(std::uint16_t{}, std::numeric_limits<std::uint16_t>::max())) {
-		if (ext::truthy(i % 2)) {
+		if (static_cast<bool>(i % 2)) {
 			commands.enqueue([&] noexcept -> void {
 				count += *value2;
 			});

@@ -23,8 +23,6 @@
 
 #include <stellarlib/ext/memory.hpp>
 
-#include <stellarlib/ext/functional.hpp>
-
 #include <SDL3/SDL_cpuinfo.h>
 #include <SDL3/SDL_stdinc.h>
 
@@ -37,7 +35,7 @@
 namespace stellarlib::ext
 {
 arena::arena(const size_type capacity) noexcept
-	: _capacity{truthy(capacity) ? (capacity + page_capacity - 1) / page_capacity * page_capacity : page_capacity}
+	: _capacity{static_cast<bool>(capacity) ? (capacity + page_capacity - 1) / page_capacity * page_capacity : page_capacity}
 {}
 
 arena::arena(arena &&other) noexcept
@@ -82,11 +80,11 @@ void arena::deallocate() noexcept
 }
 
 arena::size_type arena::page_capacity{[] [[nodiscard]] noexcept -> auto {
-	const auto capacity{SDL_GetSystemPageSize()};
-	return 0 < capacity ? static_cast<size_type>(capacity) : 4096;
+	const auto page_capacity{SDL_GetSystemPageSize()};
+	return 0 < page_capacity ? static_cast<size_type>(page_capacity) : 4096;
 }()};
 
-arena::size_type arena::page_alignment{truthy(page_capacity % alignof(std::max_align_t)) ? alignof(std::max_align_t) : page_capacity};
+arena::size_type arena::page_alignment{static_cast<bool>(page_capacity % alignof(std::max_align_t)) ? alignof(std::max_align_t) : page_capacity};
 
 arena_allocator::arena_allocator() noexcept = default;
 
@@ -109,7 +107,7 @@ auto arena_allocator::operator=(arena_allocator &&other) noexcept
 
 arena_allocator::~arena_allocator() noexcept
 {
-	if (truthy(_begin)) {
+	if (static_cast<bool>(_begin)) {
 		std::destroy_n(_begin, _cursor + 1);
 		std::free(_begin);
 	}
@@ -123,7 +121,7 @@ auto arena_allocator::operator==(const arena_allocator &other) const noexcept
 
 void arena_allocator::deallocate() noexcept
 {
-	if (truthy(_cursor)) {
+	if (static_cast<bool>(_cursor)) {
 		for (const auto arena : std::views::iota(_begin, _begin + _cursor + 1)) {
 			std::destroy_at(arena);
 		}

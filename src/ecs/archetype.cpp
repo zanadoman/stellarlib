@@ -24,7 +24,6 @@
 #include <stellarlib/ecs/archetype.hpp>
 
 #include <stellarlib/ext/bit.hpp>
-#include <stellarlib/ext/functional.hpp>
 
 #include <algorithm>
 #include <cstdint>
@@ -39,7 +38,7 @@ archetype::archetype() noexcept = default;
 archetype::archetype(const archetype &other) noexcept
 	: _size{other._size}
 {
-	if (ext::truthy(_size)) {
+	if (static_cast<bool>(_size)) {
 		_capacity = _size;
 		allocate(_begin, _capacity);
 		_end = _begin + _size;
@@ -130,7 +129,7 @@ void archetype::insert(const archetype &other) noexcept
 auto archetype::contains(const std::uintmax_t id) const noexcept
 	-> bool
 {
-	return ext::bit_index(id) < _size && ext::truthy(_begin[ext::bit_index(id)] & ext::bit_mask(id));
+	return ext::bit_index(id) < _size && static_cast<bool>(_begin[ext::bit_index(id)] & ext::bit_mask(id));
 }
 
 auto archetype::operator==(const archetype &other) const noexcept
@@ -142,7 +141,9 @@ auto archetype::operator==(const archetype &other) const noexcept
 auto archetype::operator<=(const archetype &other) const noexcept
 	-> bool
 {
-	return _size <= other._size && std::ranges::all_of(std::views::zip(std::ranges::subrange{_begin, _end}, std::ranges::subrange{other._begin, other._end}), ext::zip::subset<std::uintmax_t>);
+	return _size <= other._size && std::ranges::all_of(std::views::zip(std::ranges::subrange{_begin, _end}, std::ranges::subrange{other._begin, other._end}), [] [[nodiscard]] (const auto &pair) noexcept -> auto {
+		return (std::get<0>(pair) & std::get<1>(pair)) == std::get<0>(pair);
+	});
 }
 
 auto archetype::operator>=(const archetype &other) const noexcept
@@ -159,8 +160,8 @@ void archetype::erase(const std::uintmax_t id) noexcept
 
 	_begin[ext::bit_index(id)] &= ~ext::bit_mask(id);
 
-	while (ext::falsy(_begin[_size - 1])) {
-		if (ext::falsy(--_size)) {
+	while (!static_cast<bool>(_begin[_size - 1])) {
+		if (!static_cast<bool>(--_size)) {
 			break;
 		}
 	}
@@ -174,7 +175,7 @@ void archetype::erase(const archetype &other) noexcept
 		lhs &= ~rhs;
 	}
 
-	while (ext::truthy(_size) && ext::falsy(_begin[_size - 1])) {
+	while (static_cast<bool>(_size) && !static_cast<bool>(_begin[_size - 1])) {
 		--_size;
 	}
 

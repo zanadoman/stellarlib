@@ -24,8 +24,6 @@
 #ifndef STELLARLIB_EXT_TYPE_TRAITS_HPP
 #define STELLARLIB_EXT_TYPE_TRAITS_HPP
 
-#include <stellarlib/ext/functional.hpp>
-
 #include <array>
 #include <cstddef>
 #include <tuple>
@@ -49,7 +47,7 @@ template <typename AlignTo, typename ...Fields>
 struct padding final
 {
 	static constexpr std::size_t size{(alignof(AlignTo) - (sizeof(Fields) + ...) % alignof(AlignTo)) % alignof(AlignTo)};
-	[[no_unique_address]] std::conditional_t<falsy(size), std::tuple<>, std::array<std::byte, size>> bytes;
+	[[no_unique_address]] std::conditional_t<!static_cast<bool>(size), std::tuple<>, std::array<std::byte, size>> bytes;
 };
 }
 

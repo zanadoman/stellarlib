@@ -56,7 +56,7 @@ public:
 	constexpr void enqueue(Callback &&callback) noexcept
 	{
 		_commands.push(
-			[] (void *callback) noexcept -> void {
+			[] (auto callback) noexcept -> void {
 				(*static_cast<Callback *>(callback))();
 				std::destroy_at(static_cast<const Callback *>(callback));
 			},

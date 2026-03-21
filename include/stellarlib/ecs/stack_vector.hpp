@@ -55,7 +55,7 @@ public:
 		-> stack_vector & = delete;
 
 	constexpr auto operator=(stack_vector &&other) noexcept
-		-> stack_vector &
+		-> auto &
 	{
 		if (std::addressof(other) != this) {
 			std::destroy_at(this);
@@ -109,7 +109,7 @@ public:
 
 	[[nodiscard]]
 	constexpr auto operator[](const SizeType index) const noexcept
-		-> T &
+		-> auto &
 	{
 		return _begin[index];
 	}

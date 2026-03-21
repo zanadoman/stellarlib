@@ -92,7 +92,7 @@ public:
 
 	[[nodiscard]]
 	constexpr auto operator[](const Key key) const noexcept
-		-> T &
+		-> auto &
 	{
 		return _values[_sparse[key]];
 	}

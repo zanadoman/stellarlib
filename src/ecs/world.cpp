@@ -24,7 +24,6 @@
 #include <stellarlib/ecs/world.hpp>
 
 #include <stellarlib/ecs/archetype.hpp>
-#include <stellarlib/ext/functional.hpp>
 
 #include <cstddef>
 #include <cstdint>
@@ -78,7 +77,7 @@ void world::despawn(const std::uint32_t entity) noexcept
 	if (_spawned.contains(entity)) {
 		_spawned.erase(entity);
 	}
-	else if (ext::falsy(pair) || pair->second) {
+	else if (!static_cast<bool>(pair) || pair->second) {
 		return;
 	}
 	else {
@@ -87,7 +86,7 @@ void world::despawn(const std::uint32_t entity) noexcept
 
 	_despawned.push(entity);
 
-	if (ext::truthy(_lock)) {
+	if (static_cast<bool>(_lock)) {
 		_commands.enqueue([cpt = std::pair{this, entity}] noexcept -> void {
 			cpt.first->_components.erase(cpt.second);
 			cpt.first->_archetypes[cpt.first->_entities[cpt.second].first].second.erase(cpt.second);
@@ -125,7 +124,7 @@ void world::clear() noexcept
 		_entities.clear();
 	}};
 
-	if (ext::truthy(_lock)) {
+	if (static_cast<bool>(_lock)) {
 		_commands.enqueue([command] noexcept -> void {
 			command();
 		});
