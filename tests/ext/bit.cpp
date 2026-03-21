@@ -30,12 +30,8 @@
 using namespace stellarlib;
 
 #pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wexit-time-destructors"
-#pragma clang diagnostic ignored "-Wglobal-constructors"
 #pragma clang diagnostic ignored "-Wself-assign-overloaded"
 #pragma clang diagnostic ignored "-Wself-move"
-
-/* NOLINTBEGIN(cert-err58-cpp,performance-unnecessary-copy-initialization) */
 
 TEST(stellarlib_ext_bit, bit_index)
 {
@@ -48,7 +44,5 @@ TEST(stellarlib_ext_bit, bit_mask)
 	ASSERT_EQ(ext::bit_mask<std::uint8_t>(5), 0b0010'0000);
 	ASSERT_EQ(ext::bit_mask<std::uint8_t>(10), 0b0000'0100);
 }
-
-/* NOLINTEND(cert-err58-cpp,performance-unnecessary-copy-initialization) */
 
 #pragma clang diagnostic pop

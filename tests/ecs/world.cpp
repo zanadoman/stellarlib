@@ -36,12 +36,8 @@
 using namespace stellarlib;
 
 #pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wexit-time-destructors"
-#pragma clang diagnostic ignored "-Wglobal-constructors"
 #pragma clang diagnostic ignored "-Wself-assign-overloaded"
 #pragma clang diagnostic ignored "-Wself-move"
-
-/* NOLINTBEGIN(cert-err58-cpp,performance-unnecessary-copy-initialization) */
 
 namespace
 {
@@ -465,7 +461,5 @@ TEST(stellarlib_ecs_world, should_clear_entities)
 	}
 	check_entities(world);
 }
-
-/* NOLINTEND(cert-err58-cpp,performance-unnecessary-copy-initialization) */
 
 #pragma clang diagnostic pop

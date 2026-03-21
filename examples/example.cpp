@@ -24,11 +24,13 @@
 #include <stellarlib/stellarlib.hpp>
 
 #include <cstdint>
+#include <cstdio>
 #include <cstdlib>
 
 auto main([[maybe_unused]] const std::int32_t argc, [[maybe_unused]] const char **argv)
 	-> std::int32_t
 {
-	stellarlib::hello_world();
+	stellarlib::world world{};
+	std::puts(std::get<0>(world.operator[]<const char *>(world.spawn(static_cast<const char *>("hello, world")))));
 	return EXIT_SUCCESS;
 }

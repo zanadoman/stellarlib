@@ -29,12 +29,8 @@
 using namespace stellarlib;
 
 #pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wexit-time-destructors"
-#pragma clang diagnostic ignored "-Wglobal-constructors"
 #pragma clang diagnostic ignored "-Wself-assign-overloaded"
 #pragma clang diagnostic ignored "-Wself-move"
-
-/* NOLINTBEGIN(cert-err58-cpp,performance-unnecessary-copy-initialization) */
 
 namespace
 {
@@ -114,7 +110,5 @@ static_assert(!static_cast<bool>(ext::padding<std::uint8_t, std::uint64_t>::size
 static_assert(ext::padding<std::uint16_t, std::uint8_t>::size == sizeof(std::uint8_t));
 static_assert(ext::padding<std::uint32_t, std::uint8_t, std::uint8_t>::size == sizeof(std::uint16_t));
 static_assert(ext::padding<std::uint64_t, std::uint16_t, std::uint16_t>::size == sizeof(std::uint32_t));
-
-/* NOLINTEND(cert-err58-cpp,performance-unnecessary-copy-initialization) */
 
 #pragma clang diagnostic pop

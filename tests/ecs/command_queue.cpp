@@ -34,12 +34,8 @@
 using namespace stellarlib;
 
 #pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wexit-time-destructors"
-#pragma clang diagnostic ignored "-Wglobal-constructors"
 #pragma clang diagnostic ignored "-Wself-assign-overloaded"
 #pragma clang diagnostic ignored "-Wself-move"
-
-/* NOLINTBEGIN(cert-err58-cpp,performance-unnecessary-copy-initialization) */
 
 TEST(stellarlib_ecs_command_queue, should_enqueue_and_execute_commands)
 {
@@ -76,7 +72,5 @@ TEST(stellarlib_ecs_command_queue, should_enqueue_and_execute_commands)
 	commands.execute();
 	ASSERT_EQ(count, std::numeric_limits<std::uint16_t>::max() * 3);
 }
-
-/* NOLINTEND(cert-err58-cpp,performance-unnecessary-copy-initialization) */
 
 #pragma clang diagnostic pop

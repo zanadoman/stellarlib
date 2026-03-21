@@ -31,8 +31,8 @@
 
 namespace stellarlib::ext
 {
-template <typename Pack, typename Output>
-using expand_as = Output;
+template <typename Pack, typename T>
+using expand_as = T;
 
 template <typename Pack, auto VALUE>
 static constexpr auto expand_as_v{VALUE};

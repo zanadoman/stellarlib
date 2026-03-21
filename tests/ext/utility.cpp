@@ -30,12 +30,8 @@
 using namespace stellarlib;
 
 #pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wexit-time-destructors"
-#pragma clang diagnostic ignored "-Wglobal-constructors"
 #pragma clang diagnostic ignored "-Wself-assign-overloaded"
 #pragma clang diagnostic ignored "-Wself-move"
-
-/* NOLINTBEGIN(cert-err58-cpp,performance-unnecessary-copy-initialization) */
 
 namespace
 {
@@ -77,7 +73,5 @@ TEST(stellarlib_ext_utility, scoped_typeid)
 	ASSERT_EQ((ext::scoped_typeid<baz, std::int64_t, std::int64_t>)(), 1);
 	ASSERT_EQ((ext::scoped_typeid<baz, std::int64_t, std::int64_t>)(), 1);
 }
-
-/* NOLINTEND(cert-err58-cpp,performance-unnecessary-copy-initialization) */
 
 #pragma clang diagnostic pop

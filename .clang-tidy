@@ -69,7 +69,6 @@ Checks: >
   portability-*,
   readability-*,
   -bugprone-exception-escape,
-  -bugprone-multi-level-implicit-pointer-conversion,
   -bugprone-suspicious-realloc-usage,
   -bugprone-throwing-static-initialization,
   -cert-err58-cpp,
@@ -82,7 +81,6 @@ Checks: >
   -cppcoreguidelines-pro-bounds-constant-array-index,
   -cppcoreguidelines-pro-bounds-pointer-arithmetic,
   -cppcoreguidelines-pro-type-reinterpret-cast,
-  -cppcoreguidelines-pro-type-static-cast-downcast,
   -hicpp-no-malloc,
   -modernize-use-integer-sign-comparison,
   -portability-template-virtual-member-function,
@@ -90,7 +88,6 @@ Checks: >
   -readability-identifier-length,
   -readability-magic-numbers,
   -readability-math-missing-parentheses,
-  -readability-qualified-auto,
-  -readability-suspicious-call-argument
-HeaderFilterRegex: (include/stellarlib|src|tests)
+  -readability-qualified-auto
+HeaderFilterRegex: (include/stellarlib|src|tests|examples)
 WarningsAsErrors: '*'

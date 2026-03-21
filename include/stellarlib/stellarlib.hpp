@@ -24,9 +24,13 @@
 #ifndef STELLARLIB_STELLARLIB_HPP
 #define STELLARLIB_STELLARLIB_HPP
 
+#include <stellarlib/ecs/archetype.hpp>
+#include <stellarlib/ecs/world.hpp>
+
 namespace stellarlib
 {
-void hello_world() noexcept;
+using archetype = ecs::archetype;
+using world = ecs::world;
 }
 
 #endif
