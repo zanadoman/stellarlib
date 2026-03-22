@@ -27,8 +27,17 @@
 #include <atomic>
 #include <cstddef>
 
+/**
+ * @brief Standard library extensions
+ */
 namespace stellarlib::ext
 {
+/**
+ * @brief Thread-safe sequential ID generator scoped by type
+ * @tparam Scope Distinct type used to separate ID sequences
+ * @tparam SizeType Integral type of the ID (default: std::size_t)
+ * @return Next ID in the sequence for the given scope
+ */
 template <typename Scope, typename SizeType = std::size_t>
 [[nodiscard]]
 constexpr auto sequential_id() noexcept
@@ -37,6 +46,13 @@ constexpr auto sequential_id() noexcept
 	return ++id;
 }
 
+/**
+ * @brief Generates a unique ID per type within a scope
+ * @tparam Scope Distinct type used to separate type ID spaces
+ * @tparam T Type to retrieve an ID for
+ * @tparam SizeType Integral type of the ID (default: std::size_t)
+ * @return Unique ID corresponding to type T within the scope
+ */
 template <typename Scope, typename T, typename SizeType = std::size_t>
 [[nodiscard]]
 constexpr auto scoped_typeid() noexcept

@@ -26,8 +26,17 @@
 
 #include <limits>
 
+/**
+ * @brief Standard library extensions
+ */
 namespace stellarlib::ext
 {
+/**
+ * @brief Calculates the segment index of a bit in an array
+ * @tparam T Unsigned integral type of the segment
+ * @param arg Index of the bit
+ * @return Segment index of the bit in an array
+ */
 template <typename T>
 [[nodiscard]]
 constexpr auto bit_index(const T arg) noexcept
@@ -35,6 +44,12 @@ constexpr auto bit_index(const T arg) noexcept
 	return arg / std::numeric_limits<T>::digits;
 }
 
+/**
+ * @brief Calculates the segment mask of a bit in an array
+ * @tparam T Unsigned integral type of the segment
+ * @param arg Index of the bit
+ * @return Segment mask of the bit in an array
+ */
 template <typename T>
 [[nodiscard]]
 constexpr auto bit_mask(const T arg) noexcept

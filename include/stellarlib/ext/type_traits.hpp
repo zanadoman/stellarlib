@@ -29,24 +29,57 @@
 #include <tuple>
 #include <type_traits>
 
+/**
+ * @brief Standard library extensions
+ */
 namespace stellarlib::ext
 {
+/**
+ * @brief Expands a parameter pack into a repeated type
+ * @tparam Pack Parameter pack used to drive expansion
+ * @tparam T Type to substitute for each element
+ */
 template <typename Pack, typename T>
 using expand_as = T;
 
+/**
+ * @brief Expands a parameter pack into a repeated value
+ * @tparam Pack Parameter pack used to drive expansion
+ * @tparam VALUE Value to substitute for each element
+ */
 template <typename Pack, auto VALUE>
 static constexpr auto expand_as_v{VALUE};
 
+/**
+ * @brief Evaluates whether T eligible for bit-wise relocation
+ * @tparam T Type to evaluate
+ */
 template <typename T>
 using is_trivially_relocatable = std::bool_constant<std::is_trivially_move_constructible_v<T> && std::is_trivially_destructible_v<T>>;
 
+/**
+ * @brief Evaluates whether T eligible for bit-wise relocation
+ * @tparam T Type to evaluate
+ */
 template <typename T>
 constexpr bool is_trivially_relocatable_v{is_trivially_relocatable<T>::value};
 
+/**
+ * @brief Compile-time padding for explicit field layout alignment
+ * @tparam AlignTo Type whose alignment is used as the target
+ * @tparam Fields Types whose combined size is being padded
+ */
 template <typename AlignTo, typename ...Fields>
 struct padding final
 {
+	/**
+	 * @brief Size of the padding in bytes
+	 */
 	static constexpr std::size_t size{(alignof(AlignTo) - (sizeof(Fields) + ...) % alignof(AlignTo)) % alignof(AlignTo)};
+
+	/**
+	 * @brief Padding bytes
+	 */
 	[[no_unique_address]] std::conditional_t<!static_cast<bool>(size), std::tuple<>, std::array<std::byte, size>> bytes;
 };
 }

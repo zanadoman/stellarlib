@@ -35,44 +35,101 @@
 #include <ranges>
 #include <utility>
 
+/**
+ * @brief Standard library extensions
+ */
 namespace stellarlib::ext
 {
+/**
+ * @brief Linear memory allocator optimized for vectors
+ * @tparam T Value type of the allocator
+ * @tparam SizeType Size type of the allocator
+ */
 template <typename T, typename SizeType = std::size_t>
 class vector_allocator : std::allocator<T>
 {
 public:
+	/**
+	 * @brief Value type of the allocator
+	 */
 	using value_type = std::allocator<T>::value_type;
+
+	/**
+	 * @brief Size type of the allocator
+	 */
 	using size_type = SizeType;
+
+	/**
+	 * @brief Difference type of the allocator
+	 */
 	using difference_type = std::allocator<value_type>::difference_type;
+
+	/**
+	 * @brief Whether the allocator can be propagated on container move assignment
+	 */
 	using propagate_on_container_move_assignment = std::allocator<value_type>::propagate_on_container_move_assignment;
 
+	/**
+	 * @brief Default constructor
+	 */
 	[[nodiscard]]
 	explicit constexpr vector_allocator() noexcept = default;
 
+	/**
+	 * @brief Copy constructor
+	 */
 	[[nodiscard]]
 	constexpr vector_allocator(const vector_allocator &) noexcept = default;
 
+	/**
+	 * @brief Move constructor
+	 */
 	[[nodiscard]]
 	constexpr vector_allocator(vector_allocator &&) noexcept = default;
 
+	/**
+	 * @brief Copy assignment operator
+	 */
 	constexpr auto operator=(const vector_allocator &) noexcept
 		-> vector_allocator & = default;
 
+	/**
+	 * @brief Move assignment operator
+	 */
 	constexpr auto operator=(vector_allocator &&) noexcept
 		-> vector_allocator & = default;
 
+	/**
+	 * @brief Destructor
+	 */
 	constexpr ~vector_allocator() noexcept = default;
 
+	/**
+	 * @brief Allocates uninitialized memory for N instances of type T
+	 * @param begin Updated to point to the allocated memory
+	 * @param capacity Number of instances to allocate
+	 */
 	constexpr void allocate(value_type *&begin, const size_type capacity) const noexcept
 	{
 		begin = static_cast<value_type *>(std::malloc(capacity * sizeof(value_type)));
 	}
 
+	/**
+	 * @brief Reallocates uninitialized memory for N instances of type T via bit-wise relocation
+	 * @param begin Pointer for existing memory; Updated to point to the reallocated memory
+	 * @param capacity Number of instances to allocate
+	 */
 	constexpr void reallocate(value_type *&begin, const size_type capacity) const noexcept
 	{
 		begin = static_cast<value_type *>(std::realloc(begin, capacity * sizeof(value_type)));
 	}
 
+	/**
+	 * @brief Reallocates uninitialized memory for at least N instances of type T via element-wise move
+	 * @param begin Pointer for existing memory; Updated to point to the reallocated memory
+	 * @param size Number of initialized instances in existing memory
+	 * @param capacity Requested capacity; Updated to the actual allocated capacity
+	 */
 	constexpr void reallocate(value_type *&begin, const size_type size, size_type &capacity) const noexcept
 	{
 		if constexpr (is_trivially_relocatable_v<value_type>) {
@@ -93,45 +150,100 @@ public:
 		}
 	}
 
+	/**
+	 * @brief Comparison operator
+	 */
 	[[nodiscard]]
 	constexpr auto operator==(const vector_allocator &) const noexcept
 		-> bool = default;
 
+	/**
+	 * @brief Deallocates uninitialized memory
+	 * @param begin Pointer for existing memory
+	 */
 	constexpr void deallocate(value_type *begin) const noexcept
 	{
 		std::free(begin);
 	}
 };
 
+/**
+ * @brief Fixed-size, page-aligned memory arena
+ */
 class arena : std::allocator<void>
 {
 public:
+	/**
+	 * @brief Value type of the allocator
+	 */
 	using value_type = std::allocator<void>::value_type;
+
+	/**
+	 * @brief Size type of the allocator
+	 */
 	using size_type = std::allocator<void>::size_type;
+
+	/**
+	 * @brief Difference type of the allocator
+	 */
 	using difference_type = std::allocator<void>::difference_type;
+
+	/**
+	 * @brief Whether the allocator can be propagated on container move assignment
+	 */
 	using propagate_on_container_move_assignment = std::allocator<void>::propagate_on_container_move_assignment;
 
+	/**
+	 * @brief Parameterized constructor
+	 * @param capacity Requested capacity of the arena in bytes
+	 */
 	[[nodiscard]]
 	explicit arena(size_type capacity) noexcept;
 
+	/**
+	 * @brief Deleted copy constructor
+	 */
 	[[nodiscard]]
 	constexpr arena(const arena &) noexcept = delete;
 
+	/**
+	 * @brief Move constructor
+	 * @param other Other instance
+	 */
 	[[nodiscard]]
 	arena(arena &&other) noexcept;
 
+	/**
+	 * @brief Deleted copy assignment operator
+	 */
 	constexpr auto operator=(const arena &) noexcept
 		-> arena & = delete;
 
+	/**
+	 * @brief Move assignment operator
+	 * @param other Other instance
+	 */
 	auto operator=(arena &&other) noexcept
 		-> arena &;
 
+	/**
+	 * @brief Destructor
+	 */
 	~arena() noexcept;
 
+	/**
+	 * @brief Return the actual size of the arena in bytes
+	 * @return Actual size of the arena in bytes
+	 */
 	[[nodiscard]]
 	auto capacity() const noexcept
 		-> size_type;
 
+	/**
+	 * @brief Returns uninitialized memory for type T
+	 * @tparam T Type to determine alignment and size
+	 * @return Uninitialized memory for type T, or nullptr if arena is exhausted
+	 */
 	template <typename T>
 	[[nodiscard]]
 	constexpr auto allocate() noexcept
@@ -145,10 +257,17 @@ public:
 		return static_cast<T *>(nullptr);
 	}
 
+	/**
+	 * @brief Comparison operator
+	 * @param other Other instance
+	 */
 	[[nodiscard]]
 	auto operator==(const arena &other) const noexcept
 		-> bool;
 
+	/**
+	 * @brief Resets the arena
+	 */
 	void deallocate() noexcept;
 
 private:
@@ -160,31 +279,74 @@ private:
 	value_type *_begin{_cursor};
 };
 
+/**
+ * @brief Dynamic arena allocator
+ */
 class arena_allocator : std::allocator<void>
 {
 public:
+	/**
+	 * @brief Value type of the allocator
+	 */
 	using value_type = std::allocator<void>::value_type;
+
+	/**
+	 * @brief Size type of the allocator
+	 */
 	using size_type = std::allocator<void>::size_type;
+
+	/**
+	 * @brief Difference type of the allocator
+	 */
 	using difference_type = std::allocator<void>::difference_type;
+
+	/**
+	 * @brief Whether the allocator can be propagated on container move assignment
+	 */
 	using propagate_on_container_move_assignment = std::allocator<void>::propagate_on_container_move_assignment;
 
+	/**
+	 * @brief Default constructor
+	 */
 	[[nodiscard]]
 	explicit arena_allocator() noexcept;
 
+	/**
+	 * @brief Deleted copy constructor
+	 */
 	[[nodiscard]]
 	constexpr arena_allocator(const arena_allocator &) noexcept = delete;
 
+	/**
+	 * @brief Move constructor
+	 * @param other Other instance
+	 */
 	[[nodiscard]]
 	arena_allocator(arena_allocator &&other) noexcept;
 
+	/**
+	 * @brief Deleted copy assignment operator
+	 */
 	constexpr auto operator=(const arena_allocator &) noexcept
 		-> arena_allocator & = delete;
 
+	/**
+	 * @brief Move assignment operator
+	 * @param other Other instance
+	 */
 	auto operator=(arena_allocator &&other) noexcept
 		-> arena_allocator &;
 
+	/**
+	 * @brief Destructor
+	 */
 	~arena_allocator() noexcept;
 
+	/**
+	 * @brief Returns uninitialized memory for type T
+	 * @tparam T Type to determine alignment and size
+	 * @return Uninitialized memory for type T
+	 */
 	template <typename T>
 	[[nodiscard]]
 	constexpr auto allocate() noexcept
@@ -199,10 +361,17 @@ public:
 		return _begin[_cursor].allocate<T>();
 	}
 
+	/**
+	 * @brief Comparison operator
+	 * @param other Other instance
+	 */
 	[[nodiscard]]
 	auto operator==(const arena_allocator &other) const noexcept
 		-> bool;
 
+	/**
+	 * @brief Resets the arena
+	 */
 	void deallocate() noexcept;
 
 private:
