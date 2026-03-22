@@ -47,10 +47,10 @@ archetype::archetype(const archetype &other) noexcept
 }
 
 archetype::archetype(archetype &&other) noexcept
-	: _size{std::exchange(other._size, {})}
-	, _capacity{std::exchange(other._capacity, {})}
-	, _begin{std::exchange(other._begin, {})}
+	: _begin{std::exchange(other._begin, {})}
 	, _end{std::exchange(other._end, {})}
+	, _size{std::exchange(other._size, {})}
+	, _capacity{std::exchange(other._capacity, {})}
 {}
 
 auto archetype::operator=(const archetype &other) noexcept

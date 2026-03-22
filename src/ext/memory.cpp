@@ -40,9 +40,9 @@ arena::arena(const size_type capacity) noexcept
 
 arena::arena(arena &&other) noexcept
 	: _capacity{std::exchange(other._capacity, {})}
-	, _begin{std::exchange(other._begin, {})}
 	, _cursor{std::exchange(other._cursor, {})}
 	, _size{std::exchange(other._size, {})}
+	, _begin{std::exchange(other._begin, {})}
 {}
 
 auto arena::operator=(arena &&other) noexcept

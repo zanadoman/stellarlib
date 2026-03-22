@@ -102,10 +102,10 @@ public:
 	void clear() noexcept;
 
 private:
-	std::uintmax_t _size{};
-	std::uintmax_t _capacity{};
 	std::uintmax_t *_begin{};
 	std::uintmax_t *_end{};
+	std::uintmax_t _size{};
+	std::uintmax_t _capacity{};
 };
 }
 

@@ -155,9 +155,9 @@ private:
 	static size_type page_capacity;
 	static size_type page_alignment;
 	size_type _capacity;
-	value_type *_begin{SDL_aligned_alloc(page_alignment, _capacity)};
-	value_type *_cursor{_begin};
+	value_type *_cursor{SDL_aligned_alloc(page_alignment, _capacity)};
 	size_type _size{_capacity};
+	value_type *_begin{_cursor};
 };
 
 class arena_allocator : std::allocator<void>

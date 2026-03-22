@@ -45,10 +45,10 @@ public:
 
 	[[nodiscard]]
 	constexpr stack_vector(stack_vector &&other) noexcept
-		: _size{std::exchange(other._size, {})}
-		, _capacity{std::exchange(other._capacity, {})}
-		, _begin{std::exchange(other._begin, {})}
+		: _begin{std::exchange(other._begin, {})}
 		, _end{std::exchange(other._end, {})}
+		, _size{std::exchange(other._size, {})}
+		, _capacity{std::exchange(other._capacity, {})}
 	{}
 
 	constexpr auto operator=(const stack_vector &) noexcept
@@ -140,11 +140,11 @@ public:
 	}
 
 private:
+	T *_begin{};
+	T *_end{};
 	SizeType _size{};
 	SizeType _capacity{};
 	[[no_unique_address]] ext::padding<T *, SizeType, SizeType> _padding{};
-	T *_begin{};
-	T *_end{};
 };
 }
 
