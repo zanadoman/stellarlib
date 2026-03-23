@@ -30,11 +30,22 @@
 #include <cstdint>
 #include <type_traits>
 
+/**
+ * @brief Entity component system
+ */
 namespace stellarlib::ecs
 {
+/**
+ * @brief Represents the archetype of an entity
+ */
 class archetype final : ext::vector_allocator<std::uintmax_t>
 {
 public:
+	/**
+	 * @brief Retrieves an archetype for a set of component types
+	 * @tparam T Component types
+	 * @return Archetype for a set of component types
+	 */
 	template <typename ...T>
 	[[nodiscard]]
 	static constexpr auto of() noexcept
@@ -58,47 +69,110 @@ public:
 		}
 	}
 
+	/**
+	 * @brief Default constructor
+	 */
 	[[nodiscard]]
 	explicit archetype() noexcept;
 
+	/**
+	 * @brief Copy constructor
+	 * @param other Other instance
+	 */
 	[[nodiscard]]
 	archetype(const archetype &other) noexcept;
 
+	/**
+	 * @brief Move constructor
+	 * @param other Other instance
+	 */
 	[[nodiscard]]
 	archetype(archetype &&other) noexcept;
 
+	/**
+	 * @brief Copy assignment operator
+	 * @param other Other instance
+	 * @return Current instance
+	 */
 	auto operator=(const archetype &other) noexcept
 		-> archetype &;
 
+	/**
+	 * @brief Move assignment operator
+	 * @param other Other instance
+	 * @return Current instance
+	 */
 	auto operator=(archetype &&other) noexcept
 		-> archetype &;
 
+	/**
+	 * @brief Destructor
+	 */
 	~archetype() noexcept;
 
+	/**
+	 * @brief Inserts a component ID into the archetype
+	 * @param id Component ID
+	 */
 	void insert(std::uintmax_t id) noexcept;
 
+	/**
+	 * @brief Inserts all component IDs that exist in another instance into the archetype
+	 * @param other Other instance
+	 */
 	void insert(const archetype &other) noexcept;
 
+	/**
+	 * @brief Evaluates whether the archetype contains a component ID
+	 * @param id Component ID
+	 * @return Whether the archetype contains the component ID
+	 */
 	[[nodiscard]]
 	auto contains(std::uintmax_t id) const noexcept
 		-> bool;
 
+	/**
+	 * @brief Comparison operator
+	 * @param other Other instance
+	 * @return Result of the comparison
+	 */
 	[[nodiscard]]
 	auto operator==(const archetype &other) const noexcept
 		-> bool;
 
+	/**
+	 * @brief Evaluates whether the current instance is the subtype of an other instance
+	 * @param other Other instance
+	 * @return Whether the current instance is the subtype of the other
+	 */
 	[[nodiscard]]
 	auto operator<=(const archetype &other) const noexcept
 		-> bool;
 
+	/**
+	 * @brief Evaluates whether the current instance is the supertype of an other instance
+	 * @param other Other instance
+	 * @return Whether the current instance is the supertype of the other
+	 */
 	[[nodiscard]]
 	auto operator>=(const archetype &other) const noexcept
 		-> bool;
 
+	/**
+	 * @brief Removes a component ID from the archetype
+	 * @param id Component ID
+	 */
 	void erase(std::uintmax_t id) noexcept;
 
+	/**
+	 * @brief Removes all component IDs that exist in another instance from the archetype
+	 * @param other Other instance
+	 */
 	void erase(const archetype &other) noexcept;
 
+	/**
+	 * @brief Removes all component IDs from the archetype
+	 */
 	void clear() noexcept;
 
 private:

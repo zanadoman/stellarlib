@@ -77,26 +77,32 @@ public:
 
 	/**
 	 * @brief Copy constructor
+	 * @param other Other instance
 	 */
 	[[nodiscard]]
-	constexpr vector_allocator(const vector_allocator &) noexcept = default;
+	constexpr vector_allocator(const vector_allocator &other) noexcept = default;
 
 	/**
 	 * @brief Move constructor
+	 * @param other Other instance
 	 */
 	[[nodiscard]]
-	constexpr vector_allocator(vector_allocator &&) noexcept = default;
+	constexpr vector_allocator(vector_allocator &&other) noexcept = default;
 
 	/**
 	 * @brief Copy assignment operator
+	 * @param other Other instance
+	 * @return Current instance
 	 */
-	constexpr auto operator=(const vector_allocator &) noexcept
+	constexpr auto operator=(const vector_allocator &other) noexcept
 		-> vector_allocator & = default;
 
 	/**
 	 * @brief Move assignment operator
+	 * @param other Other instance
+	 * @return Current instance
 	 */
-	constexpr auto operator=(vector_allocator &&) noexcept
+	constexpr auto operator=(vector_allocator &&other) noexcept
 		-> vector_allocator & = default;
 
 	/**
@@ -152,9 +158,11 @@ public:
 
 	/**
 	 * @brief Comparison operator
+	 * @param other Other instance
+	 * @return Result of the comparison
 	 */
 	[[nodiscard]]
-	constexpr auto operator==(const vector_allocator &) const noexcept
+	constexpr auto operator==(const vector_allocator &other) const noexcept
 		-> bool = default;
 
 	/**
@@ -222,6 +230,7 @@ public:
 	/**
 	 * @brief Move assignment operator
 	 * @param other Other instance
+	 * @return Current instance
 	 */
 	auto operator=(arena &&other) noexcept
 		-> arena &;
@@ -232,7 +241,7 @@ public:
 	~arena() noexcept;
 
 	/**
-	 * @brief Return the actual size of the arena in bytes
+	 * @brief Returns the actual size of the arena in bytes
 	 * @return Actual size of the arena in bytes
 	 */
 	[[nodiscard]]
@@ -260,6 +269,7 @@ public:
 	/**
 	 * @brief Comparison operator
 	 * @param other Other instance
+	 * @return Result of the comparison
 	 */
 	[[nodiscard]]
 	auto operator==(const arena &other) const noexcept
@@ -333,6 +343,7 @@ public:
 	/**
 	 * @brief Move assignment operator
 	 * @param other Other instance
+	 * @return Current instance
 	 */
 	auto operator=(arena_allocator &&other) noexcept
 		-> arena_allocator &;
@@ -364,6 +375,7 @@ public:
 	/**
 	 * @brief Comparison operator
 	 * @param other Other instance
+	 * @return Result of the comparison
 	 */
 	[[nodiscard]]
 	auto operator==(const arena_allocator &other) const noexcept

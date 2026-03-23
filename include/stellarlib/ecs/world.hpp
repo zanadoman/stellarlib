@@ -44,6 +44,9 @@
 #include <type_traits>
 #include <utility>
 
+/**
+ * @brief Entity component system
+ */
 namespace stellarlib::ecs
 {
 class world final
