@@ -48,10 +48,23 @@ auto world::size() const noexcept
 	return _entities.size();
 }
 
+auto world::spawning(const std::uint32_t entity) const noexcept
+	-> bool
+{
+	return _spawning.contains(entity);
+}
+
 auto world::contains(const std::uint32_t entity) const noexcept
 	-> bool
 {
 	return _entities.contains(entity);
+}
+
+auto world::despawning(const std::uint32_t entity) const noexcept
+	-> bool
+{
+	const auto pair{_entities.at(entity)};
+	return static_cast<bool>(pair) && pair->second;
 }
 
 auto world::at(const std::uint32_t entity) const noexcept
@@ -74,8 +87,8 @@ void world::despawn(const std::uint32_t entity) noexcept
 {
 	const auto pair{_entities.at(entity)};
 
-	if (_spawned.contains(entity)) {
-		_spawned.erase(entity);
+	if (spawning(entity)) {
+		_spawning.erase(entity);
 	}
 	else if (!static_cast<bool>(pair) || pair->second) {
 		return;
@@ -105,7 +118,7 @@ void world::despawn(const std::uint32_t entity) noexcept
 
 void world::clear() noexcept
 {
-	_spawned.clear();
+	_spawning.clear();
 
 	for (const auto [entity, pair] : _entities.zip() | std::views::reverse) {
 		if (!pair.second) {

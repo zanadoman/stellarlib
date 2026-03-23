@@ -103,7 +103,7 @@ public:
 	template <typename ...T>
 	constexpr auto spawn(T &&...components) noexcept
 	{
-		auto entity{_entities.size() + _spawned.size()};
+		auto entity{_entities.size() + _spawning.size()};
 
 		if (_despawned.size()) {
 			entity = *(_despawned.end() - 1);
@@ -115,7 +115,7 @@ public:
 				pair->second = false;
 			}
 			else {
-				_spawned.insert(entity);
+				_spawning.insert(entity);
 			}
 		}
 
@@ -154,7 +154,7 @@ public:
 		-> std::expected<void, std::tuple<T...>>
 		requires (0 < sizeof...(T))
 	{
-		if (const auto pair{_entities.at(entity)}; (!pair || pair->second) && !_spawned.contains(entity)) {
+		if (const auto pair{_entities.at(entity)}; (!pair || pair->second) && !spawning(entity)) {
 			return std::unexpected{std::tuple{std::forward<T>(components)...}};
 		}
 
@@ -164,7 +164,7 @@ public:
 				(_components.at<T>(ids[I]).insert(entity, std::forward<T>(components)), ...);
 			}(entity, std::forward<T>(components)..., std::index_sequence_for<T...>{});
 
-			cache = _archetypes[_entities[entity].first].first;
+			cache = (*this)[entity];
 
 			if constexpr (1 < sizeof...(T)) {
 				cache.insert(archetype::of<T...>());
@@ -197,12 +197,30 @@ public:
 		-> std::size_t;
 
 	/**
-	 * @brief Evaluates whether an entity ID is valid
+	 * @brief Evaluates whether an entity will be spawned
 	 * @param entity ID of the entity
-	 * @return Whether the entity ID is valid
+	 * @return Whether the entity will be spawned
+	 */
+	[[nodiscard]]
+	auto spawning(std::uint32_t entity) const noexcept
+		-> bool;
+
+	/**
+	 * @brief Evaluates whether an entity exists
+	 * @param entity ID of the entity
+	 * @return Whether the entity exists
 	 */
 	[[nodiscard]]
 	auto contains(std::uint32_t entity) const noexcept
+		-> bool;
+
+	/**
+	 * @brief Evaluates whether an entity will be despawned
+	 * @param entity ID of the entity
+	 * @return Whether the entity will be despawned
+	 */
+	[[nodiscard]]
+	auto despawning(std::uint32_t entity) const noexcept
 		-> bool;
 
 	/**
@@ -365,7 +383,7 @@ public:
 	constexpr void erase(const std::uint32_t entity) noexcept
 		requires (0 < sizeof...(T))
 	{
-		if (const auto pair{_entities.at(entity)}; (!pair || pair->second) && !_spawned.contains(entity)) {
+		if (const auto pair{_entities.at(entity)}; (!pair || pair->second) && !spawning(entity)) {
 			return;
 		}
 
@@ -375,7 +393,7 @@ public:
 				(_components.at<T>(ids[I]).erase(entity), ...);
 			}(entity, std::index_sequence_for<T...>{});
 
-			cache = _archetypes[_entities[entity].first].first;
+			cache = (*this)[entity];
 
 			if constexpr (1 < sizeof...(T)) {
 				cache.erase(archetype::of<T...>());
@@ -413,7 +431,7 @@ public:
 private:
 	static thread_local archetype cache;
 	internal::sparse_storage _components;
-	internal::sparse_set _spawned;
+	internal::sparse_set _spawning;
 	internal::stack_vector<std::uint32_t, std::uint32_t> _despawned;
 	internal::sparse_map<std::uint32_t, std::pair<std::uint16_t, bool>> _entities;
 	internal::stack_vector<std::pair<archetype, internal::sparse_set>, std::uint16_t> _archetypes;
@@ -425,7 +443,7 @@ private:
 	std::function<void ()> _execute{[this] noexcept -> void {
 		if (!--_lock) {
 			_commands.execute();
-			_spawned.clear();
+			_spawning.clear();
 		}
 	}};
 

@@ -241,8 +241,8 @@ public:
 	~arena() noexcept;
 
 	/**
-	 * @brief Returns the actual size of the arena in bytes
-	 * @return Actual size of the arena in bytes
+	 * @brief Returns the remaining capacity of the arena in bytes
+	 * @return Remaining capacity of the arena in bytes
 	 */
 	[[nodiscard]]
 	auto capacity() const noexcept
