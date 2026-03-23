@@ -143,7 +143,7 @@ public:
 	/**
 	 * @brief Evaluates whether the current instance is the subtype of an other instance
 	 * @param other Other instance
-	 * @return Whether the current instance is the subtype of the other
+	 * @return Whether the current instance is the subtype of the other instance
 	 */
 	[[nodiscard]]
 	auto operator<=(const archetype &other) const noexcept
@@ -152,7 +152,7 @@ public:
 	/**
 	 * @brief Evaluates whether the current instance is the supertype of an other instance
 	 * @param other Other instance
-	 * @return Whether the current instance is the supertype of the other
+	 * @return Whether the current instance is the supertype of the other instance
 	 */
 	[[nodiscard]]
 	auto operator>=(const archetype &other) const noexcept

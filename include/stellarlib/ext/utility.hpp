@@ -35,7 +35,7 @@ namespace stellarlib::ext
 /**
  * @brief Thread-safe sequential ID generator scoped by type
  * @tparam Scope Distinct type used to separate ID sequences
- * @tparam SizeType Integral type of the ID (default: std::size_t)
+ * @tparam SizeType Integral type of the ID
  * @return Next ID in the sequence for the given scope
  */
 template <typename Scope, typename SizeType = std::size_t>
@@ -48,9 +48,9 @@ constexpr auto sequential_id() noexcept
 
 /**
  * @brief Generates a unique ID per type within a scope
- * @tparam Scope Distinct type used to separate type ID spaces
+ * @tparam Scope Distinct type used to separate ID spaces
  * @tparam T Type to retrieve an ID for
- * @tparam SizeType Integral type of the ID (default: std::size_t)
+ * @tparam SizeType Integral type of the ID
  * @return Unique ID corresponding to type T within the scope
  */
 template <typename Scope, typename T, typename SizeType = std::size_t>

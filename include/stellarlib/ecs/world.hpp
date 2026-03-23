@@ -49,26 +49,57 @@
  */
 namespace stellarlib::ecs
 {
+/**
+ * @brief Stores and exposes operations on entities and components
+ */
 class world final
 {
 public:
+	/**
+	 * @brief Default constructor
+	 */
 	[[nodiscard]]
 	explicit world() noexcept;
 
+	/**
+	 * @brief Deleted copy constructor
+	 */
 	[[nodiscard]]
 	constexpr world(const world &) noexcept = delete;
 
+	/**
+	 * @brief Move constructor
+	 * @param other Other instance
+	 */
 	[[nodiscard]]
-	world(world &&) noexcept;
+	world(world &&other) noexcept;
 
+	/**
+	 * @brief Deleted copy assignment operator
+	 */
 	constexpr auto operator=(const world &) noexcept
 		-> world & = delete;
 
-	auto operator=(world &&) noexcept
+	/**
+	 * @brief Move assignment operator
+	 * @param other Other instance
+	 * @return Current instance
+	 */
+	auto operator=(world &&other) noexcept
 		-> world &;
 
+	/**
+	 * @brief Destructor
+	 */
 	~world() noexcept;
 
+	/**
+	 * @brief Spawns an entity with the provided components
+	 * @tparam T Component types
+	 * @param components Component instances
+	 * @return ID of the spawned entity
+	 * @note This action is deferred during iterations
+	 */
 	template <typename ...T>
 	constexpr auto spawn(T &&...components) noexcept
 	{
@@ -109,6 +140,14 @@ public:
 		return entity;
 	}
 
+	/**
+	 * @brief Adds the provided components to an entity
+	 * @tparam T Components types
+	 * @param entity ID of the entity (can be invalid)
+	 * @param components Component instances
+	 * @return Void, or a tuple of the provided component instances if the entity ID is invalid
+	 * @note This action is deferred during iterations
+	 */
 	template <typename ...T>
 	[[nodiscard]]
 	constexpr auto insert(const std::uint32_t entity, T &&...components) noexcept
@@ -149,14 +188,29 @@ public:
 		return {};
 	}
 
+	/**
+	 * @brief Returns the number of entities
+	 * @return Number of entities
+	 */
 	[[nodiscard]]
 	auto size() const noexcept
 		-> std::size_t;
 
+	/**
+	 * @brief Evaluates whether an entity ID is valid
+	 * @param entity ID of the entity
+	 * @return Whether the entity ID is valid
+	 */
 	[[nodiscard]]
 	auto contains(std::uint32_t entity) const noexcept
 		-> bool;
 
+	/**
+	 * @brief Evaluates whether an entity has the specified components
+	 * @tparam T Component types
+	 * @param entity ID of the entity (can be invalid)
+	 * @return Tuple of bools indicating the result for each component type
+	 */
 	template <typename ...T>
 	[[nodiscard]]
 	constexpr auto contains(const std::uint32_t entity) const noexcept
@@ -172,10 +226,21 @@ public:
 		return std::tuple{ext::expand_as_v<T, false>...};
 	}
 
+	/**
+	 * @brief Returns a pointer to the archetype of an entity
+	 * @param entity ID of the entity (can be invalid)
+	 * @return Pointer to the archetype of the entity, or nullptr if the entity ID is invalid
+	 */
 	[[nodiscard]]
 	auto at(std::uint32_t entity) const noexcept
 		-> const archetype *;
 
+	/**
+	 * @brief Returns a tuple of pointers to the specified components of an entity
+	 * @tparam T Component types
+	 * @param entity ID of the entity (can be invalid)
+	 * @return Tuple of pointers to the specified components of the entity, invalid components are indicated with nullptrs
+	 */
 	template <typename ...T>
 	[[nodiscard]]
 	constexpr auto at(const std::uint32_t entity) const noexcept
@@ -187,10 +252,23 @@ public:
 		}(entity, std::index_sequence_for<T...>{});
 	}
 
+	/**
+	 * @brief Returns a reference to the archetype of an entity
+	 * @param entity ID of the entity
+	 * @return Reference to the archetype of the entity
+	 * @warning Invalid entity ID can lead to undefined behavior
+	 */
 	[[nodiscard]]
 	auto operator[](std::uint32_t entity) const noexcept
 		-> const archetype &;
 
+	/**
+	 * @brief Returns a tuple of references to the specified components of an entity
+	 * @tparam T Component types
+	 * @param entity ID of the entity
+	 * @return Tuple of references to the specified components of the entity
+	 * @warning Invalid entity ID or component types can lead to undefined behavior
+	 */
 	template <typename ...T>
 	[[nodiscard]]
 	constexpr auto operator[](const std::uint32_t entity) const noexcept
@@ -202,6 +280,10 @@ public:
 		}(entity, std::index_sequence_for<T...>{});
 	}
 
+	/**
+	 * @brief Returns a view to all entities with their archetypes
+	 * @return View to all entities with their archetypes
+	 */
 	[[nodiscard]]
 	constexpr auto query() noexcept
 	{
@@ -213,6 +295,11 @@ public:
 		}) | std::views::join, _execute};
 	}
 
+	/**
+	 * @brief Returns a view to entities with the specified components
+	 * @tparam T Component types
+	 * @return View to entities with the specified components
+	 */
 	template <typename T>
 	[[nodiscard]]
 	constexpr auto query() noexcept
@@ -221,6 +308,11 @@ public:
 		return internal::query{_components.at<T>(internal::sparse_storage::ids<T>().front()).zip(), _execute};
 	}
 
+	/**
+	 * @brief Returns a view to entities with the specified components
+	 * @tparam T Component types
+	 * @return View to entities with the specified components
+	 */
 	template <typename ...T>
 	[[nodiscard]]
 	constexpr auto query() noexcept
@@ -263,6 +355,12 @@ public:
 		}), _execute};
 	}
 
+	/**
+	 * @brief Removes the specified components from an entity
+	 * @tparam T Components types
+	 * @param entity ID of the entity (can be invalid)
+	 * @note This action is deferred during iterations
+	 */
 	template <typename ...T>
 	constexpr void erase(const std::uint32_t entity) noexcept
 		requires (0 < sizeof...(T))
@@ -299,8 +397,17 @@ public:
 		}
 	}
 
+	/**
+	 * @brief Despawns an entity
+	 * @param entity ID of the entity (can be invalid)
+	 * @note This action is deferred during iterations
+	 */
 	void despawn(std::uint32_t entity) noexcept;
 
+	/**
+	 * @brief Despawns all entities
+	 * @note This action is deferred during iterations
+	 */
 	void clear() noexcept;
 
 private:

@@ -35,7 +35,7 @@ namespace stellarlib::ext
  * @brief Calculates the segment index of a bit in an array
  * @tparam T Unsigned integral type of the segment
  * @param arg Index of the bit
- * @return Segment index of the bit in an array
+ * @return Segment index of the bit in the array
  */
 template <typename T>
 [[nodiscard]]
@@ -48,7 +48,7 @@ constexpr auto bit_index(const T arg) noexcept
  * @brief Calculates the segment mask of a bit in an array
  * @tparam T Unsigned integral type of the segment
  * @param arg Index of the bit
- * @return Segment mask of the bit in an array
+ * @return Segment mask of the bit in the array
  */
 template <typename T>
 [[nodiscard]]

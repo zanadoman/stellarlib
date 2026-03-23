@@ -51,14 +51,14 @@ template <typename Pack, auto VALUE>
 static constexpr auto expand_as_v{VALUE};
 
 /**
- * @brief Evaluates whether T eligible for bit-wise relocation
+ * @brief Evaluates whether T is eligible for bit-wise relocation
  * @tparam T Type to evaluate
  */
 template <typename T>
 using is_trivially_relocatable = std::bool_constant<std::is_trivially_move_constructible_v<T> && std::is_trivially_destructible_v<T>>;
 
 /**
- * @brief Evaluates whether T eligible for bit-wise relocation
+ * @brief Evaluates whether T is eligible for bit-wise relocation
  * @tparam T Type to evaluate
  */
 template <typename T>

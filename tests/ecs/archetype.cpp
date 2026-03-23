@@ -192,7 +192,6 @@ TEST(stellarlib_ecs_archetype, should_evaluate_equal_archetypes)
 	ASSERT_GE(archetype1, archetype2);
 }
 
-
 TEST(stellarlib_ecs_archetype, should_evaluate_unequal_archetypes)
 {
 	ecs::archetype archetype1{};
