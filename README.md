@@ -137,6 +137,14 @@ env JAVA_HOME=/usr/lib/jvm/java-21-openjdk ANDROID_HOME=/opt/android-sdk cmake -
 
 </details>
 
+## Contributing
+
+Contributions are welcome!
+
+- Fork the repository
+- Make your changes in accordance with the existing style
+- Open a pull request targeting the `develop` branch
+
 ---
 
 Enjoy!
