@@ -34,4 +34,6 @@ using namespace stellarlib;
 static_assert(lin::internal::matrix<std::int32_t, 2, 2>{1, 2, 3, 4} == lin::internal::matrix<std::int32_t, 2, 2>{1, 2, 3, 4});
 static_assert(lin::internal::matrix<std::int32_t, 2, 2>{1, 2, 3, 4} != lin::internal::matrix<std::int32_t, 2, 2>{5, 6, 7, 8});
 
+static_assert(lin::internal::matrix<std::int32_t, 1, 2>{1, 2} + lin::internal::matrix<std::int32_t, 1, 2>{5, 6} == lin::internal::matrix<std::int32_t, 1, 2>{6, 8});
+
 #pragma clang diagnostic pop

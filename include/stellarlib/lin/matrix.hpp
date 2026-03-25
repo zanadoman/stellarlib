@@ -26,11 +26,34 @@
 
 #include <array>
 #include <cstddef>
+#include <ranges>
+#include <type_traits>
 
 namespace stellarlib::lin::internal
 {
 template <typename T, std::size_t M, std::size_t N>
 struct matrix final : public std::array<T, M * N> {};
+
+template <typename T, typename U, std::size_t M, std::size_t N>
+constexpr auto operator+=(matrix<T, M, N> &lhs, const matrix<U, M, N> &rhs) noexcept
+	-> auto &
+{
+	for (const auto [lhs, rhs] : std::views::zip(lhs, rhs)) {
+		lhs += rhs;
+	}
+
+	return lhs;
+}
+
+template <typename T, typename U, std::size_t M, std::size_t N>
+[[nodiscard]]
+constexpr auto operator+(const matrix<T, M, N> &lhs, const matrix<U, M, N> &rhs) noexcept
+	-> matrix<std::common_type_t<T, U>, M, N>
+{
+	auto res{lhs};
+	res += rhs;
+	return res;
+}
 }
 
 #endif
