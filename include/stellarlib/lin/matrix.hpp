@@ -34,32 +34,6 @@ namespace stellarlib::lin::internal
 template <typename T, std::size_t M, std::size_t N>
 struct matrix final : public std::array<T, M * N> {};
 
-template <typename T, std::size_t M, std::size_t N>
-[[nodiscard]]
-constexpr auto operator+(const matrix<T, M, N> &self) noexcept
-{
-	return self;
-}
-
-#define STELLARLIB_LIN_MATRIX_UNARY_OPERATOR_IMPL(op)\
-template <typename T, std::size_t M, std::size_t N>\
-[[nodiscard]]\
-constexpr auto operator op (const matrix<T, M, N> &self) noexcept\
-	-> matrix<T, M, N>\
-{\
-	matrix<T, M, N> res;\
-\
-	for (const auto [res, elem] : std::views::zip(res, self)) {\
-		res = op elem;\
-	}\
-\
-	return res;\
-}
-
-STELLARLIB_LIN_MATRIX_UNARY_OPERATOR_IMPL(-);
-STELLARLIB_LIN_MATRIX_UNARY_OPERATOR_IMPL(!);
-STELLARLIB_LIN_MATRIX_UNARY_OPERATOR_IMPL(~);
-
 #define STELLARLIB_LIN_MATRIX_PREFIX_POSTFIX_OPERATOR_IMPL(op)\
 template <typename T, std::size_t M, std::size_t N>\
 constexpr auto operator op (matrix<T, M, N> &self) noexcept\
@@ -81,8 +55,20 @@ constexpr auto operator op (matrix<T, M, N> &self, int) noexcept\
 	return res;\
 }
 
-STELLARLIB_LIN_MATRIX_PREFIX_POSTFIX_OPERATOR_IMPL(++);
-STELLARLIB_LIN_MATRIX_PREFIX_POSTFIX_OPERATOR_IMPL(--);
+#define STELLARLIB_LIN_MATRIX_UNARY_OPERATOR_IMPL(op)\
+template <typename T, std::size_t M, std::size_t N>\
+[[nodiscard]]\
+constexpr auto operator op (const matrix<T, M, N> &self) noexcept\
+	-> matrix<T, M, N>\
+{\
+	matrix<T, M, N> res;\
+\
+	for (const auto [res, elem] : std::views::zip(res, self)) {\
+		res = op elem;\
+	}\
+\
+	return res;\
+}
 
 #define STELLARLIB_LIN_MATRIX_BINARY_OPERATOR_IMPL(op)\
 template <typename T, std::size_t M, std::size_t N, typename U>\
@@ -141,17 +127,6 @@ constexpr auto operator op (const matrix<T, M, N> &lhs, const matrix<U, M, N> &r
 	return res;\
 }
 
-STELLARLIB_LIN_MATRIX_BINARY_OPERATOR_IMPL(+);
-STELLARLIB_LIN_MATRIX_BINARY_OPERATOR_IMPL(-);
-STELLARLIB_LIN_MATRIX_BINARY_OPERATOR_IMPL(*);
-STELLARLIB_LIN_MATRIX_BINARY_OPERATOR_IMPL(/);
-STELLARLIB_LIN_MATRIX_BINARY_OPERATOR_IMPL(%);
-STELLARLIB_LIN_MATRIX_BINARY_OPERATOR_IMPL(<<);
-STELLARLIB_LIN_MATRIX_BINARY_OPERATOR_IMPL(>>);
-STELLARLIB_LIN_MATRIX_BINARY_OPERATOR_IMPL(&);
-STELLARLIB_LIN_MATRIX_BINARY_OPERATOR_IMPL(|);
-STELLARLIB_LIN_MATRIX_BINARY_OPERATOR_IMPL(^);
-
 #define STELLARLIB_LIN_MATRIX_BOOLEAN_OPERATOR_IMPL(op)\
 template <typename T, std::size_t M, std::size_t N, typename U>\
 [[nodiscard]]\
@@ -195,14 +170,30 @@ constexpr auto operator op (const matrix<T, M, N> &lhs, const matrix<U, M, N> &r
 	return res;\
 }
 
-STELLARLIB_LIN_MATRIX_BOOLEAN_OPERATOR_IMPL(&&);
-STELLARLIB_LIN_MATRIX_BOOLEAN_OPERATOR_IMPL(||);
+STELLARLIB_LIN_MATRIX_PREFIX_POSTFIX_OPERATOR_IMPL(++);
+STELLARLIB_LIN_MATRIX_PREFIX_POSTFIX_OPERATOR_IMPL(--);
+STELLARLIB_LIN_MATRIX_UNARY_OPERATOR_IMPL(+);
+STELLARLIB_LIN_MATRIX_UNARY_OPERATOR_IMPL(-);
+STELLARLIB_LIN_MATRIX_UNARY_OPERATOR_IMPL(!);
+STELLARLIB_LIN_MATRIX_UNARY_OPERATOR_IMPL(~);
+STELLARLIB_LIN_MATRIX_BINARY_OPERATOR_IMPL(*);
+STELLARLIB_LIN_MATRIX_BINARY_OPERATOR_IMPL(/);
+STELLARLIB_LIN_MATRIX_BINARY_OPERATOR_IMPL(%);
+STELLARLIB_LIN_MATRIX_BINARY_OPERATOR_IMPL(+);
+STELLARLIB_LIN_MATRIX_BINARY_OPERATOR_IMPL(-);
+STELLARLIB_LIN_MATRIX_BINARY_OPERATOR_IMPL(<<);
+STELLARLIB_LIN_MATRIX_BINARY_OPERATOR_IMPL(>>);
 STELLARLIB_LIN_MATRIX_BOOLEAN_OPERATOR_IMPL(<);
+STELLARLIB_LIN_MATRIX_BOOLEAN_OPERATOR_IMPL(<=);
 STELLARLIB_LIN_MATRIX_BOOLEAN_OPERATOR_IMPL(>);
+STELLARLIB_LIN_MATRIX_BOOLEAN_OPERATOR_IMPL(>=);
 STELLARLIB_LIN_MATRIX_BOOLEAN_OPERATOR_IMPL(==);
 STELLARLIB_LIN_MATRIX_BOOLEAN_OPERATOR_IMPL(!=);
-STELLARLIB_LIN_MATRIX_BOOLEAN_OPERATOR_IMPL(<=);
-STELLARLIB_LIN_MATRIX_BOOLEAN_OPERATOR_IMPL(>=);
+STELLARLIB_LIN_MATRIX_BINARY_OPERATOR_IMPL(&);
+STELLARLIB_LIN_MATRIX_BINARY_OPERATOR_IMPL(^);
+STELLARLIB_LIN_MATRIX_BINARY_OPERATOR_IMPL(|);
+STELLARLIB_LIN_MATRIX_BOOLEAN_OPERATOR_IMPL(&&);
+STELLARLIB_LIN_MATRIX_BOOLEAN_OPERATOR_IMPL(||);
 }
 
 #endif
