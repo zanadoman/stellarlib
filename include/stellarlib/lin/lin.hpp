@@ -25,6 +25,7 @@
 #define STELLARLIB_LIN_LIN_HPP
 
 /* IWYU pragma: begin_exports */
+#include <stellarlib/lin/intrinsics.hpp>
 #include <stellarlib/lin/matrix.hpp>
 /* IWYU pragma: end_exports */
 
@@ -116,6 +117,31 @@ using double1x4 = internal::matrix<double, 1, 4>;
 using double2x4 = internal::matrix<double, 2, 4>;
 using double3x4 = internal::matrix<double, 3, 4>;
 using double4x4 = internal::matrix<double, 4, 4>;
+
+using bool1 = bool1x1;
+using bool2 = bool1x2;
+using bool3 = bool1x3;
+using bool4 = bool1x4;
+
+using int1 = int1x1;
+using int2 = int1x2;
+using int3 = int1x3;
+using int4 = int1x4;
+
+using uint1 = uint1x1;
+using uint2 = uint1x2;
+using uint3 = uint1x3;
+using uint4 = uint1x4;
+
+using float1 = float1x1;
+using float2 = float1x2;
+using float3 = float1x3;
+using float4 = float1x4;
+
+using double1 = double1x1;
+using double2 = double1x2;
+using double3 = double1x3;
+using double4 = double1x4;
 }
 
 #endif
