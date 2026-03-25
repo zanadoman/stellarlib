@@ -76,7 +76,7 @@ template <typename T, std::size_t M, std::size_t N>\
 constexpr auto operator op (matrix<T, M, N> &self, int) noexcept\
 	-> matrix<T, M, N>\
 {\
-	auto res{self};\
+	const auto res{self};\
 	op self;\
 	return res;\
 }
