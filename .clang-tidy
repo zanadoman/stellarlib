@@ -76,6 +76,7 @@ Checks: >
   -clang-analyzer-nullability.NullableDereferenced,
   -clang-analyzer-unix.Malloc,
   -cppcoreguidelines-avoid-magic-numbers,
+  -cppcoreguidelines-macro-usage,
   -cppcoreguidelines-no-malloc,
   -cppcoreguidelines-owning-memory,
   -cppcoreguidelines-pro-bounds-avoid-unchecked-container-access,

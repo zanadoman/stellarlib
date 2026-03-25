@@ -34,26 +34,147 @@ namespace stellarlib::lin::internal
 template <typename T, std::size_t M, std::size_t N>
 struct matrix final : public std::array<T, M * N> {};
 
-template <typename T, typename U, std::size_t M, std::size_t N>
-constexpr auto operator+=(matrix<T, M, N> &lhs, const matrix<U, M, N> &rhs) noexcept
-	-> auto &
-{
-	for (const auto [lhs, rhs] : std::views::zip(lhs, rhs)) {
-		lhs += rhs;
-	}
-
-	return lhs;
-}
-
-template <typename T, typename U, std::size_t M, std::size_t N>
+template <typename T, std::size_t M, std::size_t N>
 [[nodiscard]]
-constexpr auto operator+(const matrix<T, M, N> &lhs, const matrix<U, M, N> &rhs) noexcept
-	-> matrix<std::common_type_t<T, U>, M, N>
+constexpr auto operator+(const matrix<T, M, N> &self) noexcept
 {
-	auto res{lhs};
-	res += rhs;
-	return res;
+	return self;
 }
+
+#define STELLARLIB_LIN_MATRIX_UNARY_OPERATOR_IMPL(op)\
+template <typename T, std::size_t M, std::size_t N>\
+[[nodiscard]]\
+constexpr auto operator op (const matrix<T, M, N> &self) noexcept\
+	-> matrix<T, M, N>\
+{\
+	matrix<T, M, N> res;\
+\
+	for (const auto [res, elem] : std::views::zip(res, self)) {\
+		res = op elem;\
+	}\
+\
+	return res;\
+}
+
+STELLARLIB_LIN_MATRIX_UNARY_OPERATOR_IMPL(-);
+STELLARLIB_LIN_MATRIX_UNARY_OPERATOR_IMPL(!);
+STELLARLIB_LIN_MATRIX_UNARY_OPERATOR_IMPL(~);
+
+#define STELLARLIB_LIN_MATRIX_PREFIX_POSTFIX_OPERATOR_IMPL(op)\
+template <typename T, std::size_t M, std::size_t N>\
+constexpr auto operator op (matrix<T, M, N> &self) noexcept\
+	-> auto &\
+{\
+	for (auto &elem : self) {\
+		op elem;\
+	}\
+\
+	return self;\
+}\
+\
+template <typename T, std::size_t M, std::size_t N>\
+constexpr auto operator op (matrix<T, M, N> &self, int) noexcept\
+	-> matrix<T, M, N>\
+{\
+	auto res{self};\
+	op self;\
+	return res;\
+}
+
+STELLARLIB_LIN_MATRIX_PREFIX_POSTFIX_OPERATOR_IMPL(++);
+STELLARLIB_LIN_MATRIX_PREFIX_POSTFIX_OPERATOR_IMPL(--);
+
+#define STELLARLIB_LIN_MATRIX_BINARY_OPERATOR_IMPL(op)\
+template <typename T, std::size_t M, std::size_t N, typename U>\
+constexpr auto operator op##= (matrix<T, M, N> &lhs, const U rhs) noexcept\
+	-> auto &\
+{\
+	for (auto &lhs : lhs) {\
+		lhs op##= rhs;\
+	}\
+\
+	return lhs;\
+}\
+\
+template <typename T, std::size_t M, std::size_t N, typename U>\
+[[nodiscard]]\
+constexpr auto operator op (const matrix<T, M, N> &lhs, const U rhs) noexcept\
+	-> matrix<std::common_type_t<T, U>, M, N>\
+{\
+	auto res{lhs};\
+	res op##= rhs;\
+	return res;\
+}\
+\
+template <typename T, typename U, std::size_t M, std::size_t N>\
+[[nodiscard]]\
+constexpr auto operator op (const T lhs, const matrix<U, M, N> &rhs) noexcept\
+	-> matrix<std::common_type_t<T, U>, M, N>\
+{\
+	matrix<std::common_type_t<T, U>, M, N> res;\
+\
+	for (const auto [res, rhs] : std::views::zip(res, rhs)) {\
+		res = lhs op rhs;\
+	}\
+\
+	return res;\
+}\
+\
+template <typename T, typename U, std::size_t M, std::size_t N>\
+constexpr auto operator op##= (matrix<T, M, N> &lhs, const matrix<U, M, N> &rhs) noexcept\
+	-> auto &\
+{\
+	for (const auto [lhs, rhs] : std::views::zip(lhs, rhs)) {\
+		lhs op##= rhs;\
+	}\
+\
+	return lhs;\
+}\
+\
+template <typename T, typename U, std::size_t M, std::size_t N>\
+[[nodiscard]]\
+constexpr auto operator op (const matrix<T, M, N> &lhs, const matrix<U, M, N> &rhs) noexcept\
+	-> matrix<std::common_type_t<T, U>, M, N>\
+{\
+	auto res{lhs};\
+	res op##= rhs;\
+	return res;\
+}
+
+STELLARLIB_LIN_MATRIX_BINARY_OPERATOR_IMPL(+);
+STELLARLIB_LIN_MATRIX_BINARY_OPERATOR_IMPL(-);
+STELLARLIB_LIN_MATRIX_BINARY_OPERATOR_IMPL(*);
+STELLARLIB_LIN_MATRIX_BINARY_OPERATOR_IMPL(/);
+STELLARLIB_LIN_MATRIX_BINARY_OPERATOR_IMPL(%);
+STELLARLIB_LIN_MATRIX_BINARY_OPERATOR_IMPL(<<);
+STELLARLIB_LIN_MATRIX_BINARY_OPERATOR_IMPL(>>);
+STELLARLIB_LIN_MATRIX_BINARY_OPERATOR_IMPL(&);
+STELLARLIB_LIN_MATRIX_BINARY_OPERATOR_IMPL(|);
+STELLARLIB_LIN_MATRIX_BINARY_OPERATOR_IMPL(^);
+
+#define STELLARLIB_LIN_MATRIX_BOOLEAN_OPERATOR_IMPL(op)\
+template <typename T, typename U, std::size_t M, std::size_t N>\
+[[nodiscard]]\
+constexpr auto operator op (const matrix<T, M, N> &lhs, const matrix<U, M, N> &rhs) noexcept\
+	-> matrix<bool, M, N>\
+{\
+	matrix<bool, M, N> res;\
+\
+	for (const auto [res, lhs, rhs] : std::views::zip(res, lhs, rhs)) {\
+		res = lhs op rhs;\
+	}\
+\
+	return res;\
+}
+
+STELLARLIB_LIN_MATRIX_BOOLEAN_OPERATOR_IMPL(&&);
+STELLARLIB_LIN_MATRIX_BOOLEAN_OPERATOR_IMPL(||);
+STELLARLIB_LIN_MATRIX_BOOLEAN_OPERATOR_IMPL(<);
+STELLARLIB_LIN_MATRIX_BOOLEAN_OPERATOR_IMPL(>);
+STELLARLIB_LIN_MATRIX_BOOLEAN_OPERATOR_IMPL(==);
+STELLARLIB_LIN_MATRIX_BOOLEAN_OPERATOR_IMPL(!=);
+STELLARLIB_LIN_MATRIX_BOOLEAN_OPERATOR_IMPL(<=);
+STELLARLIB_LIN_MATRIX_BOOLEAN_OPERATOR_IMPL(>=);
 }
 
 #endif
