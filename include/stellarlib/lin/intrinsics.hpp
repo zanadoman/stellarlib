@@ -29,7 +29,7 @@
 
 #include <stellarlib/lin/matrix.hpp>
 
-#include <cmath>
+/* #include <cmath> */
 
 namespace stellarlib::lin::internal
 {
@@ -60,8 +60,8 @@ constexpr auto mul(const matrix<T, M, N> &lhs, const matrix<U, P, N> &rhs) noexc
 	matrix<std::common_type_t<T, U>, M, P> res{};
 
 	for (const auto m : std::views::iota(std::size_t{}, M)) {
-		for (const auto p : std::views::iota(std::size_t{}, P)) {
-			for (const auto n : std::views::iota(std::size_t{}, N)) {
+		for (const auto n : std::views::iota(std::size_t{}, N)) {
+			for (const auto p : std::views::iota(std::size_t{}, P)) {
 				res[m * P + p] += lhs[m * N + n] * rhs[n * P + p];
 			}
 		}
@@ -70,11 +70,9 @@ constexpr auto mul(const matrix<T, M, N> &lhs, const matrix<U, P, N> &rhs) noexc
 	return res;
 }
 
-/* static_assert(all(mul(matrix<int, 1, 2>{1, 2}, matrix<int, 2, 2>{4, 6, 5, 7}) == matrix<int, 1, 2>{16, 19})); */
-/* static_assert(all(mul(matrix<int, 1, 3>{1, 2, 3}, matrix<int, 2, 3>{4, 6, 8, 5, 7, 9}) == matrix<int, 1, 2>{40, 46})); */
-/* static_assert(all(mul(matrix<int, 2, 3>{1, 2, 3, 4, 5, 6}, matrix<int, 2, 3>{1, 3, 5, 2, 4, 6}) == matrix<int, 2, 2>{22, 49, 28, 64})); */
-
-
+static_assert(all(mul(matrix<int, 1, 2>{1, 2}, matrix<int, 2, 2>{3, 5, 4, 6}) == matrix<int, 1, 2>{11, 17}));
+static_assert(all(mul(matrix<int, 1, 3>{1, 2, 3}, matrix<int, 2, 3>{4, 7, 5, 8, 6, 9}) == matrix<int, 1, 2>{32, 50}));
+static_assert(all(mul(matrix<int, 2, 2>{1, 3, 2, 4}, matrix<int, 2, 2>{5, 7, 6, 8}) == matrix<int, 2, 2>{23, 31, 34, 46}));
 static_assert(all(mul(matrix<int, 1, 2>{1, 2}, matrix<int, 1, 2>{3, 4}) == matrix<int, 1, 1>{11}));
 static_assert(all(mul(matrix<int, 1, 3>{0, 0, 1}, mul(matrix<int, 3, 3>{1, 0, 0, 0, 1, 0, 2, 3, 1}, matrix<int, 3, 3>{2, 0, 0, 0, 1, 0, 0, 0, 1})) == matrix<int, 1, 3>{4, 3, 1}));
 }

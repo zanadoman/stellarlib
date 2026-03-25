@@ -153,6 +153,34 @@ STELLARLIB_LIN_MATRIX_BINARY_OPERATOR_IMPL(|);
 STELLARLIB_LIN_MATRIX_BINARY_OPERATOR_IMPL(^);
 
 #define STELLARLIB_LIN_MATRIX_BOOLEAN_OPERATOR_IMPL(op)\
+template <typename T, std::size_t M, std::size_t N, typename U>\
+[[nodiscard]]\
+constexpr auto operator op (const matrix<T, M, N> &lhs, const U rhs) noexcept\
+	-> matrix<bool, M, N>\
+{\
+	matrix<bool, M, N> res;\
+\
+	for (const auto [res, lhs] : std::views::zip(res, lhs)) {\
+		res = lhs op rhs;\
+	}\
+\
+	return res;\
+}\
+\
+template <typename T, typename U, std::size_t M, std::size_t N>\
+[[nodiscard]]\
+constexpr auto operator op (const T lhs, const matrix<U, M, N> &rhs) noexcept\
+	-> matrix<bool, M, N>\
+{\
+	matrix<bool, M, N> res;\
+\
+	for (const auto [res, rhs] : std::views::zip(res, rhs)) {\
+		res = lhs op rhs;\
+	}\
+\
+	return res;\
+}\
+\
 template <typename T, typename U, std::size_t M, std::size_t N>\
 [[nodiscard]]\
 constexpr auto operator op (const matrix<T, M, N> &lhs, const matrix<U, M, N> &rhs) noexcept\
