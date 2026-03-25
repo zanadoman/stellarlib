@@ -21,12 +21,17 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef STELLARLIB_STELLARLIB_HPP
-#define STELLARLIB_STELLARLIB_HPP
+#include <stellarlib/lin/matrix.hpp>
 
-/* IWYU pragma: begin_exports */
-#include <stellarlib/ecs/ecs.hpp>
-#include <stellarlib/lin/lin.hpp>
-/* IWYU pragma: end_exports */
+#include <cstdint>
 
-#endif
+using namespace stellarlib;
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wself-assign-overloaded"
+#pragma clang diagnostic ignored "-Wself-move"
+
+static_assert(lin::internal::matrix<std::int32_t, 2, 2>{1, 2, 3, 4} == lin::internal::matrix<std::int32_t, 2, 2>{1, 2, 3, 4});
+static_assert(lin::internal::matrix<std::int32_t, 2, 2>{1, 2, 3, 4} != lin::internal::matrix<std::int32_t, 2, 2>{5, 6, 7, 8});
+
+#pragma clang diagnostic pop

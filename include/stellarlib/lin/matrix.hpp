@@ -21,12 +21,16 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef STELLARLIB_STELLARLIB_HPP
-#define STELLARLIB_STELLARLIB_HPP
+#ifndef STELLARLIB_LIN_MATRIX_HPP
+#define STELLARLIB_LIN_MATRIX_HPP
 
-/* IWYU pragma: begin_exports */
-#include <stellarlib/ecs/ecs.hpp>
-#include <stellarlib/lin/lin.hpp>
-/* IWYU pragma: end_exports */
+#include <array>
+#include <cstddef>
+
+namespace stellarlib::lin::internal
+{
+template <typename T, std::size_t M, std::size_t N>
+struct matrix final : public std::array<T, M * N> {};
+}
 
 #endif
