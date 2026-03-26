@@ -54,6 +54,11 @@ public:
 		}
 	}
 
+	[[nodiscard]]
+	explicit constexpr matrix(const std::array<T, M * N> &elems) noexcept
+		: std::array<T, M * N>{elems}
+	{}
+
 	template <typename U>
 	[[nodiscard]]
 	explicit constexpr matrix(const std::array<U, M * N> &elems) noexcept
@@ -62,6 +67,12 @@ public:
 			lhs = rhs;
 		}
 	}
+
+	[[nodiscard]]
+	explicit constexpr matrix(const matrix<T, N, M> &other) noexcept
+		requires (M == 1 || N == 1)
+		: std::array<T, M * N>{other}
+	{}
 
 	template <typename U>
 	[[nodiscard]]

@@ -80,7 +80,7 @@ struct padding final
 	/**
 	 * @brief Padding bytes
 	 */
-	[[no_unique_address]] std::conditional_t<!static_cast<bool>(size), std::tuple<>, std::array<std::byte, size>> bytes;
+	[[no_unique_address]] std::conditional_t<static_cast<bool>(size), std::array<std::byte, size>, std::tuple<>> bytes;
 };
 }
 
