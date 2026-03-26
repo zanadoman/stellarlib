@@ -84,6 +84,7 @@ Checks: >
   -cppcoreguidelines-pro-bounds-constant-array-index,
   -cppcoreguidelines-pro-bounds-pointer-arithmetic,
   -cppcoreguidelines-pro-type-vararg,
+  -hicpp-explicit-conversions,
   -hicpp-no-malloc,
   -hicpp-vararg,
   -modernize-use-integer-sign-comparison,

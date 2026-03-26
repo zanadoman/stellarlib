@@ -26,13 +26,84 @@
 
 #include <array>
 #include <cstddef>
+#include <memory>
 #include <ranges>
 #include <type_traits>
+#include <utility>
 
 namespace stellarlib::lin::internal
 {
 template <typename T, std::size_t M, std::size_t N>
-struct matrix final : public std::array<T, M * N> {};
+class matrix final : public std::array<T, M * N>
+{
+public:
+	[[nodiscard]]
+	explicit constexpr matrix() noexcept
+		: std::array<T, M * N>{}
+	{}
+
+	template <typename ...Args>
+	[[nodiscard]]
+	constexpr matrix(Args &&...args) noexcept
+		requires (sizeof...(Args) == M * N)
+	{
+		const std::array<T, M * N> elems{{std::forward<Args>(args)...}};
+
+		for (const auto m : std::views::iota(std::size_t{}, M)) {
+			for (const auto n : std::views::iota(std::size_t{}, N)) {
+				std::array<T, M * N>::operator[](n * M + m) = elems[m * N + n];
+			}
+		}
+	}
+
+	template <typename U>
+	[[nodiscard]]
+	constexpr matrix(const matrix<U, N, M> &other) noexcept
+		requires (M == 1 || N == 1)
+	{
+		for (const auto [lhs, rhs] : std::views::zip(*this, other)) {
+			lhs = rhs;
+		}
+	}
+
+	[[nodiscard]]
+	constexpr matrix(const matrix &) noexcept = default;
+
+	[[nodiscard]]
+	constexpr matrix(matrix &&) noexcept = default;
+
+	template <typename ...Args>
+	constexpr auto operator=(Args &&...args) noexcept
+		-> auto &
+	{
+		std::construct_at(this, std::forward<Args>(args)...);
+		return *this;
+	}
+
+	template <typename U>
+	constexpr auto operator=(const matrix<U, N, M> &other) noexcept
+		-> auto &
+	{
+		std::construct_at(this, other);
+		return *this;
+	}
+
+	constexpr auto operator=(const matrix &) noexcept
+		-> matrix & = default;
+
+	constexpr auto operator=(matrix &&) noexcept
+		-> matrix & = default;
+
+	constexpr ~matrix() noexcept = default;
+
+	template <typename U>
+	[[nodiscard]]
+	constexpr operator U() noexcept
+		requires (M == 1 && N == 1)
+	{
+		return std::array<T, M * N>::front();
+	}
+};
 
 #define STELLARLIB_LIN_MATRIX_PREFIX_POSTFIX_OPERATOR_IMPL(op)\
 template <typename T, std::size_t M, std::size_t N>\
@@ -64,7 +135,7 @@ constexpr auto operator op (const matrix<T, M, N> &self) noexcept\
 	matrix<T, M, N> res;\
 \
 	for (const auto [res, elem] : std::views::zip(res, self)) {\
-		res = op elem;\
+		res = static_cast<T>(op elem);\
 	}\
 \
 	return res;\
