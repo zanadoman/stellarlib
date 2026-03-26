@@ -59,7 +59,7 @@ public:
 	 * @brief Default constructor
 	 */
 	[[nodiscard]]
-	explicit world() noexcept;
+	world() noexcept;
 
 	/**
 	 * @brief Deleted copy constructor

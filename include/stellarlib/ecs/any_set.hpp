@@ -38,7 +38,7 @@ public:
 
 protected:
 	[[nodiscard]]
-	explicit constexpr any_set() noexcept = default;
+	constexpr any_set() noexcept = default;
 
 	[[nodiscard]]
 	constexpr any_set(const any_set &) noexcept = default;

@@ -73,7 +73,7 @@ public:
 	 * @brief Default constructor
 	 */
 	[[nodiscard]]
-	explicit archetype() noexcept;
+	archetype() noexcept;
 
 	/**
 	 * @brief Copy constructor

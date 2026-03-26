@@ -38,7 +38,7 @@ class trivially_relocatable final
 {
 public:
 	[[nodiscard]]
-	explicit trivially_relocatable() noexcept;
+	trivially_relocatable() noexcept;
 
 	[[nodiscard]]
 	trivially_relocatable(const trivially_relocatable &) noexcept;
@@ -59,7 +59,7 @@ class non_trivially_move_constructible final
 {
 public:
 	[[nodiscard]]
-	explicit non_trivially_move_constructible() noexcept;
+	non_trivially_move_constructible() noexcept;
 
 	[[nodiscard]]
 	non_trivially_move_constructible(const non_trivially_move_constructible &) noexcept;
@@ -80,7 +80,7 @@ class non_trivially_destructible final
 {
 public:
 	[[nodiscard]]
-	explicit non_trivially_destructible() noexcept;
+	non_trivially_destructible() noexcept;
 
 	[[nodiscard]]
 	non_trivially_destructible(const non_trivially_destructible &) noexcept;

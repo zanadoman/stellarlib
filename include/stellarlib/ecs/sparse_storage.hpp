@@ -53,7 +53,7 @@ public:
 	}
 
 	[[nodiscard]]
-	explicit sparse_storage() noexcept;
+	sparse_storage() noexcept;
 
 	[[nodiscard]]
 	constexpr sparse_storage(const sparse_storage &) noexcept = delete;

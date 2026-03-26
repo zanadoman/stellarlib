@@ -39,7 +39,7 @@ class sparse_map final : public any_set<Key>
 {
 public:
 	[[nodiscard]]
-	explicit constexpr sparse_map() noexcept = default;
+	constexpr sparse_map() noexcept = default;
 
 	[[nodiscard]]
 	constexpr sparse_map(const sparse_map &) noexcept = delete;

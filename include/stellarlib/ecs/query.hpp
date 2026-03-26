@@ -35,7 +35,7 @@ class query final
 {
 public:
 	[[nodiscard]]
-	explicit constexpr query(Query &&query, const std::function<void ()> &callback) noexcept
+	constexpr query(Query &&query, const std::function<void ()> &callback) noexcept
 		: _query{std::move(query)}
 		, _callback{callback}
 	{}

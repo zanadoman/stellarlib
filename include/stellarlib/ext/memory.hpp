@@ -73,7 +73,7 @@ public:
 	 * @brief Default constructor
 	 */
 	[[nodiscard]]
-	explicit constexpr vector_allocator() noexcept = default;
+	constexpr vector_allocator() noexcept = default;
 
 	/**
 	 * @brief Copy constructor
@@ -319,7 +319,7 @@ public:
 	 * @brief Default constructor
 	 */
 	[[nodiscard]]
-	explicit arena_allocator() noexcept;
+	arena_allocator() noexcept;
 
 	/**
 	 * @brief Deleted copy constructor

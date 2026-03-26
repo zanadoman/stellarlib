@@ -38,7 +38,7 @@ class stack_vector final : ext::vector_allocator<T, SizeType>
 {
 public:
 	[[nodiscard]]
-	explicit constexpr stack_vector() noexcept = default;
+	constexpr stack_vector() noexcept = default;
 
 	[[nodiscard]]
 	constexpr stack_vector(const stack_vector &) noexcept = delete;

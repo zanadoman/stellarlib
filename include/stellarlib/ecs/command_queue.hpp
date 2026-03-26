@@ -36,7 +36,7 @@ class command_queue final : ext::arena_allocator
 {
 public:
 	[[nodiscard]]
-	explicit command_queue() noexcept;
+	command_queue() noexcept;
 
 	[[nodiscard]]
 	constexpr command_queue(const command_queue &) noexcept = delete;

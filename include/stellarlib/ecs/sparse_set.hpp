@@ -34,7 +34,7 @@ class sparse_set final
 {
 public:
 	[[nodiscard]]
-	explicit sparse_set() noexcept;
+	sparse_set() noexcept;
 
 	[[nodiscard]]
 	constexpr sparse_set(const sparse_set &) noexcept = delete;

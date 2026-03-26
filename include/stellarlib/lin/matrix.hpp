@@ -38,16 +38,14 @@ class matrix final : public std::array<T, M * N>
 {
 public:
 	[[nodiscard]]
-	explicit constexpr matrix() noexcept
-		: std::array<T, M * N>{}
-	{}
+	constexpr matrix() noexcept = default;
 
 	template <typename ...Args>
 	[[nodiscard]]
-	constexpr matrix(Args &&...args) noexcept
-		requires (sizeof...(Args) == M * N)
+	explicit constexpr matrix(Args &&...args) noexcept
+		requires (std::is_convertible_v<Args, T> && ...)
 	{
-		const std::array<T, M * N> elems{{std::forward<Args>(args)...}};
+		const std::array<T, M * N> elems{static_cast<T>(std::forward<Args>(args))...};
 
 		for (const auto m : std::views::iota(std::size_t{}, M)) {
 			for (const auto n : std::views::iota(std::size_t{}, N)) {
@@ -58,7 +56,16 @@ public:
 
 	template <typename U>
 	[[nodiscard]]
-	constexpr matrix(const matrix<U, N, M> &other) noexcept
+	explicit constexpr matrix(const std::array<U, M * N> &elems) noexcept
+	{
+		for (const auto [lhs, rhs] : std::views::zip(*this, elems)) {
+			lhs = rhs;
+		}
+	}
+
+	template <typename U>
+	[[nodiscard]]
+	explicit constexpr matrix(const matrix<U, N, M> &other) noexcept
 		requires (M == 1 || N == 1)
 	{
 		for (const auto [lhs, rhs] : std::views::zip(*this, other)) {
@@ -81,6 +88,14 @@ public:
 	}
 
 	template <typename U>
+	constexpr auto operator=(const std::array<U, M * N> &elems) noexcept
+		-> auto &
+	{
+		std::construct_at(this, elems);
+		return *this;
+	}
+
+	template <typename U>
 	constexpr auto operator=(const matrix<U, N, M> &other) noexcept
 		-> auto &
 	{
@@ -98,8 +113,8 @@ public:
 
 	template <typename U>
 	[[nodiscard]]
-	constexpr operator U() noexcept
-		requires (M == 1 && N == 1)
+	explicit constexpr operator U() noexcept
+		requires (std::is_convertible_v<T, U> && M * N == 1)
 	{
 		return std::array<T, M * N>::front();
 	}
