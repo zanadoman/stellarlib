@@ -72,7 +72,7 @@ constexpr void check_entity_without_components(ecs::world &world, const std::uin
 	ASSERT_FALSE(std::get<1>(world.at<std::string, std::int32_t>(entity)));
 	ASSERT_EQ(world[entity], ecs::archetype::of());
 	auto query{world.query()};
-	ASSERT_NE(std::ranges::find(query, std::tuple{entity, ecs::archetype::of()}), query.end());
+	ASSERT_TRUE(std::ranges::contains(query, std::tuple{entity, ecs::archetype::of()}));
 }
 
 constexpr void check_entity_with_number_only(ecs::world &world, const std::uint32_t entity)
@@ -98,15 +98,15 @@ constexpr void check_entity_with_number_only(ecs::world &world, const std::uint3
 	ASSERT_EQ(world[entity], ecs::archetype::of<std::int32_t>());
 	ASSERT_EQ(world.operator[]<std::int32_t>(entity), std::tuple{number_of(entity)});
 	auto query1{world.query()};
-	ASSERT_NE(std::ranges::find(query1, std::tuple{entity, ecs::archetype::of<std::int32_t>()}), query1.end());
+	ASSERT_TRUE(std::ranges::contains(query1, std::tuple{entity, ecs::archetype::of<std::int32_t>()}));
 	auto query2{world.query<std::int32_t>()};
-	ASSERT_NE(std::ranges::find(query2, std::tuple{entity, number_of(entity)}), query2.end());
+	ASSERT_TRUE(std::ranges::contains(query2, std::tuple{entity, number_of(entity)}));
 	auto query3{world.query<std::string>()};
-	ASSERT_EQ(std::ranges::find(query3, std::tuple{entity, string_of(entity)}), query3.end());
+	ASSERT_FALSE(std::ranges::contains(query3, std::tuple{entity, string_of(entity)}));
 	auto query4{world.query<std::int32_t, std::string>()};
-	ASSERT_EQ(std::ranges::find(query4, std::tuple{entity, number_of(entity), string_of(entity)}), query4.end());
+	ASSERT_FALSE(std::ranges::contains(query4, std::tuple{entity, number_of(entity), string_of(entity)}));
 	auto query5{world.query<std::string, std::int32_t>()};
-	ASSERT_EQ(std::ranges::find(query5, std::tuple{entity, string_of(entity), number_of(entity)}), query5.end());
+	ASSERT_FALSE(std::ranges::contains(query5, std::tuple{entity, string_of(entity), number_of(entity)}));
 }
 
 constexpr void check_entity_with_string_only(ecs::world &world, const std::uint32_t entity)
@@ -132,15 +132,15 @@ constexpr void check_entity_with_string_only(ecs::world &world, const std::uint3
 	ASSERT_EQ(world[entity], ecs::archetype::of<std::string>());
 	ASSERT_EQ(world.operator[]<std::string>(entity), std::tuple{string_of(entity)});
 	auto query1{world.query()};
-	ASSERT_NE(std::ranges::find(query1, std::tuple{entity, ecs::archetype::of<std::string>()}), query1.end());
+	ASSERT_TRUE(std::ranges::contains(query1, std::tuple{entity, ecs::archetype::of<std::string>()}));
 	auto query2{world.query<std::int32_t>()};
-	ASSERT_EQ(std::ranges::find(query2, std::tuple{entity, number_of(entity)}), query2.end());
+	ASSERT_FALSE(std::ranges::contains(query2, std::tuple{entity, number_of(entity)}));
 	auto query3{world.query<std::string>()};
-	ASSERT_NE(std::ranges::find(query3, std::tuple{entity, string_of(entity)}), query3.end());
+	ASSERT_TRUE(std::ranges::contains(query3, std::tuple{entity, string_of(entity)}));
 	auto query4{world.query<std::int32_t, std::string>()};
-	ASSERT_EQ(std::ranges::find(query4, std::tuple{entity, number_of(entity), string_of(entity)}), query4.end());
+	ASSERT_FALSE(std::ranges::contains(query4, std::tuple{entity, number_of(entity), string_of(entity)}));
 	auto query5{world.query<std::string, std::int32_t>()};
-	ASSERT_EQ(std::ranges::find(query5, std::tuple{entity, string_of(entity), number_of(entity)}), query5.end());
+	ASSERT_FALSE(std::ranges::contains(query5, std::tuple{entity, string_of(entity), number_of(entity)}));
 }
 
 constexpr void check_entity_with_components(ecs::world &world, const std::uint32_t entity)
@@ -174,16 +174,16 @@ constexpr void check_entity_with_components(ecs::world &world, const std::uint32
 	ASSERT_EQ((world.operator[]<std::int32_t, std::string>)(entity), (std::tuple{number_of(entity), string_of(entity)}));
 	ASSERT_EQ((world.operator[]<std::string, std::int32_t>)(entity), (std::tuple{string_of(entity), number_of(entity)}));
 	auto query1{world.query()};
-	ASSERT_NE(std::ranges::find(query1, std::tuple{entity, ecs::archetype::of<std::int32_t, std::string>()}), query1.end());
-	ASSERT_NE(std::ranges::find(query1, std::tuple{entity, ecs::archetype::of<std::string, std::int32_t>()}), query1.end());
+	ASSERT_TRUE(std::ranges::contains(query1, std::tuple{entity, ecs::archetype::of<std::int32_t, std::string>()}));
+	ASSERT_TRUE(std::ranges::contains(query1, std::tuple{entity, ecs::archetype::of<std::string, std::int32_t>()}));
 	auto query2{world.query<std::int32_t>()};
-	ASSERT_NE(std::ranges::find(query2, std::tuple{entity, number_of(entity)}), query2.end());
+	ASSERT_TRUE(std::ranges::contains(query2, std::tuple{entity, number_of(entity)}));
 	auto query3{world.query<std::string>()};
-	ASSERT_NE(std::ranges::find(query3, std::tuple{entity, string_of(entity)}), query3.end());
+	ASSERT_TRUE(std::ranges::contains(query3, std::tuple{entity, string_of(entity)}));
 	auto query4{world.query<std::int32_t, std::string>()};
-	ASSERT_NE(std::ranges::find(query4, std::tuple{entity, number_of(entity), string_of(entity)}), query4.end());
+	ASSERT_TRUE(std::ranges::contains(query4, std::tuple{entity, number_of(entity), string_of(entity)}));
 	auto query5{world.query<std::string, std::int32_t>()};
-	ASSERT_NE(std::ranges::find(query5, std::tuple{entity, string_of(entity), number_of(entity)}), query5.end());
+	ASSERT_TRUE(std::ranges::contains(query5, std::tuple{entity, string_of(entity), number_of(entity)}));
 }
 
 constexpr void check_entities(ecs::world &world)

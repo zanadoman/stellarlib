@@ -62,7 +62,7 @@ TEST(stellarlib_ecs_sparse_set, should_insert_and_erase_keys)
 		set.erase(KEYS[i / 2]);
 		ASSERT_EQ(set.size(), i);
 		ASSERT_FALSE(set.contains(KEYS[i / 2]));
-		ASSERT_EQ(std::ranges::find(set, KEYS[i / 2]), set.end());
+		ASSERT_FALSE(std::ranges::contains(set, KEYS[i / 2]));
 		set.insert(KEYS[i / 2]);
 		ASSERT_EQ(set.size(), i + 1);
 		ASSERT_TRUE(set.contains(KEYS[i / 2]));
@@ -70,7 +70,7 @@ TEST(stellarlib_ecs_sparse_set, should_insert_and_erase_keys)
 		set.erase(KEYS[i]);
 		ASSERT_EQ(set.size(), i);
 		ASSERT_FALSE(set.contains(KEYS[i]));
-		ASSERT_EQ(std::ranges::find(set, KEYS[i]), set.end());
+		ASSERT_FALSE(std::ranges::contains(set, KEYS[i]));
 		set.insert(KEYS[i]);
 		ASSERT_EQ(set.size(), i + 1);
 		ASSERT_TRUE(set.contains(KEYS[i]));

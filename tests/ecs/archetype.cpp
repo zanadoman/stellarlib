@@ -57,7 +57,7 @@ constexpr std::array<std::uintmax_t, 3> IDS{
 	std::numeric_limits<std::uintmax_t>::digits * 2 - 1
 };
 
-static_assert(std::ranges::find(IDS, (std::ranges::min(IDS) + std::ranges::max(IDS)) / 2) != IDS.end());
+static_assert(std::ranges::contains(IDS, (std::ranges::min(IDS) + std::ranges::max(IDS)) / 2));
 static_assert(ext::bit_index(IDS[0]) < ext::bit_index(IDS[1]));
 static_assert(ext::bit_index(IDS[0]) < ext::bit_index(IDS[2]));
 static_assert(ext::bit_index(IDS[2]) < ext::bit_index(IDS[1]));
@@ -67,7 +67,7 @@ namespace
 constexpr void check_ids(const ecs::archetype &archetype)
 {
 	for (const auto id : std::views::iota(std::uintmax_t{}, std::ranges::max(IDS))) {
-		ASSERT_EQ(archetype.contains(id), std::ranges::find(IDS, id) != IDS.end());
+		ASSERT_EQ(archetype.contains(id), std::ranges::contains(IDS, id));
 	}
 }
 }
