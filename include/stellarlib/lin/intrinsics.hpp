@@ -24,10 +24,12 @@
 #ifndef STELLARLIB_LIN_INTRINSICS_HPP
 #define STELLARLIB_LIN_INTRINSICS_HPP
 
+#include <stellarlib/lin/matrix.hpp>
+
 #include <algorithm>
 #include <cstddef>
-
-#include <stellarlib/lin/matrix.hpp>
+#include <cstdint>
+#include <functional>
 
 namespace stellarlib::lin
 {
@@ -37,6 +39,39 @@ constexpr auto all(const internal::matrix<T, M, N> &matrix) noexcept
 {
 	return !std::ranges::contains(matrix, false);
 }
+
+template <typename T, typename U, std::size_t M, std::size_t N>
+[[nodiscard]]
+constexpr auto mul(const internal::matrix<T, M, N> &lhs, const internal::matrix<U, M, N> &rhs) noexcept
+	requires (M == 1 || N == 1)
+{
+	return internal::matrix<std::common_type_t<T, U>, 1, 1>{std::ranges::fold_left(lhs * rhs, std::common_type_t<T, U>{}, std::plus{})};
+}
+
+template <typename T, typename U, std::size_t M, std::size_t N, std::size_t P>
+[[nodiscard]]
+constexpr auto mul(const internal::matrix<T, M, N> &lhs, const internal::matrix<U, N, P> &rhs) noexcept
+	-> internal::matrix<std::common_type_t<T, U>, M, P>
+{
+	internal::matrix<std::common_type_t<T, U>, M, P> res{};
+
+	for (const auto m : std::views::iota(std::size_t{}, M)) {
+		for (const auto n : std::views::iota(std::size_t{}, N)) {
+			for (const auto p : std::views::iota(std::size_t{}, P)) {
+				/* res[p * M + m] += lhs[n * M + m] * rhs[p * N + n]; */
+				res[m * P + p] += lhs[m * N + n] * rhs[n * P + p];
+			}
+		}
+	}
+
+	return res;
+}
+
+static_assert(all(mul(internal::matrix<std::int32_t, 1, 2>{1, 2}, internal::matrix<std::int32_t, 1, 2>{3, 4}) == 11));
+static_assert(all(mul(internal::matrix<std::int32_t, 2, 1>{1, 2}, internal::matrix<std::int32_t, 2, 1>{3, 4}) == 11));
+static_assert(all(mul(internal::matrix<std::int32_t, 2, 2>{1, 2, 3, 4}, internal::matrix<std::int32_t, 2, 2>{5, 6, 7, 8}) == internal::matrix<std::int32_t, 2, 2>{19, 22, 43, 50}));
+static_assert(all(mul(internal::matrix<std::int32_t, 1, 3>{0, 0, 1}, internal::matrix<std::int32_t, 3, 3>{1, 0, 0, 0, 1, 0, 5, 0, 1}) == internal::matrix<std::int32_t, 1, 3>{5, 0, 1}));
+static_assert(all(mul(internal::matrix<std::int32_t, 3, 3>{1, 0, 5, 0, 1, 0, 0, 0, 1}, internal::matrix<std::int32_t, 3, 1>{0, 0, 1}) == internal::matrix<std::int32_t, 3, 1>{5, 0, 1}));
 }
 
 #endif
