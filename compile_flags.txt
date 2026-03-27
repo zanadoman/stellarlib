@@ -5,6 +5,7 @@
 -Wno-c++20-compat
 -Wno-c++98-compat-pedantic
 -Wno-exit-time-destructors
+-Wno-extra-semi
 -Wno-global-constructors
 -Wno-overloaded-shift-op-parentheses
 -Wno-shadow
