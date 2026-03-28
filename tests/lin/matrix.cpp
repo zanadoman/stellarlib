@@ -46,11 +46,11 @@ static_assert(lin::internal::matrix<std::int16_t, 1, 1>{lin::internal::matrix<st
 static_assert(sizeof(lin::internal::matrix<float, 2, 2>) == 4 * sizeof(float));
 static_assert(std::is_standard_layout_v<lin::internal::matrix<float, 2, 2>>);
 static_assert(ext::is_trivially_relocatable_v<lin::internal::matrix<float, 1, 1>>);
-static_assert(static_cast<std::array<std::int16_t, 4>>(lin::internal::matrix<std::int16_t, 2, 2>{1, 2, 3, 4}) == std::array<std::int16_t, 4>{1, 3, 2, 4});
+static_assert(static_cast<std::array<std::int16_t, 4>>(lin::internal::matrix<std::int16_t, 2, 2>{1, 2, 3, 4}) == std::array<std::int16_t, 4>{1, 2, 3, 4});
 static_assert(static_cast<std::array<std::int16_t, 4>>(lin::internal::matrix<std::int16_t, 2, 2>{std::array<std::int8_t, 4>{1, 2, 3, 4}}) == std::array<std::int16_t, 4>{1, 2, 3, 4});
 static_assert(static_cast<std::array<std::int16_t, 2>>(lin::internal::matrix<std::int16_t, 1, 2>{lin::internal::matrix<std::int8_t, 2, 1>{1, 2}}) == std::array<std::int16_t, 2>{1, 2});
 static_assert(static_cast<std::array<std::int16_t, 2>>(lin::internal::matrix<std::int16_t, 2, 1>{lin::internal::matrix<std::int8_t, 1, 2>{1, 2}}) == std::array<std::int16_t, 2>{1, 2});
-static_assert(static_cast<std::array<std::int16_t, 4>>(lin::internal::matrix<std::int16_t, 2, 2>{lin::internal::matrix<std::int8_t, 2, 2>{1, 2, 3, 4}}) == std::array<std::int16_t, 4>{1, 3, 2, 4});
-static_assert(static_cast<std::array<std::int16_t, 4>>(lin::internal::matrix<std::int16_t, 2, 2>{lin::internal::matrix<std::int16_t, 2, 2>{1, 2, 3, 4}}) == std::array<std::int16_t, 4>{1, 3, 2, 4});
+static_assert(static_cast<std::array<std::int16_t, 4>>(lin::internal::matrix<std::int16_t, 2, 2>{lin::internal::matrix<std::int8_t, 2, 2>{1, 2, 3, 4}}) == std::array<std::int16_t, 4>{1, 2, 3, 4});
+static_assert(static_cast<std::array<std::int16_t, 4>>(lin::internal::matrix<std::int16_t, 2, 2>{lin::internal::matrix<std::int16_t, 2, 2>{1, 2, 3, 4}}) == std::array<std::int16_t, 4>{1, 2, 3, 4});
 
 #pragma clang diagnostic pop

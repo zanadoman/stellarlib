@@ -44,15 +44,8 @@ public:
 	[[nodiscard]]
 	explicit constexpr matrix(Args &&...args) noexcept
 		requires (std::is_convertible_v<Args, T> && ...)
-	{
-		const std::array<T, M * N> elems{static_cast<T>(std::forward<Args>(args))...};
-
-		for (const auto m : std::views::iota(std::size_t{}, M)) {
-			for (const auto n : std::views::iota(std::size_t{}, N)) {
-				std::array<T, M * N>::operator[](n * M + m) = elems[m * N + n];
-			}
-		}
-	}
+		: std::array<T, M * N>{static_cast<T>(std::forward<Args>(args))...}
+	{}
 
 	[[nodiscard]]
 	explicit constexpr matrix(const std::array<T, M * N> &elems) noexcept
@@ -599,6 +592,18 @@ constexpr auto operator op (const T lhs, const matrix<U, M, N> &rhs) noexcept\
 }\
 \
 template <typename T, typename U, std::size_t M, std::size_t N>\
+constexpr auto operator op##= (matrix<T, M, N> &lhs, const matrix<U, N, M> &rhs) noexcept\
+	-> auto &\
+	requires (M == 1 || N == 1)\
+{\
+	for (const auto [lhs, rhs] : std::views::zip(lhs, rhs)) {\
+		lhs op##= rhs;\
+	}\
+\
+	return lhs;\
+}\
+\
+template <typename T, typename U, std::size_t M, std::size_t N>\
 constexpr auto operator op##= (matrix<T, M, N> &lhs, const matrix<U, M, N> &rhs) noexcept\
 	-> auto &\
 {\
@@ -607,6 +612,17 @@ constexpr auto operator op##= (matrix<T, M, N> &lhs, const matrix<U, M, N> &rhs)
 	}\
 \
 	return lhs;\
+}\
+\
+template <typename T, typename U, std::size_t M, std::size_t N>\
+[[nodiscard]]\
+constexpr auto operator op (const matrix<T, M, N> &lhs, const matrix<U, N, M> &rhs) noexcept\
+	-> matrix<std::common_type_t<T, U>, M, N>\
+	requires (M == 1 || N == 1)\
+{\
+	auto res{lhs};\
+	res op##= rhs;\
+	return res;\
 }\
 \
 template <typename T, typename U, std::size_t M, std::size_t N>\
@@ -642,6 +658,21 @@ constexpr auto operator op (const T lhs, const matrix<U, M, N> &rhs) noexcept\
 	matrix<bool, M, N> res;\
 \
 	for (const auto [res, rhs] : std::views::zip(res, rhs)) {\
+		res = lhs op rhs;\
+	}\
+\
+	return res;\
+}\
+\
+template <typename T, typename U, std::size_t M, std::size_t N>\
+[[nodiscard]]\
+constexpr auto operator op (const matrix<T, M, N> &lhs, const matrix<U, N, M> &rhs) noexcept\
+	-> matrix<bool, M, N>\
+	requires (M == 1 || N == 1)\
+{\
+	matrix<bool, M, N> res;\
+\
+	for (const auto [res, lhs, rhs] : std::views::zip(res, lhs, rhs)) {\
 		res = lhs op rhs;\
 	}\
 \

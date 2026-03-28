@@ -40,6 +40,13 @@ constexpr auto all(const internal::matrix<T, M, N> &matrix) noexcept
 	return !std::ranges::contains(matrix, false);
 }
 
+template <typename T, typename U, typename V>
+[[nodiscard]]
+constexpr auto mad(T x, U y, V z) noexcept
+{
+	return x * y + z;
+}
+
 template <typename T, typename U, std::size_t M, std::size_t N>
 [[nodiscard]]
 constexpr auto mul(const internal::matrix<T, M, N> &lhs, const internal::matrix<U, M, N> &rhs) noexcept
@@ -58,8 +65,7 @@ constexpr auto mul(const internal::matrix<T, M, N> &lhs, const internal::matrix<
 	for (const auto m : std::views::iota(std::size_t{}, M)) {
 		for (const auto n : std::views::iota(std::size_t{}, N)) {
 			for (const auto p : std::views::iota(std::size_t{}, P)) {
-				/* res[p * M + m] += lhs[n * M + m] * rhs[p * N + n]; */
-				res[m * P + p] += lhs[m * N + n] * rhs[n * P + p];
+				res[mad(m, P, p)] += lhs[mad(m, N, n)] * rhs[mad(n, P, p)];
 			}
 		}
 	}
