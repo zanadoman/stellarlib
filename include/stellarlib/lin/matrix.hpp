@@ -585,7 +585,7 @@ constexpr auto operator op (const T lhs, const matrix<U, M, N> &rhs) noexcept\
 	matrix<std::common_type_t<T, U>, M, N> res;\
 \
 	for (const auto [res, rhs] : std::views::zip(res, rhs)) {\
-		res = lhs op rhs;\
+		res = static_cast<T>(lhs op rhs);\
 	}\
 \
 	return res;\
