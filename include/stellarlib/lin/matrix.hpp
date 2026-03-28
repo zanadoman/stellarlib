@@ -42,7 +42,7 @@ public:
 
 	template <typename ...Args>
 	[[nodiscard]]
-	explicit constexpr matrix(Args &&...args) noexcept
+	constexpr matrix(Args &&...args) noexcept
 		requires (std::is_convertible_v<Args, T> && ...)
 		: std::array<T, M * N>{static_cast<T>(std::forward<Args>(args))...}
 	{}
@@ -88,22 +88,6 @@ public:
 		-> auto &
 	{
 		std::construct_at(this, std::forward<Args>(args)...);
-		return *this;
-	}
-
-	template <typename U>
-	constexpr auto operator=(const std::array<U, M * N> &elems) noexcept
-		-> auto &
-	{
-		std::construct_at(this, elems);
-		return *this;
-	}
-
-	template <typename U>
-	constexpr auto operator=(const matrix<U, N, M> &other) noexcept
-		-> auto &
-	{
-		std::construct_at(this, other);
 		return *this;
 	}
 

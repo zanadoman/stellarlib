@@ -86,6 +86,7 @@ Checks: >
   -cppcoreguidelines-pro-bounds-pointer-arithmetic,
   -cppcoreguidelines-pro-type-member-init,
   -cppcoreguidelines-pro-type-vararg,
+  -hicpp-explicit-conversions,
   -hicpp-member-init,
   -hicpp-no-malloc,
   -hicpp-vararg,
