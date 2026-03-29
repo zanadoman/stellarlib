@@ -39,18 +39,14 @@ using namespace stellarlib;
 #pragma clang diagnostic ignored "-Wself-assign-overloaded"
 #pragma clang diagnostic ignored "-Wself-move"
 
-static_assert(std::is_standard_layout_v<lin::internal::matrix<float, 1, 1>>);
-static_assert(sizeof(lin::internal::matrix<float, 1, 1>) == sizeof(float));
-static_assert(ext::is_trivially_relocatable_v<lin::internal::matrix<float, 1, 1>>);
+static_assert(std::is_standard_layout_v<lin::internal::matrix<float, 2, 2>>);
+static_assert(sizeof(lin::internal::matrix<float, 2, 2>) == 4 * sizeof(float));
+static_assert(ext::is_trivially_relocatable_v<lin::internal::matrix<float, 2, 2>>);
 static_assert(lin::internal::matrix<std::int16_t, 1, 1>{} == 0);
 static_assert(lin::internal::matrix<std::int16_t, 1, 1>{5} == 5);
 static_assert(lin::internal::matrix<std::int16_t, 1, 1>{std::array<std::int16_t, 1>{5}} == 5);
 static_assert(lin::internal::matrix<std::int16_t, 1, 1>{std::array<std::int8_t, 1>{5}} == 5);
 static_assert(lin::internal::matrix<std::int16_t, 1, 1>{lin::internal::matrix<std::int8_t, 1, 1>{5}} == 5);
-
-static_assert(std::is_standard_layout_v<lin::internal::matrix<float, 2, 2>>);
-static_assert(sizeof(lin::internal::matrix<float, 2, 2>) == 4 * sizeof(float));
-static_assert(ext::is_trivially_relocatable_v<lin::internal::matrix<float, 2, 2>>);
 static_assert(static_cast<std::array<std::int16_t, 4>>(lin::internal::matrix<std::int16_t, 2, 2>{}) == std::array<std::int16_t, 4>{});
 static_assert(static_cast<std::array<std::int16_t, 4>>(lin::internal::matrix<std::int16_t, 2, 2>{1, 2, 3, 4}) == std::array<std::int16_t, 4>{1, 2, 3, 4});
 static_assert(static_cast<std::array<std::int16_t, 4>>(lin::internal::matrix<std::int16_t, 2, 2>{std::array<std::int16_t, 4>{1, 2, 3, 4}}) == std::array<std::int16_t, 4>{1, 2, 3, 4});
@@ -80,14 +76,26 @@ static_assert(lin::internal::matrix<std::int32_t, 1, 4>{1, 2, 3, 4}.z() == 3);
 static_assert(lin::internal::matrix<std::int32_t, 1, 4>{1, 2, 3, 4}.b() == 3);
 static_assert(lin::internal::matrix<std::int32_t, 1, 4>{1, 2, 3, 4}.w() == 4);
 static_assert(lin::internal::matrix<std::int32_t, 1, 4>{1, 2, 3, 4}.a() == 4);
+static_assert(lin::internal::matrix<std::int32_t, 2, 2>{1, 2, 3, 4}[0, 0] == 1);
+static_assert(lin::internal::matrix<std::int32_t, 2, 2>{1, 2, 3, 4}[0, 1] == 2);
+static_assert(lin::internal::matrix<std::int32_t, 2, 2>{1, 2, 3, 4}[1, 0] == 3);
+static_assert(lin::internal::matrix<std::int32_t, 2, 2>{1, 2, 3, 4}[1, 1] == 4);
+static_assert(lin::all(lin::internal::matrix<std::int32_t, 2, 2>{1, 2, 3, 4}[0] == lin::internal::matrix<std::int32_t, 1, 2>{1, 2}));
+static_assert(lin::all(lin::internal::matrix<std::int32_t, 2, 2>{1, 2, 3, 4}[1] == lin::internal::matrix<std::int32_t, 1, 2>{3, 4}));
 
 TEST(stellarlib_lin_matrix, should_provide_accessors)
 {
-	lin::internal::matrix<std::int32_t, 1, 4> matrix{};
-	ASSERT_EQ(std::addressof(matrix.x()), std::addressof(matrix.r()));
-	ASSERT_EQ(std::addressof(matrix.y()), std::addressof(matrix.g()));
-	ASSERT_EQ(std::addressof(matrix.z()), std::addressof(matrix.b()));
-	ASSERT_EQ(std::addressof(matrix.w()), std::addressof(matrix.a()));
+	lin::internal::matrix<std::int32_t, 1, 4> matrix1{};
+	ASSERT_EQ(std::addressof(matrix1.x()), std::addressof(matrix1.r()));
+	ASSERT_EQ(std::addressof(matrix1.y()), std::addressof(matrix1.g()));
+	ASSERT_EQ(std::addressof(matrix1.z()), std::addressof(matrix1.b()));
+	ASSERT_EQ(std::addressof(matrix1.w()), std::addressof(matrix1.a()));
+	lin::internal::matrix<std::int32_t, 2, 2> matrix2{};
+	matrix2[0, 0] = 1;
+	matrix2[0, 1] = 2;
+	matrix2[1, 0] = 3;
+	matrix2[1, 1] = 4;
+	ASSERT_TRUE(lin::all(matrix2 == lin::internal::matrix<std::int32_t, 2, 2>{1, 2, 3, 4}));
 }
 
 static_assert(lin::all(lin::internal::matrix<std::int32_t, 1, 4>{1, 2, 3, 4}.xyzw() == lin::internal::matrix<std::int32_t, 1, 4>{1, 2, 3, 4}));

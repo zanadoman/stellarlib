@@ -281,8 +281,8 @@ public:
 	void deallocate() noexcept;
 
 private:
-	static size_type page_capacity;
-	static size_type page_alignment;
+	static const size_type page_capacity;
+	static const size_type page_alignment;
 	size_type _capacity;
 	value_type *_cursor{SDL_aligned_alloc(page_alignment, _capacity)};
 	size_type _size{_capacity};

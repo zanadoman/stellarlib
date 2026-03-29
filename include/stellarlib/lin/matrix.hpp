@@ -126,6 +126,40 @@ public:
 	STELLARLIB_LIN_MATRIX_ACCESSOR_SINGLE_IMPL(expr1, i);\
 	STELLARLIB_LIN_MATRIX_ACCESSOR_SINGLE_IMPL(expr2, i);
 
+	STELLARLIB_LIN_MATRIX_ACCESSOR_DOUBLE_IMPL(x, r, 0);
+	STELLARLIB_LIN_MATRIX_ACCESSOR_DOUBLE_IMPL(y, g, 1);
+	STELLARLIB_LIN_MATRIX_ACCESSOR_DOUBLE_IMPL(z, b, 2);
+	STELLARLIB_LIN_MATRIX_ACCESSOR_DOUBLE_IMPL(w, a, 3);
+
+	[[nodiscard]]
+	constexpr auto operator[](const std::size_t m, const std::size_t n) const noexcept
+		requires (M != 1 && N != 1)
+	{
+		return std::array<T, M * N>::operator[](m * N + n);
+	}
+
+	[[nodiscard]]
+	constexpr auto operator[](const std::size_t m, const std::size_t n) noexcept
+		-> auto &
+		requires (M != 1 && N != 1)
+	{
+		return std::array<T, M * N>::operator[](m * N + n);
+	}
+
+	[[nodiscard]]
+	constexpr auto operator[](const std::size_t m) const noexcept
+		-> matrix<T, 1, N>
+		requires (M != 1 && N != 1)
+	{
+		matrix<T, 1, N> res;
+
+		for (const auto n : std::views::iota(std::size_t{}, N)) {
+			res.std::template array<T, N>::operator[](n) = (*this)[m, n];
+		}
+
+		return res;
+	}
+
 #define STELLARLIB_LIN_MATRIX_SWIZZLE_SINGLE_IMPL(expr, ...)\
 	[[nodiscard]]\
 	constexpr auto expr() const noexcept\
@@ -137,10 +171,6 @@ public:
 	STELLARLIB_LIN_MATRIX_SWIZZLE_SINGLE_IMPL(expr1, __VA_ARGS__);\
 	STELLARLIB_LIN_MATRIX_SWIZZLE_SINGLE_IMPL(expr2, __VA_ARGS__);
 
-	STELLARLIB_LIN_MATRIX_ACCESSOR_DOUBLE_IMPL(x, r, 0);
-	STELLARLIB_LIN_MATRIX_ACCESSOR_DOUBLE_IMPL(y, g, 1);
-	STELLARLIB_LIN_MATRIX_ACCESSOR_DOUBLE_IMPL(z, b, 2);
-	STELLARLIB_LIN_MATRIX_ACCESSOR_DOUBLE_IMPL(w, a, 3);
 	STELLARLIB_LIN_MATRIX_SWIZZLE_DOUBLE_IMPL(xx, rr, 0, 0);
 	STELLARLIB_LIN_MATRIX_SWIZZLE_DOUBLE_IMPL(xy, rg, 0, 1);
 	STELLARLIB_LIN_MATRIX_SWIZZLE_DOUBLE_IMPL(xz, rb, 0, 2);
