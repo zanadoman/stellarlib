@@ -85,24 +85,24 @@ constexpr auto mul(const internal::matrix<T, M, N> &lhs, const internal::matrix<
 	return internal::matrix<std::common_type_t<T, U>, 1, 1>{std::ranges::fold_left(lhs * rhs, std::common_type_t<T, U>{}, std::plus{})};
 }
 
-/* template <typename T, typename U, std::size_t M, std::size_t N, std::size_t P> */
-/* [[nodiscard]] */
-/* constexpr auto mul(const internal::matrix<T, N, M> &lhs, const internal::matrix<U, P, N> &rhs) noexcept */
-/* 	-> internal::matrix<std::common_type_t<T, U>, M, P> */
-/* 	requires (M == 1 || P == 1) */
-/* { */
-/* 	internal::matrix<std::common_type_t<T, U>, M, P> res{}; */
-/**/
-/* 	for (const auto m : std::views::iota(std::size_t{}, M)) { */
-/* 		for (const auto n : std::views::iota(std::size_t{}, N)) { */
-/* 			for (const auto p : std::views::iota(std::size_t{}, P)) { */
-/* 				res[mad(m, P, p)] += lhs[mad(m, N, n)] * rhs[mad(n, P, p)]; */
-/* 			} */
-/* 		} */
-/* 	} */
-/**/
-/* 	return res; */
-/* } */
+template <typename T, typename U, std::size_t M, std::size_t N, std::size_t P>
+[[nodiscard]]
+constexpr auto mul(const internal::matrix<T, N, M> &lhs, const internal::matrix<U, P, N> &rhs) noexcept
+	-> internal::matrix<std::common_type_t<T, U>, M, P>
+	requires (M == 1 || P == 1)
+{
+	internal::matrix<std::common_type_t<T, U>, M, P> res{};
+
+	for (const auto m : std::views::iota(std::size_t{}, M)) {
+		for (const auto n : std::views::iota(std::size_t{}, N)) {
+			for (const auto p : std::views::iota(std::size_t{}, P)) {
+				res.std::template array<std::common_type_t<T, U>, M * P>::operator[](mad(m, P, p)) += lhs.std::template array<T, N * M>::operator[](mad(m, N, n)) * rhs.std::template array<U, P * N>::operator[](mad(n, P, p));
+			}
+		}
+	}
+
+	return res;
+}
 
 template <typename T, typename U, std::size_t M, std::size_t N, std::size_t P>
 [[nodiscard]]
@@ -114,7 +114,7 @@ constexpr auto mul(const internal::matrix<T, M, N> &lhs, const internal::matrix<
 	for (const auto m : std::views::iota(std::size_t{}, M)) {
 		for (const auto n : std::views::iota(std::size_t{}, N)) {
 			for (const auto p : std::views::iota(std::size_t{}, P)) {
-				res[m, p] += lhs[m, n] * rhs[n, p];
+				res.std::template array<std::common_type_t<T, U>, M * P>::operator[](mad(m, P, p)) += lhs.std::template array<T, M * N>::operator[](mad(m, N, n)) * rhs.std::template array<U, N * P>::operator[](mad(n, P, p));
 			}
 		}
 	}

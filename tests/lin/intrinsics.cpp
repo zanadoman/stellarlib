@@ -48,9 +48,9 @@ static_assert(lin::all(lin::mad(lin::internal::matrix<std::int32_t, 1, 2>{1, 2},
 static_assert(lin::all(lin::mul(lin::internal::matrix<std::int32_t, 1, 2>{1, 2}, lin::internal::matrix<std::int32_t, 1, 2>{3, 4}) == 11));
 static_assert(lin::all(lin::mul(lin::internal::matrix<std::int32_t, 2, 1>{1, 2}, lin::internal::matrix<std::int32_t, 2, 1>{3, 4}) == 11));
 static_assert(lin::all(lin::mul(lin::internal::matrix<std::int32_t, 2, 2>{1, 2, 3, 4}, lin::internal::matrix<std::int32_t, 2, 2>{5, 6, 7, 8}) == lin::internal::matrix<std::int32_t, 2, 2>{19, 22, 43, 50}));
-/* static_assert(lin::all(lin::mul(lin::internal::matrix<std::int32_t, 1, 3>{0, 0, 1}, lin::internal::matrix<std::int32_t, 3, 3>{1, 0, 0, 0, 1, 0, 5, 0, 1}) == lin::internal::matrix<std::int32_t, 1, 3>{5, 0, 1})); */
-/* static_assert(lin::all(lin::mul(lin::internal::matrix<std::int32_t, 3, 1>{0, 0, 1}, lin::internal::matrix<std::int32_t, 3, 3>{1, 0, 0, 0, 1, 0, 5, 0, 1}) == lin::internal::matrix<std::int32_t, 1, 3>{5, 0, 1})); */
-/* static_assert(lin::all(lin::mul(lin::internal::matrix<std::int32_t, 3, 3>{1, 0, 5, 0, 1, 0, 0, 0, 1}, lin::internal::matrix<std::int32_t, 3, 1>{0, 0, 1}) == lin::internal::matrix<std::int32_t, 1, 3>{5, 0, 1})); */
-/* static_assert(lin::all(lin::mul(lin::internal::matrix<std::int32_t, 3, 3>{1, 0, 5, 0, 1, 0, 0, 0, 1}, lin::internal::matrix<std::int32_t, 1, 3>{0, 0, 1}) == lin::internal::matrix<std::int32_t, 1, 3>{5, 0, 1})); */
+static_assert(lin::all(lin::mul(lin::internal::matrix<std::int32_t, 1, 3>{0, 0, 1}, lin::internal::matrix<std::int32_t, 3, 3>{1, 0, 0, 0, 1, 0, 5, 0, 1}) == lin::internal::matrix<std::int32_t, 1, 3>{5, 0, 1}));
+static_assert(lin::all(lin::mul(lin::internal::matrix<std::int32_t, 3, 1>{0, 0, 1}, lin::internal::matrix<std::int32_t, 3, 3>{1, 0, 0, 0, 1, 0, 5, 0, 1}) == lin::internal::matrix<std::int32_t, 1, 3>{5, 0, 1}));
+static_assert(lin::all(lin::mul(lin::internal::matrix<std::int32_t, 3, 3>{1, 0, 5, 0, 1, 0, 0, 0, 1}, lin::internal::matrix<std::int32_t, 3, 1>{0, 0, 1}) == lin::internal::matrix<std::int32_t, 1, 3>{5, 0, 1}));
+static_assert(lin::all(lin::mul(lin::internal::matrix<std::int32_t, 3, 3>{1, 0, 5, 0, 1, 0, 0, 0, 1}, lin::internal::matrix<std::int32_t, 1, 3>{0, 0, 1}) == lin::internal::matrix<std::int32_t, 1, 3>{5, 0, 1}));
 
 #pragma clang diagnostic pop

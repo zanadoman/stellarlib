@@ -29,119 +29,126 @@
 #include <stellarlib/lin/matrix.hpp>
 /* IWYU pragma: end_exports */
 
+#include <cstddef>
 #include <cstdint>
 
 namespace stellarlib::lin
 {
-using bool1x1 = internal::matrix<bool, 1, 1>;
-using bool2x1 = internal::matrix<bool, 2, 1>;
-using bool3x1 = internal::matrix<bool, 3, 1>;
-using bool4x1 = internal::matrix<bool, 4, 1>;
-using bool1x2 = internal::matrix<bool, 1, 2>;
-using bool2x2 = internal::matrix<bool, 2, 2>;
-using bool3x2 = internal::matrix<bool, 3, 2>;
-using bool4x2 = internal::matrix<bool, 4, 2>;
-using bool1x3 = internal::matrix<bool, 1, 3>;
-using bool2x3 = internal::matrix<bool, 2, 3>;
-using bool3x3 = internal::matrix<bool, 3, 3>;
-using bool4x3 = internal::matrix<bool, 4, 3>;
-using bool1x4 = internal::matrix<bool, 1, 4>;
-using bool2x4 = internal::matrix<bool, 2, 4>;
-using bool3x4 = internal::matrix<bool, 3, 4>;
-using bool4x4 = internal::matrix<bool, 4, 4>;
+template <typename T, std::size_t M = 4, std::size_t N = 4>
+using matrix = internal::matrix<T, M, N>;
 
-using int1x1 = internal::matrix<std::int32_t, 1, 1>;
-using int2x1 = internal::matrix<std::int32_t, 2, 1>;
-using int3x1 = internal::matrix<std::int32_t, 3, 1>;
-using int4x1 = internal::matrix<std::int32_t, 4, 1>;
-using int1x2 = internal::matrix<std::int32_t, 1, 2>;
-using int2x2 = internal::matrix<std::int32_t, 2, 2>;
-using int3x2 = internal::matrix<std::int32_t, 3, 2>;
-using int4x2 = internal::matrix<std::int32_t, 4, 2>;
-using int1x3 = internal::matrix<std::int32_t, 1, 3>;
-using int2x3 = internal::matrix<std::int32_t, 2, 3>;
-using int3x3 = internal::matrix<std::int32_t, 3, 3>;
-using int4x3 = internal::matrix<std::int32_t, 4, 3>;
-using int1x4 = internal::matrix<std::int32_t, 1, 4>;
-using int2x4 = internal::matrix<std::int32_t, 2, 4>;
-using int3x4 = internal::matrix<std::int32_t, 3, 4>;
-using int4x4 = internal::matrix<std::int32_t, 4, 4>;
+using int1x1 = matrix<std::int32_t, 1, 1>;
+using int2x1 = matrix<std::int32_t, 2, 1>;
+using int3x1 = matrix<std::int32_t, 3, 1>;
+using int4x1 = matrix<std::int32_t, 4, 1>;
+using int1x2 = matrix<std::int32_t, 1, 2>;
+using int2x2 = matrix<std::int32_t, 2, 2>;
+using int3x2 = matrix<std::int32_t, 3, 2>;
+using int4x2 = matrix<std::int32_t, 4, 2>;
+using int1x3 = matrix<std::int32_t, 1, 3>;
+using int2x3 = matrix<std::int32_t, 2, 3>;
+using int3x3 = matrix<std::int32_t, 3, 3>;
+using int4x3 = matrix<std::int32_t, 4, 3>;
+using int1x4 = matrix<std::int32_t, 1>;
+using int2x4 = matrix<std::int32_t, 2>;
+using int3x4 = matrix<std::int32_t, 3>;
+using int4x4 = matrix<std::int32_t>;
 
-using uint1x1 = internal::matrix<std::uint32_t, 1, 1>;
-using uint2x1 = internal::matrix<std::uint32_t, 2, 1>;
-using uint3x1 = internal::matrix<std::uint32_t, 3, 1>;
-using uint4x1 = internal::matrix<std::uint32_t, 4, 1>;
-using uint1x2 = internal::matrix<std::uint32_t, 1, 2>;
-using uint2x2 = internal::matrix<std::uint32_t, 2, 2>;
-using uint3x2 = internal::matrix<std::uint32_t, 3, 2>;
-using uint4x2 = internal::matrix<std::uint32_t, 4, 2>;
-using uint1x3 = internal::matrix<std::uint32_t, 1, 3>;
-using uint2x3 = internal::matrix<std::uint32_t, 2, 3>;
-using uint3x3 = internal::matrix<std::uint32_t, 3, 3>;
-using uint4x3 = internal::matrix<std::uint32_t, 4, 3>;
-using uint1x4 = internal::matrix<std::uint32_t, 1, 4>;
-using uint2x4 = internal::matrix<std::uint32_t, 2, 4>;
-using uint3x4 = internal::matrix<std::uint32_t, 3, 4>;
-using uint4x4 = internal::matrix<std::uint32_t, 4, 4>;
+using uint1x1 = matrix<std::uint32_t, 1, 1>;
+using uint2x1 = matrix<std::uint32_t, 2, 1>;
+using uint3x1 = matrix<std::uint32_t, 3, 1>;
+using uint4x1 = matrix<std::uint32_t, 4, 1>;
+using uint1x2 = matrix<std::uint32_t, 1, 2>;
+using uint2x2 = matrix<std::uint32_t, 2, 2>;
+using uint3x2 = matrix<std::uint32_t, 3, 2>;
+using uint4x2 = matrix<std::uint32_t, 4, 2>;
+using uint1x3 = matrix<std::uint32_t, 1, 3>;
+using uint2x3 = matrix<std::uint32_t, 2, 3>;
+using uint3x3 = matrix<std::uint32_t, 3, 3>;
+using uint4x3 = matrix<std::uint32_t, 4, 3>;
+using uint1x4 = matrix<std::uint32_t, 1>;
+using uint2x4 = matrix<std::uint32_t, 2>;
+using uint3x4 = matrix<std::uint32_t, 3>;
+using uint4x4 = matrix<std::uint32_t>;
 
-using float1x1 = internal::matrix<float, 1, 1>;
-using float2x1 = internal::matrix<float, 2, 1>;
-using float3x1 = internal::matrix<float, 3, 1>;
-using float4x1 = internal::matrix<float, 4, 1>;
-using float1x2 = internal::matrix<float, 1, 2>;
-using float2x2 = internal::matrix<float, 2, 2>;
-using float3x2 = internal::matrix<float, 3, 2>;
-using float4x2 = internal::matrix<float, 4, 2>;
-using float1x3 = internal::matrix<float, 1, 3>;
-using float2x3 = internal::matrix<float, 2, 3>;
-using float3x3 = internal::matrix<float, 3, 3>;
-using float4x3 = internal::matrix<float, 4, 3>;
-using float1x4 = internal::matrix<float, 1, 4>;
-using float2x4 = internal::matrix<float, 2, 4>;
-using float3x4 = internal::matrix<float, 3, 4>;
-using float4x4 = internal::matrix<float, 4, 4>;
+using float1x1 = matrix<float, 1, 1>;
+using float2x1 = matrix<float, 2, 1>;
+using float3x1 = matrix<float, 3, 1>;
+using float4x1 = matrix<float, 4, 1>;
+using float1x2 = matrix<float, 1, 2>;
+using float2x2 = matrix<float, 2, 2>;
+using float3x2 = matrix<float, 3, 2>;
+using float4x2 = matrix<float, 4, 2>;
+using float1x3 = matrix<float, 1, 3>;
+using float2x3 = matrix<float, 2, 3>;
+using float3x3 = matrix<float, 3, 3>;
+using float4x3 = matrix<float, 4, 3>;
+using float1x4 = matrix<float, 1>;
+using float2x4 = matrix<float, 2>;
+using float3x4 = matrix<float, 3>;
+using float4x4 = matrix<float>;
 
-using double1x1 = internal::matrix<double, 1, 1>;
-using double2x1 = internal::matrix<double, 2, 1>;
-using double3x1 = internal::matrix<double, 3, 1>;
-using double4x1 = internal::matrix<double, 4, 1>;
-using double1x2 = internal::matrix<double, 1, 2>;
-using double2x2 = internal::matrix<double, 2, 2>;
-using double3x2 = internal::matrix<double, 3, 2>;
-using double4x2 = internal::matrix<double, 4, 2>;
-using double1x3 = internal::matrix<double, 1, 3>;
-using double2x3 = internal::matrix<double, 2, 3>;
-using double3x3 = internal::matrix<double, 3, 3>;
-using double4x3 = internal::matrix<double, 4, 3>;
-using double1x4 = internal::matrix<double, 1, 4>;
-using double2x4 = internal::matrix<double, 2, 4>;
-using double3x4 = internal::matrix<double, 3, 4>;
-using double4x4 = internal::matrix<double, 4, 4>;
+using double1x1 = matrix<double, 1, 1>;
+using double2x1 = matrix<double, 2, 1>;
+using double3x1 = matrix<double, 3, 1>;
+using double4x1 = matrix<double, 4, 1>;
+using double1x2 = matrix<double, 1, 2>;
+using double2x2 = matrix<double, 2, 2>;
+using double3x2 = matrix<double, 3, 2>;
+using double4x2 = matrix<double, 4, 2>;
+using double1x3 = matrix<double, 1, 3>;
+using double2x3 = matrix<double, 2, 3>;
+using double3x3 = matrix<double, 3, 3>;
+using double4x3 = matrix<double, 4, 3>;
+using double1x4 = matrix<double, 1>;
+using double2x4 = matrix<double, 2>;
+using double3x4 = matrix<double, 3>;
+using double4x4 = matrix<double>;
 
-using bool1 = bool1x1;
-using bool2 = bool1x2;
-using bool3 = bool1x3;
-using bool4 = bool1x4;
+using bool1x1 = matrix<bool, 1, 1>;
+using bool2x1 = matrix<bool, 2, 1>;
+using bool3x1 = matrix<bool, 3, 1>;
+using bool4x1 = matrix<bool, 4, 1>;
+using bool1x2 = matrix<bool, 1, 2>;
+using bool2x2 = matrix<bool, 2, 2>;
+using bool3x2 = matrix<bool, 3, 2>;
+using bool4x2 = matrix<bool, 4, 2>;
+using bool1x3 = matrix<bool, 1, 3>;
+using bool2x3 = matrix<bool, 2, 3>;
+using bool3x3 = matrix<bool, 3, 3>;
+using bool4x3 = matrix<bool, 4, 3>;
+using bool1x4 = matrix<bool, 1>;
+using bool2x4 = matrix<bool, 2>;
+using bool3x4 = matrix<bool, 3>;
+using bool4x4 = matrix<bool>;
 
-using int1 = int1x1;
-using int2 = int1x2;
-using int3 = int1x3;
-using int4 = int1x4;
+template <typename T, std::size_t N = 4>
+using vector = matrix<T, 1, N>;
 
-using uint1 = uint1x1;
-using uint2 = uint1x2;
-using uint3 = uint1x3;
-using uint4 = uint1x4;
+using int1 = vector<std::int32_t, 1>;
+using int2 = vector<std::int32_t, 2>;
+using int3 = vector<std::int32_t, 3>;
+using int4 = vector<std::int32_t>;
 
-using float1 = float1x1;
-using float2 = float1x2;
-using float3 = float1x3;
-using float4 = float1x4;
+using uint1 = vector<std::uint32_t, 1>;
+using uint2 = vector<std::uint32_t, 2>;
+using uint3 = vector<std::uint32_t, 3>;
+using uint4 = vector<std::uint32_t>;
 
-using double1 = double1x1;
-using double2 = double1x2;
-using double3 = double1x3;
-using double4 = double1x4;
+using float1 = vector<float, 1>;
+using float2 = vector<float, 2>;
+using float3 = vector<float, 3>;
+using float4 = vector<float>;
+
+using double1 = vector<double, 1>;
+using double2 = vector<double, 2>;
+using double3 = vector<double, 3>;
+using double4 = vector<double>;
+
+using bool1 = vector<bool, 1>;
+using bool2 = vector<bool, 2>;
+using bool3 = vector<bool, 3>;
+using bool4 = vector<bool>;
 }
 
 #endif
