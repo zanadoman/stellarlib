@@ -39,45 +39,37 @@ using namespace stellarlib;
 #pragma clang diagnostic ignored "-Wself-assign-overloaded"
 #pragma clang diagnostic ignored "-Wself-move"
 
-static_assert(sizeof(lin::internal::matrix<float, 1, 1>) == sizeof(float));
 static_assert(std::is_standard_layout_v<lin::internal::matrix<float, 1, 1>>);
+static_assert(sizeof(lin::internal::matrix<float, 1, 1>) == sizeof(float));
 static_assert(ext::is_trivially_relocatable_v<lin::internal::matrix<float, 1, 1>>);
 static_assert(lin::internal::matrix<std::int16_t, 1, 1>{} == 0);
 static_assert(lin::internal::matrix<std::int16_t, 1, 1>{5} == 5);
 static_assert(lin::internal::matrix<std::int16_t, 1, 1>{std::array<std::int16_t, 1>{5}} == 5);
 static_assert(lin::internal::matrix<std::int16_t, 1, 1>{std::array<std::int8_t, 1>{5}} == 5);
-static_assert(lin::internal::matrix<std::int16_t, 1, 1>{lin::internal::matrix<std::int16_t, 1, 1>{5}} == 5);
 static_assert(lin::internal::matrix<std::int16_t, 1, 1>{lin::internal::matrix<std::int8_t, 1, 1>{5}} == 5);
 
-static_assert(sizeof(lin::internal::matrix<float, 2, 2>) == 4 * sizeof(float));
 static_assert(std::is_standard_layout_v<lin::internal::matrix<float, 2, 2>>);
+static_assert(sizeof(lin::internal::matrix<float, 2, 2>) == 4 * sizeof(float));
 static_assert(ext::is_trivially_relocatable_v<lin::internal::matrix<float, 2, 2>>);
 static_assert(static_cast<std::array<std::int16_t, 4>>(lin::internal::matrix<std::int16_t, 2, 2>{}) == std::array<std::int16_t, 4>{});
 static_assert(static_cast<std::array<std::int16_t, 4>>(lin::internal::matrix<std::int16_t, 2, 2>{1, 2, 3, 4}) == std::array<std::int16_t, 4>{1, 2, 3, 4});
 static_assert(static_cast<std::array<std::int16_t, 4>>(lin::internal::matrix<std::int16_t, 2, 2>{std::array<std::int16_t, 4>{1, 2, 3, 4}}) == std::array<std::int16_t, 4>{1, 2, 3, 4});
 static_assert(static_cast<std::array<std::int16_t, 4>>(lin::internal::matrix<std::int16_t, 2, 2>{std::array<std::int8_t, 4>{1, 2, 3, 4}}) == std::array<std::int16_t, 4>{1, 2, 3, 4});
 static_assert(static_cast<std::array<std::int16_t, 2>>(lin::internal::matrix<std::int16_t, 1, 2>{lin::internal::matrix<std::int16_t, 2, 1>{1, 2}}) == std::array<std::int16_t, 2>{1, 2});
-static_assert(static_cast<std::array<std::int16_t, 2>>(lin::internal::matrix<std::int16_t, 1, 2>{lin::internal::matrix<std::int8_t, 1, 2>{1, 2}}) == std::array<std::int16_t, 2>{1, 2});
 static_assert(static_cast<std::array<std::int16_t, 2>>(lin::internal::matrix<std::int16_t, 1, 2>{lin::internal::matrix<std::int8_t, 2, 1>{1, 2}}) == std::array<std::int16_t, 2>{1, 2});
 
 TEST(stellarlib_lin_matrix, should_handle_assignment)
 {
 	lin::internal::matrix<std::int16_t, 2, 2> matrix1{};
 	matrix1 = std::array<std::int16_t, 4>{1, 2, 3, 4};
-	ASSERT_TRUE(lin::all(matrix1 == lin::internal::matrix<std::int16_t, 2, 2>{1, 2, 3, 4}));
+	ASSERT_EQ((static_cast<std::array<std::int16_t, 4>>(matrix1)), (std::array<std::int16_t, 4>{1, 2, 3, 4}));
 	matrix1 = std::array<std::int8_t, 4>{4, 3, 2, 1};
-	ASSERT_TRUE(lin::all(matrix1 == lin::internal::matrix<std::int16_t, 2, 2>{4, 3, 2, 1}));
+	ASSERT_EQ((static_cast<std::array<std::int16_t, 4>>(matrix1)), (std::array<std::int16_t, 4>{4, 3, 2, 1}));
 	lin::internal::matrix<std::int16_t, 1, 2> matrix2{};
-	matrix2 = std::array<std::int16_t, 2>{1, 2};
-	ASSERT_TRUE(lin::all(matrix2 == lin::internal::matrix<std::int16_t, 1, 2>{1, 2}));
-	matrix2 = std::array<std::int8_t, 2>{2, 1};
-	ASSERT_TRUE(lin::all(matrix2 == lin::internal::matrix<std::int16_t, 1, 2>{2, 1}));
 	matrix2 = lin::internal::matrix<std::int16_t, 2, 1>{1, 2};
-	ASSERT_TRUE(lin::all(matrix2 == lin::internal::matrix<std::int16_t, 1, 2>{1, 2}));
-	matrix2 = lin::internal::matrix<std::int8_t, 1, 2>{2, 1};
-	ASSERT_TRUE(lin::all(matrix2 == lin::internal::matrix<std::int16_t, 1, 2>{2, 1}));
-	matrix2 = lin::internal::matrix<std::int8_t, 2, 1>{1, 2};
-	ASSERT_TRUE(lin::all(matrix2 == lin::internal::matrix<std::int16_t, 1, 2>{1, 2}));
+	ASSERT_EQ((static_cast<std::array<std::int16_t, 2>>(matrix2)), (std::array<std::int16_t, 2>{1, 2}));
+	matrix2 = lin::internal::matrix<std::int8_t, 2, 1>{2, 1};
+	ASSERT_EQ((static_cast<std::array<std::int16_t, 2>>(matrix2)), (std::array<std::int16_t, 2>{2, 1}));
 }
 
 static_assert(lin::internal::matrix<std::int32_t, 1, 4>{1, 2, 3, 4}.x() == 1);
@@ -91,7 +83,7 @@ static_assert(lin::internal::matrix<std::int32_t, 1, 4>{1, 2, 3, 4}.a() == 4);
 
 TEST(stellarlib_lin_matrix, should_provide_accessors)
 {
-	lin::internal::matrix<std::int32_t, 1, 4> matrix{1, 2, 3, 4};
+	lin::internal::matrix<std::int32_t, 1, 4> matrix{};
 	ASSERT_EQ(std::addressof(matrix.x()), std::addressof(matrix.r()));
 	ASSERT_EQ(std::addressof(matrix.y()), std::addressof(matrix.g()));
 	ASSERT_EQ(std::addressof(matrix.z()), std::addressof(matrix.b()));
@@ -105,18 +97,18 @@ static_assert(lin::all(lin::internal::matrix<std::int32_t, 1, 4>{1, 2, 3, 4}.abg
 
 TEST(stellarlib_lin_matrix, should_increment)
 {
-	lin::internal::matrix<std::int32_t, 1, 4> matrix{1, 2, 3, 4};
-	ASSERT_TRUE(lin::all(++matrix == lin::internal::matrix<std::int32_t, 1, 4>{2, 3, 4, 5}));
-	ASSERT_TRUE(lin::all(matrix++ == lin::internal::matrix<std::int32_t, 1, 4>{2, 3, 4, 5}));
-	ASSERT_TRUE(lin::all(matrix == lin::internal::matrix<std::int32_t, 1, 4>{3, 4, 5, 6}));
+	lin::internal::matrix<std::int32_t, 1, 2> matrix{1, 2};
+	ASSERT_TRUE(lin::all(++matrix == lin::internal::matrix<std::int32_t, 1, 2>{2, 3}));
+	ASSERT_TRUE(lin::all(matrix++ == lin::internal::matrix<std::int32_t, 1, 2>{2, 3}));
+	ASSERT_TRUE(lin::all(matrix == lin::internal::matrix<std::int32_t, 1, 2>{3, 4}));
 }
 
 TEST(stellarlib_lin_matrix, should_decrement)
 {
-	lin::internal::matrix<std::int32_t, 1, 4> matrix{3, 4, 5, 6};
-	ASSERT_TRUE(lin::all(--matrix == lin::internal::matrix<std::int32_t, 1, 4>{2, 3, 4, 5}));
-	ASSERT_TRUE(lin::all(matrix-- == lin::internal::matrix<std::int32_t, 1, 4>{2, 3, 4, 5}));
-	ASSERT_TRUE(lin::all(matrix == lin::internal::matrix<std::int32_t, 1, 4>{1, 2, 3, 4}));
+	lin::internal::matrix<std::int32_t, 1, 2> matrix{3, 4};
+	ASSERT_TRUE(lin::all(--matrix == lin::internal::matrix<std::int32_t, 1, 2>{2, 3}));
+	ASSERT_TRUE(lin::all(matrix-- == lin::internal::matrix<std::int32_t, 1, 2>{2, 3}));
+	ASSERT_TRUE(lin::all(matrix == lin::internal::matrix<std::int32_t, 1, 2>{1, 2}));
 }
 
 static_assert(lin::all(+lin::internal::matrix<std::int32_t, 1, 2>{1, 2} == lin::internal::matrix<std::int32_t, 1, 2>{1, 2}));
