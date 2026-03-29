@@ -39,6 +39,7 @@
 #include <cstdint>
 #include <expected>
 #include <functional>
+#include <limits>
 #include <ranges>
 #include <tuple>
 #include <type_traits>
@@ -338,7 +339,7 @@ public:
 	{
 		const auto id{ext::scoped_typeid<world, std::tuple<T...>, std::uint16_t>()};
 
-		if (_queries.extend(id + 1, static_cast<std::uint16_t>(-1)) || _queries[id] == -1) {
+		if (_queries.extend(id + 1, std::numeric_limits<std::uint16_t>::max()) || _queries[id] == std::numeric_limits<std::uint16_t>::max()) {
 			const auto &archetype{archetype::of<T...>()};
 
 			const auto pair{std::ranges::find_if(_indices, [&] [[nodiscard]] (const auto &pair) noexcept -> auto {

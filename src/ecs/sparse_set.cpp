@@ -24,6 +24,7 @@
 #include <stellarlib/ecs/sparse_set.hpp>
 
 #include <cstdint>
+#include <limits>
 
 namespace stellarlib::ecs::internal
 {
@@ -38,7 +39,7 @@ sparse_set::~sparse_set() noexcept = default;
 
 void sparse_set::insert(const std::uint32_t key) noexcept
 {
-	_sparse.extend(key + 1, static_cast<std::uint32_t>(-1));
+	_sparse.extend(key + 1, std::numeric_limits<std::uint32_t>::max());
 	_sparse[key] = _keys.size();
 	_keys.push(key);
 }
@@ -52,7 +53,7 @@ auto sparse_set::size() const noexcept
 auto sparse_set::contains(const std::uint32_t key) const noexcept
 	-> bool
 {
-	return key < _sparse.size() && _sparse[key] != static_cast<std::uint32_t>(-1);
+	return key < _sparse.size() && _sparse[key] != std::numeric_limits<std::uint32_t>::max();
 }
 
 auto sparse_set::begin() const noexcept
@@ -74,7 +75,7 @@ void sparse_set::erase(const std::uint32_t key) noexcept
 		_sparse[_keys[_sparse[key]]] = _sparse[key];
 	}
 
-	_sparse[key] = static_cast<std::uint32_t>(-1);
+	_sparse[key] = std::numeric_limits<std::uint32_t>::max();
 	_keys.pop();
 }
 

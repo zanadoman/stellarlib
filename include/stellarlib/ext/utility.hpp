@@ -26,6 +26,7 @@
 
 #include <atomic>
 #include <cstddef>
+#include <limits>
 
 /**
  * @brief Standard library extensions
@@ -42,7 +43,7 @@ template <typename Scope, typename SizeType = std::size_t>
 [[nodiscard]]
 constexpr auto sequential_id() noexcept
 {
-	static std::atomic<SizeType> id{static_cast<SizeType>(-1)};
+	static std::atomic<SizeType> id{std::numeric_limits<SizeType>::max()};
 	return ++id;
 }
 

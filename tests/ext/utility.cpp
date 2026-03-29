@@ -44,34 +44,34 @@ struct baz final {};
 
 TEST(stellarlib_ext_utility, sequential_id)
 {
-	ASSERT_EQ((ext::sequential_id<foo, std::uint64_t>)(), 0);
-	ASSERT_EQ((ext::sequential_id<foo, std::uint64_t>)(), 1);
-	ASSERT_EQ((ext::sequential_id<foo, std::uint64_t>)(), 2);
-	ASSERT_EQ((ext::sequential_id<foo, std::uint64_t>)(), 3);
-	ASSERT_EQ((ext::sequential_id<foo, std::int64_t>)(), 0);
-	ASSERT_EQ((ext::sequential_id<foo, std::int64_t>)(), 1);
-	ASSERT_EQ((ext::sequential_id<foo, std::int64_t>)(), 2);
-	ASSERT_EQ((ext::sequential_id<foo, std::int64_t>)(), 3);
-	ASSERT_EQ((ext::sequential_id<bar, std::uint64_t>)(), 0);
-	ASSERT_EQ((ext::sequential_id<bar, std::uint64_t>)(), 1);
-	ASSERT_EQ((ext::sequential_id<bar, std::uint64_t>)(), 2);
-	ASSERT_EQ((ext::sequential_id<bar, std::uint64_t>)(), 3);
+	ASSERT_EQ((ext::sequential_id<foo, std::uint8_t>)(), 0);
+	ASSERT_EQ((ext::sequential_id<foo, std::uint8_t>)(), 1);
+	ASSERT_EQ((ext::sequential_id<foo, std::uint8_t>)(), 2);
+	ASSERT_EQ((ext::sequential_id<foo, std::uint8_t>)(), 3);
+	ASSERT_EQ((ext::sequential_id<foo, std::int8_t>)(), -128);
+	ASSERT_EQ((ext::sequential_id<foo, std::int8_t>)(), -127);
+	ASSERT_EQ((ext::sequential_id<foo, std::int8_t>)(), -126);
+	ASSERT_EQ((ext::sequential_id<foo, std::int8_t>)(), -125);
+	ASSERT_EQ((ext::sequential_id<bar, std::uint8_t>)(), 0);
+	ASSERT_EQ((ext::sequential_id<bar, std::uint8_t>)(), 1);
+	ASSERT_EQ((ext::sequential_id<bar, std::uint8_t>)(), 2);
+	ASSERT_EQ((ext::sequential_id<bar, std::uint8_t>)(), 3);
 }
 
 TEST(stellarlib_ext_utility, scoped_typeid)
 {
-	ASSERT_EQ((ext::scoped_typeid<bar, std::int32_t, std::int64_t>)(), 0);
-	ASSERT_EQ((ext::scoped_typeid<bar, std::int32_t, std::int64_t>)(), 0);
-	ASSERT_EQ((ext::scoped_typeid<bar, std::int64_t, std::int64_t>)(), 1);
-	ASSERT_EQ((ext::scoped_typeid<bar, std::int64_t, std::int64_t>)(), 1);
-	ASSERT_EQ((ext::scoped_typeid<baz, std::int32_t, std::uint64_t>)(), 0);
-	ASSERT_EQ((ext::scoped_typeid<baz, std::int32_t, std::uint64_t>)(), 0);
-	ASSERT_EQ((ext::scoped_typeid<baz, std::int64_t, std::uint64_t>)(), 1);
-	ASSERT_EQ((ext::scoped_typeid<baz, std::int64_t, std::uint64_t>)(), 1);
-	ASSERT_EQ((ext::scoped_typeid<baz, std::int32_t, std::int64_t>)(), 0);
-	ASSERT_EQ((ext::scoped_typeid<baz, std::int32_t, std::int64_t>)(), 0);
-	ASSERT_EQ((ext::scoped_typeid<baz, std::int64_t, std::int64_t>)(), 1);
-	ASSERT_EQ((ext::scoped_typeid<baz, std::int64_t, std::int64_t>)(), 1);
+	ASSERT_EQ((ext::scoped_typeid<bar, std::int32_t, std::int8_t>)(), -128);
+	ASSERT_EQ((ext::scoped_typeid<bar, std::int32_t, std::int8_t>)(), -128);
+	ASSERT_EQ((ext::scoped_typeid<bar, std::int64_t, std::int8_t>)(), -127);
+	ASSERT_EQ((ext::scoped_typeid<bar, std::int64_t, std::int8_t>)(), -127);
+	ASSERT_EQ((ext::scoped_typeid<baz, std::int32_t, std::uint8_t>)(), 0);
+	ASSERT_EQ((ext::scoped_typeid<baz, std::int32_t, std::uint8_t>)(), 0);
+	ASSERT_EQ((ext::scoped_typeid<baz, std::int64_t, std::uint8_t>)(), 1);
+	ASSERT_EQ((ext::scoped_typeid<baz, std::int64_t, std::uint8_t>)(), 1);
+	ASSERT_EQ((ext::scoped_typeid<baz, std::int32_t, std::int8_t>)(), -128);
+	ASSERT_EQ((ext::scoped_typeid<baz, std::int32_t, std::int8_t>)(), -128);
+	ASSERT_EQ((ext::scoped_typeid<baz, std::int64_t, std::int8_t>)(), -127);
+	ASSERT_EQ((ext::scoped_typeid<baz, std::int64_t, std::int8_t>)(), -127);
 }
 
 #pragma clang diagnostic pop

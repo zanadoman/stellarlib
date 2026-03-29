@@ -27,6 +27,7 @@
 #include <stellarlib/ecs/any_set.hpp>
 #include <stellarlib/ecs/stack_vector.hpp>
 
+#include <limits>
 #include <memory>
 #include <ranges>
 #include <type_traits>
@@ -58,7 +59,7 @@ public:
 	template <typename ...Args>
 	constexpr void insert(const Key key, Args &&...args) noexcept
 	{
-		if (_sparse.extend(key + 1, static_cast<Key>(-1)) || _sparse[key] == static_cast<Key>(-1)) {
+		if (_sparse.extend(key + 1, std::numeric_limits<Key>::max()) || _sparse[key] == std::numeric_limits<Key>::max()) {
 			_sparse[key] = _keys.size();
 			_keys.push(key);
 			_values.push(std::forward<Args>(args)...);
@@ -81,7 +82,7 @@ public:
 	[[nodiscard]]
 	constexpr auto contains(const Key key) const noexcept
 	{
-		return key < _sparse.size() && _sparse[key] != static_cast<Key>(-1);
+		return key < _sparse.size() && _sparse[key] != std::numeric_limits<Key>::max();
 	}
 
 	[[nodiscard]]
@@ -121,7 +122,7 @@ public:
 			_sparse[_keys[_sparse[key]]] = _sparse[key];
 		}
 
-		_sparse[key] = static_cast<Key>(-1);
+		_sparse[key] = std::numeric_limits<Key>::max();
 		_keys.pop();
 		_values.pop();
 	}
