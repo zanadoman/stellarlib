@@ -468,15 +468,20 @@ TEST(stellarlib_lin_matrix, should_mul_assign)
 	ASSERT_TRUE(lin::all(matrix == lin::internal::matrix<std::int32_t, 1, 2>{3, 6}));
 	matrix *= lin::internal::matrix<std::int32_t, 2, 1>{7, 8};
 	ASSERT_TRUE(lin::all(matrix == lin::internal::matrix<std::int32_t, 1, 2>{21, 48}));
+	matrix *= lin::internal::matrix<std::int32_t, 1, 2>{49, 50};
+	ASSERT_TRUE(lin::all(matrix == lin::internal::matrix<std::int32_t, 1, 2>{1029, 2400}));
 }
 
 static_assert(lin::all(lin::internal::matrix<std::int32_t, 1, 2>{1, 2} * 3 == lin::internal::matrix<std::int32_t, 1, 2>{3, 6}));
 static_assert(lin::all(1 * lin::internal::matrix<std::int32_t, 1, 2>{2, 3} == lin::internal::matrix<std::int32_t, 1, 2>{2, 3}));
 static_assert(lin::all(lin::internal::matrix<std::int32_t, 1, 2>{1, 2} * lin::internal::matrix<std::int32_t, 2, 1>{3, 4} == lin::internal::matrix<std::int32_t, 1, 2>{3, 8}));
+static_assert(lin::all(lin::internal::matrix<std::int32_t, 1, 2>{1, 2} * lin::internal::matrix<std::int32_t, 1, 2>{3, 4} == lin::internal::matrix<std::int32_t, 1, 2>{3, 8}));
 
 TEST(stellarlib_lin_matrix, should_div_assign)
 {
-	lin::internal::matrix<std::int32_t, 1, 2> matrix{21, 48};
+	lin::internal::matrix<std::int32_t, 1, 2> matrix{1029, 2400};
+	matrix /= lin::internal::matrix<std::int32_t, 1, 2>{49, 50};
+	ASSERT_TRUE(lin::all(matrix == lin::internal::matrix<std::int32_t, 1, 2>{21, 48}));
 	matrix /= lin::internal::matrix<std::int32_t, 2, 1>{7, 8};
 	ASSERT_TRUE(lin::all(matrix == lin::internal::matrix<std::int32_t, 1, 2>{3, 6}));
 	matrix /= 3;
@@ -486,10 +491,13 @@ TEST(stellarlib_lin_matrix, should_div_assign)
 static_assert(lin::all(lin::internal::matrix<std::int32_t, 1, 2>{3, 6} / 3 == lin::internal::matrix<std::int32_t, 1, 2>{1, 2}));
 static_assert(lin::all(6 / lin::internal::matrix<std::int32_t, 1, 2>{3, 4} == lin::internal::matrix<std::int32_t, 1, 2>{2, 1}));
 static_assert(lin::all(lin::internal::matrix<std::int32_t, 1, 2>{3, 8} / lin::internal::matrix<std::int32_t, 2, 1>{3, 4} == lin::internal::matrix<std::int32_t, 1, 2>{1, 2}));
+static_assert(lin::all(lin::internal::matrix<std::int32_t, 1, 2>{3, 8} / lin::internal::matrix<std::int32_t, 1, 2>{3, 4} == lin::internal::matrix<std::int32_t, 1, 2>{1, 2}));
 
 TEST(stellarlib_lin_matrix, should_rem_assign)
 {
-	lin::internal::matrix<std::int32_t, 1, 2> matrix{25, 28};
+	lin::internal::matrix<std::int32_t, 1, 2> matrix{83, 88};
+	matrix %= lin::internal::matrix<std::int32_t, 1, 2>{29, 30};
+	ASSERT_TRUE(lin::all(matrix == lin::internal::matrix<std::int32_t, 1, 2>{25, 28}));
 	matrix %= lin::internal::matrix<std::int32_t, 2, 1>{9, 10};
 	ASSERT_TRUE(lin::all(matrix == lin::internal::matrix<std::int32_t, 1, 2>{7, 8}));
 	matrix %= 3;
@@ -499,6 +507,7 @@ TEST(stellarlib_lin_matrix, should_rem_assign)
 static_assert(lin::all(lin::internal::matrix<std::int32_t, 1, 2>{7, 8} % 3 == lin::internal::matrix<std::int32_t, 1, 2>{1, 2}));
 static_assert(lin::all(17 % lin::internal::matrix<std::int32_t, 1, 2>{3, 4} == lin::internal::matrix<std::int32_t, 1, 2>{2, 1}));
 static_assert(lin::all(lin::internal::matrix<std::int32_t, 1, 2>{7, 10} % lin::internal::matrix<std::int32_t, 2, 1>{3, 4} == lin::internal::matrix<std::int32_t, 1, 2>{1, 2}));
+static_assert(lin::all(lin::internal::matrix<std::int32_t, 1, 2>{7, 10} % lin::internal::matrix<std::int32_t, 1, 2>{3, 4} == lin::internal::matrix<std::int32_t, 1, 2>{1, 2}));
 
 TEST(stellarlib_lin_matrix, should_add_assign)
 {
@@ -507,15 +516,20 @@ TEST(stellarlib_lin_matrix, should_add_assign)
 	ASSERT_TRUE(lin::all(matrix == lin::internal::matrix<std::int32_t, 1, 2>{4, 5}));
 	matrix += lin::internal::matrix<std::int32_t, 2, 1>{6, 7};
 	ASSERT_TRUE(lin::all(matrix == lin::internal::matrix<std::int32_t, 1, 2>{10, 12}));
+	matrix += lin::internal::matrix<std::int32_t, 1, 2>{13, 14};
+	ASSERT_TRUE(lin::all(matrix == lin::internal::matrix<std::int32_t, 1, 2>{23, 26}));
 }
 
 static_assert(lin::all(lin::internal::matrix<std::int32_t, 1, 2>{1, 2} + 3 == lin::internal::matrix<std::int32_t, 1, 2>{4, 5}));
 static_assert(lin::all(1 + lin::internal::matrix<std::int32_t, 1, 2>{2, 3} == lin::internal::matrix<std::int32_t, 1, 2>{3, 4}));
 static_assert(lin::all(lin::internal::matrix<std::int32_t, 1, 2>{1, 2} + lin::internal::matrix<std::int32_t, 2, 1>{3, 4} == lin::internal::matrix<std::int32_t, 1, 2>{4, 6}));
+static_assert(lin::all(lin::internal::matrix<std::int32_t, 1, 2>{1, 2} + lin::internal::matrix<std::int32_t, 1, 2>{3, 4} == lin::internal::matrix<std::int32_t, 1, 2>{4, 6}));
 
 TEST(stellarlib_lin_matrix, should_sub_assign)
 {
-	lin::internal::matrix<std::int32_t, 1, 2> matrix{10, 12};
+	lin::internal::matrix<std::int32_t, 1, 2> matrix{23, 26};
+	matrix -= lin::internal::matrix<std::int32_t, 1, 2>{13, 14};
+	ASSERT_TRUE(lin::all(matrix == lin::internal::matrix<std::int32_t, 1, 2>{10, 12}));
 	matrix -= lin::internal::matrix<std::int32_t, 2, 1>{6, 7};
 	ASSERT_TRUE(lin::all(matrix == lin::internal::matrix<std::int32_t, 1, 2>{4, 5}));
 	matrix -= 3;
@@ -525,6 +539,7 @@ TEST(stellarlib_lin_matrix, should_sub_assign)
 static_assert(lin::all(lin::internal::matrix<std::int32_t, 1, 2>{4, 5} - 3 == lin::internal::matrix<std::int32_t, 1, 2>{1, 2}));
 static_assert(lin::all(5 - lin::internal::matrix<std::int32_t, 1, 2>{3, 4} == lin::internal::matrix<std::int32_t, 1, 2>{2, 1}));
 static_assert(lin::all(lin::internal::matrix<std::int32_t, 1, 2>{4, 6} - lin::internal::matrix<std::int32_t, 2, 1>{3, 4} == lin::internal::matrix<std::int32_t, 1, 2>{1, 2}));
+static_assert(lin::all(lin::internal::matrix<std::int32_t, 1, 2>{4, 6} - lin::internal::matrix<std::int32_t, 1, 2>{3, 4} == lin::internal::matrix<std::int32_t, 1, 2>{1, 2}));
 
 TEST(stellarlib_lin_matrix, should_shl_assign)
 {
@@ -533,15 +548,20 @@ TEST(stellarlib_lin_matrix, should_shl_assign)
 	ASSERT_TRUE(lin::all(matrix == lin::internal::matrix<std::uint8_t, 1, 2>{0b0000'0010, 0b0000'0100}));
 	matrix <<= lin::internal::matrix<std::uint8_t, 2, 1>{2, 3};
 	ASSERT_TRUE(lin::all(matrix == lin::internal::matrix<std::uint8_t, 1, 2>{0b0000'1000, 0b0010'0000}));
+	matrix <<= lin::internal::matrix<std::uint8_t, 1, 2>{3, 2};
+	ASSERT_TRUE(lin::all(matrix == lin::internal::matrix<std::uint8_t, 1, 2>{0b0100'0000, 0b1000'0000}));
 }
 
 static_assert(lin::all(lin::internal::matrix<std::uint8_t, 1, 2>{0b0000'0001, 0b0000'0010} << std::uint8_t{3} == lin::internal::matrix<std::uint8_t, 1, 2>{0b0000'1000, 0b0001'0000}));
 static_assert(lin::all(std::uint8_t{0b0000'0001} << lin::internal::matrix<std::uint8_t, 1, 2>{2, 3} == lin::internal::matrix<std::uint8_t, 1, 2>{0b0000'0100, 0b0000'1000}));
 static_assert(lin::all(lin::internal::matrix<std::uint8_t, 1, 2>{0b0000'0001, 0b0000'0010} << lin::internal::matrix<std::uint8_t, 2, 1>{3, 4} == lin::internal::matrix<std::uint8_t, 1, 2>{0b0000'1000, 0b0010'0000}));
+static_assert(lin::all(lin::internal::matrix<std::uint8_t, 1, 2>{0b0000'0001, 0b0000'0010} << lin::internal::matrix<std::uint8_t, 1, 2>{3, 4} == lin::internal::matrix<std::uint8_t, 1, 2>{0b0000'1000, 0b0010'0000}));
 
 TEST(stellarlib_lin_matrix, should_shr_assign)
 {
-	lin::internal::matrix<std::uint8_t, 1, 2> matrix{0b0000'1000, 0b0010'0000};
+	lin::internal::matrix<std::uint8_t, 1, 2> matrix{0b0100'0000, 0b1000'0000};
+	matrix >>= lin::internal::matrix<std::uint8_t, 1, 2>{3, 2};
+	ASSERT_TRUE(lin::all(matrix == lin::internal::matrix<std::uint8_t, 1, 2>{0b0000'1000, 0b0010'0000}));
 	matrix >>= lin::internal::matrix<std::uint8_t, 2, 1>{2, 3};
 	ASSERT_TRUE(lin::all(matrix == lin::internal::matrix<std::uint8_t, 1, 2>{0b0000'0010, 0b0000'0100}));
 	matrix >>= std::uint8_t{1};
@@ -551,76 +571,94 @@ TEST(stellarlib_lin_matrix, should_shr_assign)
 static_assert(lin::all(lin::internal::matrix<std::uint8_t, 1, 2>{0b0000'1000, 0b0001'0000} >> std::uint8_t{3} == lin::internal::matrix<std::uint8_t, 1, 2>{0b0000'0001, 0b0000'0010}));
 static_assert(lin::all(std::uint8_t{0b0001'0000} >> lin::internal::matrix<std::uint8_t, 1, 2>{3, 4} == lin::internal::matrix<std::uint8_t, 1, 2>{0b0000'0010, 0b0000'0001}));
 static_assert(lin::all(lin::internal::matrix<std::uint8_t, 1, 2>{0b0000'1000, 0b0010'0000} >> lin::internal::matrix<std::uint8_t, 2, 1>{3, 4} == lin::internal::matrix<std::uint8_t, 1, 2>{0b0000'0001, 0b0000'0010}));
+static_assert(lin::all(lin::internal::matrix<std::uint8_t, 1, 2>{0b0000'1000, 0b0010'0000} >> lin::internal::matrix<std::uint8_t, 1, 2>{3, 4} == lin::internal::matrix<std::uint8_t, 1, 2>{0b0000'0001, 0b0000'0010}));
 
 static_assert(lin::all((lin::internal::matrix<std::int32_t, 1, 3>{-1, 0, 1} < 0) == lin::internal::matrix<bool, 1, 3>{true, false, false}));
 static_assert(lin::all((0 < lin::internal::matrix<std::int32_t, 1, 3>{1, 0, -1}) == lin::internal::matrix<bool, 1, 3>{true, false, false}));
 static_assert(lin::all((lin::internal::matrix<std::int32_t, 1, 3>{-1, 0, 1} < lin::internal::matrix<std::int32_t, 3, 1>{1, 0, -1}) == lin::internal::matrix<bool, 1, 3>{true, false, false}));
+static_assert(lin::all((lin::internal::matrix<std::int32_t, 1, 3>{-1, 0, 1} < lin::internal::matrix<std::int32_t, 1, 3>{1, 0, -1}) == lin::internal::matrix<bool, 1, 3>{true, false, false}));
 
 static_assert(lin::all((lin::internal::matrix<std::int32_t, 1, 3>{-1, 0, 1} <= 0) == lin::internal::matrix<bool, 1, 3>{true, true, false}));
 static_assert(lin::all((0 <= lin::internal::matrix<std::int32_t, 1, 3>{1, 0, -1}) == lin::internal::matrix<bool, 1, 3>{true, true, false}));
 static_assert(lin::all((lin::internal::matrix<std::int32_t, 1, 3>{-1, 0, 1} <= lin::internal::matrix<std::int32_t, 3, 1>{1, 0, -1}) == lin::internal::matrix<bool, 1, 3>{true, true, false}));
+static_assert(lin::all((lin::internal::matrix<std::int32_t, 1, 3>{-1, 0, 1} <= lin::internal::matrix<std::int32_t, 1, 3>{1, 0, -1}) == lin::internal::matrix<bool, 1, 3>{true, true, false}));
 
 static_assert(lin::all((lin::internal::matrix<std::int32_t, 1, 3>{-1, 0, 1} > 0) == lin::internal::matrix<bool, 1, 3>{false, false, true}));
 static_assert(lin::all((0 > lin::internal::matrix<std::int32_t, 1, 3>{1, 0, -1}) == lin::internal::matrix<bool, 1, 3>{false, false, true}));
 static_assert(lin::all((lin::internal::matrix<std::int32_t, 1, 3>{-1, 0, 1} > lin::internal::matrix<std::int32_t, 3, 1>{1, 0, -1}) == lin::internal::matrix<bool, 1, 3>{false, false, true}));
+static_assert(lin::all((lin::internal::matrix<std::int32_t, 1, 3>{-1, 0, 1} > lin::internal::matrix<std::int32_t, 1, 3>{1, 0, -1}) == lin::internal::matrix<bool, 1, 3>{false, false, true}));
 
 static_assert(lin::all((lin::internal::matrix<std::int32_t, 1, 3>{-1, 0, 1} >= 0) == lin::internal::matrix<bool, 1, 3>{false, true, true}));
 static_assert(lin::all((0 >= lin::internal::matrix<std::int32_t, 1, 3>{1, 0, -1}) == lin::internal::matrix<bool, 1, 3>{false, true, true}));
 static_assert(lin::all((lin::internal::matrix<std::int32_t, 1, 3>{-1, 0, 1} >= lin::internal::matrix<std::int32_t, 3, 1>{1, 0, -1}) == lin::internal::matrix<bool, 1, 3>{false, true, true}));
+static_assert(lin::all((lin::internal::matrix<std::int32_t, 1, 3>{-1, 0, 1} >= lin::internal::matrix<std::int32_t, 1, 3>{1, 0, -1}) == lin::internal::matrix<bool, 1, 3>{false, true, true}));
 
 static_assert(lin::all((lin::internal::matrix<std::int32_t, 1, 3>{-1, 0, 1} == 0) == lin::internal::matrix<bool, 1, 3>{false, true, false}));
 static_assert(lin::all((0 == lin::internal::matrix<std::int32_t, 1, 3>{1, 0, -1}) == lin::internal::matrix<bool, 1, 3>{false, true, false}));
 static_assert(lin::all((lin::internal::matrix<std::int32_t, 1, 3>{-1, 0, 1} == lin::internal::matrix<std::int32_t, 3, 1>{1, 0, -1}) == lin::internal::matrix<bool, 1, 3>{false, true, false}));
+static_assert(lin::all((lin::internal::matrix<std::int32_t, 1, 3>{-1, 0, 1} == lin::internal::matrix<std::int32_t, 1, 3>{1, 0, -1}) == lin::internal::matrix<bool, 1, 3>{false, true, false}));
 
 static_assert(lin::all((lin::internal::matrix<std::int32_t, 1, 3>{-1, 0, 1} != 0) == lin::internal::matrix<bool, 1, 3>{true, false, true}));
 static_assert(lin::all((0 != lin::internal::matrix<std::int32_t, 1, 3>{1, 0, -1}) == lin::internal::matrix<bool, 1, 3>{true, false, true}));
 static_assert(lin::all((lin::internal::matrix<std::int32_t, 1, 3>{-1, 0, 1} != lin::internal::matrix<std::int32_t, 3, 1>{1, 0, -1}) == lin::internal::matrix<bool, 1, 3>{true, false, true}));
+static_assert(lin::all((lin::internal::matrix<std::int32_t, 1, 3>{-1, 0, 1} != lin::internal::matrix<std::int32_t, 1, 3>{1, 0, -1}) == lin::internal::matrix<bool, 1, 3>{true, false, true}));
 
 TEST(stellarlib_lin_matrix, should_bit_and_assign)
 {
 	lin::internal::matrix<std::uint8_t, 1, 2> matrix{0b1010'1010, 0b0101'0101};
-	matrix &= std::uint8_t{0b1100'0011};
-	ASSERT_TRUE(lin::all(matrix == lin::internal::matrix<std::uint8_t, 1, 2>{0b1000'0010, 0b0100'0001}));
-	matrix &= lin::internal::matrix<std::uint8_t, 2, 1>{0b0011'1100, 0b0011'1100};
-	ASSERT_TRUE(lin::all(matrix == lin::internal::matrix<std::uint8_t, 1, 2>{0b0000'0000, 0b0000'0000}));
+	matrix &= std::uint8_t{0b1101'1011};
+	ASSERT_TRUE(lin::all(matrix == lin::internal::matrix<std::uint8_t, 1, 2>{0b1000'1010, 0b0101'0001}));
+	matrix &= lin::internal::matrix<std::uint8_t, 2, 1>{0b1011'1100, 0b0011'1101};
+	ASSERT_TRUE(lin::all(matrix == lin::internal::matrix<std::uint8_t, 1, 2>{0b1000'1000, 0b0001'0001}));
+	matrix &= lin::internal::matrix<std::uint8_t, 1, 2>{0b1101'1011, 0b1101'1011};
+	ASSERT_TRUE(lin::all(matrix == lin::internal::matrix<std::uint8_t, 1, 2>{0b1000'1000, 0b0001'0001}));
 }
 
 static_assert(lin::all((lin::internal::matrix<std::uint8_t, 1, 2>{0b1010'1010, 0b1101'1011} & std::uint8_t{0b0101'0101}) == lin::internal::matrix<std::uint8_t, 1, 2>{0b0000'0000, 0b0101'0001}));
 static_assert(lin::all((std::uint8_t{0b1010'1010} & lin::internal::matrix<std::uint8_t, 1, 2>{0b1101'1011, 0b0101'0101}) == lin::internal::matrix<std::uint8_t, 1, 2>{0b1000'1010, 0b0000'0000}));
 static_assert(lin::all((lin::internal::matrix<std::uint8_t, 1, 2>{0b1010'1010, 0b1101'1011} & lin::internal::matrix<std::uint8_t, 2, 1>{0b1101'1011, 0b0101'0101}) == lin::internal::matrix<std::uint8_t, 1, 2>{0b1000'1010, 0b0101'0001}));
+static_assert(lin::all((lin::internal::matrix<std::uint8_t, 1, 2>{0b1010'1010, 0b1101'1011} & lin::internal::matrix<std::uint8_t, 1, 2>{0b1101'1011, 0b0101'0101}) == lin::internal::matrix<std::uint8_t, 1, 2>{0b1000'1010, 0b0101'0001}));
 
 TEST(stellarlib_lin_matrix, should_bit_xor_assign)
 {
 	lin::internal::matrix<std::uint8_t, 1, 2> matrix{0b1010'1010, 0b0101'0101};
-	matrix ^= std::uint8_t{0b1100'0011};
-	ASSERT_TRUE(lin::all(matrix == lin::internal::matrix<std::uint8_t, 1, 2>{0b0110'1001, 0b1001'0110}));
-	matrix ^= lin::internal::matrix<std::uint8_t, 2, 1>{0b0011'1100, 0b0011'1100};
-	ASSERT_TRUE(lin::all(matrix == lin::internal::matrix<std::uint8_t, 1, 2>{0b0101'0101, 0b1010'1010}));
+	matrix ^= std::uint8_t{0b1101'1011};
+	ASSERT_TRUE(lin::all(matrix == lin::internal::matrix<std::uint8_t, 1, 2>{0b0111'0001, 0b1000'1110}));
+	matrix ^= lin::internal::matrix<std::uint8_t, 2, 1>{0b1011'1100, 0b0011'1101};
+	ASSERT_TRUE(lin::all(matrix == lin::internal::matrix<std::uint8_t, 1, 2>{0b1100'1101, 0b1011'0011}));
+	matrix ^= lin::internal::matrix<std::uint8_t, 1, 2>{0b1101'1011, 0b1101'1011};
+	ASSERT_TRUE(lin::all(matrix == lin::internal::matrix<std::uint8_t, 1, 2>{0b0001'0110, 0b0110'1000}));
 }
 
 static_assert(lin::all((lin::internal::matrix<std::uint8_t, 1, 2>{0b1010'1010, 0b1101'1011} ^ std::uint8_t{0b0101'0101}) == lin::internal::matrix<std::uint8_t, 1, 2>{0b1111'1111, 0b1000'1110}));
 static_assert(lin::all((std::uint8_t{0b1010'1010} ^ lin::internal::matrix<std::uint8_t, 1, 2>{0b1101'1011, 0b0101'0101}) == lin::internal::matrix<std::uint8_t, 1, 2>{0b0111'0001, 0b1111'1111}));
 static_assert(lin::all((lin::internal::matrix<std::uint8_t, 1, 2>{0b1010'1010, 0b1101'1011} ^ lin::internal::matrix<std::uint8_t, 2, 1>{0b1101'1011, 0b0101'0101}) == lin::internal::matrix<std::uint8_t, 1, 2>{0b0111'0001, 0b1000'1110}));
+static_assert(lin::all((lin::internal::matrix<std::uint8_t, 1, 2>{0b1010'1010, 0b1101'1011} ^ lin::internal::matrix<std::uint8_t, 1, 2>{0b1101'1011, 0b0101'0101}) == lin::internal::matrix<std::uint8_t, 1, 2>{0b0111'0001, 0b1000'1110}));
 
 TEST(stellarlib_lin_matrix, should_bit_or_assign)
 {
 	lin::internal::matrix<std::uint8_t, 1, 2> matrix{0b1010'1010, 0b0101'0101};
-	matrix |= std::uint8_t{0b1100'0011};
-	ASSERT_TRUE(lin::all(matrix == lin::internal::matrix<std::uint8_t, 1, 2>{0b1110'1011, 0b1101'0111}));
-	matrix |= lin::internal::matrix<std::uint8_t, 2, 1>{0b0011'1100, 0b0011'1100};
+	matrix |= std::uint8_t{0b1101'1011};
+	ASSERT_TRUE(lin::all(matrix == lin::internal::matrix<std::uint8_t, 1, 2>{0b1111'1011, 0b1101'1111}));
+	matrix |= lin::internal::matrix<std::uint8_t, 2, 1>{0b1011'1100, 0b0011'1101};
+	ASSERT_TRUE(lin::all(matrix == lin::internal::matrix<std::uint8_t, 1, 2>{0b1111'1111, 0b1111'1111}));
+	matrix |= lin::internal::matrix<std::uint8_t, 1, 2>{0b1101'1011, 0b1101'1011};
 	ASSERT_TRUE(lin::all(matrix == lin::internal::matrix<std::uint8_t, 1, 2>{0b1111'1111, 0b1111'1111}));
 }
 
 static_assert(lin::all((lin::internal::matrix<std::uint8_t, 1, 2>{0b1010'1010, 0b1101'1011} | std::uint8_t{0b0101'0101}) == lin::internal::matrix<std::uint8_t, 1, 2>{0b1111'1111, 0b1101'1111}));
 static_assert(lin::all((std::uint8_t{0b1010'1010} | lin::internal::matrix<std::uint8_t, 1, 2>{0b1101'1011, 0b0101'0101}) == lin::internal::matrix<std::uint8_t, 1, 2>{0b1111'1011, 0b1111'1111}));
 static_assert(lin::all((lin::internal::matrix<std::uint8_t, 1, 2>{0b1010'1010, 0b1101'1011} | lin::internal::matrix<std::uint8_t, 2, 1>{0b1101'1011, 0b0101'0101}) == lin::internal::matrix<std::uint8_t, 1, 2>{0b1111'1011, 0b1101'1111}));
+static_assert(lin::all((lin::internal::matrix<std::uint8_t, 1, 2>{0b1010'1010, 0b1101'1011} | lin::internal::matrix<std::uint8_t, 1, 2>{0b1101'1011, 0b0101'0101}) == lin::internal::matrix<std::uint8_t, 1, 2>{0b1111'1011, 0b1101'1111}));
 
 static_assert(lin::all((lin::internal::matrix<std::int32_t, 1, 3>{true, false} && true) == lin::internal::matrix<bool, 1, 3>{true, false}));
 static_assert(lin::all((true && lin::internal::matrix<std::int32_t, 1, 3>{false, true}) == lin::internal::matrix<bool, 1, 3>{false, true}));
 static_assert(lin::all((lin::internal::matrix<std::int32_t, 1, 3>{true, true, false} && lin::internal::matrix<std::int32_t, 3, 1>{false, true, true}) == lin::internal::matrix<bool, 1, 3>{false, true, false}));
+static_assert(lin::all((lin::internal::matrix<std::int32_t, 1, 3>{true, true, false} && lin::internal::matrix<std::int32_t, 1, 3>{false, true, true}) == lin::internal::matrix<bool, 1, 3>{false, true, false}));
 
 static_assert(lin::all((lin::internal::matrix<std::int32_t, 1, 3>{false, true} || false) == lin::internal::matrix<bool, 1, 3>{false, true}));
 static_assert(lin::all((false || lin::internal::matrix<std::int32_t, 1, 3>{true, false}) == lin::internal::matrix<bool, 1, 3>{true, false}));
 static_assert(lin::all((lin::internal::matrix<std::int32_t, 1, 3>{false, false, true} || lin::internal::matrix<std::int32_t, 3, 1>{true, false, false}) == lin::internal::matrix<bool, 1, 3>{true, false, true}));
+static_assert(lin::all((lin::internal::matrix<std::int32_t, 1, 3>{false, false, true} || lin::internal::matrix<std::int32_t, 1, 3>{true, false, false}) == lin::internal::matrix<bool, 1, 3>{true, false, true}));
 
 #pragma clang diagnostic pop
