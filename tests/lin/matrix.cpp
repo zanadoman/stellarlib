@@ -78,7 +78,6 @@ TEST(stellarlib_lin_matrix, should_handle_assignment)
 	ASSERT_TRUE(lin::all(matrix2 == lin::internal::matrix<std::int16_t, 1, 2>{2, 1}));
 	matrix2 = lin::internal::matrix<std::int8_t, 2, 1>{1, 2};
 	ASSERT_TRUE(lin::all(matrix2 == lin::internal::matrix<std::int16_t, 1, 2>{1, 2}));
-	matrix2 = {2, 1};
 }
 
 static_assert(lin::internal::matrix<std::int32_t, 1, 4>{1, 2, 3, 4}.x() == 1);

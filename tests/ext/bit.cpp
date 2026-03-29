@@ -23,8 +23,6 @@
 
 #include <stellarlib/ext/bit.hpp>
 
-#include <gtest/gtest.h>
-
 #include <cstdint>
 
 using namespace stellarlib;
@@ -33,16 +31,10 @@ using namespace stellarlib;
 #pragma clang diagnostic ignored "-Wself-assign-overloaded"
 #pragma clang diagnostic ignored "-Wself-move"
 
-TEST(stellarlib_ext_bit, bit_index)
-{
-	ASSERT_EQ(ext::bit_index<std::uint8_t>(5), 0);
-	ASSERT_EQ(ext::bit_index<std::uint8_t>(10), 1);
-}
+static_assert(ext::bit_index<std::uint8_t>(5) == 0);
+static_assert(ext::bit_index<std::uint8_t>(10) == 1);
 
-TEST(stellarlib_ext_bit, bit_mask)
-{
-	ASSERT_EQ(ext::bit_mask<std::uint8_t>(5), 0b0010'0000);
-	ASSERT_EQ(ext::bit_mask<std::uint8_t>(10), 0b0000'0100);
-}
+static_assert(ext::bit_mask<std::uint8_t>(5) == 0b0010'0000);
+static_assert(ext::bit_mask<std::uint8_t>(10) == 0b0000'0100);
 
 #pragma clang diagnostic pop
