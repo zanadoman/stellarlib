@@ -26,14 +26,18 @@
 
 #include <array>
 #include <cstddef>
+#include <format>
 #include <memory>
+#include <ostream>
 #include <ranges>
+#include <sstream>
 #include <type_traits>
 #include <utility>
 
 namespace stellarlib::lin::internal
 {
 template <typename T, std::size_t M, std::size_t N>
+requires (static_cast<bool>(M * N))
 class matrix final : public std::array<T, M * N>
 {
 public:
@@ -732,6 +736,53 @@ STELLARLIB_LIN_MATRIX_BINARY_OPERATOR_IMPL(^);
 STELLARLIB_LIN_MATRIX_BINARY_OPERATOR_IMPL(|);
 STELLARLIB_LIN_MATRIX_BOOLEAN_OPERATOR_IMPL(&&);
 STELLARLIB_LIN_MATRIX_BOOLEAN_OPERATOR_IMPL(||);
+
+template <typename T, std::size_t M, std::size_t N>
+constexpr auto operator<<(std::ostream &os, const matrix<T, M, N> &self)
+	-> auto &
+	requires (M == 1 || N == 1)
+{
+	os << '[' << self.front();
+
+	for (const auto elem : std::ranges::subrange{self.begin() + 1, self.end()}) {
+		os << ", " << elem;
+	}
+
+	os << ']';
+	return os;
 }
+
+template <typename T, std::size_t M, std::size_t N>
+constexpr auto operator<<(std::ostream &os, const matrix<T, M, N> &self)
+	-> auto &
+{
+	os << '[' << self[0];
+
+	for (const auto m : std::views::iota(std::size_t{1}, M)) {
+		os << ", " << self[m];
+	}
+
+	os << ']';
+	return os;
+}
+}
+
+template <typename T, std::size_t M, std::size_t N>
+struct std::formatter<stellarlib::lin::internal::matrix<T, M, N>> final
+{
+	[[nodiscard]]
+	constexpr auto parse(const std::format_parse_context &ctx) const
+	{
+		return ctx.begin();
+	}
+
+	[[nodiscard]]
+	constexpr auto format(const stellarlib::lin::internal::matrix<T, M, N> &matrix, std::format_context &ctx) const
+	{
+		std::ostringstream out{};
+		out << matrix;
+		return std::format_to(ctx.out(), "{}", out.str());
+	}
+};
 
 #endif

@@ -30,7 +30,9 @@
 
 #include <array>
 #include <cstdint>
+#include <format>
 #include <memory>
+#include <sstream>
 #include <type_traits>
 
 using namespace stellarlib;
@@ -58,14 +60,14 @@ TEST(stellarlib_lin_matrix, should_handle_assignment)
 {
 	lin::internal::matrix<std::int16_t, 2, 2> matrix1{};
 	matrix1 = std::array<std::int16_t, 4>{1, 2, 3, 4};
-	ASSERT_EQ((static_cast<std::array<std::int16_t, 4>>(matrix1)), (std::array<std::int16_t, 4>{1, 2, 3, 4}));
+	ASSERT_EQ((static_cast<const std::array<std::int16_t, 4> &>(matrix1)), (std::array<std::int16_t, 4>{1, 2, 3, 4}));
 	matrix1 = std::array<std::int8_t, 4>{4, 3, 2, 1};
-	ASSERT_EQ((static_cast<std::array<std::int16_t, 4>>(matrix1)), (std::array<std::int16_t, 4>{4, 3, 2, 1}));
+	ASSERT_EQ((static_cast<const std::array<std::int16_t, 4> &>(matrix1)), (std::array<std::int16_t, 4>{4, 3, 2, 1}));
 	lin::internal::matrix<std::int16_t, 1, 2> matrix2{};
 	matrix2 = lin::internal::matrix<std::int16_t, 2, 1>{1, 2};
-	ASSERT_EQ((static_cast<std::array<std::int16_t, 2>>(matrix2)), (std::array<std::int16_t, 2>{1, 2}));
+	ASSERT_EQ((static_cast<const std::array<std::int16_t, 2> &>(matrix2)), (std::array<std::int16_t, 2>{1, 2}));
 	matrix2 = lin::internal::matrix<std::int8_t, 2, 1>{2, 1};
-	ASSERT_EQ((static_cast<std::array<std::int16_t, 2>>(matrix2)), (std::array<std::int16_t, 2>{2, 1}));
+	ASSERT_EQ((static_cast<const std::array<std::int16_t, 2> &>(matrix2)), (std::array<std::int16_t, 2>{2, 1}));
 }
 
 static_assert(lin::internal::matrix<std::int32_t, 1, 4>{1, 2, 3, 4}.x() == 1);
@@ -660,5 +662,19 @@ static_assert(lin::all((lin::internal::matrix<std::int32_t, 1, 3>{false, true} |
 static_assert(lin::all((false || lin::internal::matrix<std::int32_t, 1, 3>{true, false}) == lin::internal::matrix<bool, 1, 3>{true, false}));
 static_assert(lin::all((lin::internal::matrix<std::int32_t, 1, 3>{false, false, true} || lin::internal::matrix<std::int32_t, 3, 1>{true, false, false}) == lin::internal::matrix<bool, 1, 3>{true, false, true}));
 static_assert(lin::all((lin::internal::matrix<std::int32_t, 1, 3>{false, false, true} || lin::internal::matrix<std::int32_t, 1, 3>{true, false, false}) == lin::internal::matrix<bool, 1, 3>{true, false, true}));
+
+TEST(stellarlib_lin_matrix, should_stream_and_format)
+{
+	std::ostringstream out1{};
+	const lin::internal::matrix<std::int32_t, 1, 2> matrix1{1, 2};
+	out1 << matrix1;
+	ASSERT_EQ(out1.str(), "[1, 2]");
+	ASSERT_EQ(std::format("{}", matrix1), out1.str());
+	std::ostringstream out2{};
+	const lin::internal::matrix<std::int32_t, 2, 2> matrix2{1, 2, 3, 4};
+	out2 << matrix2;
+	ASSERT_EQ(out2.str(), "[[1, 2], [3, 4]]");
+	ASSERT_EQ(std::format("{}", matrix2), out2.str());
+}
 
 #pragma clang diagnostic pop
