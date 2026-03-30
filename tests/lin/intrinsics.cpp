@@ -25,6 +25,8 @@
 
 #include <stellarlib/lin/matrix.hpp>
 
+#include <gtest/gtest.h>
+
 #include <cstdint>
 
 using namespace stellarlib;
@@ -33,24 +35,24 @@ using namespace stellarlib;
 #pragma clang diagnostic ignored "-Wself-assign-overloaded"
 #pragma clang diagnostic ignored "-Wself-move"
 
-static_assert(lin::abs(1) == 1);
-static_assert(lin::abs(-1) == 1);
-static_assert(lin::all(lin::abs(lin::internal::matrix<std::int32_t, 1, 2>{1, -1}) == lin::internal::matrix<std::int32_t, 1, 2>{1, 1}));
+static_assert(lin::internal::abs(1) == 1);
+static_assert(lin::internal::abs(-1) == 1);
+static_assert(lin::internal::all(lin::internal::abs(lin::internal::matrix<std::int32_t, 1, 2>{1, -1}) == lin::internal::matrix<std::int32_t, 1, 2>{1, 1}));
 
-static_assert(lin::all(lin::internal::matrix<bool, 1, 3>{true, true, true}));
-static_assert(!lin::all(lin::internal::matrix<bool, 1, 3>{true, false, true}));
+TEST(stellarlib_lin_intrinsics, acos)
+{
+	[[maybe_unused]] const auto x = lin::internal::acos(0.0);
+	[[maybe_unused]] const auto y = lin::internal::acos(0.0F);
+	[[maybe_unused]] const auto z = lin::internal::acos(lin::internal::matrix<float, 1, 2>{0.0F, 0.0F});
+	[[maybe_unused]] const auto w = lin::internal::acos(lin::internal::matrix<double, 1, 2>{0.0, 0.0});
+}
 
-static_assert(lin::any(lin::internal::matrix<bool, 1, 3>{false, true, false}));
-static_assert(!lin::any(lin::internal::matrix<bool, 1, 3>{false, false, false}));
+static_assert(lin::internal::all(lin::internal::matrix<bool, 1, 2>{true, true}));
+static_assert(!lin::internal::all(lin::internal::matrix<bool, 1, 2>{true, false}));
 
-static_assert(lin::all(lin::mad(lin::internal::matrix<std::int32_t, 1, 2>{1, 2}, 3, lin::internal::matrix<std::int32_t, 2, 1>{4, 5}) == lin::internal::matrix<std::int32_t, 1, 2>{7, 11}));
+static_assert(lin::internal::any(lin::internal::matrix<bool, 1, 2>{true, false}));
+static_assert(!lin::internal::any(lin::internal::matrix<bool, 1, 2>{false, false}));
 
-static_assert(lin::all(lin::mul(lin::internal::matrix<std::int32_t, 1, 2>{1, 2}, lin::internal::matrix<std::int32_t, 1, 2>{3, 4}) == 11));
-static_assert(lin::all(lin::mul(lin::internal::matrix<std::int32_t, 2, 1>{1, 2}, lin::internal::matrix<std::int32_t, 2, 1>{3, 4}) == 11));
-static_assert(lin::all(lin::mul(lin::internal::matrix<std::int32_t, 2, 2>{1, 2, 3, 4}, lin::internal::matrix<std::int32_t, 2, 2>{5, 6, 7, 8}) == lin::internal::matrix<std::int32_t, 2, 2>{19, 22, 43, 50}));
-static_assert(lin::all(lin::mul(lin::internal::matrix<std::int32_t, 1, 3>{0, 0, 1}, lin::internal::matrix<std::int32_t, 3, 3>{1, 0, 0, 0, 1, 0, 5, 0, 1}) == lin::internal::matrix<std::int32_t, 1, 3>{5, 0, 1}));
-static_assert(lin::all(lin::mul(lin::internal::matrix<std::int32_t, 3, 1>{0, 0, 1}, lin::internal::matrix<std::int32_t, 3, 3>{1, 0, 0, 0, 1, 0, 5, 0, 1}) == lin::internal::matrix<std::int32_t, 1, 3>{5, 0, 1}));
-static_assert(lin::all(lin::mul(lin::internal::matrix<std::int32_t, 3, 3>{1, 0, 5, 0, 1, 0, 0, 0, 1}, lin::internal::matrix<std::int32_t, 3, 1>{0, 0, 1}) == lin::internal::matrix<std::int32_t, 1, 3>{5, 0, 1}));
-static_assert(lin::all(lin::mul(lin::internal::matrix<std::int32_t, 3, 3>{1, 0, 5, 0, 1, 0, 0, 0, 1}, lin::internal::matrix<std::int32_t, 1, 3>{0, 0, 1}) == lin::internal::matrix<std::int32_t, 1, 3>{5, 0, 1}));
+static_assert(lin::internal::asdouble(0b01010001'11101011'10000101'00011111, 0b01000000'00001001'00011110'10111000) == 3.14);
 
 #pragma clang diagnostic pop

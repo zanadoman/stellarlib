@@ -27,147 +27,85 @@
 #include <stellarlib/lin/matrix.hpp>
 
 #include <algorithm>
+#include <bit>
 #include <cmath>
 #include <cstddef>
-#include <functional>
+#include <cstdint>
 #include <ranges>
 #include <type_traits>
 
-namespace stellarlib::lin
+namespace stellarlib::lin::internal
 {
 template <typename T>
 [[nodiscard]]
-constexpr auto abs(const T arg) noexcept
+constexpr auto abs(const T x) noexcept
 {
-	return arg < 0 ? -arg : arg;
+	return x < 0 ? -x : x;
 }
 
 template <typename T, std::size_t M, std::size_t N>
 [[nodiscard]]
-constexpr auto abs(const internal::matrix<T, M, N> &matrix) noexcept
-	-> internal::matrix<T, M, N>
+constexpr auto abs(const matrix<T, M, N> &x) noexcept
+	-> matrix<T, M, N>
 {
-	internal::matrix<T, M, N> res;
+	matrix<T, M, N> ret;
 
-	for (const auto [res, elem] : std::views::zip(res, matrix)) {
-		res = abs(elem);
+	for (const auto [ret, x] : std::views::zip(ret, x)) {
+		ret = abs(x);
 	}
 
-	return res;
+	return ret;
 }
 
-template <typename T, std::size_t M, std::size_t N>
-[[nodiscard]]
-constexpr auto all(const internal::matrix<T, M, N> &matrix) noexcept
-{
-	return !std::ranges::contains(matrix, false);
-}
-
-template <typename T, std::size_t M, std::size_t N>
-[[nodiscard]]
-constexpr auto any(const internal::matrix<T, M, N> &matrix) noexcept
-{
-	return std::ranges::contains(matrix, true);
-}
-
-template <typename T, typename U, typename V>
-[[nodiscard]]
-constexpr auto mad(T x, U y, V z) noexcept
-{
-	return x * y + z;
-}
-
-template <typename T, typename U, std::size_t M, std::size_t N>
-[[nodiscard]]
-constexpr auto mul(const internal::matrix<T, M, N> &lhs, const internal::matrix<U, M, N> &rhs) noexcept
-	requires (M == 1 || N == 1)
-{
-	return internal::matrix<std::common_type_t<T, U>, 1, 1>{std::ranges::fold_left(lhs * rhs, std::common_type_t<T, U>{}, std::plus{})};
-}
-
-template <typename T, typename U, std::size_t M, std::size_t N, std::size_t P>
-[[nodiscard]]
-constexpr auto mul(const internal::matrix<T, N, M> &lhs, const internal::matrix<U, P, N> &rhs) noexcept
-	-> internal::matrix<std::common_type_t<T, U>, M, P>
-	requires (M == 1 || P == 1)
-{
-	internal::matrix<std::common_type_t<T, U>, M, P> res{};
-
-	for (const auto m : std::views::iota(std::size_t{}, M)) {
-		for (const auto n : std::views::iota(std::size_t{}, N)) {
-			for (const auto p : std::views::iota(std::size_t{}, P)) {
-				res.std::template array<std::common_type_t<T, U>, M * P>::operator[](mad(m, P, p)) += lhs.std::template array<T, N * M>::operator[](mad(m, N, n)) * rhs.std::template array<U, P * N>::operator[](mad(n, P, p));
-			}
-		}
-	}
-
-	return res;
-}
-
-template <typename T, typename U, std::size_t M, std::size_t N, std::size_t P>
-[[nodiscard]]
-constexpr auto mul(const internal::matrix<T, M, N> &lhs, const internal::matrix<U, N, P> &rhs) noexcept
-	-> internal::matrix<std::common_type_t<T, U>, M, P>
-{
-	internal::matrix<std::common_type_t<T, U>, M, P> res{};
-
-	for (const auto m : std::views::iota(std::size_t{}, M)) {
-		for (const auto n : std::views::iota(std::size_t{}, N)) {
-			for (const auto p : std::views::iota(std::size_t{}, P)) {
-				res.std::template array<std::common_type_t<T, U>, M * P>::operator[](mad(m, P, p)) += lhs.std::template array<T, M * N>::operator[](mad(m, N, n)) * rhs.std::template array<U, N * P>::operator[](mad(n, P, p));
-			}
-		}
-	}
-
-	return res;
-}
-
-#define STELLARLIB_LIN_INTRINSICS_TRIGONOMETRIC_IMPL(fn)\
+#define STELLARLIB_LIN_INTRINSICS_UNARY_OPERATION_IMPL(op)\
 template <typename T>\
 [[nodiscard]]\
-constexpr auto fn(const T arg) noexcept\
+constexpr auto op(const T x) noexcept\
 	requires (std::is_same_v<T, float> || std::is_same_v<T, double>)\
 {\
 	if constexpr (std::is_same_v<T, float>) {\
-		return std::fn##f(arg);\
+		return std::op##f(x);\
 	}\
 	else if constexpr (std::is_same_v<T, double>) {\
-		return std::fn(arg);\
+		return std::op(x);\
 	}\
 }\
 \
 template <typename T, std::size_t M, std::size_t N>\
 [[nodiscard]]\
-constexpr auto fn(const internal::matrix<T, M, N> &matrix) noexcept\
-	-> internal::matrix<T, M, N>\
+constexpr auto op(const matrix<T, M, N> &x) noexcept\
+	-> matrix<T, M, N>\
 {\
-	internal::matrix<T, M, N> res;\
+	matrix<T, M, N> ret;\
 \
-	for (const auto [res, elem] : std::views::zip(res, matrix)) {\
-		res = fn(elem);\
+	for (const auto [ret, x] : std::views::zip(ret, x)) {\
+		ret = op(x);\
 	}\
 \
-	return res;\
+	return ret;\
 }
 
-STELLARLIB_LIN_INTRINSICS_TRIGONOMETRIC_IMPL(acos);
-STELLARLIB_LIN_INTRINSICS_TRIGONOMETRIC_IMPL(asin);
-STELLARLIB_LIN_INTRINSICS_TRIGONOMETRIC_IMPL(atan);
-STELLARLIB_LIN_INTRINSICS_TRIGONOMETRIC_IMPL(ceil);
-STELLARLIB_LIN_INTRINSICS_TRIGONOMETRIC_IMPL(cos);
-STELLARLIB_LIN_INTRINSICS_TRIGONOMETRIC_IMPL(cosh);
-STELLARLIB_LIN_INTRINSICS_TRIGONOMETRIC_IMPL(exp);
-STELLARLIB_LIN_INTRINSICS_TRIGONOMETRIC_IMPL(exp2);
-STELLARLIB_LIN_INTRINSICS_TRIGONOMETRIC_IMPL(floor);
-STELLARLIB_LIN_INTRINSICS_TRIGONOMETRIC_IMPL(log);
-STELLARLIB_LIN_INTRINSICS_TRIGONOMETRIC_IMPL(log10);
-STELLARLIB_LIN_INTRINSICS_TRIGONOMETRIC_IMPL(log2);
-STELLARLIB_LIN_INTRINSICS_TRIGONOMETRIC_IMPL(modf);
-STELLARLIB_LIN_INTRINSICS_TRIGONOMETRIC_IMPL(sin);
-STELLARLIB_LIN_INTRINSICS_TRIGONOMETRIC_IMPL(sinh);
-STELLARLIB_LIN_INTRINSICS_TRIGONOMETRIC_IMPL(sqrt);
-STELLARLIB_LIN_INTRINSICS_TRIGONOMETRIC_IMPL(tan);
-STELLARLIB_LIN_INTRINSICS_TRIGONOMETRIC_IMPL(tanh);
+STELLARLIB_LIN_INTRINSICS_UNARY_OPERATION_IMPL(acos);
+
+template <typename T, std::size_t M, std::size_t N>
+[[nodiscard]]
+constexpr auto all(const matrix<T, M, N> &x) noexcept
+{
+	return !std::ranges::contains(x, false);
+}
+
+template <typename T, std::size_t M, std::size_t N>
+[[nodiscard]]
+constexpr auto any(const matrix<T, M, N> &x) noexcept
+{
+	return std::ranges::contains(x, true);
+}
+
+[[nodiscard]]
+constexpr auto asdouble(const std::uint32_t lowbits, const std::uint32_t highbits)
+{
+	return std::bit_cast<double>(static_cast<std::uint64_t>(highbits) << std::uint64_t{32} | static_cast<std::uint64_t>(lowbits));
+}
 }
 
 #endif
