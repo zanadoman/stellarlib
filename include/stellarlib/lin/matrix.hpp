@@ -610,10 +610,10 @@ constexpr auto operator op (const T lhs, const matrix<U, M, N> &rhs) noexcept\
 	return res;\
 }\
 \
-template <typename T, typename U, std::size_t M, std::size_t N>\
-constexpr auto operator op##= (matrix<T, M, N> &lhs, const matrix<U, N, M> &rhs) noexcept\
+template <typename T, typename U, std::size_t M1, std::size_t N1, std::size_t M2, std::size_t N2>\
+constexpr auto operator op##= (matrix<T, M1, N1> &lhs, const matrix<U, M2, N2> &rhs) noexcept\
 	-> auto &\
-	requires (M == 1 || N == 1)\
+	requires ((M1 == 1 || N1 == 1) && (M2 == 1 || N2 == 1) && M1 * N1 == M2 * N2 || M1 == M2 && N1 == N2)\
 {\
 	for (const auto [lhs, rhs] : std::views::zip(lhs, rhs)) {\
 		lhs op##= rhs;\
@@ -622,32 +622,11 @@ constexpr auto operator op##= (matrix<T, M, N> &lhs, const matrix<U, N, M> &rhs)
 	return lhs;\
 }\
 \
-template <typename T, typename U, std::size_t M, std::size_t N>\
-constexpr auto operator op##= (matrix<T, M, N> &lhs, const matrix<U, M, N> &rhs) noexcept\
-	-> auto &\
-{\
-	for (const auto [lhs, rhs] : std::views::zip(lhs, rhs)) {\
-		lhs op##= rhs;\
-	}\
-\
-	return lhs;\
-}\
-\
-template <typename T, typename U, std::size_t M, std::size_t N>\
+template <typename T, typename U, std::size_t M1, std::size_t N1, std::size_t M2, std::size_t N2>\
 [[nodiscard]]\
-constexpr auto operator op (const matrix<T, M, N> &lhs, const matrix<U, N, M> &rhs) noexcept\
-	-> matrix<std::common_type_t<T, U>, M, N>\
-	requires (M == 1 || N == 1)\
-{\
-	auto res{lhs};\
-	res op##= rhs;\
-	return res;\
-}\
-\
-template <typename T, typename U, std::size_t M, std::size_t N>\
-[[nodiscard]]\
-constexpr auto operator op (const matrix<T, M, N> &lhs, const matrix<U, M, N> &rhs) noexcept\
-	-> matrix<std::common_type_t<T, U>, M, N>\
+constexpr auto operator op (const matrix<T, M1, N1> &lhs, const matrix<U, M2, N2> &rhs) noexcept\
+	-> matrix<std::common_type_t<T, U>, M1, N1>\
+	requires ((M1 == 1 || N1 == 1) && (M2 == 1 || N2 == 1) && M1 * N1 == M2 * N2 || M1 == M2 && N1 == N2)\
 {\
 	auto res{lhs};\
 	res op##= rhs;\
@@ -683,27 +662,13 @@ constexpr auto operator op (const T lhs, const matrix<U, M, N> &rhs) noexcept\
 	return res;\
 }\
 \
-template <typename T, typename U, std::size_t M, std::size_t N>\
+template <typename T, typename U, std::size_t M1, std::size_t N1, std::size_t M2, std::size_t N2>\
 [[nodiscard]]\
-constexpr auto operator op (const matrix<T, M, N> &lhs, const matrix<U, N, M> &rhs) noexcept\
-	-> matrix<bool, M, N>\
-	requires (M == 1 || N == 1)\
+constexpr auto operator op (const matrix<T, M1, N1> &lhs, const matrix<U, M2, N2> &rhs) noexcept\
+	-> matrix<bool, M1, N1>\
+	requires ((M1 == 1 || N1 == 1) && (M2 == 1 || N2 == 1) && M1 * N1 == M2 * N2 || M1 == M2 && N1 == N2)\
 {\
-	matrix<bool, M, N> res;\
-\
-	for (const auto [res, lhs, rhs] : std::views::zip(res, lhs, rhs)) {\
-		res = lhs op rhs;\
-	}\
-\
-	return res;\
-}\
-\
-template <typename T, typename U, std::size_t M, std::size_t N>\
-[[nodiscard]]\
-constexpr auto operator op (const matrix<T, M, N> &lhs, const matrix<U, M, N> &rhs) noexcept\
-	-> matrix<bool, M, N>\
-{\
-	matrix<bool, M, N> res;\
+	matrix<bool, M1, N1> res;\
 \
 	for (const auto [res, lhs, rhs] : std::views::zip(res, lhs, rhs)) {\
 		res = lhs op rhs;\
