@@ -6,7 +6,9 @@
 -Wno-c++98-compat-pedantic
 -Wno-exit-time-destructors
 -Wno-extra-semi
+-Wno-float-equal
 -Wno-global-constructors
+-Wno-logical-op-parentheses
 -Wno-overloaded-shift-op-parentheses
 -Wno-shadow
 -Wno-unsafe-buffer-usage

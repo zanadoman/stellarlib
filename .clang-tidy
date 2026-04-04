@@ -69,6 +69,7 @@ Checks: >
   portability-*,
   readability-*,
   -bugprone-bitwise-pointer-cast,
+  -bugprone-easily-swappable-parameters,
   -bugprone-exception-escape,
   -bugprone-signed-char-misuse,
   -bugprone-std-namespace-modification,

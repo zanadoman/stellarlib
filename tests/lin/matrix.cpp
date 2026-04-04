@@ -653,13 +653,13 @@ static_assert(lin::all((std::uint8_t{0b1010'1010} | lin::internal::matrix<std::u
 static_assert(lin::all((lin::internal::matrix<std::uint8_t, 1, 2>{0b1010'1010, 0b1101'1011} | lin::internal::matrix<std::uint8_t, 2, 1>{0b1101'1011, 0b0101'0101}) == lin::internal::matrix<std::uint8_t, 1, 2>{0b1111'1011, 0b1101'1111}));
 static_assert(lin::all((lin::internal::matrix<std::uint8_t, 1, 2>{0b1010'1010, 0b1101'1011} | lin::internal::matrix<std::uint8_t, 1, 2>{0b1101'1011, 0b0101'0101}) == lin::internal::matrix<std::uint8_t, 1, 2>{0b1111'1011, 0b1101'1111}));
 
-static_assert(lin::all((lin::internal::matrix<std::int32_t, 1, 3>{true, false} && true) == lin::internal::matrix<bool, 1, 3>{true, false}));
-static_assert(lin::all((true && lin::internal::matrix<std::int32_t, 1, 3>{false, true}) == lin::internal::matrix<bool, 1, 3>{false, true}));
+static_assert(lin::all((lin::internal::matrix<std::int32_t, 1, 3>{false, true, true} && true) == lin::internal::matrix<bool, 1, 3>{false, true, true}));
+static_assert(lin::all((true && lin::internal::matrix<std::int32_t, 1, 3>{false, true, true}) == lin::internal::matrix<bool, 1, 3>{false, true, true}));
 static_assert(lin::all((lin::internal::matrix<std::int32_t, 1, 3>{true, true, false} && lin::internal::matrix<std::int32_t, 3, 1>{false, true, true}) == lin::internal::matrix<bool, 1, 3>{false, true, false}));
 static_assert(lin::all((lin::internal::matrix<std::int32_t, 1, 3>{true, true, false} && lin::internal::matrix<std::int32_t, 1, 3>{false, true, true}) == lin::internal::matrix<bool, 1, 3>{false, true, false}));
 
-static_assert(lin::all((lin::internal::matrix<std::int32_t, 1, 3>{false, true} || false) == lin::internal::matrix<bool, 1, 3>{false, true}));
-static_assert(lin::all((false || lin::internal::matrix<std::int32_t, 1, 3>{true, false}) == lin::internal::matrix<bool, 1, 3>{true, false}));
+static_assert(lin::all((lin::internal::matrix<std::int32_t, 1, 3>{true, false, false} || false) == lin::internal::matrix<bool, 1, 3>{true, false, false}));
+static_assert(lin::all((false || lin::internal::matrix<std::int32_t, 1, 3>{true, false, false}) == lin::internal::matrix<bool, 1, 3>{true, false, false}));
 static_assert(lin::all((lin::internal::matrix<std::int32_t, 1, 3>{false, false, true} || lin::internal::matrix<std::int32_t, 3, 1>{true, false, false}) == lin::internal::matrix<bool, 1, 3>{true, false, true}));
 static_assert(lin::all((lin::internal::matrix<std::int32_t, 1, 3>{false, false, true} || lin::internal::matrix<std::int32_t, 1, 3>{true, false, false}) == lin::internal::matrix<bool, 1, 3>{true, false, true}));
 

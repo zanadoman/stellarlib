@@ -47,7 +47,7 @@ public:
 	template <typename ...Args>
 	[[nodiscard]]
 	explicit constexpr matrix(Args &&...args) noexcept
-		requires (std::is_convertible_v<Args, T> && ...)
+		requires ((std::is_convertible_v<Args, T> && ...) && sizeof...(Args) == M * N)
 		: std::array<T, M * N>{static_cast<T>(std::forward<Args>(args))...}
 	{}
 
@@ -578,6 +578,7 @@ constexpr auto operator op (const matrix<T, M, N> &self) noexcept\
 template <typename T, std::size_t M, std::size_t N, typename U>\
 constexpr auto operator op##= (matrix<T, M, N> &lhs, const U rhs) noexcept\
 	-> auto &\
+	requires (std::is_arithmetic_v<U>)\
 {\
 	for (auto &lhs : lhs) {\
 		lhs op##= rhs;\
@@ -590,6 +591,7 @@ template <typename T, std::size_t M, std::size_t N, typename U>\
 [[nodiscard]]\
 constexpr auto operator op (const matrix<T, M, N> &lhs, const U rhs) noexcept\
 	-> matrix<std::common_type_t<T, U>, M, N>\
+	requires (std::is_arithmetic_v<U>)\
 {\
 	auto res{lhs};\
 	res op##= rhs;\
@@ -600,6 +602,7 @@ template <typename T, typename U, std::size_t M, std::size_t N>\
 [[nodiscard]]\
 constexpr auto operator op (const T lhs, const matrix<U, M, N> &rhs) noexcept\
 	-> matrix<std::common_type_t<T, U>, M, N>\
+	requires (std::is_arithmetic_v<T>)\
 {\
 	matrix<std::common_type_t<T, U>, M, N> res;\
 \
@@ -638,6 +641,7 @@ template <typename T, std::size_t M, std::size_t N, typename U>\
 [[nodiscard]]\
 constexpr auto operator op (const matrix<T, M, N> &lhs, const U rhs) noexcept\
 	-> matrix<bool, M, N>\
+	requires (std::is_arithmetic_v<U>)\
 {\
 	matrix<bool, M, N> res;\
 \
@@ -652,6 +656,7 @@ template <typename T, typename U, std::size_t M, std::size_t N>\
 [[nodiscard]]\
 constexpr auto operator op (const T lhs, const matrix<U, M, N> &rhs) noexcept\
 	-> matrix<bool, M, N>\
+	requires (std::is_arithmetic_v<T>)\
 {\
 	matrix<bool, M, N> res;\
 \

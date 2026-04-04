@@ -667,6 +667,7 @@ STELLARLIB_LIN_INTRINSICS_DOUBLE_ARGUMENT_OPERATION_IMPL(min, {
 
 template <typename T>
 constexpr auto modf(const T x, T &ip) noexcept
+	requires (std::is_arithmetic_v<T>)
 {
 	return std::modf(x, std::addressof(ip));
 }
@@ -674,6 +675,7 @@ constexpr auto modf(const T x, T &ip) noexcept
 template <typename T, std::size_t M, std::size_t N>
 constexpr auto modf(const T x, internal::matrix<T, M, N> &ip) noexcept
 	-> internal::matrix<T, M, N>
+	requires (std::is_arithmetic_v<T>)
 {
 	internal::matrix<T, M, N> res;
 	res.front() = modf(x, ip.front());
@@ -686,11 +688,12 @@ constexpr auto modf(const T x, internal::matrix<T, M, N> &ip) noexcept
 	return res;
 }
 
-template <typename T, std::size_t M, std::size_t N>
-constexpr auto modf(const internal::matrix<T, M, N> &x, internal::matrix<T, M, N> &ip) noexcept
-	-> internal::matrix<T, M, N>
+template <typename T, std::size_t M1, std::size_t N1, std::size_t M2, std::size_t N2>
+constexpr auto modf(const internal::matrix<T, M1, N1> &x, internal::matrix<T, M2, N2> &ip) noexcept
+	-> internal::matrix<T, M1, N1>
+	requires ((M1 == 1 || N1 == 1) && (M2 == 1 || N2 == 1) && M1 * N1 == M2 * N2 || M1 == M2 && N1 == N2)
 {
-	internal::matrix<T, M, N> res;
+	internal::matrix<T, M1, N1> res;
 
 	for (const auto [res, x, ip] : std::views::zip(res, x, ip)) {
 		res = modf(x, ip);
