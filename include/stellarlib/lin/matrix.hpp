@@ -37,7 +37,7 @@
 namespace stellarlib::lin::internal
 {
 template <typename T, std::size_t M, std::size_t N>
-requires (static_cast<bool>(M * N))
+requires (std::is_arithmetic_v<T> && static_cast<bool>(M * N))
 class matrix final : public std::array<T, M * N>
 {
 public:
@@ -516,7 +516,7 @@ private:
 	template <std::size_t I>
 	[[nodiscard]]
 	constexpr auto elem() const noexcept
-		requires (I < M * N && (M == 1 || N == 1))
+		requires ((M == 1 || N == 1) && I < M * N)
 	{
 		return std::array<T, M * N>::operator[](I);
 	}
@@ -525,7 +525,7 @@ private:
 	[[nodiscard]]
 	constexpr auto elem() noexcept
 		-> auto &
-		requires (I < M * N && (M == 1 || N == 1))
+		requires ((M == 1 || N == 1) && I < M * N)
 	{
 		return std::array<T, M * N>::operator[](I);
 	}
@@ -684,7 +684,14 @@ constexpr auto operator op (const matrix<T, M1, N1> &lhs, const matrix<U, M2, N2
 
 STELLARLIB_LIN_MATRIX_PREFIX_POSTFIX_OPERATOR_IMPL(++);
 STELLARLIB_LIN_MATRIX_PREFIX_POSTFIX_OPERATOR_IMPL(--);
-STELLARLIB_LIN_MATRIX_UNARY_OPERATOR_IMPL(+);
+
+template <typename T, std::size_t M, std::size_t N>
+[[nodiscard]]
+constexpr auto operator+(const matrix<T, M, N> &self) noexcept
+{
+	return self;
+}
+
 STELLARLIB_LIN_MATRIX_UNARY_OPERATOR_IMPL(-);
 STELLARLIB_LIN_MATRIX_UNARY_OPERATOR_IMPL(!);
 STELLARLIB_LIN_MATRIX_UNARY_OPERATOR_IMPL(~);
@@ -741,7 +748,7 @@ template <typename T, std::size_t M, std::size_t N>
 struct std::formatter<stellarlib::lin::internal::matrix<T, M, N>> final
 {
 	[[nodiscard]]
-	constexpr auto parse(const std::format_parse_context &ctx) const
+	constexpr auto parse(const std::format_parse_context &ctx) const noexcept
 	{
 		return ctx.begin();
 	}
@@ -751,7 +758,7 @@ struct std::formatter<stellarlib::lin::internal::matrix<T, M, N>> final
 	{
 		std::ostringstream out{};
 		out << matrix;
-		return std::format_to(ctx.out(), "{}", out.str());
+		return std::format_to(ctx.out(), "{}", out.view());
 	}
 };
 

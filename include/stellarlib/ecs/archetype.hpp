@@ -49,9 +49,9 @@ public:
 	template <typename ...T>
 	[[nodiscard]]
 	static constexpr auto of() noexcept
-		-> std::conditional_t<0 < sizeof...(T), const archetype &, archetype>
+		-> std::conditional_t<static_cast<bool>(sizeof...(T)), const archetype &, archetype>
 	{
-		if constexpr (0 < sizeof...(T)) {
+		if constexpr (sizeof...(T)) {
 			static const auto cache{[] [[nodiscard]] noexcept -> archetype {
 				archetype archetype{};
 

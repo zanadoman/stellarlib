@@ -668,13 +668,13 @@ TEST(stellarlib_lin_matrix, should_stream_and_format)
 	std::ostringstream out1{};
 	const lin::internal::matrix<std::int32_t, 1, 2> matrix1{1, 2};
 	out1 << matrix1;
-	ASSERT_EQ(out1.str(), "[1, 2]");
-	ASSERT_EQ(std::format("{}", matrix1), out1.str());
+	ASSERT_EQ(out1.view(), "[1, 2]");
+	ASSERT_EQ(std::format("{}", matrix1), out1.view());
 	std::ostringstream out2{};
 	const lin::internal::matrix<std::int32_t, 2, 2> matrix2{1, 2, 3, 4};
 	out2 << matrix2;
-	ASSERT_EQ(out2.str(), "[[1, 2], [3, 4]]");
-	ASSERT_EQ(std::format("{}", matrix2), out2.str());
+	ASSERT_EQ(out2.view(), "[[1, 2], [3, 4]]");
+	ASSERT_EQ(std::format("{}", matrix2), out2.view());
 }
 
 #pragma clang diagnostic pop

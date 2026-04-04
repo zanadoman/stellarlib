@@ -153,7 +153,7 @@ public:
 	[[nodiscard]]
 	constexpr auto insert(const std::uint32_t entity, T &&...components) noexcept
 		-> std::expected<void, std::tuple<T...>>
-		requires (0 < sizeof...(T))
+		requires (static_cast<bool>(sizeof...(T)))
 	{
 		if (const auto pair{_entities.at(entity)}; (!pair || pair->second) && !spawning(entity)) {
 			return std::unexpected{std::tuple{std::forward<T>(components)...}};
@@ -233,7 +233,7 @@ public:
 	template <typename ...T>
 	[[nodiscard]]
 	constexpr auto contains(const std::uint32_t entity) const noexcept
-		requires (0 < sizeof...(T))
+		requires (static_cast<bool>(sizeof...(T)))
 	{
 		if (const auto pair{_entities.at(entity)}) {
 			return [] <std::size_t ...I> [[nodiscard]] (const auto &archetype, const std::index_sequence<I...>) noexcept -> auto {
@@ -263,7 +263,7 @@ public:
 	template <typename ...T>
 	[[nodiscard]]
 	constexpr auto at(const std::uint32_t entity) const noexcept
-		requires (0 < sizeof...(T))
+		requires (static_cast<bool>(sizeof...(T)))
 	{
 		return [this] <std::size_t ...I> [[nodiscard]] (const auto entity, const std::index_sequence<I...>) noexcept -> auto {
 			const auto &ids{internal::sparse_storage::ids<T...>()};
@@ -291,7 +291,7 @@ public:
 	template <typename ...T>
 	[[nodiscard]]
 	constexpr auto operator[](const std::uint32_t entity) const noexcept
-		requires (0 < sizeof...(T))
+		requires (static_cast<bool>(sizeof...(T)))
 	{
 		return [this] <std::size_t ...I> [[nodiscard]] (const auto entity, const std::index_sequence<I...>) noexcept -> auto {
 			const auto &ids{internal::sparse_storage::ids<T...>()};
@@ -382,7 +382,7 @@ public:
 	 */
 	template <typename ...T>
 	constexpr void erase(const std::uint32_t entity) noexcept
-		requires (0 < sizeof...(T))
+		requires (static_cast<bool>(sizeof...(T)))
 	{
 		if (const auto pair{_entities.at(entity)}; (!pair || pair->second) && !spawning(entity)) {
 			return;
