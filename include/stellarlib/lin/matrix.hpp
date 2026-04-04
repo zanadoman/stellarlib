@@ -37,7 +37,7 @@
 namespace stellarlib::lin::internal
 {
 template <typename T, std::size_t M, std::size_t N>
-requires (static_cast<bool>(M * N))
+requires (std::is_arithmetic_v<T> && static_cast<bool>(M * N))
 class matrix final : public std::array<T, M * N>
 {
 public:
