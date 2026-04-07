@@ -395,6 +395,10 @@ constexpr auto determinant(internal::matrix<T, N, N> x) noexcept
 	return determinant;
 }
 
+STELLARLIB_LIN_INTRINSICS_SINGLE_ARGUMENT_OPERATION_IMPL(sqrt, {
+	return std::sqrt(x);
+});
+
 template <typename T>
 [[nodiscard]]
 constexpr auto distance(const T x, const T y) noexcept
@@ -408,7 +412,7 @@ template <typename T, std::size_t M, std::size_t N>
 constexpr auto distance(const internal::matrix<T, M, N> &x, const T y) noexcept
 	requires (M == 1 || N == 1)
 {
-	return std::sqrt(std::ranges::fold_left(x | std::views::transform([y] [[nodiscard]] (const auto x) noexcept -> auto {
+	return sqrt(std::ranges::fold_left(x | std::views::transform([y] [[nodiscard]] (const auto x) noexcept -> auto {
 		return y - x;
 	}) | std::views::transform([] [[nodiscard]] (const auto d) noexcept -> auto {
 		return d * d;
@@ -420,7 +424,7 @@ template <typename T, std::size_t M, std::size_t N>
 constexpr auto distance(const T x, const internal::matrix<T, M, N> &y) noexcept
 	requires (M == 1 || N == 1)
 {
-	return std::sqrt(std::ranges::fold_left(y | std::views::transform([x] [[nodiscard]] (const auto y) noexcept -> auto {
+	return sqrt(std::ranges::fold_left(y | std::views::transform([x] [[nodiscard]] (const auto y) noexcept -> auto {
 		return y - x;
 	}) | std::views::transform([] [[nodiscard]] (const auto d) noexcept -> auto {
 		return d * d;
@@ -432,7 +436,7 @@ template <typename T, std::size_t M1, std::size_t N1, std::size_t M2, std::size_
 constexpr auto distance(const internal::matrix<T, M1, N1> &x, const internal::matrix<T, M2, N2> &y) noexcept
 	requires ((M1 == 1 || N1 == 1) && (M2 == 1 || N2 == 1) && M1 * N1 == M2 * N2)
 {
-	return std::sqrt(std::ranges::fold_left(std::views::zip(x, y) | std::views::transform([] [[nodiscard]] (const auto xy) noexcept -> auto {
+	return sqrt(std::ranges::fold_left(std::views::zip(x, y) | std::views::transform([] [[nodiscard]] (const auto xy) noexcept -> auto {
 		return std::get<1>(xy) - std::get<0>(xy);
 	}) | std::views::transform([] [[nodiscard]] (const auto d) noexcept -> auto {
 		return d * d;
@@ -483,10 +487,6 @@ STELLARLIB_LIN_INTRINSICS_SINGLE_ARGUMENT_OPERATION_IMPL(exp, {
 
 STELLARLIB_LIN_INTRINSICS_SINGLE_ARGUMENT_OPERATION_IMPL(exp2, {
 	return std::exp2(x);
-});
-
-STELLARLIB_LIN_INTRINSICS_SINGLE_ARGUMENT_OPERATION_IMPL(sign, {
-	return static_cast<T>((0 < x) - (x < 0));
 });
 
 template <typename T>
@@ -632,7 +632,7 @@ constexpr auto length(const internal::matrix<T, M, N> &x) noexcept
 		return std::hypot(x.x(), x.y(), x.z());
 	}
 
-	return std::sqrt(std::ranges::fold_left(x | std::views::transform([] [[nodiscard]] (const auto x) noexcept -> auto {
+	return sqrt(std::ranges::fold_left(x | std::views::transform([] [[nodiscard]] (const auto x) noexcept -> auto {
 		return x * x;
 	}), 0, std::plus{}));
 }
@@ -640,6 +640,21 @@ constexpr auto length(const internal::matrix<T, M, N> &x) noexcept
 STELLARLIB_LIN_INTRINSICS_TRIPLE_ARGUMENT_OPERATION_IMPL(lerp, {
 	return std::lerp(x, y, z);
 });
+
+STELLARLIB_LIN_INTRINSICS_DOUBLE_ARGUMENT_OPERATION_IMPL(max, {
+	return SDL_max(x, y);
+});
+
+STELLARLIB_LIN_INTRINSICS_DOUBLE_ARGUMENT_OPERATION_IMPL(pow, {
+	return std::pow(x, y);
+});
+
+template <typename T>
+[[nodiscard]]
+constexpr auto lit(const T n_dot_l, const T n_dot_h, const T m) noexcept
+{
+	return internal::matrix<T, 1, 4>{1, max(n_dot_l, T{}), n_dot_l < 0 || n_dot_h < 0 ? 0 : pow(n_dot_h, m), 1};
+}
 
 STELLARLIB_LIN_INTRINSICS_SINGLE_ARGUMENT_OPERATION_IMPL(log, {
 	return std::log(x);
@@ -655,10 +670,6 @@ STELLARLIB_LIN_INTRINSICS_SINGLE_ARGUMENT_OPERATION_IMPL(log2, {
 
 STELLARLIB_LIN_INTRINSICS_TRIPLE_ARGUMENT_OPERATION_IMPL(mad, {
 	return x * y + z;
-});
-
-STELLARLIB_LIN_INTRINSICS_DOUBLE_ARGUMENT_OPERATION_IMPL(max, {
-	return SDL_max(x, y);
 });
 
 STELLARLIB_LIN_INTRINSICS_DOUBLE_ARGUMENT_OPERATION_IMPL(min, {
@@ -762,17 +773,6 @@ constexpr auto normalize(const internal::matrix<T, M, N> &x) noexcept
 	return x / length(x);
 }
 
-STELLARLIB_LIN_INTRINSICS_DOUBLE_ARGUMENT_OPERATION_IMPL(pow, {
-	return std::pow(x, y);
-});
-
-template <typename T>
-[[nodiscard]]
-constexpr auto lit(const T n_dot_l, const T n_dot_h, const T m) noexcept
-{
-	return internal::matrix<T, 1, 4>{1, max(n_dot_l, T{}), n_dot_l < 0 || n_dot_h < 0 ? 0 : pow(n_dot_h, m), 1};
-}
-
 STELLARLIB_LIN_INTRINSICS_SINGLE_ARGUMENT_OPERATION_IMPL(radians, {
 	return std::numbers::pi_v<T> / 180 * x;
 });
@@ -783,10 +783,6 @@ STELLARLIB_LIN_INTRINSICS_SINGLE_ARGUMENT_OPERATION_IMPL(rcp, {
 
 STELLARLIB_LIN_INTRINSICS_DOUBLE_ARGUMENT_OPERATION_IMPL(reflect, {
 	return x - 2 * y * dot(x, y);
-});
-
-STELLARLIB_LIN_INTRINSICS_SINGLE_ARGUMENT_OPERATION_IMPL(sqrt, {
-	return std::sqrt(x);
 });
 
 #define STELLARLIB_LIN_INTRINSICS_REFRACT_IMPL(zero)\
@@ -834,6 +830,10 @@ STELLARLIB_LIN_INTRINSICS_SINGLE_ARGUMENT_OPERATION_IMPL(rsqrt, {
 
 STELLARLIB_LIN_INTRINSICS_SINGLE_ARGUMENT_OPERATION_IMPL(saturate, {
 	return clamp(x, T{0}, T{1});
+});
+
+STELLARLIB_LIN_INTRINSICS_SINGLE_ARGUMENT_OPERATION_IMPL(sign, {
+	return static_cast<T>((0 < x) - (x < 0));
 });
 
 STELLARLIB_LIN_INTRINSICS_SINGLE_ARGUMENT_OPERATION_IMPL(sin, {
