@@ -130,6 +130,17 @@ public:
 	STELLARLIB_LIN_MATRIX_ACCESSOR_SINGLE_IMPL(expr1, i);\
 	STELLARLIB_LIN_MATRIX_ACCESSOR_SINGLE_IMPL(expr2, i);
 
+#define STELLARLIB_LIN_MATRIX_SWIZZLE_SINGLE_IMPL(expr, ...)\
+	[[nodiscard]]\
+	constexpr auto expr() const noexcept\
+	{\
+		return swizzle<__VA_ARGS__>();\
+	}
+
+#define STELLARLIB_LIN_MATRIX_SWIZZLE_DOUBLE_IMPL(expr1, expr2, ...)\
+	STELLARLIB_LIN_MATRIX_SWIZZLE_SINGLE_IMPL(expr1, __VA_ARGS__);\
+	STELLARLIB_LIN_MATRIX_SWIZZLE_SINGLE_IMPL(expr2, __VA_ARGS__);
+
 	STELLARLIB_LIN_MATRIX_ACCESSOR_DOUBLE_IMPL(x, r, 0);
 	STELLARLIB_LIN_MATRIX_ACCESSOR_DOUBLE_IMPL(y, g, 1);
 	STELLARLIB_LIN_MATRIX_ACCESSOR_DOUBLE_IMPL(z, b, 2);
@@ -149,31 +160,6 @@ public:
 	{
 		return std::array<T, M * N>::operator[](m * N + n);
 	}
-
-	[[nodiscard]]
-	constexpr auto operator[](const std::size_t m) const noexcept
-		-> matrix<T, 1, N>
-		requires (M != 1 && N != 1)
-	{
-		matrix<T, 1, N> res;
-
-		for (const auto n : std::views::iota(std::size_t{}, N)) {
-			res.std::template array<T, N>::operator[](n) = (*this)[m, n];
-		}
-
-		return res;
-	}
-
-#define STELLARLIB_LIN_MATRIX_SWIZZLE_SINGLE_IMPL(expr, ...)\
-	[[nodiscard]]\
-	constexpr auto expr() const noexcept\
-	{\
-		return swizzle<__VA_ARGS__>();\
-	}
-
-#define STELLARLIB_LIN_MATRIX_SWIZZLE_DOUBLE_IMPL(expr1, expr2, ...)\
-	STELLARLIB_LIN_MATRIX_SWIZZLE_SINGLE_IMPL(expr1, __VA_ARGS__);\
-	STELLARLIB_LIN_MATRIX_SWIZZLE_SINGLE_IMPL(expr2, __VA_ARGS__);
 
 	STELLARLIB_LIN_MATRIX_SWIZZLE_DOUBLE_IMPL(xx, rr, 0, 0);
 	STELLARLIB_LIN_MATRIX_SWIZZLE_DOUBLE_IMPL(xy, rg, 0, 1);
@@ -511,6 +497,20 @@ public:
 	STELLARLIB_LIN_MATRIX_SWIZZLE_DOUBLE_IMPL(wwwy, aaag, 3, 3, 3, 1);
 	STELLARLIB_LIN_MATRIX_SWIZZLE_DOUBLE_IMPL(wwwz, aaab, 3, 3, 3, 2);
 	STELLARLIB_LIN_MATRIX_SWIZZLE_DOUBLE_IMPL(wwww, aaaa, 3, 3, 3, 3);
+
+	[[nodiscard]]
+	constexpr auto operator[](const std::size_t m) const noexcept
+		-> matrix<T, 1, N>
+		requires (M != 1 && N != 1)
+	{
+		matrix<T, 1, N> res;
+
+		for (const auto n : std::views::iota(std::size_t{}, N)) {
+			res.std::template array<T, N>::operator[](n) = (*this)[m, n];
+		}
+
+		return res;
+	}
 
 private:
 	template <std::size_t I>
