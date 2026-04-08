@@ -4,6 +4,7 @@
 -Weverything
 -Wno-c++20-compat
 -Wno-c++98-compat-pedantic
+-Wno-constant-evaluated
 -Wno-exit-time-destructors
 -Wno-extra-semi
 -Wno-float-equal

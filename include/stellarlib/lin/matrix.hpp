@@ -25,6 +25,7 @@
 #define STELLARLIB_LIN_MATRIX_HPP
 
 #include <array>
+#include <cmath>
 #include <cstddef>
 #include <format>
 #include <memory>
@@ -150,7 +151,12 @@ public:
 	constexpr auto operator[](const std::size_t m, const std::size_t n) const noexcept
 		requires (M != 1 && N != 1)
 	{
-		return std::array<T, M * N>::operator[](m * N + n);
+		if constexpr (std::is_constant_evaluated()) {
+			return std::array<T, M * N>::operator[](m * N + n);
+		}
+		else {
+			return std::array<T, M * N>::operator[](std::fma(m, N, n));
+		}
 	}
 
 	[[nodiscard]]
@@ -158,7 +164,12 @@ public:
 		-> auto &
 		requires (M != 1 && N != 1)
 	{
-		return std::array<T, M * N>::operator[](m * N + n);
+		if constexpr (std::is_constant_evaluated()) {
+			return std::array<T, M * N>::operator[](m * N + n);
+		}
+		else {
+			return std::array<T, M * N>::operator[](std::fma(m, N, n));
+		}
 	}
 
 	STELLARLIB_LIN_MATRIX_SWIZZLE_DOUBLE_IMPL(xx, rr, 0, 0);
@@ -613,7 +624,7 @@ constexpr auto operator op (const T lhs, const matrix<U, M, N> &rhs) noexcept\
 	return res;\
 }\
 \
-template <typename T, typename U, std::size_t M1, std::size_t N1, std::size_t M2, std::size_t N2>\
+template <typename T, std::size_t M1, std::size_t N1, typename U, std::size_t M2, std::size_t N2>\
 constexpr auto operator op##= (matrix<T, M1, N1> &lhs, const matrix<U, M2, N2> &rhs) noexcept\
 	-> auto &\
 	requires ((M1 == 1 || N1 == 1) && (M2 == 1 || N2 == 1) && M1 * N1 == M2 * N2 || M1 == M2 && N1 == N2)\
@@ -625,7 +636,7 @@ constexpr auto operator op##= (matrix<T, M1, N1> &lhs, const matrix<U, M2, N2> &
 	return lhs;\
 }\
 \
-template <typename T, typename U, std::size_t M1, std::size_t N1, std::size_t M2, std::size_t N2>\
+template <typename T, std::size_t M1, std::size_t N1, typename U, std::size_t M2, std::size_t N2>\
 [[nodiscard]]\
 constexpr auto operator op (const matrix<T, M1, N1> &lhs, const matrix<U, M2, N2> &rhs) noexcept\
 	-> matrix<std::common_type_t<T, U>, M1, N1>\
@@ -667,7 +678,7 @@ constexpr auto operator op (const T lhs, const matrix<U, M, N> &rhs) noexcept\
 	return res;\
 }\
 \
-template <typename T, typename U, std::size_t M1, std::size_t N1, std::size_t M2, std::size_t N2>\
+template <typename T, std::size_t M1, std::size_t N1, typename U, std::size_t M2, std::size_t N2>\
 [[nodiscard]]\
 constexpr auto operator op (const matrix<T, M1, N1> &lhs, const matrix<U, M2, N2> &rhs) noexcept\
 	-> matrix<bool, M1, N1>\

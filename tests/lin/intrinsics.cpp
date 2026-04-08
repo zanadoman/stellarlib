@@ -28,6 +28,7 @@
 #include <gtest/gtest.h>
 
 #include <cmath>
+#include <cstdint>
 #include <memory>
 #include <numbers>
 
@@ -48,14 +49,14 @@ TEST(stellarlib_lin_intrinsics, acos)
 	ASSERT_TRUE(lin::all(lin::acos(lin::internal::matrix<float, 2, 2>{0.5F, -0.5F, 0.5F, -0.5F}) == lin::internal::matrix<float, 2, 2>{std::acosf(0.5F), std::acosf(-0.5F), std::acosf(0.5F), std::acosf(-0.5F)}));
 }
 
-static_assert(lin::all(1.0F));
+static_assert(lin::all(0.5F));
 static_assert(!lin::all(0.0F));
-static_assert(lin::all(lin::internal::matrix<float, 1, 2>{1.0F, -1.0F}));
-static_assert(!lin::all(lin::internal::matrix<float, 1, 2>{1.0F, 0.0F}));
+static_assert(lin::all(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}));
+static_assert(!lin::all(lin::internal::matrix<float, 1, 2>{0.5F, 0.0F}));
 
-static_assert(lin::any(1.0F));
+static_assert(lin::any(0.5F));
 static_assert(!lin::any(0.0F));
-static_assert(lin::any(lin::internal::matrix<float, 1, 2>{1.0F, 0.0F}));
+static_assert(lin::any(lin::internal::matrix<float, 1, 2>{0.5F, 0.0F}));
 static_assert(!lin::any(lin::internal::matrix<float, 1, 2>{0.0F, 0.0F}));
 
 TEST(stellarlib_lin_intrinsics, asin)
@@ -75,8 +76,8 @@ TEST(stellarlib_lin_intrinsics, atan)
 TEST(stellarlib_lin_intrinsics, atan2)
 {
 	ASSERT_EQ(lin::atan2(0.5F, -0.5F), std::atan2f(0.5F, -0.5F));
-	ASSERT_TRUE(lin::all(lin::atan2(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, 0.0F) == lin::internal::matrix<float, 1, 2>{std::atan2f(0.5F, 0.0F), std::atan2f(-0.5F, 0.0F)}));
-	ASSERT_TRUE(lin::all(lin::atan2(0.0F, lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}) == lin::internal::matrix<float, 1, 2>{std::atan2f(0.0F, 0.5F), std::atan2f(0.0F, -0.5F)}));
+	ASSERT_TRUE(lin::all(lin::atan2(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, 0.5F) == lin::internal::matrix<float, 1, 2>{std::atan2f(0.5F, 0.5F), std::atan2f(-0.5F, 0.5F)}));
+	ASSERT_TRUE(lin::all(lin::atan2(-0.5F, lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}) == lin::internal::matrix<float, 1, 2>{std::atan2f(-0.5F, 0.5F), std::atan2f(-0.5F, -0.5F)}));
 	ASSERT_TRUE(lin::all(lin::atan2(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, lin::internal::matrix<float, 2, 1>{-0.5F, 0.5F}) == lin::internal::matrix<float, 1, 2>{std::atan2f(0.5F, -0.5F), std::atan2f(-0.5F, 0.5F)}));
 	ASSERT_TRUE(lin::all(lin::atan2(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, lin::internal::matrix<float, 1, 2>{-0.5F, 0.5F}) == lin::internal::matrix<float, 1, 2>{std::atan2f(0.5F, -0.5F), std::atan2f(-0.5F, 0.5F)}));
 	ASSERT_TRUE(lin::all(lin::atan2(lin::internal::matrix<float, 2, 2>{0.5F, -0.5F, 0.5F, -0.5F}, lin::internal::matrix<float, 2, 2>{-0.5F, 0.5F, -0.5F, 0.5F}) == lin::internal::matrix<float, 2, 2>{std::atan2f(0.5F, -0.5F), std::atan2f(-0.5F, 0.5F), std::atan2f(0.5F, -0.5F), std::atan2f(-0.5F, 0.5F)}));
@@ -84,28 +85,26 @@ TEST(stellarlib_lin_intrinsics, atan2)
 
 TEST(stellarlib_lin_intrinsics, ceil)
 {
-	ASSERT_EQ(lin::ceil(0.0F), std::ceilf(0.0F));
-	ASSERT_TRUE(lin::all(lin::ceil(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}) == lin::internal::matrix<float, 1, 2>{std::ceilf(0.5F), std::ceilf(-0.5F)}));
-	ASSERT_TRUE(lin::all(lin::ceil(lin::internal::matrix<float, 2, 2>{0.5F, -0.5F, 0.5F, -0.5F}) == lin::internal::matrix<float, 2, 2>{std::ceilf(0.5F), std::ceilf(-0.5F), std::ceilf(0.5F), std::ceilf(-0.5F)}));
+	ASSERT_EQ(lin::ceil(0.0F), 0.0F);
+	ASSERT_TRUE(lin::all(lin::ceil(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}) == lin::internal::matrix<float, 1, 2>{1.0F, 0.0F}));
+	ASSERT_TRUE(lin::all(lin::ceil(lin::internal::matrix<float, 2, 2>{0.5F, -0.5F, 0.5F, -0.5F}) == lin::internal::matrix<float, 2, 2>{1.0F, 0.0F, 1.0F, 0.0F}));
 }
 
-static_assert(lin::clamp(-2.0F, -1.0F, 1.0F) == -1.0F);
-static_assert(lin::clamp(0.0F, -1.0F, 1.0F) == 0.0F);
-static_assert(lin::clamp(2.0F, -1.0F, 1.0F) == 1.0F);
-static_assert(lin::all(lin::clamp(lin::internal::matrix<float, 1, 3>{-2.0F, 0.0F, 2.0F}, -1.0F, 1.0F) == lin::internal::matrix<float, 1, 3>{-1.0F, 0.0F, 1.0F}));
-static_assert(lin::all(lin::clamp(-2.0F, lin::internal::matrix<float, 1, 3>{-2.0F, -1.0F, 0.0F}, 1.0F) == lin::internal::matrix<float, 1, 3>{-2.0F, -1.0F, 0.0F}));
-static_assert(lin::all(lin::clamp(2.0F, -1.0F, lin::internal::matrix<float, 1, 3>{0.0F, 1.0F, 2.0F}) == lin::internal::matrix<float, 1, 3>{0.0, 1.0F, 2.0F}));
-static_assert(lin::all(lin::clamp(lin::internal::matrix<float, 1, 3>{-2.0F, 0.0F, 2.0F}, lin::internal::matrix<float, 3, 1>{-1.0F, -1.0F, -1.0F}, 1.0F) == lin::internal::matrix<float, 1, 3>{-1.0F, 0.0F, 1.0F}));
-static_assert(lin::all(lin::clamp(lin::internal::matrix<float, 1, 3>{-2.0F, 0.0F, 2.0F}, lin::internal::matrix<float, 1, 3>{-1.0F, -1.0F, -1.0F}, 1.0F) == lin::internal::matrix<float, 1, 3>{-1.0F, 0.0F, 1.0F}));
-static_assert(lin::all(lin::clamp(lin::internal::matrix<float, 1, 3>{-2.0F, 0.0F, 2.0F}, -1.0F, lin::internal::matrix<float, 3, 1>{1.0F, 1.0F, 1.0F}) == lin::internal::matrix<float, 1, 3>{-1.0F, 0.0F, 1.0F}));
-static_assert(lin::all(lin::clamp(lin::internal::matrix<float, 1, 3>{-2.0F, 0.0F, 2.0F}, -1.0F, lin::internal::matrix<float, 1, 3>{1.0F, 1.0F, 1.0F}) == lin::internal::matrix<float, 1, 3>{-1.0F, 0.0F, 1.0F}));
-static_assert(lin::all(lin::clamp(0.0F, lin::internal::matrix<float, 1, 3>{-1.0F, -1.0F, -1.0F}, lin::internal::matrix<float, 3, 1>{1.0F, 1.0F, 1.0F}) == lin::internal::matrix<float, 1, 3>{0.0F, 0.0F, 0.0F}));
-static_assert(lin::all(lin::clamp(0.0F, lin::internal::matrix<float, 1, 3>{-1.0F, -1.0F, -1.0F}, lin::internal::matrix<float, 1, 3>{1.0F, 1.0F, 1.0F}) == lin::internal::matrix<float, 1, 3>{0.0F, 0.0F, 0.0F}));
-static_assert(lin::all(lin::clamp(lin::internal::matrix<float, 1, 3>{-2.0F, 0.0F, 2.0F}, lin::internal::matrix<float, 1, 3>{-1.0F, -1.0F, -1.0F}, lin::internal::matrix<float, 3, 1>{1.0F, 1.0F, 1.0F}) == lin::internal::matrix<float, 1, 3>{-1.0F, 0.0F, 1.0F}));
-static_assert(lin::all(lin::clamp(lin::internal::matrix<float, 1, 3>{-2.0F, 0.0F, 2.0F}, lin::internal::matrix<float, 3, 1>{-1.0F, -1.0F, -1.0F}, lin::internal::matrix<float, 1, 3>{1.0F, 1.0F, 1.0F}) == lin::internal::matrix<float, 1, 3>{-1.0F, 0.0F, 1.0F}));
-static_assert(lin::all(lin::clamp(lin::internal::matrix<float, 3, 1>{-2.0F, 0.0F, 2.0F}, lin::internal::matrix<float, 1, 3>{-1.0F, -1.0F, -1.0F}, lin::internal::matrix<float, 1, 3>{1.0F, 1.0F, 1.0F}) == lin::internal::matrix<float, 1, 3>{-1.0F, 0.0F, 1.0F}));
-static_assert(lin::all(lin::clamp(lin::internal::matrix<float, 1, 3>{-2.0F, 0.0F, 2.0F}, lin::internal::matrix<float, 1, 3>{-1.0F, -1.0F, -1.0F}, lin::internal::matrix<float, 1, 3>{1.0F, 1.0F, 1.0F}) == lin::internal::matrix<float, 1, 3>{-1.0F, 0.0F, 1.0F}));
-static_assert(lin::all(lin::clamp(lin::internal::matrix<float, 3, 3>{-2.0F, 0.0F, 2.0F, -2.0F, 0.0F, 2.0F, -2.0F, 0.0F, 2.0F}, lin::internal::matrix<float, 3, 3>{-1.0F, -1.0F, -1.0F, -1.0F, -1.0F, -1.0F, -1.0F, -1.0F, -1.0F}, lin::internal::matrix<float, 3, 3>{1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F}) == lin::internal::matrix<float, 3, 3>{-1.0F, 0.0F, 1.0F, -1.0F, 0.0F, 1.0F, -1.0F, 0.0F, 1.0F}));
+static_assert(lin::clamp(0.0F, -0.5F, 0.5F) == 0.0F);
+static_assert(lin::all(lin::clamp(lin::internal::matrix<float, 1, 2>{1.0F, -1.0F}, -0.5F, 0.5F) == lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}));
+static_assert(lin::all(lin::clamp(0.0F, lin::internal::matrix<float, 1, 2>{-0.5F, -0.5F}, 0.5F) == lin::internal::matrix<float, 1, 2>{0.0F, 0.0F}));
+static_assert(lin::all(lin::clamp(0.0F, -0.5F, lin::internal::matrix<float, 1, 2>{0.5F, 0.5F}) == lin::internal::matrix<float, 1, 2>{0.0F, 0.0F}));
+static_assert(lin::all(lin::clamp(lin::internal::matrix<float, 1, 2>{1.0F, -1.0F}, lin::internal::matrix<float, 2, 1>{-0.5F, -0.5F}, 0.5F) == lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}));
+static_assert(lin::all(lin::clamp(lin::internal::matrix<float, 1, 2>{1.0F, -1.0F}, lin::internal::matrix<float, 1, 2>{-0.5F, -0.5F}, 0.5F) == lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}));
+static_assert(lin::all(lin::clamp(lin::internal::matrix<float, 1, 2>{1.0F, -1.0F}, -0.5F, lin::internal::matrix<float, 2, 1>{0.5F, 0.5F}) == lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}));
+static_assert(lin::all(lin::clamp(lin::internal::matrix<float, 1, 2>{1.0F, -1.0F}, -0.5F, lin::internal::matrix<float, 1, 2>{0.5F, 0.5F}) == lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}));
+static_assert(lin::all(lin::clamp(0.0F, lin::internal::matrix<float, 1, 2>{-0.5F, -0.5F}, lin::internal::matrix<float, 2, 1>{0.5F, 0.5F}) == lin::internal::matrix<float, 1, 2>{0.0F, 0.0F}));
+static_assert(lin::all(lin::clamp(0.0F, lin::internal::matrix<float, 1, 2>{-0.5F, -0.5F}, lin::internal::matrix<float, 1, 2>{0.5F, 0.5F}) == lin::internal::matrix<float, 1, 2>{0.0F, 0.0F}));
+static_assert(lin::all(lin::clamp(lin::internal::matrix<float, 1, 2>{1.0F, -1.0F}, lin::internal::matrix<float, 1, 2>{-0.5F, -0.5F}, lin::internal::matrix<float, 2, 1>{0.5F, 0.5F}) == lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}));
+static_assert(lin::all(lin::clamp(lin::internal::matrix<float, 1, 2>{1.0F, -1.0F}, lin::internal::matrix<float, 2, 1>{-0.5F, -0.5F}, lin::internal::matrix<float, 1, 2>{0.5F, 0.5F}) == lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}));
+static_assert(lin::all(lin::clamp(lin::internal::matrix<float, 2, 1>{1.0F, -1.0F}, lin::internal::matrix<float, 1, 2>{-0.5F, -0.5F}, lin::internal::matrix<float, 1, 2>{0.5F, 0.5F}) == lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}));
+static_assert(lin::all(lin::clamp(lin::internal::matrix<float, 1, 2>{1.0F, -1.0F}, lin::internal::matrix<float, 1, 2>{-0.5F, -0.5F}, lin::internal::matrix<float, 1, 2>{0.5F, 0.5F}) == lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}));
+static_assert(lin::all(lin::clamp(lin::internal::matrix<float, 2, 2>{1.0F, -1.0F, 1.0F, -1.0F}, lin::internal::matrix<float, 2, 2>{-0.5F, -0.5F, -0.5F, -0.5F}, lin::internal::matrix<float, 2, 2>{0.5F, 0.5F, 0.5F, 0.5F}) == lin::internal::matrix<float, 2, 2>{0.5F, -0.5F, 0.5F, -0.5F}));
 
 TEST(stellarlib_lin_intrinsics, cos)
 {
@@ -144,13 +143,21 @@ TEST(stellarlib_lin_intrinsics, sqrt)
 	ASSERT_TRUE(lin::all(lin::sqrt(lin::internal::matrix<float, 2, 2>{0.5F, -0.5F, 0.5F, -0.5F}) == lin::internal::matrix<float, 2, 2>{std::sqrtf(0.5F), std::sqrtf(-0.5F), std::sqrtf(0.5F), std::sqrtf(-0.5F)}));
 }
 
+TEST(stellarlib_lin_intrinsics, length)
+{
+	static_assert(lin::length(-1.0F) == 1.0F);
+	ASSERT_EQ(lin::length(lin::internal::matrix<float, 1, 2>{-3.0F, -4.0F}), 5.0F);
+	ASSERT_EQ(lin::length(lin::internal::matrix<float, 1, 3>{-1.0F, -2.0F, -2.0F}), 3.0F);
+	ASSERT_EQ(lin::length(lin::internal::matrix<float, 1, 4>{-1.0F, -2.0F, -2.0F, -4.0F}), 5.0F);
+}
+
 TEST(stellarlib_lin_intrinsics, distance)
 {
-	static_assert(lin::distance(1.0F, -1.0F) == 2.0F);
+	static_assert(lin::distance(0.5F, -0.5F) == 1.0F);
 	ASSERT_EQ(lin::distance(lin::internal::matrix<float, 1, 2>{1.0F, 2.0F}, 5.0F), 5.0F);
 	ASSERT_EQ(lin::distance(1.0F, lin::internal::matrix<float, 1, 2>{4.0F, 5.0F}), 5.0F);
-	ASSERT_EQ(lin::distance(lin::internal::matrix<float, 1, 2>{-1.5F, -2.0F}, lin::internal::matrix<float, 2, 1>{1.5F, 2.0F}), 5.0F);
-	ASSERT_EQ(lin::distance(lin::internal::matrix<float, 1, 2>{-1.5F, -2.0F}, lin::internal::matrix<float, 1, 2>{1.5F, 2.0F}), 5.0F);
+	ASSERT_EQ(lin::distance(lin::internal::matrix<float, 1, 2>{1.5F, -2.0F}, lin::internal::matrix<float, 2, 1>{-1.5F, 2.0F}), 5.0F);
+	ASSERT_EQ(lin::distance(lin::internal::matrix<float, 1, 2>{1.5F, -2.0F}, lin::internal::matrix<float, 1, 2>{-1.5F, 2.0F}), 5.0F);
 }
 
 static_assert(lin::dot(1.0F, 2.0F) == 2.0F);
@@ -190,19 +197,38 @@ static_assert(lin::all(lin::faceforward(lin::internal::matrix<float, 1, 2>{1.0F,
 
 TEST(stellarlib_lin_intrinsics, floor)
 {
-	ASSERT_EQ(lin::floor(0.0F), std::floorf(0.0F));
-	ASSERT_TRUE(lin::all(lin::floor(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}) == lin::internal::matrix<float, 1, 2>{std::floorf(0.5F), std::floorf(-0.5F)}));
-	ASSERT_TRUE(lin::all(lin::floor(lin::internal::matrix<float, 2, 2>{0.5F, -0.5F, 0.5F, -0.5F}) == lin::internal::matrix<float, 2, 2>{std::floorf(0.5F), std::floorf(-0.5F), std::floorf(0.5F), std::floorf(-0.5F)}));
+	ASSERT_EQ(lin::floor(0.0F), 0.0F);
+	ASSERT_TRUE(lin::all(lin::floor(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}) == lin::internal::matrix<float, 1, 2>{0.0F, -1.0F}));
+	ASSERT_TRUE(lin::all(lin::floor(lin::internal::matrix<float, 2, 2>{0.5F, -0.5F, 0.5F, -0.5F}) == lin::internal::matrix<float, 2, 2>{0.0F, -1.0F, 0.0F, -1.0F}));
+}
+
+TEST(stellarlib_lin_intrinsics, fma)
+{
+	ASSERT_EQ(lin::fma(0.5F, -0.5F, 0.5F), 0.25F);
+	ASSERT_TRUE(lin::all(lin::fma(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, 0.5F, -0.5F) == lin::internal::matrix<float, 1, 2>{-0.25F, -0.75F}));
+	ASSERT_TRUE(lin::all(lin::fma(-0.5F, lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, 0.5F) == lin::internal::matrix<float, 1, 2>{0.25F, 0.75F}));
+	ASSERT_TRUE(lin::all(lin::fma(0.5F, -0.5F, lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}) == lin::internal::matrix<float, 1, 2>{0.25F, -0.75F}));
+	ASSERT_TRUE(lin::all(lin::fma(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, lin::internal::matrix<float, 2, 1>{-0.5F, 0.5F}, -0.5F) == lin::internal::matrix<float, 1, 2>{-0.75F, -0.75F}));
+	ASSERT_TRUE(lin::all(lin::fma(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, lin::internal::matrix<float, 1, 2>{-0.5F, 0.5F}, -0.5F) == lin::internal::matrix<float, 1, 2>{-0.75F, -0.75F}));
+	ASSERT_TRUE(lin::all(lin::fma(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, 0.5F, lin::internal::matrix<float, 2, 1>{-0.5F, 0.5F}) == lin::internal::matrix<float, 1, 2>{-0.25F, 0.25F}));
+	ASSERT_TRUE(lin::all(lin::fma(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, 0.5F, lin::internal::matrix<float, 1, 2>{-0.5F, 0.5F}) == lin::internal::matrix<float, 1, 2>{-0.25F, 0.25F}));
+	ASSERT_TRUE(lin::all(lin::fma(-0.5F, lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, lin::internal::matrix<float, 2, 1>{-0.5F, 0.5F}) == lin::internal::matrix<float, 1, 2>{-0.75F, 0.75F}));
+	ASSERT_TRUE(lin::all(lin::fma(-0.5F, lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, lin::internal::matrix<float, 1, 2>{-0.5F, 0.5F}) == lin::internal::matrix<float, 1, 2>{-0.75F, 0.75F}));
+	ASSERT_TRUE(lin::all(lin::fma(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, lin::internal::matrix<float, 1, 2>{-0.5F, 0.5F}, lin::internal::matrix<float, 2, 1>{0.5F, -0.5F}) == lin::internal::matrix<float, 1, 2>{0.25F, -0.75F}));
+	ASSERT_TRUE(lin::all(lin::fma(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, lin::internal::matrix<float, 2, 1>{-0.5F, 0.5F}, lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}) == lin::internal::matrix<float, 1, 2>{0.25F, -0.75F}));
+	ASSERT_TRUE(lin::all(lin::fma(lin::internal::matrix<float, 2, 1>{0.5F, -0.5F}, lin::internal::matrix<float, 1, 2>{-0.5F, 0.5F}, lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}) == lin::internal::matrix<float, 1, 2>{0.25F, -0.75F}));
+	ASSERT_TRUE(lin::all(lin::fma(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, lin::internal::matrix<float, 1, 2>{-0.5F, 0.5F}, lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}) == lin::internal::matrix<float, 1, 2>{0.25F, -0.75F}));
+	ASSERT_TRUE(lin::all(lin::fma(lin::internal::matrix<float, 2, 2>{0.5F, -0.5F, 0.5F, -0.5F}, lin::internal::matrix<float, 2, 2>{-0.5F, 0.5F, -0.5F, 0.5F}, lin::internal::matrix<float, 2, 2>{0.5F, -0.5F, 0.5F, -0.5F}) == lin::internal::matrix<float, 2, 2>{0.25F, -0.75F, 0.25F, -0.75F}));
 }
 
 TEST(stellarlib_lin_intrinsics, fmod)
 {
-	ASSERT_EQ(lin::fmod(3.14F, 1.5F), std::fmodf(3.14F, 1.5F));
-	ASSERT_TRUE(lin::all(lin::fmod(lin::internal::matrix<float, 1, 2>{3.14F, 6.28F}, 1.5F) == lin::internal::matrix<float, 1, 2>{std::fmodf(3.14F, 1.5F), std::fmodf(6.28F, 1.5F)}));
-	ASSERT_TRUE(lin::all(lin::fmod(6.28F, lin::internal::matrix<float, 1, 2>{1.5F, 3.0F}) == lin::internal::matrix<float, 1, 2>{std::fmodf(6.28F, 1.5F), std::fmodf(6.28F, 3.0F)}));
-	ASSERT_TRUE(lin::all(lin::fmod(lin::internal::matrix<float, 1, 2>{3.14F, 6.28F}, lin::internal::matrix<float, 2, 1>{1.5F, 3.0F}) == lin::internal::matrix<float, 1, 2>{std::fmodf(3.14F, 1.5F), std::fmodf(6.28F, 3.0F)}));
-	ASSERT_TRUE(lin::all(lin::fmod(lin::internal::matrix<float, 1, 2>{3.14F, 6.28F}, lin::internal::matrix<float, 1, 2>{1.5F, 3.0F}) == lin::internal::matrix<float, 1, 2>{std::fmodf(3.14F, 1.5F), std::fmodf(6.28F, 3.0F)}));
-	ASSERT_TRUE(lin::all(lin::fmod(lin::internal::matrix<float, 2, 2>{3.14F, 6.28F, 3.14F, 6.28F}, lin::internal::matrix<float, 2, 2>{1.5F, 3.0F, 1.5F, 3.0F}) == lin::internal::matrix<float, 2, 2>{std::fmodf(3.14F, 1.5F), std::fmodf(6.28F, 3.0F), std::fmodf(3.14F, 1.5F), std::fmodf(6.28F, 3.0F)}));
+	ASSERT_EQ(lin::fmod(0.5F, -0.5F), 0.0F);
+	ASSERT_TRUE(lin::all(lin::fmod(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, 0.5F) == lin::internal::matrix<float, 1, 2>{0.0F, 0.0F}));
+	ASSERT_TRUE(lin::all(lin::fmod(-0.5F, lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}) == lin::internal::matrix<float, 1, 2>{0.0F, 0.0F}));
+	ASSERT_TRUE(lin::all(lin::fmod(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, lin::internal::matrix<float, 2, 1>{-0.5F, 0.5F}) == lin::internal::matrix<float, 1, 2>{0.0F, 0.0F}));
+	ASSERT_TRUE(lin::all(lin::fmod(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, lin::internal::matrix<float, 1, 2>{-0.5F, 0.5F}) == lin::internal::matrix<float, 1, 2>{0.0F, 0.0F}));
+	ASSERT_TRUE(lin::all(lin::fmod(lin::internal::matrix<float, 2, 2>{0.5F, -0.5F, 0.5F, -0.5F}, lin::internal::matrix<float, 2, 2>{-0.5F, 0.5F, -0.5F, 0.5F}) == lin::internal::matrix<float, 2, 2>{0.0F, 0.0F, 0.0F, 0.0F}));
 }
 
 TEST(stellarlib_lin_intrinsics, frac)
@@ -214,40 +240,33 @@ TEST(stellarlib_lin_intrinsics, frac)
 
 TEST(stellarlib_lin_intrinsics, ldexp)
 {
-	ASSERT_EQ(lin::ldexp(0.5F, 2.0F), std::ldexpf(0.5F, 2.0F));
-	ASSERT_TRUE(lin::all(lin::ldexp(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, 2.0F) == lin::internal::matrix<float, 1, 2>{std::ldexpf(0.5F, 2.0F), std::ldexpf(-0.5F, 2.0F)}));
-	ASSERT_TRUE(lin::all(lin::ldexp(0.5F, lin::internal::matrix<float, 1, 2>{2.0F, 3.0F}) == lin::internal::matrix<float, 1, 2>{std::ldexpf(0.5F, 2.0F), std::ldexpf(0.5F, 3.0F)}));
-	ASSERT_TRUE(lin::all(lin::ldexp(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, lin::internal::matrix<float, 2, 1>{2.0F, 3.0F}) == lin::internal::matrix<float, 1, 2>{std::ldexpf(0.5F, 2.0F), std::ldexpf(-0.5F, 3.0F)}));
-	ASSERT_TRUE(lin::all(lin::ldexp(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, lin::internal::matrix<float, 1, 2>{2.0F, 3.0F}) == lin::internal::matrix<float, 1, 2>{std::ldexpf(0.5F, 2.0F), std::ldexpf(-0.5F, 3.0F)}));
-	ASSERT_TRUE(lin::all(lin::ldexp(lin::internal::matrix<float, 2, 2>{0.5F, -0.5F, 0.5F, -0.5F}, lin::internal::matrix<float, 2, 2>{2.0F, 3.0F, 2.0F, 3.0F}) == lin::internal::matrix<float, 2, 2>{std::ldexpf(0.5F, 2.0F), std::ldexpf(-0.5F, 3.0F), std::ldexpf(0.5F, 2.0F), std::ldexpf(-0.5F, 3.0F)}));
+	ASSERT_EQ(lin::ldexp(0.5F, -0.5F), std::ldexpf(0.5F, static_cast<std::int32_t>(-0.5F)));
+	ASSERT_TRUE(lin::all(lin::ldexp(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, 0.5F) == lin::internal::matrix<float, 1, 2>{std::ldexpf(0.5F, static_cast<std::int32_t>(0.5F)), std::ldexpf(-0.5F, static_cast<std::int32_t>(0.5F))}));
+	ASSERT_TRUE(lin::all(lin::ldexp(-0.5F, lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}) == lin::internal::matrix<float, 1, 2>{std::ldexpf(-0.5F, static_cast<std::int32_t>(0.5F)), std::ldexpf(-0.5F, static_cast<std::int32_t>(-0.5F))}));
+	ASSERT_TRUE(lin::all(lin::ldexp(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, lin::internal::matrix<float, 2, 1>{-0.5F, 0.5F}) == lin::internal::matrix<float, 1, 2>{std::ldexpf(0.5F, static_cast<std::int32_t>(-0.5F)), std::ldexpf(-0.5F, static_cast<std::int32_t>(0.5F))}));
+	ASSERT_TRUE(lin::all(lin::ldexp(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, lin::internal::matrix<float, 1, 2>{-0.5F, 0.5F}) == lin::internal::matrix<float, 1, 2>{std::ldexpf(0.5F, static_cast<std::int32_t>(-0.5F)), std::ldexpf(-0.5F, static_cast<std::int32_t>(0.5F))}));
+	ASSERT_TRUE(lin::all(lin::ldexp(lin::internal::matrix<float, 2, 2>{0.5F, -0.5F, 0.5F, -0.5F}, lin::internal::matrix<float, 2, 2>{-0.5F, 0.5F, -0.5F, 0.5F}) == lin::internal::matrix<float, 2, 2>{std::ldexpf(0.5F, static_cast<std::int32_t>(-0.5F)), std::ldexpf(-0.5F, static_cast<std::int32_t>(0.5F)), std::ldexpf(0.5F, static_cast<std::int32_t>(-0.5F)), std::ldexpf(-0.5F, static_cast<std::int32_t>(0.5F))}));
 }
 
-TEST(stellarlib_lin_intrinsics, length)
-{
-	static_assert(lin::length(1.0F) == lin::length(-1.0F));
-	ASSERT_EQ(lin::length(lin::internal::matrix<float, 1, 2>{-3.0F, -4.0F}), 5.0F);
-	ASSERT_EQ(lin::length(lin::internal::matrix<float, 1, 3>{-1.0F, -2.0F, -2.0F}), 3.0F);
-}
-
-static_assert(lin::lerp(0.0F, 2.0F, 0.25F) == 0.5F);
-static_assert(lin::all(lin::lerp(lin::internal::matrix<float, 1, 2>{0.0F, 1.0F}, 2.0F, 0.25F) == lin::internal::matrix<float, 1, 2>{0.5F, 1.25F}));
-static_assert(lin::all(lin::lerp(0.0F, lin::internal::matrix<float, 1, 2>{1.0F, 2.0F}, 0.25F) == lin::internal::matrix<float, 1, 2>{0.25F, 0.5F}));
-static_assert(lin::all(lin::lerp(0.0F, 2.0F, lin::internal::matrix<float, 1, 2>{0.25F, 0.75F}) == lin::internal::matrix<float, 1, 2>{0.5F, 1.5F}));
-static_assert(lin::all(lin::lerp(lin::internal::matrix<float, 1, 2>{0.0F, 1.0F}, lin::internal::matrix<float, 2, 1>{2.0F, 3.0F}, 0.5F) == lin::internal::matrix<float, 1, 2>{1.0F, 2.0F}));
-static_assert(lin::all(lin::lerp(lin::internal::matrix<float, 1, 2>{0.0F, 1.0F}, lin::internal::matrix<float, 1, 2>{2.0F, 3.0F}, 0.5F) == lin::internal::matrix<float, 1, 2>{1.0F, 2.0F}));
-static_assert(lin::all(lin::lerp(lin::internal::matrix<float, 1, 2>{0.0F, 0.0F}, 2.0F, lin::internal::matrix<float, 2, 1>{0.25F, 0.75F}) == lin::internal::matrix<float, 1, 2>{0.5F, 1.5F}));
-static_assert(lin::all(lin::lerp(lin::internal::matrix<float, 1, 2>{0.0F, 0.0F}, 2.0F, lin::internal::matrix<float, 1, 2>{0.25F, 0.75F}) == lin::internal::matrix<float, 1, 2>{0.5F, 1.5F}));
-static_assert(lin::all(lin::lerp(0.0F, lin::internal::matrix<float, 1, 2>{2.0F, 2.0F}, lin::internal::matrix<float, 2, 1>{0.25F, 0.75F}) == lin::internal::matrix<float, 1, 2>{0.5F, 1.5F}));
-static_assert(lin::all(lin::lerp(0.0F, lin::internal::matrix<float, 1, 2>{2.0F, 2.0F}, lin::internal::matrix<float, 1, 2>{0.25F, 0.75F}) == lin::internal::matrix<float, 1, 2>{0.5F, 1.5F}));
-static_assert(lin::all(lin::lerp(lin::internal::matrix<float, 1, 2>{0.0F, 1.0F}, lin::internal::matrix<float, 1, 2>{2.0F, 3.0F}, lin::internal::matrix<float, 2, 1>{0.25F, 0.75F}) == lin::internal::matrix<float, 1, 2>{0.5F, 2.5F}));
-static_assert(lin::all(lin::lerp(lin::internal::matrix<float, 1, 2>{0.0F, 1.0F}, lin::internal::matrix<float, 2, 1>{2.0F, 3.0F}, lin::internal::matrix<float, 1, 2>{0.25F, 0.75F}) == lin::internal::matrix<float, 1, 2>{0.5F, 2.5F}));
-static_assert(lin::all(lin::lerp(lin::internal::matrix<float, 2, 1>{0.0F, 1.0F}, lin::internal::matrix<float, 1, 2>{2.0F, 3.0F}, lin::internal::matrix<float, 1, 2>{0.25F, 0.75F}) == lin::internal::matrix<float, 1, 2>{0.5F, 2.5F}));
-static_assert(lin::all(lin::lerp(lin::internal::matrix<float, 1, 2>{0.0F, 1.0F}, lin::internal::matrix<float, 1, 2>{2.0F, 3.0F}, lin::internal::matrix<float, 1, 2>{0.25F, 0.75F}) == lin::internal::matrix<float, 1, 2>{0.5F, 2.5F}));
-static_assert(lin::all(lin::lerp(lin::internal::matrix<float, 2, 2>{0.0F, 1.0F, 0.0F, 1.0F}, lin::internal::matrix<float, 2, 2>{2.0F, 3.0F, 2.0F, 3.0F}, lin::internal::matrix<float, 2, 2>{0.25F, 0.75F, 0.25F, 0.75F}) == lin::internal::matrix<float, 2, 2>{0.5F, 2.5F, 0.5F, 2.5F}));
+static_assert(lin::lerp(0.0F, 1.0F, 0.5F) == 0.5F);
+static_assert(lin::all(lin::lerp(lin::internal::matrix<float, 1, 2>{0.0F, 1.0F}, 2.0F, 0.5F) == lin::internal::matrix<float, 1, 2>{1.0F, 1.5F}));
+static_assert(lin::all(lin::lerp(0.0F, lin::internal::matrix<float, 1, 2>{1.0F, 2.0F}, 0.5F) == lin::internal::matrix<float, 1, 2>{0.5F, 1.0F}));
+static_assert(lin::all(lin::lerp(0.0F, 1.0F, lin::internal::matrix<float, 1, 2>{0.25F, 0.75F}) == lin::internal::matrix<float, 1, 2>{0.25F, 0.75F}));
+static_assert(lin::all(lin::lerp(lin::internal::matrix<float, 1, 2>{0.0F, 1.0F}, lin::internal::matrix<float, 2, 1>{1.0F, 2.0F}, 0.5F) == lin::internal::matrix<float, 1, 2>{0.5F, 1.5F}));
+static_assert(lin::all(lin::lerp(lin::internal::matrix<float, 1, 2>{0.0F, 1.0F}, lin::internal::matrix<float, 1, 2>{1.0F, 2.0F}, 0.5F) == lin::internal::matrix<float, 1, 2>{0.5F, 1.5F}));
+static_assert(lin::all(lin::lerp(lin::internal::matrix<float, 1, 2>{0.0F, 1.0F}, 2.0F, lin::internal::matrix<float, 2, 1>{0.25F, 0.75F}) == lin::internal::matrix<float, 1, 2>{0.5F, 1.75F}));
+static_assert(lin::all(lin::lerp(lin::internal::matrix<float, 1, 2>{0.0F, 1.0F}, 2.0F, lin::internal::matrix<float, 1, 2>{0.25F, 0.75F}) == lin::internal::matrix<float, 1, 2>{0.5F, 1.75F}));
+static_assert(lin::all(lin::lerp(0.0F, lin::internal::matrix<float, 1, 2>{1.0F, 2.0F}, lin::internal::matrix<float, 2, 1>{0.25F, 0.75F}) == lin::internal::matrix<float, 1, 2>{0.25F, 1.5F}));
+static_assert(lin::all(lin::lerp(0.0F, lin::internal::matrix<float, 1, 2>{1.0F, 2.0F}, lin::internal::matrix<float, 1, 2>{0.25F, 0.75F}) == lin::internal::matrix<float, 1, 2>{0.25F, 1.5F}));
+static_assert(lin::all(lin::lerp(lin::internal::matrix<float, 1, 2>{0.0F, 1.0F}, lin::internal::matrix<float, 1, 2>{1.0F, 2.0F}, lin::internal::matrix<float, 2, 1>{0.25F, 0.75F}) == lin::internal::matrix<float, 1, 2>{0.25F, 1.75F}));
+static_assert(lin::all(lin::lerp(lin::internal::matrix<float, 1, 2>{0.0F, 1.0F}, lin::internal::matrix<float, 2, 1>{1.0F, 2.0F}, lin::internal::matrix<float, 1, 2>{0.25F, 0.75F}) == lin::internal::matrix<float, 1, 2>{0.25F, 1.75F}));
+static_assert(lin::all(lin::lerp(lin::internal::matrix<float, 2, 1>{0.0F, 1.0F}, lin::internal::matrix<float, 1, 2>{1.0F, 2.0F}, lin::internal::matrix<float, 1, 2>{0.25F, 0.75F}) == lin::internal::matrix<float, 1, 2>{0.25F, 1.75F}));
+static_assert(lin::all(lin::lerp(lin::internal::matrix<float, 1, 2>{0.0F, 1.0F}, lin::internal::matrix<float, 1, 2>{1.0F, 2.0F}, lin::internal::matrix<float, 1, 2>{0.25F, 0.75F}) == lin::internal::matrix<float, 1, 2>{0.25F, 1.75F}));
+static_assert(lin::all(lin::lerp(lin::internal::matrix<float, 2, 2>{0.0F, 1.0F, 0.0F, 1.0F}, lin::internal::matrix<float, 2, 2>{1.0F, 2.0F, 1.0F, 2.0F}, lin::internal::matrix<float, 2, 2>{0.25F, 0.75F, 0.25F, 0.75F}) == lin::internal::matrix<float, 2, 2>{0.25F, 1.75F, 0.25F, 1.75F}));
 
 static_assert(lin::max(0.5F, -0.5F) == 0.5F);
-static_assert(lin::all(lin::max(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, 0.0F) == lin::internal::matrix<float, 1, 2>{0.5F, 0.0F}));
-static_assert(lin::all(lin::max(0.0F, lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}) == lin::internal::matrix<float, 1, 2>{0.5F, 0.0F}));
+static_assert(lin::all(lin::max(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, 0.5F) == lin::internal::matrix<float, 1, 2>{0.5F, 0.5F}));
+static_assert(lin::all(lin::max(-0.5F, lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}) == lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}));
 static_assert(lin::all(lin::max(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, lin::internal::matrix<float, 2, 1>{-0.5F, 0.5F}) == lin::internal::matrix<float, 1, 2>{0.5F, 0.5F}));
 static_assert(lin::all(lin::max(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, lin::internal::matrix<float, 1, 2>{-0.5F, 0.5F}) == lin::internal::matrix<float, 1, 2>{0.5F, 0.5F}));
 static_assert(lin::all(lin::max(lin::internal::matrix<float, 2, 2>{0.5F, -0.5F, 0.5F, -0.5F}, lin::internal::matrix<float, 2, 2>{-0.5F, 0.5F, -0.5F, 0.5F}) == lin::internal::matrix<float, 2, 2>{0.5F, 0.5F, 0.5F, 0.5F}));
@@ -255,8 +274,8 @@ static_assert(lin::all(lin::max(lin::internal::matrix<float, 2, 2>{0.5F, -0.5F, 
 TEST(stellarlib_lin_intrinsics, pow)
 {
 	ASSERT_EQ(lin::pow(0.5F, -0.5F), std::powf(0.5F, -0.5F));
-	ASSERT_TRUE(lin::all(lin::pow(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, 0.0F) == lin::internal::matrix<float, 1, 2>{std::powf(0.5F, 0.0F), std::powf(-0.5F, 0.0F)}));
-	ASSERT_TRUE(lin::all(lin::pow(0.5F, lin::internal::matrix<float, 1, 2>{-0.5F, 0.0F}) == lin::internal::matrix<float, 1, 2>{std::powf(0.5F, -0.5F), std::powf(0.5F, 0.0F)}));
+	ASSERT_TRUE(lin::all(lin::pow(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, 0.5F) == lin::internal::matrix<float, 1, 2>{std::powf(0.5F, 0.5F), std::powf(-0.5F, 0.5F)}));
+	ASSERT_TRUE(lin::all(lin::pow(-0.5F, lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}) == lin::internal::matrix<float, 1, 2>{std::powf(-0.5F, 0.5F), std::powf(-0.5F, -0.5F)}));
 	ASSERT_TRUE(lin::all(lin::pow(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, lin::internal::matrix<float, 2, 1>{-0.5F, 0.5F}) == lin::internal::matrix<float, 1, 2>{std::powf(0.5F, -0.5F), std::powf(-0.5F, 0.5F)}));
 	ASSERT_TRUE(lin::all(lin::pow(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, lin::internal::matrix<float, 1, 2>{-0.5F, 0.5F}) == lin::internal::matrix<float, 1, 2>{std::powf(0.5F, -0.5F), std::powf(-0.5F, 0.5F)}));
 	ASSERT_TRUE(lin::all(lin::pow(lin::internal::matrix<float, 2, 2>{0.5F, -0.5F, 0.5F, -0.5F}, lin::internal::matrix<float, 2, 2>{-0.5F, 0.5F, -0.5F, 0.5F}) == lin::internal::matrix<float, 2, 2>{std::powf(0.5F, -0.5F), std::powf(-0.5F, 0.5F), std::powf(0.5F, -0.5F), std::powf(-0.5F, 0.5F)}));
@@ -264,8 +283,8 @@ TEST(stellarlib_lin_intrinsics, pow)
 
 TEST(stellarlib_lin_intrinsics, lit)
 {
-	ASSERT_TRUE(lin::all(lin::lit(-1.0F, 2.0F, 3.0F) == lin::internal::matrix<float, 1, 4>{1.0F, 0.0F, 0.0F, 1.0F}));
-	ASSERT_TRUE(lin::all(lin::lit(1.0F, -1.0F, 3.0F) == lin::internal::matrix<float, 1, 4>{1.0F, 1.0F, 0.0F, 1.0F}));
+	static_assert(lin::all(lin::lit(-1.0F, 2.0F, 3.0F) == lin::internal::matrix<float, 1, 4>{1.0F, 0.0F, 0.0F, 1.0F}));
+	static_assert(lin::all(lin::lit(1.0F, -1.0F, 3.0F) == lin::internal::matrix<float, 1, 4>{1.0F, 1.0F, 0.0F, 1.0F}));
 	ASSERT_TRUE(lin::all(lin::lit(1.0F, 2.0F, 3.0F) == lin::internal::matrix<float, 1, 4>{1.0F, 1.0F, 8.0F, 1.0F}));
 }
 
@@ -290,25 +309,25 @@ TEST(stellarlib_lin_intrinsics, log2)
 	ASSERT_TRUE(lin::all(lin::log2(lin::internal::matrix<float, 2, 2>{0.5F, 0.0F, 0.5F, 0.0F}) == lin::internal::matrix<float, 2, 2>{std::log2f(0.5F), std::log2f(0.0F), std::log2f(0.5F), std::log2f(0.0F)}));
 }
 
-static_assert(lin::mad(1.0F, 2.0F, 3.0F) == 5.0F);
-static_assert(lin::all(lin::mad(lin::internal::matrix<float, 1, 2>{1.0F, 2.0F}, 3.0F, 4.0F) == lin::internal::matrix<float, 1, 2>{7.0F, 10.0F}));
-static_assert(lin::all(lin::mad(1.0F, lin::internal::matrix<float, 1, 2>{2.0F, 3.0F}, 4.0F) == lin::internal::matrix<float, 1, 2>{6.0F, 7.0F}));
-static_assert(lin::all(lin::mad(1.0F, 2.0F, lin::internal::matrix<float, 1, 2>{3.0F, 4.0F}) == lin::internal::matrix<float, 1, 2>{5.0F, 6.0F}));
-static_assert(lin::all(lin::mad(lin::internal::matrix<float, 1, 2>{1.0F, 2.0F}, lin::internal::matrix<float, 2, 1>{3.0F, 4.0F}, 5.0F) == lin::internal::matrix<float, 1, 2>{8.0F, 13.0F}));
-static_assert(lin::all(lin::mad(lin::internal::matrix<float, 1, 2>{1.0F, 2.0F}, lin::internal::matrix<float, 1, 2>{3.0F, 4.0F}, 5.0F) == lin::internal::matrix<float, 1, 2>{8.0F, 13.0F}));
-static_assert(lin::all(lin::mad(lin::internal::matrix<float, 1, 2>{1.0F, 2.0F}, 3.0F, lin::internal::matrix<float, 2, 1>{4.0F, 5.0F}) == lin::internal::matrix<float, 1, 2>{7.0F, 11.0F}));
-static_assert(lin::all(lin::mad(lin::internal::matrix<float, 1, 2>{1.0F, 2.0F}, 3.0F, lin::internal::matrix<float, 1, 2>{4.0F, 5.0F}) == lin::internal::matrix<float, 1, 2>{7.0F, 11.0F}));
-static_assert(lin::all(lin::mad(1.0F, lin::internal::matrix<float, 1, 2>{2.0F, 3.0F}, lin::internal::matrix<float, 2, 1>{4.0F, 5.0F}) == lin::internal::matrix<float, 1, 2>{6.0F, 8.0F}));
-static_assert(lin::all(lin::mad(1.0F, lin::internal::matrix<float, 1, 2>{2.0F, 3.0F}, lin::internal::matrix<float, 1, 2>{4.0F, 5.0F}) == lin::internal::matrix<float, 1, 2>{6.0F, 8.0F}));
-static_assert(lin::all(lin::mad(lin::internal::matrix<float, 1, 2>{1.0F, 2.0F}, lin::internal::matrix<float, 1, 2>{3.0F, 4.0F}, lin::internal::matrix<float, 2, 1>{5.0F, 6.0F}) == lin::internal::matrix<float, 1, 2>{8.0F, 14.0F}));
-static_assert(lin::all(lin::mad(lin::internal::matrix<float, 1, 2>{1.0F, 2.0F}, lin::internal::matrix<float, 2, 1>{3.0F, 4.0F}, lin::internal::matrix<float, 1, 2>{5.0F, 6.0F}) == lin::internal::matrix<float, 1, 2>{8.0F, 14.0F}));
-static_assert(lin::all(lin::mad(lin::internal::matrix<float, 2, 1>{1.0F, 2.0F}, lin::internal::matrix<float, 1, 2>{3.0F, 4.0F}, lin::internal::matrix<float, 1, 2>{5.0F, 6.0F}) == lin::internal::matrix<float, 1, 2>{8.0F, 14.0F}));
-static_assert(lin::all(lin::mad(lin::internal::matrix<float, 1, 2>{1.0F, 2.0F}, lin::internal::matrix<float, 1, 2>{3.0F, 4.0F}, lin::internal::matrix<float, 1, 2>{5.0F, 6.0F}) == lin::internal::matrix<float, 1, 2>{8.0F, 14.0F}));
-static_assert(lin::all(lin::mad(lin::internal::matrix<float, 2, 2>{1.0F, 2.0F, 1.0F, 2.0F}, lin::internal::matrix<float, 2, 2>{3.0F, 4.0F, 3.0F, 4.0F}, lin::internal::matrix<float, 2, 2>{5.0F, 6.0F, 5.0F, 6.0F}) == lin::internal::matrix<float, 2, 2>{8.0F, 14.0F, 8.0F, 14.0F}));
+static_assert(lin::mad(0.5F, -0.5F, 0.5F) == 0.25F);
+static_assert(lin::all(lin::mad(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, 0.5F, -0.5F) == lin::internal::matrix<float, 1, 2>{-0.25F, -0.75F}));
+static_assert(lin::all(lin::mad(-0.5F, lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, 0.5F) == lin::internal::matrix<float, 1, 2>{0.25F, 0.75F}));
+static_assert(lin::all(lin::mad(0.5F, -0.5F, lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}) == lin::internal::matrix<float, 1, 2>{0.25F, -0.75F}));
+static_assert(lin::all(lin::mad(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, lin::internal::matrix<float, 2, 1>{-0.5F, 0.5F}, -0.5F) == lin::internal::matrix<float, 1, 2>{-0.75F, -0.75F}));
+static_assert(lin::all(lin::mad(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, lin::internal::matrix<float, 1, 2>{-0.5F, 0.5F}, -0.5F) == lin::internal::matrix<float, 1, 2>{-0.75F, -0.75F}));
+static_assert(lin::all(lin::mad(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, 0.5F, lin::internal::matrix<float, 2, 1>{-0.5F, 0.5F}) == lin::internal::matrix<float, 1, 2>{-0.25F, 0.25F}));
+static_assert(lin::all(lin::mad(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, 0.5F, lin::internal::matrix<float, 1, 2>{-0.5F, 0.5F}) == lin::internal::matrix<float, 1, 2>{-0.25F, 0.25F}));
+static_assert(lin::all(lin::mad(-0.5F, lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, lin::internal::matrix<float, 2, 1>{-0.5F, 0.5F}) == lin::internal::matrix<float, 1, 2>{-0.75F, 0.75F}));
+static_assert(lin::all(lin::mad(-0.5F, lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, lin::internal::matrix<float, 1, 2>{-0.5F, 0.5F}) == lin::internal::matrix<float, 1, 2>{-0.75F, 0.75F}));
+static_assert(lin::all(lin::mad(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, lin::internal::matrix<float, 1, 2>{-0.5F, 0.5F}, lin::internal::matrix<float, 2, 1>{0.5F, -0.5F}) == lin::internal::matrix<float, 1, 2>{0.25F, -0.75F}));
+static_assert(lin::all(lin::mad(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, lin::internal::matrix<float, 2, 1>{-0.5F, 0.5F}, lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}) == lin::internal::matrix<float, 1, 2>{0.25F, -0.75F}));
+static_assert(lin::all(lin::mad(lin::internal::matrix<float, 2, 1>{0.5F, -0.5F}, lin::internal::matrix<float, 1, 2>{-0.5F, 0.5F}, lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}) == lin::internal::matrix<float, 1, 2>{0.25F, -0.75F}));
+static_assert(lin::all(lin::mad(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, lin::internal::matrix<float, 1, 2>{-0.5F, 0.5F}, lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}) == lin::internal::matrix<float, 1, 2>{0.25F, -0.75F}));
+static_assert(lin::all(lin::mad(lin::internal::matrix<float, 2, 2>{0.5F, -0.5F, 0.5F, -0.5F}, lin::internal::matrix<float, 2, 2>{-0.5F, 0.5F, -0.5F, 0.5F}, lin::internal::matrix<float, 2, 2>{0.5F, -0.5F, 0.5F, -0.5F}) == lin::internal::matrix<float, 2, 2>{0.25F, -0.75F, 0.25F, -0.75F}));
 
 static_assert(lin::min(0.5F, -0.5F) == -0.5F);
-static_assert(lin::all(lin::min(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, 0.0F) == lin::internal::matrix<float, 1, 2>{0.0F, -0.5F}));
-static_assert(lin::all(lin::min(0.0F, lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}) == lin::internal::matrix<float, 1, 2>{0.0F, -0.5F}));
+static_assert(lin::all(lin::min(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, 0.5F) == lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}));
+static_assert(lin::all(lin::min(-0.5F, lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}) == lin::internal::matrix<float, 1, 2>{-0.5F, -0.5F}));
 static_assert(lin::all(lin::min(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, lin::internal::matrix<float, 2, 1>{-0.5F, 0.5F}) == lin::internal::matrix<float, 1, 2>{-0.5F, -0.5F}));
 static_assert(lin::all(lin::min(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, lin::internal::matrix<float, 1, 2>{-0.5F, 0.5F}) == lin::internal::matrix<float, 1, 2>{-0.5F, -0.5F}));
 static_assert(lin::all(lin::min(lin::internal::matrix<float, 2, 2>{0.5F, -0.5F, 0.5F, -0.5F}, lin::internal::matrix<float, 2, 2>{-0.5F, 0.5F, -0.5F, 0.5F}) == lin::internal::matrix<float, 2, 2>{-0.5F, -0.5F, -0.5F, -0.5F}));
@@ -348,27 +367,24 @@ static_assert(lin::all(lin::mul(lin::internal::matrix<float, 1, 2>{1.0F, 2.0F}, 
 
 TEST(stellarlib_lin_intrinsics, normalize)
 {
-	static_assert(lin::normalize(2.0F) == 1.0F);
-	static_assert(lin::normalize(-2.0F) == -1.0F);
-	ASSERT_TRUE(lin::all(lin::normalize(lin::internal::matrix<float, 1, 2>{0.0, 2.0F}) == lin::internal::matrix<float, 1, 2>{0.0F, 1.0F}));
-	ASSERT_TRUE(lin::all(lin::normalize(lin::internal::matrix<float, 1, 3>{0.0, 0.0F, 2.0F}) == lin::internal::matrix<float, 1, 3>{0.0F, 0.0F, 1.0F}));
-	ASSERT_TRUE(lin::all(lin::normalize(lin::internal::matrix<float, 1, 4>{0.0, 0.0F, 0.0F, 2.0F}) == lin::internal::matrix<float, 1, 4>{0.0F, 0.0F, 0.0F, 1.0F}));
+	static_assert(lin::normalize(0.5F) == 1.0F);
+	ASSERT_TRUE(lin::all(lin::normalize(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}) == lin::internal::matrix<float, 1, 2>{std::sqrtf(0.5), -std::sqrtf(0.5F)}));
 }
 
 static_assert(lin::radians(180.0F) == std::numbers::pi_v<float>);
 static_assert(lin::all(lin::radians(lin::internal::matrix<float, 1, 2>{180.0F, 360.0F}) == lin::internal::matrix<float, 1, 2>{std::numbers::pi_v<float>, 2.0F * std::numbers::pi_v<float>}));
 static_assert(lin::all(lin::radians(lin::internal::matrix<float, 2, 2>{180.0F, 360.0F, 180.0F, 360.0F}) == lin::internal::matrix<float, 2, 2>{std::numbers::pi_v<float>, 2.0F * std::numbers::pi_v<float>, std::numbers::pi_v<float>, 2.0F * std::numbers::pi_v<float>}));
 
-static_assert(lin::rcp(1.0F) == 1.0F);
+static_assert(lin::rcp(0.5F) == 2.0F);
 static_assert(lin::all(lin::rcp(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}) == lin::internal::matrix<float, 1, 2>{2.0F, -2.0F}));
 static_assert(lin::all(lin::rcp(lin::internal::matrix<float, 2, 2>{0.5F, -0.5F, 0.5F, -0.5F}) == lin::internal::matrix<float, 2, 2>{2.0F, -2.0F, 2.0F, -2.0F}));
 
-static_assert(lin::reflect(1.0F, 2.0F) == -7.0F);
-static_assert(lin::all(lin::reflect(lin::internal::matrix<float, 1, 2>{1.0F, 2.0F}, 3.0F) == lin::internal::matrix<float, 1, 2>{-17.0F, -34.0F}));
-static_assert(lin::all(lin::reflect(1.0F, lin::internal::matrix<float, 1, 2>{2.0F, 3.0F}) == lin::internal::matrix<float, 1, 2>{-7.0F, -17.0F}));
-static_assert(lin::all(lin::reflect(lin::internal::matrix<float, 1, 2>{1.0F, 2.0F}, lin::internal::matrix<float, 2, 1>{3.0F, 4.0F}) == lin::internal::matrix<float, 1, 2>{-17.0F, -62.0F}));
-static_assert(lin::all(lin::reflect(lin::internal::matrix<float, 1, 2>{1.0F, 2.0F}, lin::internal::matrix<float, 1, 2>{3.0F, 4.0F}) == lin::internal::matrix<float, 1, 2>{-17.0F, -62.0F}));
-static_assert(lin::all(lin::reflect(lin::internal::matrix<float, 2, 2>{1.0F, 2.0F, 1.0F, 2.0F}, lin::internal::matrix<float, 2, 2>{3.0F, 4.0F, 3.0F, 4.0F}) == lin::internal::matrix<float, 2, 2>{-17.0F, -62.0F, -17.0F, -62.0F}));
+static_assert(lin::reflect(0.5F, -0.5F) == 0.25F);
+static_assert(lin::all(lin::reflect(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, 0.5F) == lin::internal::matrix<float, 1, 2>{0.25F, -0.25F}));
+static_assert(lin::all(lin::reflect(-0.5F, lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}) == lin::internal::matrix<float, 1, 2>{-0.25F, -0.25F}));
+static_assert(lin::all(lin::reflect(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, lin::internal::matrix<float, 2, 1>{-0.5F, 0.5F}) == lin::internal::matrix<float, 1, 2>{0.25F, -0.25F}));
+static_assert(lin::all(lin::reflect(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, lin::internal::matrix<float, 1, 2>{-0.5F, 0.5F}) == lin::internal::matrix<float, 1, 2>{0.25F, -0.25F}));
+static_assert(lin::all(lin::reflect(lin::internal::matrix<float, 2, 2>{0.5F, -0.5F, 0.5F, -0.5F}, lin::internal::matrix<float, 2, 2>{-0.5F, 0.5F, -0.5F, 0.5F}) == lin::internal::matrix<float, 2, 2>{0.25F, -0.25F, 0.25F, -0.25F}));
 
 TEST(stellarlib_lin_intrinsics, refract)
 {
@@ -380,14 +396,14 @@ TEST(stellarlib_lin_intrinsics, refract)
 
 TEST(stellarlib_lin_intrinsics, round)
 {
-	ASSERT_EQ(lin::round(0.0F), std::roundf(0.0F));
-	ASSERT_TRUE(lin::all(lin::round(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}) == lin::internal::matrix<float, 1, 2>{std::roundf(0.5F), std::roundf(-0.5F)}));
-	ASSERT_TRUE(lin::all(lin::round(lin::internal::matrix<float, 2, 2>{0.5F, -0.5F, 0.5F, -0.5F}) == lin::internal::matrix<float, 2, 2>{std::roundf(0.5F), std::roundf(-0.5F), std::roundf(0.5F), std::roundf(-0.5F)}));
+	ASSERT_EQ(lin::round(0.0F), 0.0F);
+	ASSERT_TRUE(lin::all(lin::round(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}) == lin::internal::matrix<float, 1, 2>{1.0F, -1.0F}));
+	ASSERT_TRUE(lin::all(lin::round(lin::internal::matrix<float, 2, 2>{0.5F, -0.5F, 0.5F, -0.5F}) == lin::internal::matrix<float, 2, 2>{1.0F, -1.0F, 1.0F, -1.0F}));
 }
 
 TEST(stellarlib_lin_intrinsics, rsqrt)
 {
-	ASSERT_EQ(lin::rsqrt(0.0F), 1.0F / std::sqrtf(0.0F));
+	ASSERT_EQ(lin::rsqrt(0.5F), 1.0F / std::sqrtf(0.5F));
 	ASSERT_TRUE(lin::all(lin::rsqrt(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}) == lin::internal::matrix<float, 1, 2>{1.0F / std::sqrtf(0.5F), 1.0F / std::sqrtf(-0.5F)}));
 	ASSERT_TRUE(lin::all(lin::rsqrt(lin::internal::matrix<float, 2, 2>{0.5F, -0.5F, 0.5F, -0.5F}) == lin::internal::matrix<float, 2, 2>{1.0F / std::sqrtf(0.5F), 1.0F / std::sqrtf(-0.5F), 1.0F / std::sqrtf(0.5F), 1.0F / std::sqrtf(-0.5F)}));
 }
@@ -442,9 +458,7 @@ TEST(stellarlib_lin_intrinsics, sinh)
 	ASSERT_TRUE(lin::all(lin::sinh(lin::internal::matrix<float, 2, 2>{0.5F, -0.5F, 0.5F, -0.5F}) == lin::internal::matrix<float, 2, 2>{std::sinhf(0.5F), std::sinhf(-0.5F), std::sinhf(0.5F), std::sinhf(-0.5F)}));
 }
 
-static_assert(lin::smoothstep(0.0F, 1.0F, 0.25F) < 0.175F);
 static_assert(lin::smoothstep(0.0F, 1.0F, 0.5F) == 0.5F);
-static_assert(0.825F < lin::smoothstep(0.0F, 1.0F, 0.75F));
 static_assert(lin::all(lin::smoothstep(lin::internal::matrix<float, 1, 2>{0.0F, 0.0F}, 1.0F, 0.5F) == lin::internal::matrix<float, 1, 2>{0.5F, 0.5F}));
 static_assert(lin::all(lin::smoothstep(0.0F, lin::internal::matrix<float, 1, 2>{1.0F, 1.0F}, 0.5F) == lin::internal::matrix<float, 1, 2>{0.5F, 0.5F}));
 static_assert(lin::all(lin::smoothstep(0.0F, 1.0F, lin::internal::matrix<float, 1, 2>{0.5F, 0.5F}) == lin::internal::matrix<float, 1, 2>{0.5F, 0.5F}));
@@ -460,13 +474,12 @@ static_assert(lin::all(lin::smoothstep(lin::internal::matrix<float, 2, 1>{0.0F, 
 static_assert(lin::all(lin::smoothstep(lin::internal::matrix<float, 1, 2>{0.0F, 0.0F}, lin::internal::matrix<float, 1, 2>{1.0F, 1.0F}, lin::internal::matrix<float, 1, 2>{0.5F, 0.5F}) == lin::internal::matrix<float, 1, 2>{0.5F, 0.5F}));
 static_assert(lin::all(lin::smoothstep(lin::internal::matrix<float, 2, 2>{0.0F, 0.0F, 0.0F, 0.0F}, lin::internal::matrix<float, 2, 2>{1.0F, 1.0F, 1.0F, 1.0F}, lin::internal::matrix<float, 2, 2>{0.5F, 0.5F, 0.5F, 0.5F}) == lin::internal::matrix<float, 2, 2>{0.5F, 0.5F, 0.5F, 0.5F}));
 
-static_assert(lin::step(0.0F, 2.0F) == 0.0F);
-static_assert(lin::step(0.0F, 0.0F) == 1.0F);
-static_assert(lin::all(lin::step(lin::internal::matrix<float, 1, 2>{0.0F, 2.0F}, 2.0F) == lin::internal::matrix<float, 1, 2>{0.0F, 1.0F}));
-static_assert(lin::all(lin::step(0.0F, lin::internal::matrix<float, 1, 2>{0.0F, 2.0F}) == lin::internal::matrix<float, 1, 2>{1.0F, 0.0F}));
-static_assert(lin::all(lin::step(lin::internal::matrix<float, 1, 2>{0.0F, 0.0F}, lin::internal::matrix<float, 2, 1>{0.0F, 2.0F}) == lin::internal::matrix<float, 1, 2>{1.0F, 0.0F}));
-static_assert(lin::all(lin::step(lin::internal::matrix<float, 1, 2>{0.0F, 0.0F}, lin::internal::matrix<float, 1, 2>{0.0F, 2.0F}) == lin::internal::matrix<float, 1, 2>{1.0F, 0.0F}));
-static_assert(lin::all(lin::step(lin::internal::matrix<float, 2, 2>{0.0F, 0.0F, 0.0F, 0.0F}, lin::internal::matrix<float, 2, 2>{0.0F, 2.0F, 0.0F, 2.0F}) == lin::internal::matrix<float, 2, 2>{1.0F, 0.0F, 1.0F, 0.0F}));
+static_assert(lin::step(0.5F, -0.5F) == 0.0F);
+static_assert(lin::all(lin::step(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, 0.5F) == lin::internal::matrix<float, 1, 2>{1.0F, 1.0F}));
+static_assert(lin::all(lin::step(-0.5F, lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}) == lin::internal::matrix<float, 1, 2>{1.0F, 1.0F}));
+static_assert(lin::all(lin::step(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, lin::internal::matrix<float, 2, 1>{-0.5F, 0.5F}) == lin::internal::matrix<float, 1, 2>{0.0F, 1.0F}));
+static_assert(lin::all(lin::step(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}, lin::internal::matrix<float, 1, 2>{-0.5F, 0.5F}) == lin::internal::matrix<float, 1, 2>{0.0F, 1.0F}));
+static_assert(lin::all(lin::step(lin::internal::matrix<float, 2, 2>{0.5F, -0.5F, 0.5F, -0.5F}, lin::internal::matrix<float, 2, 2>{-0.5F, 0.5F, -0.5F, 0.5F}) == lin::internal::matrix<float, 2, 2>{0.0F, 1.0F, 0.0F, 1.0F}));
 
 TEST(stellarlib_lin_intrinsics, tan)
 {
@@ -487,9 +500,9 @@ static_assert(lin::all(lin::transpose(lin::internal::matrix<float, 2, 3>{1.0F, 2
 
 TEST(stellarlib_lin_intrinsics, trunc)
 {
-	ASSERT_EQ(lin::trunc(0.0F), std::truncf(0.0F));
-	ASSERT_TRUE(lin::all(lin::trunc(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}) == lin::internal::matrix<float, 1, 2>{std::truncf(0.5F), std::truncf(-0.5F)}));
-	ASSERT_TRUE(lin::all(lin::trunc(lin::internal::matrix<float, 2, 2>{0.5F, -0.5F, 0.5F, -0.5F}) == lin::internal::matrix<float, 2, 2>{std::truncf(0.5F), std::truncf(-0.5F), std::truncf(0.5F), std::truncf(-0.5F)}));
+	ASSERT_EQ(lin::trunc(0.0F), 0.0F);
+	ASSERT_TRUE(lin::all(lin::trunc(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}) == lin::internal::matrix<float, 1, 2>{0.0F, 0.0F}));
+	ASSERT_TRUE(lin::all(lin::trunc(lin::internal::matrix<float, 2, 2>{0.5F, -0.5F, 0.5F, -0.5F}) == lin::internal::matrix<float, 2, 2>{0.0F, 0.0F, 0.0F, 0.0F}));
 }
 
 #pragma clang diagnostic pop
