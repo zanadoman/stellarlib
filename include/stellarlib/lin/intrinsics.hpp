@@ -300,36 +300,36 @@ STELLARLIB_LIN_INTRINSICS_SINGLE_ARG_OPERATION_IMPL(cosh, x, {
 	return std::cosh(x);
 });
 
-template <typename T>
+template <typename T, typename U>
 [[nodiscard]]
-constexpr auto cross([[maybe_unused]] const T x, [[maybe_unused]] const T y) noexcept
-	requires (std::is_arithmetic_v<T>)
+constexpr auto cross([[maybe_unused]] const T x, [[maybe_unused]] const U y) noexcept
+	requires (std::is_arithmetic_v<T> && std::is_arithmetic_v<U>)
 {
-	return lin::internal::matrix<T, 1, 3>{};
+	return internal::matrix<std::common_type_t<T, U>, 1, 3>{};
 }
 
-template <typename T, std::size_t M, std::size_t N>
+template <typename T, std::size_t M, std::size_t N, typename U>
 [[nodiscard]]
-constexpr auto cross(const internal::matrix<T, M, N> &x, const T y) noexcept
-	requires (M * N == 3)
+constexpr auto cross(const internal::matrix<T, M, N> &x, const U y) noexcept
+	requires (std::is_arithmetic_v<U> && M * N == 3)
 {
-	return internal::matrix<float, M, N>{x.y() * y - x.z() * y, x.z() * y - x.x() * y, x.x() * y - x.y() * y};
+	return internal::matrix<std::common_type_t<T, U>, M, N>{x.y() * y - x.z() * y, x.z() * y - x.x() * y, x.x() * y - x.y() * y};
 }
 
-template <typename T, std::size_t M, std::size_t N>
+template <typename T, typename U, std::size_t M, std::size_t N>
 [[nodiscard]]
-constexpr auto cross(const T x, const internal::matrix<T, M, N> &y) noexcept
-	requires (M * N == 3)
+constexpr auto cross(const T x, const internal::matrix<U, M, N> &y) noexcept
+	requires (std::is_arithmetic_v<T> && M * N == 3)
 {
-	return internal::matrix<float, M, N>{x * y.z() - x * y.y(), x * y.x() - x * y.z(), x * y.y() - x * y.x()};
+	return internal::matrix<std::common_type_t<T, U>, M, N>{x * y.z() - x * y.y(), x * y.x() - x * y.z(), x * y.y() - x * y.x()};
 }
 
-template <typename T, std::size_t M1, std::size_t N1, std::size_t M2, std::size_t N2>
+template <typename T, std::size_t M1, std::size_t N1, typename U, std::size_t M2, std::size_t N2>
 [[nodiscard]]
-constexpr auto cross(const internal::matrix<T, M1, N1> &x, const internal::matrix<T, M2, N2> &y) noexcept
+constexpr auto cross(const internal::matrix<T, M1, N1> &x, const internal::matrix<U, M2, N2> &y) noexcept
 	requires (M1 * N1 == 3 && M2 * N2 == 3)
 {
-	return internal::matrix<float, M1, N1>{x.y() * y.z() - x.z() * y.y(), x.z() * y.x() - x.x() * y.z(), x.x() * y.y() - x.y() * y.x()};
+	return internal::matrix<std::common_type_t<T, U>, M1, N1>{x.y() * y.z() - x.z() * y.y(), x.z() * y.x() - x.x() * y.z(), x.x() * y.y() - x.y() * y.x()};
 }
 
 STELLARLIB_LIN_INTRINSICS_SINGLE_ARG_OPERATION_IMPL(degrees, x, {
@@ -338,35 +338,35 @@ STELLARLIB_LIN_INTRINSICS_SINGLE_ARG_OPERATION_IMPL(degrees, x, {
 
 template <typename T>
 [[nodiscard]]
-constexpr auto determinant(const internal::matrix<T, 1, 1> &x) noexcept
+constexpr auto determinant(const internal::matrix<T, 1, 1> &m) noexcept
 {
-	return x;
+	return m.front();
 }
 
 template <typename T>
 [[nodiscard]]
-constexpr auto determinant(const internal::matrix<T, 2, 2> &x) noexcept
+constexpr auto determinant(const internal::matrix<T, 2, 2> &m) noexcept
 {
-	return x[0, 0] * x[1, 1] - x[0, 1] * x[1, 0];
+	return m[0, 0] * m[1, 1] - m[0, 1] * m[1, 0];
 }
 
 template <typename T>
 [[nodiscard]]
-constexpr auto determinant(const internal::matrix<T, 3, 3> &x) noexcept
+constexpr auto determinant(const internal::matrix<T, 3, 3> &m) noexcept
 {
-	return x[0, 0] * (x[1, 1] * x[2, 2] - x[1, 2] * x[2, 1]) - x[0, 1] * (x[1, 0] * x[2, 2] - x[1, 2] * x[2, 0]) + x[0, 2] * (x[1, 0] * x[2, 1] - x[1, 1] * x[2, 0]);
+	return m[0, 0] * (m[1, 1] * m[2, 2] - m[1, 2] * m[2, 1]) - m[0, 1] * (m[1, 0] * m[2, 2] - m[1, 2] * m[2, 0]) + m[0, 2] * (m[1, 0] * m[2, 1] - m[1, 1] * m[2, 0]);
 }
 
 template <typename T>
 [[nodiscard]]
-constexpr auto determinant(const internal::matrix<T, 4, 4> &x) noexcept
+constexpr auto determinant(const internal::matrix<T, 4, 4> &m) noexcept
 {
-	return x[0, 0] * (x[1, 1] * (x[2, 2] * x[3, 3] - x[2, 3] * x[3, 2]) - x[1, 2] * (x[2, 1] * x[3, 3] - x[2, 3] * x[3, 1]) + x[1, 3] * (x[2, 1] * x[3, 2] - x[2, 2] * x[3, 1])) - x[0, 1] * (x[1, 0] * (x[2, 2] * x[3, 3] - x[2, 3] * x[3, 2]) - x[1, 2] * (x[2, 0] * x[3, 3] - x[2, 3] * x[3, 0]) + x[1, 3] * (x[2, 0] * x[3, 2] - x[2, 2] * x[3, 0])) + x[0, 2] * (x[1, 0] * (x[2, 1] * x[3, 3] - x[2, 3] * x[3, 1]) - x[1, 1] * (x[2, 0] * x[3, 3] - x[2, 3] * x[3, 0]) + x[1, 3] * (x[2, 0] * x[3, 1] - x[2, 1] * x[3, 0])) - x[0, 3] * (x[1, 0] * (x[2, 1] * x[3, 2] - x[2, 2] * x[3, 1]) - x[1, 1] * (x[2, 0] * x[3, 2] - x[2, 2] * x[3, 0]) + x[1, 2] * (x[2, 0] * x[3, 1] - x[2, 1] * x[3, 0]));
+	return m[0, 0] * (m[1, 1] * (m[2, 2] * m[3, 3] - m[2, 3] * m[3, 2]) - m[1, 2] * (m[2, 1] * m[3, 3] - m[2, 3] * m[3, 1]) + m[1, 3] * (m[2, 1] * m[3, 2] - m[2, 2] * m[3, 1])) - m[0, 1] * (m[1, 0] * (m[2, 2] * m[3, 3] - m[2, 3] * m[3, 2]) - m[1, 2] * (m[2, 0] * m[3, 3] - m[2, 3] * m[3, 0]) + m[1, 3] * (m[2, 0] * m[3, 2] - m[2, 2] * m[3, 0])) + m[0, 2] * (m[1, 0] * (m[2, 1] * m[3, 3] - m[2, 3] * m[3, 1]) - m[1, 1] * (m[2, 0] * m[3, 3] - m[2, 3] * m[3, 0]) + m[1, 3] * (m[2, 0] * m[3, 1] - m[2, 1] * m[3, 0])) - m[0, 3] * (m[1, 0] * (m[2, 1] * m[3, 2] - m[2, 2] * m[3, 1]) - m[1, 1] * (m[2, 0] * m[3, 2] - m[2, 2] * m[3, 0]) + m[1, 2] * (m[2, 0] * m[3, 1] - m[2, 1] * m[3, 0]));
 }
 
 template <typename T, std::size_t N>
 [[nodiscard]]
-constexpr auto determinant(internal::matrix<T, N, N> x) noexcept
+constexpr auto determinant(internal::matrix<T, N, N> m) noexcept
 {
 	T determinant{1};
 
@@ -374,30 +374,30 @@ constexpr auto determinant(internal::matrix<T, N, N> x) noexcept
 		auto pivot{i};
 
 		for (const auto j : std::views::iota(i + 1, N)) {
-			if (abs(x[pivot, i]) < abs(x[j, i])) {
+			if (abs(m[pivot, i]) < abs(m[j, i])) {
 				pivot = j;
 			}
 		}
 
 		if (pivot != i) {
 			for (const auto j : std::views::iota(i, N)) {
-				std::swap(x[i, j], x[pivot, j]);
+				std::swap(m[i, j], m[pivot, j]);
 			}
 
 			determinant *= -1;
 		}
 
-		if (!static_cast<bool>(x[i, i])) {
+		if (!static_cast<bool>(m[i, i])) {
 			return T{};
 		}
 
-		determinant *= x[i, i];
+		determinant *= m[i, i];
 
 		for (const auto j : std::views::iota(i + 1, N)) {
-			x[j, i] /= x[i, i];
+			m[j, i] /= m[i, i];
 
 			for (const auto k : std::views::iota(i + 1, N)) {
-				x[j, k] -= x[j, i] * x[i, k];
+				m[j, k] -= m[j, i] * m[i, k];
 			}
 		}
 	}
@@ -465,42 +465,74 @@ constexpr auto distance(const internal::matrix<T, M1, N1> &x, const internal::ma
 	return length(x - y);
 }
 
-template <typename T>
+template <typename T, typename U>
 [[nodiscard]]
-constexpr auto dot(const T x, const T y) noexcept
-	requires (std::is_arithmetic_v<T>)
+constexpr auto dot(const T x, const U y) noexcept
+	requires (std::is_arithmetic_v<T> && std::is_arithmetic_v<U>)
 {
 	return x * y;
 }
 
-template <typename T, std::size_t M, std::size_t N>
+template <typename T, std::size_t M, std::size_t N, typename U>
 [[nodiscard]]
-constexpr auto dot(const internal::matrix<T, M, N> &x, const T y) noexcept
-	requires (M == 1 || N == 1)
+constexpr auto dot(const internal::matrix<T, M, N> &x, const U y) noexcept
+	requires (std::is_arithmetic_v<U> && (M == 1 || N == 1))
 {
 	return std::ranges::fold_left(x | std::views::transform([y] [[nodiscard]] (const auto x) noexcept -> auto {
 		return x * y;
 	}), 0, std::plus{});
 }
 
-template <typename T, std::size_t M, std::size_t N>
+template <typename T, typename U, std::size_t M, std::size_t N>
 [[nodiscard]]
-constexpr auto dot(const T x, const internal::matrix<T, M, N> &y) noexcept
-	requires (M == 1 || N == 1)
+constexpr auto dot(const T x, const internal::matrix<U, M, N> &y) noexcept
+	requires (std::is_arithmetic_v<T> && (M == 1 || N == 1))
 {
 	return std::ranges::fold_left(y | std::views::transform([x] [[nodiscard]] (const auto y) noexcept -> auto {
 		return x * y;
 	}), 0, std::plus{});
 }
 
-template <typename T, std::size_t M1, std::size_t N1, std::size_t M2, std::size_t N2>
+template <typename T, std::size_t M1, std::size_t N1, typename U, std::size_t M2, std::size_t N2>
 [[nodiscard]]
-constexpr auto dot(const internal::matrix<T, M1, N1> &x, const internal::matrix<T, M2, N2> &y) noexcept
+constexpr auto dot(const internal::matrix<T, M1, N1> &x, const internal::matrix<U, M2, N2> &y) noexcept
 	requires ((M1 == 1 || N1 == 1) && (M2 == 1 || N2 == 1) && M1 * N1 == M2 * N2)
 {
 	return std::ranges::fold_left(std::views::zip(x, y) | std::views::transform([] [[nodiscard]] (const auto xy) noexcept -> auto {
 		return std::get<0>(xy) * std::get<1>(xy);
 	}), 0, std::plus{});
+}
+
+template <typename T, typename U>
+[[nodiscard]]
+constexpr auto dst(const T src0, const U src1) noexcept
+	requires (std::is_arithmetic_v<T> && std::is_arithmetic_v<U>)
+{
+	return internal::matrix<std::common_type_t<T, U>, 1, 4>{1, src0 * src1, src0, src1};
+}
+
+template <typename T, std::size_t M, std::size_t N, typename U>
+[[nodiscard]]
+constexpr auto dst(const internal::matrix<T, M, N> &src0, const U src1) noexcept
+	requires (std::is_arithmetic_v<U> && (M == 1 || N == 1) && M * N == 4)
+{
+	return internal::matrix<std::common_type_t<T, U>, M, N>{1, src0.y() * src1, src0.z(), src1};
+}
+
+template <typename T, typename U, std::size_t M, std::size_t N>
+[[nodiscard]]
+constexpr auto dst(const T src0, const internal::matrix<U, M, N> &src1) noexcept
+	requires (std::is_arithmetic_v<T> && (M == 1 || N == 1) && M * N == 4)
+{
+	return internal::matrix<std::common_type_t<T, U>, M, N>{1, src0 * src1.y(), src0, src1.w()};
+}
+
+template <typename T, std::size_t M1, std::size_t N1, typename U, std::size_t M2, std::size_t N2>
+[[nodiscard]]
+constexpr auto dst(const internal::matrix<T, M1, N1> &src0, const internal::matrix<U, M2, N2> &src1) noexcept
+	requires ((M1 == 1 || N1 == 1) && (M2 == 1 || N2 == 1) && M1 * N1 == 4 && M2 * N2 == 4)
+{
+	return internal::matrix<std::common_type_t<T, U>, M1, N1>{1, src0.y() * src1.y(), src0.z(), src1.w()};
 }
 
 STELLARLIB_LIN_INTRINSICS_SINGLE_ARG_OPERATION_IMPL(exp, x, {
@@ -511,29 +543,29 @@ STELLARLIB_LIN_INTRINSICS_SINGLE_ARG_OPERATION_IMPL(exp2, x, {
 	return std::exp2(x);
 });
 
-template <typename T>
+template <typename T, typename U, typename V>
 [[nodiscard]]
-constexpr auto faceforward(const T n, const T i, const T ng) noexcept
-	requires (std::is_arithmetic_v<T>)
+constexpr auto faceforward(const T n, const U i, const V ng) noexcept
+	requires (std::is_arithmetic_v<T> && std::is_arithmetic_v<U> && std::is_arithmetic_v<V>)
 {
 	return dot(i, ng) < 0 ? n : -n;
 }
 
-template <typename T, std::size_t M, std::size_t N>
+template <typename T, std::size_t M, std::size_t N, typename U, typename V>
 [[nodiscard]]
-constexpr auto faceforward(const internal::matrix<T, M, N> &n, const T i, const T ng) noexcept
-	requires (M == 1 || N == 1)
+constexpr auto faceforward(const internal::matrix<T, M, N> &n, const U i, const V ng) noexcept
+	requires (std::is_arithmetic_v<U> && std::is_arithmetic_v<V> && (M == 1 || N == 1))
 {
 	return dot(i, ng) < 0 ? n : -n;
 }
 
-template <typename T, std::size_t M, std::size_t N>
+template <typename T, typename U, std::size_t M, std::size_t N, typename V>
 [[nodiscard]]
-constexpr auto faceforward(const T n, const internal::matrix<T, M, N> &i, const T ng) noexcept
-	-> lin::internal::matrix<T, M, N>
-	requires (M == 1 || N == 1)
+constexpr auto faceforward(const T n, const internal::matrix<U, M, N> &i, const V ng) noexcept
+	-> internal::matrix<T, M, N>
+	requires (std::is_arithmetic_v<T> && std::is_arithmetic_v<V> && (M == 1 || N == 1))
 {
-	lin::internal::matrix<T, M, N> res;
+	internal::matrix<T, M, N> res;
 
 	if (dot(i, ng) < 0) {
 		for (auto &res : res) {
@@ -549,13 +581,13 @@ constexpr auto faceforward(const T n, const internal::matrix<T, M, N> &i, const 
 	return res;
 }
 
-template <typename T, std::size_t M, std::size_t N>
+template <typename T, typename U, typename V, std::size_t M, std::size_t N>
 [[nodiscard]]
-constexpr auto faceforward(const T n, const T i, const internal::matrix<T, M, N> &ng) noexcept
-	-> lin::internal::matrix<T, M, N>
-	requires (M == 1 || N == 1)
+constexpr auto faceforward(const T n, const U i, const internal::matrix<V, M, N> &ng) noexcept
+	-> internal::matrix<T, M, N>
+	requires (std::is_arithmetic_v<T> && std::is_arithmetic_v<U> && (M == 1 || N == 1))
 {
-	lin::internal::matrix<T, M, N> res;
+	internal::matrix<T, M, N> res;
 
 	if (dot(i, ng) < 0) {
 		for (auto &res : res) {
@@ -571,29 +603,29 @@ constexpr auto faceforward(const T n, const T i, const internal::matrix<T, M, N>
 	return res;
 }
 
-template <typename T, std::size_t M1, std::size_t N1, std::size_t M2, std::size_t N2>
+template <typename T, std::size_t M1, std::size_t N1, typename U, std::size_t M2, std::size_t N2, typename V>
 [[nodiscard]]
-constexpr auto faceforward(const internal::matrix<T, M1, N1> &n, const internal::matrix<T, M2, N2> &i, const T ng) noexcept
-	requires ((M1 == 1 || N1 == 1) && (M2 == 1 || N2 == 1) && M1 * N1 == M2 * N2)
+constexpr auto faceforward(const internal::matrix<T, M1, N1> &n, const internal::matrix<U, M2, N2> &i, const V ng) noexcept
+	requires (std::is_arithmetic_v<V> && (M1 == 1 || N1 == 1) && (M2 == 1 || N2 == 1) && M1 * N1 == M2 * N2)
 {
 	return dot(i, ng) < 0 ? n : -n;
 }
 
-template <typename T, std::size_t M1, std::size_t N1, std::size_t M2, std::size_t N2>
+template <typename T, std::size_t M1, std::size_t N1, typename U, typename V, std::size_t M2, std::size_t N2>
 [[nodiscard]]
-constexpr auto faceforward(const internal::matrix<T, M1, N1> &n, const T i, const internal::matrix<T, M2, N2> &ng) noexcept
-	requires ((M1 == 1 || N1 == 1) && (M2 == 1 || N2 == 1) && M1 * N1 == M2 * N2)
+constexpr auto faceforward(const internal::matrix<T, M1, N1> &n, const U i, const internal::matrix<V, M2, N2> &ng) noexcept
+	requires (std::is_arithmetic_v<U> && (M1 == 1 || N1 == 1) && (M2 == 1 || N2 == 1) && M1 * N1 == M2 * N2)
 {
 	return dot(i, ng) < 0 ? n : -n;
 }
 
-template <typename T, std::size_t M1, std::size_t N1, std::size_t M2, std::size_t N2>
+template <typename T, typename U, std::size_t M1, std::size_t N1, typename V, std::size_t M2, std::size_t N2>
 [[nodiscard]]
-constexpr auto faceforward(const T n, const internal::matrix<T, M1, N1> &i, const internal::matrix<T, M2, N2> &ng) noexcept
-	-> lin::internal::matrix<T, M1, N1>
-	requires ((M1 == 1 || N1 == 1) && (M2 == 1 || N2 == 1) && M1 * N1 == M2 * N2)
+constexpr auto faceforward(const T n, const internal::matrix<U, M1, N1> &i, const internal::matrix<V, M2, N2> &ng) noexcept
+	-> internal::matrix<T, M1, N1>
+	requires (std::is_arithmetic_v<T> && (M1 == 1 || N1 == 1) && (M2 == 1 || N2 == 1) && M1 * N1 == M2 * N2)
 {
-	lin::internal::matrix<T, M1, N1> res;
+	internal::matrix<T, M1, N1> res;
 
 	if (dot(i, ng) < 0) {
 		for (auto &res : res) {
@@ -609,9 +641,9 @@ constexpr auto faceforward(const T n, const internal::matrix<T, M1, N1> &i, cons
 	return res;
 }
 
-template <typename T, std::size_t M1, std::size_t N1, std::size_t M2, std::size_t N2, std::size_t M3, std::size_t N3>
+template <typename T, std::size_t M1, std::size_t N1, typename U, std::size_t M2, std::size_t N2, typename V, std::size_t M3, std::size_t N3>
 [[nodiscard]]
-constexpr auto faceforward(const internal::matrix<T, M1, N1> &n, const internal::matrix<T, M2, N2> &i, const internal::matrix<T, M3, N3> &ng) noexcept
+constexpr auto faceforward(const internal::matrix<T, M1, N1> &n, const internal::matrix<U, M2, N2> &i, const internal::matrix<V, M3, N3> &ng) noexcept
 	requires ((M1 == 1 || N1 == 1) && (M2 == 1 || N2 == 1) && (M3 == 1 || N3 == 1) && M1 * N1 == M2 * N2 && M2 * N2 == M3 * N3)
 {
 	return dot(i, ng) < 0 ? n : -n;
@@ -649,11 +681,12 @@ STELLARLIB_LIN_INTRINSICS_DOUBLE_ARG_OPERATION_IMPL(pow, x, y, {
 	return std::pow(x, y);
 });
 
-template <typename T>
+template <typename T, typename U, typename V>
 [[nodiscard]]
-constexpr auto lit(const T n_dot_l, const T n_dot_h, const T m) noexcept
+constexpr auto lit(const T n_dot_l, const U n_dot_h, const V m) noexcept
+	requires (std::is_arithmetic_v<T> && std::is_arithmetic_v<U> && std::is_arithmetic_v<V>)
 {
-	return internal::matrix<T, 1, 4>{1, max(n_dot_l, T{}), n_dot_l < 0 || n_dot_h < 0 ? 0 : pow(n_dot_h, m), 1};
+	return internal::matrix<std::common_type_t<T, U, V>, 1, 4>{1, max(n_dot_l, std::common_type_t<T, U, V>{}), n_dot_l < 0 || n_dot_h < 0 ? 0 : pow(n_dot_h, m), 1};
 }
 
 STELLARLIB_LIN_INTRINSICS_SINGLE_ARG_OPERATION_IMPL(log, x, {
@@ -681,35 +714,38 @@ STELLARLIB_LIN_INTRINSICS_DOUBLE_ARG_OPERATION_IMPL(min, x, y, {
 	return SDL_min(x, y);
 });
 
-template <typename T>
-constexpr auto modf(const T x, T &ip) noexcept
-	requires (std::is_arithmetic_v<T>)
+template <typename T, typename U>
+[[nodiscard]]
+constexpr auto modf(const T x, U &ip) noexcept
+	requires (std::is_arithmetic_v<T> && std::is_arithmetic_v<U>)
 {
 	return std::modf(x, std::addressof(ip));
 }
 
-template <typename T, std::size_t M, std::size_t N>
-constexpr auto modf(const T x, internal::matrix<T, M, N> &ip) noexcept
-	-> internal::matrix<T, M, N>
+template <typename T, typename U, std::size_t M, std::size_t N>
+[[nodiscard]]
+constexpr auto modf(const T x, internal::matrix<U, M, N> &ip) noexcept
+	-> internal::matrix<std::common_type_t<T, U>, M, N>
 	requires (std::is_arithmetic_v<T>)
 {
-	internal::matrix<T, M, N> res;
+	internal::matrix<std::common_type_t<T, U>, M, N> res;
 	res.front() = modf(x, ip.front());
 
 	for (const auto i : std::views::iota(std::size_t{1}, M * N)) {
-		res.std::template array<T, M * N>::operator[](i) = res.front();
-		ip.std::template array<T, M * N>::operator[](i) = ip.front();
+		res.std::template array<std::common_type_t<T, U>, M * N>::operator[](i) = res.front();
+		ip.std::template array<U, M * N>::operator[](i) = ip.front();
 	}
 
 	return res;
 }
 
-template <typename T, std::size_t M1, std::size_t N1, std::size_t M2, std::size_t N2>
-constexpr auto modf(const internal::matrix<T, M1, N1> &x, internal::matrix<T, M2, N2> &ip) noexcept
-	-> internal::matrix<T, M1, N1>
+template <typename T, std::size_t M1, std::size_t N1, typename U, std::size_t M2, std::size_t N2>
+[[nodiscard]]
+constexpr auto modf(const internal::matrix<T, M1, N1> &x, internal::matrix<U, M2, N2> &ip) noexcept
+	-> internal::matrix<std::common_type_t<T, U>, M1, N1>
 	requires ((M1 == 1 || N1 == 1) && (M2 == 1 || N2 == 1) && M1 * N1 == M2 * N2 || M1 == M2 && N1 == N2)
 {
-	internal::matrix<T, M1, N1> res;
+	internal::matrix<std::common_type_t<T, U>, M1, N1> res;
 
 	for (const auto [res, x, ip] : std::views::zip(res, x, ip)) {
 		res = modf(x, ip);
@@ -718,38 +754,40 @@ constexpr auto modf(const internal::matrix<T, M1, N1> &x, internal::matrix<T, M2
 	return res;
 }
 
-template <typename T>
+template <typename T, typename U>
 [[nodiscard]]
-constexpr auto mul(const T x, const T y) noexcept
+constexpr auto mul(const T x, const U y) noexcept
+	requires (std::is_arithmetic_v<T> && std::is_arithmetic_v<U>)
+{
+	return x * y;
+}
+
+template <typename T, std::size_t M, std::size_t N, typename U>
+[[nodiscard]]
+constexpr auto mul(const internal::matrix<T, M, N> &x, const U y) noexcept
+	requires (std::is_arithmetic_v<U>)
+{
+	return x * y;
+}
+
+template <typename T, typename U, std::size_t M, std::size_t N>
+[[nodiscard]]
+constexpr auto mul(const T x, const internal::matrix<U, M, N> &y) noexcept
 	requires (std::is_arithmetic_v<T>)
 {
 	return x * y;
 }
 
-template <typename T, std::size_t M, std::size_t N>
+template <typename T, std::size_t M1, std::size_t N1, typename U, std::size_t M2, std::size_t N2>
 [[nodiscard]]
-constexpr auto mul(const internal::matrix<T, M, N> &x, const T y) noexcept
-{
-	return x * y;
-}
-
-template <typename T, std::size_t M, std::size_t N>
-[[nodiscard]]
-constexpr auto mul(const T x, const internal::matrix<T, M, N> &y) noexcept
-{
-	return x * y;
-}
-
-template <typename T, std::size_t M1, std::size_t N1, std::size_t M2, std::size_t N2>
-[[nodiscard]]
-constexpr auto mul(const internal::matrix<T, M1, N1> &x, const internal::matrix<T, M2, N2> &y) noexcept
-	-> internal::matrix<T, M1 == 1 || N1 == 1 ? 1 : M1, M2 == 1 || N2 == 1 ? 1 : N2>
+constexpr auto mul(const internal::matrix<T, M1, N1> &x, const internal::matrix<U, M2, N2> &y) noexcept
+	-> internal::matrix<std::common_type_t<T, U>, M1 == 1 || N1 == 1 ? 1 : M1, M2 == 1 || N2 == 1 ? 1 : N2>
 	requires ((M1 == 1 || N1 == 1) && M1 * N1 == M2 || (M2 == 1 || N2 == 1) && M2 * N2 == N1 || N1 == M2)
 {
 	constexpr auto M{M1 == 1 || N1 == 1 ? 1 : M1};
 	constexpr auto N{(M1 == 1 || N1 == 1) && M1 * N1 == M2 ? M2 : N1};
 	constexpr auto P{M2 == 1 || N2 == 1 ? 1 : N2};
-	internal::matrix<T, M, P> res{};
+	internal::matrix<std::common_type_t<T, U>, M, P> res{};
 
 	for (const auto m : std::views::iota(std::size_t{}, M)) {
 		for (const auto n : std::views::iota(std::size_t{}, N)) {
@@ -792,8 +830,8 @@ STELLARLIB_LIN_INTRINSICS_DOUBLE_ARG_OPERATION_IMPL(reflect, i, n, {
 
 #define STELLARLIB_LIN_INTRINSICS_REFRACT_IMPL(zero)\
 {\
-	const T n_dot_i{dot(n, i)};\
-	const T k{1 - eta * eta * (1 - n_dot_i * n_dot_i)};\
+	const auto n_dot_i{dot(n, i)};\
+	const auto k{1 - eta * eta * (1 - n_dot_i * n_dot_i)};\
 \
 	if (k < 0) {\
 		return zero;\
@@ -802,28 +840,29 @@ STELLARLIB_LIN_INTRINSICS_DOUBLE_ARG_OPERATION_IMPL(reflect, i, n, {
 	return eta * i - mad(eta, n_dot_i, sqrt(k)) * n;\
 }
 
-template <typename T>
+template <typename T, typename U, typename V>
 [[nodiscard]]
-constexpr auto refract(const T i, const T n, const T eta) noexcept
-STELLARLIB_LIN_INTRINSICS_REFRACT_IMPL(T{});
+constexpr auto refract(const T i, const U n, const V eta) noexcept
+	requires (std::is_arithmetic_v<T> && std::is_arithmetic_v<U> && std::is_arithmetic_v<V>)
+STELLARLIB_LIN_INTRINSICS_REFRACT_IMPL((std::common_type_t<T, U, V>{}));
 
-template <typename T, std::size_t M, std::size_t N>
+template <typename T, std::size_t M, std::size_t N, typename U, typename V>
 [[nodiscard]]
-constexpr auto refract(const internal::matrix<T, M, N> &i, const T n, const T eta) noexcept
-	requires (M == 1 || N == 1)
-STELLARLIB_LIN_INTRINSICS_REFRACT_IMPL((internal::matrix<T, M, N>{}));
+constexpr auto refract(const internal::matrix<T, M, N> &i, const U n, const V eta) noexcept
+	requires (std::is_arithmetic_v<U> && std::is_arithmetic_v<V> && (M == 1 || N == 1))
+STELLARLIB_LIN_INTRINSICS_REFRACT_IMPL((internal::matrix<std::common_type_t<T, U, V>, M, N>{}));
 
-template <typename T, std::size_t M, std::size_t N>
+template <typename T, typename U, std::size_t M, std::size_t N, typename V>
 [[nodiscard]]
-constexpr auto refract(const T i, const internal::matrix<T, M, N> &n, const T eta) noexcept
-	requires (M == 1 || N == 1)
-STELLARLIB_LIN_INTRINSICS_REFRACT_IMPL((internal::matrix<T, M, N>{}));
+constexpr auto refract(const T i, const internal::matrix<U, M, N> &n, const V eta) noexcept
+	requires (std::is_arithmetic_v<T> && std::is_arithmetic_v<V> && (M == 1 || N == 1))
+STELLARLIB_LIN_INTRINSICS_REFRACT_IMPL((internal::matrix<std::common_type_t<T, U, V>, M, N>{}));
 
-template <typename T, std::size_t M1, std::size_t N1, std::size_t M2, std::size_t N2>
+template <typename T, std::size_t M1, std::size_t N1, typename U, std::size_t M2, std::size_t N2, typename V>
 [[nodiscard]]
-constexpr auto refract(const internal::matrix<T, M1, N1> &i, const internal::matrix<T, M2, N2> &n, const T eta) noexcept
-	requires ((M1 == 1 || N1 == 1) && (M2 == 1 || N2 == 1) && M1 * N1 == M2 * N2)
-STELLARLIB_LIN_INTRINSICS_REFRACT_IMPL((internal::matrix<T, M1, N1>{}));
+constexpr auto refract(const internal::matrix<T, M1, N1> &i, const internal::matrix<U, M2, N2> &n, const V eta) noexcept
+	requires (std::is_arithmetic_v<V> && (M1 == 1 || N1 == 1) && (M2 == 1 || N2 == 1) && M1 * N1 == M2 * N2)
+STELLARLIB_LIN_INTRINSICS_REFRACT_IMPL((internal::matrix<std::common_type_t<T, U, V>, M1, N1>{}));
 
 STELLARLIB_LIN_INTRINSICS_SINGLE_ARG_OPERATION_IMPL(round, x, {
 	return std::round(x);
@@ -845,57 +884,54 @@ STELLARLIB_LIN_INTRINSICS_SINGLE_ARG_OPERATION_IMPL(sin, x, {
 	return std::sin(x);
 });
 
-template <typename T>
-constexpr void sincos(const T x, T &s, T &c) noexcept
-	requires (std::is_arithmetic_v<T>)
+template <typename T, typename U, typename V>
+constexpr void sincos(const T x, U &s, V &c) noexcept
+	requires (std::is_arithmetic_v<T> && std::is_arithmetic_v<U> && std::is_arithmetic_v<V>)
 {
 	s = sin(x);
 	c = cos(x);
 }
 
-template <typename T, std::size_t M, std::size_t N>
-constexpr void sincos(const T x, internal::matrix<T, M, N> &s, T &c) noexcept
+template <typename T, typename U, std::size_t M, std::size_t N, typename V>
+constexpr void sincos(const T x, internal::matrix<U, M, N> &s, V &c) noexcept
+	requires (std::is_arithmetic_v<T> && std::is_arithmetic_v<V>)
 {
-	s.front() = sin(x);
+	sincos(x, s.front(), c);
 
 	for (const auto i : std::views::iota(std::size_t{1}, M * N)) {
-		s.std::template array<T, M * N>::operator[](i) = s.front();
-	}
-
-	c = cos(x);
-}
-
-template <typename T, std::size_t M, std::size_t N>
-constexpr void sincos(const T x, T &s, internal::matrix<T, M, N> &c) noexcept
-{
-	s = sin(x);
-	c.front() = cos(x);
-
-	for (const auto i : std::views::iota(std::size_t{1}, M * N)) {
-		c.std::template array<T, M * N>::operator[](i) = c.front();
+		s.std::template array<U, M * N>::operator[](i) = s.front();
 	}
 }
 
-template <typename T, std::size_t M1, std::size_t N1, std::size_t M2, std::size_t N2>
-constexpr void sincos(const T x, internal::matrix<T, M1, N1> &s, internal::matrix<T, M2, N2> &c) noexcept
-	requires ((M1 == 1 || N1 == 1) && (M2 == 1 || N2 == 1) && M1 * N1 == M2 * N2 || M1 == M2 && N1 == N2)
+template <typename T, typename U, typename V, std::size_t M, std::size_t N>
+constexpr void sincos(const T x, U &s, internal::matrix<V, M, N> &c) noexcept
+	requires (std::is_arithmetic_v<T> && std::is_arithmetic_v<U>)
 {
-	s.front() = sin(x);
-	c.front() = cos(x);
+	sincos(x, s, c.front());
+
+	for (const auto i : std::views::iota(std::size_t{1}, M * N)) {
+		c.std::template array<V, M * N>::operator[](i) = c.front();
+	}
+}
+
+template <typename T, typename U, std::size_t M1, std::size_t N1, typename V, std::size_t M2, std::size_t N2>
+constexpr void sincos(const T x, internal::matrix<U, M1, N1> &s, internal::matrix<V, M2, N2> &c) noexcept
+	requires (std::is_arithmetic_v<T> && ((M1 == 1 || N1 == 1) && (M2 == 1 || N2 == 1) && M1 * N1 == M2 * N2 || M1 == M2 && N2 == N1))
+{
+	sincos(x, s.front(), c.front());
 
 	for (const auto i : std::views::iota(std::size_t{1}, M1 * N1)) {
-		s.std::template array<T, M1 * N1>::operator[](i) = s.front();
-		c.std::template array<T, M2 * N2>::operator[](i) = c.front();
+		s.std::template array<U, M1 * N1>::operator[](i) = s.front();
+		c.std::template array<V, M2 * N2>::operator[](i) = c.front();
 	}
 }
 
-template <typename T, std::size_t M1, std::size_t N1, std::size_t M2, std::size_t N2, std::size_t M3, std::size_t N3>
-constexpr void sincos(const internal::matrix<T, M1, N1> &x, internal::matrix<T, M2, N2> &s, internal::matrix<T, M3, N3> &c) noexcept
+template <typename T, std::size_t M1, std::size_t N1, typename U, std::size_t M2, std::size_t N2, typename V, std::size_t M3, std::size_t N3>
+constexpr void sincos(const internal::matrix<T, M1, N1> &x, internal::matrix<U, M2, N2> &s, internal::matrix<V, M3, N3> &c) noexcept
 	requires ((M1 == 1 || N1 == 1) && (M2 == 1 || N2 == 1) && (M3 == 1 || N3 == 1) && M1 * N1 == M2 * N2 && M2 * N2 == M3 * N3 || M1 == M2 && M2 == M3 && N1 == N2 && N2 == N3)
 {
 	for (const auto [x, s, c] : std::views::zip(x, s, c)) {
-		s = sin(x);
-		c = cos(x);
+		sincos(x, s, c);
 	}
 }
 
@@ -909,7 +945,7 @@ STELLARLIB_LIN_INTRINSICS_TRIPLE_ARG_OPERATION_IMPL(smoothstep, min, max, x, {
 });
 
 STELLARLIB_LIN_INTRINSICS_DOUBLE_ARG_OPERATION_IMPL(step, y, x, {
-	return x < y ? T{0} : T{1};
+	return x < y ? (std::common_type_t<T, U>{0}) : (std::common_type_t<T, U>{1});
 })
 
 STELLARLIB_LIN_INTRINSICS_SINGLE_ARG_OPERATION_IMPL(tan, x, {
@@ -923,6 +959,7 @@ STELLARLIB_LIN_INTRINSICS_SINGLE_ARG_OPERATION_IMPL(tanh, x, {
 template <typename T>
 [[nodiscard]]
 constexpr auto transpose(const T x) noexcept
+	requires (std::is_arithmetic_v<T>)
 {
 	return x;
 }
