@@ -31,12 +31,14 @@
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
+#include <cstdint>
+#include <functional>
 #include <memory>
 #include <numbers>
 #include <ranges>
 #include <type_traits>
 
-namespace stellarlib::lin
+namespace stellarlib::lin::internal
 {
 #define STELLARLIB_LIN_INTRINSICS_SINGLE_ARG_OPERATION_IMPL(op, arg1, expr)\
 template <typename T>\
@@ -49,10 +51,10 @@ constexpr auto op(const T arg1) noexcept\
 \
 template <typename T, std::size_t M, std::size_t N>\
 [[nodiscard]]\
-constexpr auto op(const internal::matrix<T, M, N> &(arg1)) noexcept\
-	-> internal::matrix<T, M, N>\
+constexpr auto op(const matrix<T, M, N> &(arg1)) noexcept\
+	-> matrix<T, M, N>\
 {\
-	internal::matrix<T, M, N> res;\
+	matrix<T, M, N> res;\
 \
 	for (const auto [res, arg1] : std::views::zip(res, arg1)) {\
 		res = op(arg1);\
@@ -72,11 +74,11 @@ constexpr auto op(const T arg1, const U arg2) noexcept\
 \
 template <typename T, std::size_t M, std::size_t N, typename U>\
 [[nodiscard]]\
-constexpr auto op(const internal::matrix<T, M, N> &(arg1), const U arg2) noexcept\
-	-> internal::matrix<std::common_type_t<T, U>, M, N>\
+constexpr auto op(const matrix<T, M, N> &(arg1), const U arg2) noexcept\
+	-> matrix<std::common_type_t<T, U>, M, N>\
 	requires (std::is_arithmetic_v<U>)\
 {\
-	internal::matrix<std::common_type_t<T, U>, M, N> res;\
+	matrix<std::common_type_t<T, U>, M, N> res;\
 \
 	for (const auto [res, arg1] : std::views::zip(res, arg1)) {\
 		res = op(arg1, arg2);\
@@ -87,11 +89,11 @@ constexpr auto op(const internal::matrix<T, M, N> &(arg1), const U arg2) noexcep
 \
 template <typename T, typename U, std::size_t M, std::size_t N>\
 [[nodiscard]]\
-constexpr auto op(const T arg1, const internal::matrix<U, M, N> &(arg2)) noexcept\
-	-> internal::matrix<std::common_type_t<T, U>, M, N>\
+constexpr auto op(const T arg1, const matrix<U, M, N> &(arg2)) noexcept\
+	-> matrix<std::common_type_t<T, U>, M, N>\
 	requires (std::is_arithmetic_v<T>)\
 {\
-	internal::matrix<std::common_type_t<T, U>, M, N> res;\
+	matrix<std::common_type_t<T, U>, M, N> res;\
 \
 	for (const auto [res, arg2] : std::views::zip(res, arg2)) {\
 		res = op(arg1, arg2);\
@@ -102,11 +104,11 @@ constexpr auto op(const T arg1, const internal::matrix<U, M, N> &(arg2)) noexcep
 \
 template <typename T, std::size_t M1, std::size_t N1, typename U, std::size_t M2, std::size_t N2>\
 [[nodiscard]]\
-constexpr auto op(const internal::matrix<T, M1, N1> &(arg1), const internal::matrix<U, M2, N2> &(arg2)) noexcept\
-	-> internal::matrix<std::common_type_t<T, U>, M1, N1>\
+constexpr auto op(const matrix<T, M1, N1> &(arg1), const matrix<U, M2, N2> &(arg2)) noexcept\
+	-> matrix<std::common_type_t<T, U>, M1, N1>\
 	requires ((M1 == 1 || N1 == 1) && (M2 == 1 || N2 == 1) && M1 * N1 == M2 * N2 || M1 == M2 && N1 == N2)\
 {\
-	internal::matrix<std::common_type_t<T, U>, M1, N1> res;\
+	matrix<std::common_type_t<T, U>, M1, N1> res;\
 \
 	for (const auto [res, arg1, arg2] : std::views::zip(res, arg1, arg2)) {\
 		res = op(arg1, arg2);\
@@ -126,11 +128,11 @@ constexpr auto op(const T arg1, const U arg2, const V arg3) noexcept\
 \
 template <typename T, std::size_t M, std::size_t N, typename U, typename V>\
 [[nodiscard]]\
-constexpr auto op(const internal::matrix<T, M, N> &(arg1), const U arg2, const V arg3) noexcept\
-	-> internal::matrix<std::common_type_t<T, U, V>, M, N>\
+constexpr auto op(const matrix<T, M, N> &(arg1), const U arg2, const V arg3) noexcept\
+	-> matrix<std::common_type_t<T, U, V>, M, N>\
 	requires (std::is_arithmetic_v<U> && std::is_arithmetic_v<V>)\
 {\
-	internal::matrix<std::common_type_t<T, U, V>, M, N> res;\
+	matrix<std::common_type_t<T, U, V>, M, N> res;\
 \
 	for (const auto [res, arg1] : std::views::zip(res, arg1)) {\
 		res = op(arg1, arg2, arg3);\
@@ -141,11 +143,11 @@ constexpr auto op(const internal::matrix<T, M, N> &(arg1), const U arg2, const V
 \
 template <typename T, typename U, std::size_t M, std::size_t N, typename V>\
 [[nodiscard]]\
-constexpr auto op(const T arg1, const internal::matrix<U, M, N> &(arg2), const V arg3) noexcept\
-	-> internal::matrix<std::common_type_t<T, U, V>, M, N>\
+constexpr auto op(const T arg1, const matrix<U, M, N> &(arg2), const V arg3) noexcept\
+	-> matrix<std::common_type_t<T, U, V>, M, N>\
 	requires (std::is_arithmetic_v<T> && std::is_arithmetic_v<V>)\
 {\
-	internal::matrix<std::common_type_t<T, U, V>, M, N> res;\
+	matrix<std::common_type_t<T, U, V>, M, N> res;\
 \
 	for (const auto [res, arg2] : std::views::zip(res, arg2)) {\
 		res = op(arg1, arg2, arg3);\
@@ -156,11 +158,11 @@ constexpr auto op(const T arg1, const internal::matrix<U, M, N> &(arg2), const V
 \
 template <typename T, typename U, typename V, std::size_t M, std::size_t N>\
 [[nodiscard]]\
-constexpr auto op(const T arg1, const U arg2, const internal::matrix<V, M, N> &(arg3)) noexcept\
-	-> internal::matrix<std::common_type_t<T, U, V>, M, N>\
+constexpr auto op(const T arg1, const U arg2, const matrix<V, M, N> &(arg3)) noexcept\
+	-> matrix<std::common_type_t<T, U, V>, M, N>\
 	requires (std::is_arithmetic_v<T> && std::is_arithmetic_v<U>)\
 {\
-	internal::matrix<std::common_type_t<T, U, V>, M, N> res;\
+	matrix<std::common_type_t<T, U, V>, M, N> res;\
 \
 	for (const auto [res, arg3] : std::views::zip(res, arg3)) {\
 		res = op(arg1, arg2, arg3);\
@@ -171,11 +173,11 @@ constexpr auto op(const T arg1, const U arg2, const internal::matrix<V, M, N> &(
 \
 template <typename T, std::size_t M1, std::size_t N1, typename U, std::size_t M2, std::size_t N2, typename V>\
 [[nodiscard]]\
-constexpr auto op(const internal::matrix<T, M1, N1> &(arg1), const internal::matrix<U, M2, N2> &(arg2), const V arg3) noexcept\
-	-> internal::matrix<std::common_type_t<T, U, V>, M1, N1>\
+constexpr auto op(const matrix<T, M1, N1> &(arg1), const matrix<U, M2, N2> &(arg2), const V arg3) noexcept\
+	-> matrix<std::common_type_t<T, U, V>, M1, N1>\
 	requires (std::is_arithmetic_v<V> && ((M1 == 1 || N1 == 1) && (M2 == 1 || N2 == 1) && M1 * N1 == M2 * N2 || M1 == M2 && N1 == N2))\
 {\
-	internal::matrix<std::common_type_t<T, U, V>, M1, N1> res;\
+	matrix<std::common_type_t<T, U, V>, M1, N1> res;\
 \
 	for (const auto [res, arg1, arg2] : std::views::zip(res, arg1, arg2)) {\
 		res = op(arg1, arg2, arg3);\
@@ -186,11 +188,11 @@ constexpr auto op(const internal::matrix<T, M1, N1> &(arg1), const internal::mat
 \
 template <typename T, std::size_t M1, std::size_t N1, typename U, typename V, std::size_t M2, std::size_t N2>\
 [[nodiscard]]\
-constexpr auto op(const internal::matrix<T, M1, N1> &(arg1), const U arg2, const internal::matrix<V, M2, N2> &(arg3)) noexcept\
-	-> internal::matrix<std::common_type_t<T, U, V>, M1, N1>\
+constexpr auto op(const matrix<T, M1, N1> &(arg1), const U arg2, const matrix<V, M2, N2> &(arg3)) noexcept\
+	-> matrix<std::common_type_t<T, U, V>, M1, N1>\
 	requires (std::is_arithmetic_v<U> && ((M1 == 1 || N1 == 1) && (M2 == 1 || N2 == 1) && M1 * N1 == M2 * N2 || M1 == M2 && N1 == N2))\
 {\
-	internal::matrix<std::common_type_t<T, U, V>, M1, N1> res;\
+	matrix<std::common_type_t<T, U, V>, M1, N1> res;\
 \
 	for (const auto [res, arg1, arg3] : std::views::zip(res, arg1, arg3)) {\
 		res = op(arg1, arg2, arg3);\
@@ -201,11 +203,11 @@ constexpr auto op(const internal::matrix<T, M1, N1> &(arg1), const U arg2, const
 \
 template <typename T, typename U, std::size_t M1, std::size_t N1, typename V, std::size_t M2, std::size_t N2>\
 [[nodiscard]]\
-constexpr auto op(const T arg1, const internal::matrix<U, M1, N1> &(arg2), const internal::matrix<V, M2, N2> &(arg3)) noexcept\
-	-> internal::matrix<std::common_type_t<T, U, V>, M1, N1>\
+constexpr auto op(const T arg1, const matrix<U, M1, N1> &(arg2), const matrix<V, M2, N2> &(arg3)) noexcept\
+	-> matrix<std::common_type_t<T, U, V>, M1, N1>\
 	requires (std::is_arithmetic_v<T> && ((M1 == 1 || N1 == 1) && (M2 == 1 || N2 == 1) && M1 * N1 == M2 * N2 || M1 == M2 && N1 == N2))\
 {\
-	internal::matrix<std::common_type_t<T, U, V>, M1, N1> res;\
+	matrix<std::common_type_t<T, U, V>, M1, N1> res;\
 \
 	for (const auto [res, arg2, arg3] : std::views::zip(res, arg2, arg3)) {\
 		res = op(arg1, arg2, arg3);\
@@ -216,11 +218,11 @@ constexpr auto op(const T arg1, const internal::matrix<U, M1, N1> &(arg2), const
 \
 template <typename T, std::size_t M1, std::size_t N1, typename U, std::size_t M2, std::size_t N2, typename V, std::size_t M3, std::size_t N3>\
 [[nodiscard]]\
-constexpr auto op(const internal::matrix<T, M1, N1> &(arg1), const internal::matrix<U, M2, N2> &(arg2), const internal::matrix<V, M3, N3> &(arg3)) noexcept\
-	-> internal::matrix<std::common_type_t<T, U, V>, M1, N1>\
+constexpr auto op(const matrix<T, M1, N1> &(arg1), const matrix<U, M2, N2> &(arg2), const matrix<V, M3, N3> &(arg3)) noexcept\
+	-> matrix<std::common_type_t<T, U, V>, M1, N1>\
 	requires ((M1 == 1 || N1 == 1) && (M2 == 1 || N2 == 1) && (M3 == 1 || N3 == 1) && M1 * N1 == M2 * N2 && M2 * N2 == M3 * N3 || M1 == M2 && M2 == M3 && N1 == N2 && N2 == N3)\
 {\
-	internal::matrix<std::common_type_t<T, U, V>, M1, N1> res;\
+	matrix<std::common_type_t<T, U, V>, M1, N1> res;\
 \
 	for (const auto [res, arg1, arg2, arg3] : std::views::zip(res, arg1, arg2, arg3)) {\
 		res = op(arg1, arg2, arg3);\
@@ -252,7 +254,7 @@ constexpr auto all(const T x) noexcept
 
 template <typename T, std::size_t M, std::size_t N>
 [[nodiscard]]
-constexpr auto all(const internal::matrix<T, M, N> &x) noexcept
+constexpr auto all(const matrix<T, M, N> &x) noexcept
 {
 	return std::ranges::all_of(x, static_cast<bool (*)(T)>(all));
 }
@@ -267,7 +269,7 @@ constexpr auto any(const T x) noexcept
 
 template <typename T, std::size_t M, std::size_t N>
 [[nodiscard]]
-constexpr auto any(const internal::matrix<T, M, N> &x) noexcept
+constexpr auto any(const matrix<T, M, N> &x) noexcept
 {
 	return std::ranges::any_of(x, static_cast<bool (*)(T)>(any));
 }
@@ -305,31 +307,31 @@ template <typename T, typename U>
 constexpr auto cross([[maybe_unused]] const T x, [[maybe_unused]] const U y) noexcept
 	requires (std::is_arithmetic_v<T> && std::is_arithmetic_v<U>)
 {
-	return internal::matrix<std::common_type_t<T, U>, 1, 3>{};
+	return matrix<std::common_type_t<T, U>, 1, 3>{};
 }
 
 template <typename T, std::size_t M, std::size_t N, typename U>
 [[nodiscard]]
-constexpr auto cross(const internal::matrix<T, M, N> &x, const U y) noexcept
+constexpr auto cross(const matrix<T, M, N> &x, const U y) noexcept
 	requires (std::is_arithmetic_v<U> && M * N == 3)
 {
-	return internal::matrix<std::common_type_t<T, U>, M, N>{x.y() * y - x.z() * y, x.z() * y - x.x() * y, x.x() * y - x.y() * y};
+	return matrix<std::common_type_t<T, U>, M, N>{x.y() * y - x.z() * y, x.z() * y - x.x() * y, x.x() * y - x.y() * y};
 }
 
 template <typename T, typename U, std::size_t M, std::size_t N>
 [[nodiscard]]
-constexpr auto cross(const T x, const internal::matrix<U, M, N> &y) noexcept
+constexpr auto cross(const T x, const matrix<U, M, N> &y) noexcept
 	requires (std::is_arithmetic_v<T> && M * N == 3)
 {
-	return internal::matrix<std::common_type_t<T, U>, M, N>{x * y.z() - x * y.y(), x * y.x() - x * y.z(), x * y.y() - x * y.x()};
+	return matrix<std::common_type_t<T, U>, M, N>{x * y.z() - x * y.y(), x * y.x() - x * y.z(), x * y.y() - x * y.x()};
 }
 
 template <typename T, std::size_t M1, std::size_t N1, typename U, std::size_t M2, std::size_t N2>
 [[nodiscard]]
-constexpr auto cross(const internal::matrix<T, M1, N1> &x, const internal::matrix<U, M2, N2> &y) noexcept
+constexpr auto cross(const matrix<T, M1, N1> &x, const matrix<U, M2, N2> &y) noexcept
 	requires (M1 * N1 == 3 && M2 * N2 == 3)
 {
-	return internal::matrix<std::common_type_t<T, U>, M1, N1>{x.y() * y.z() - x.z() * y.y(), x.z() * y.x() - x.x() * y.z(), x.x() * y.y() - x.y() * y.x()};
+	return matrix<std::common_type_t<T, U>, M1, N1>{x.y() * y.z() - x.z() * y.y(), x.z() * y.x() - x.x() * y.z(), x.x() * y.y() - x.y() * y.x()};
 }
 
 STELLARLIB_LIN_INTRINSICS_SINGLE_ARG_OPERATION_IMPL(degrees, x, {
@@ -338,35 +340,35 @@ STELLARLIB_LIN_INTRINSICS_SINGLE_ARG_OPERATION_IMPL(degrees, x, {
 
 template <typename T>
 [[nodiscard]]
-constexpr auto determinant(const internal::matrix<T, 1, 1> &m) noexcept
+constexpr auto determinant(const matrix<T, 1, 1> &m) noexcept
 {
 	return m.front();
 }
 
 template <typename T>
 [[nodiscard]]
-constexpr auto determinant(const internal::matrix<T, 2, 2> &m) noexcept
+constexpr auto determinant(const matrix<T, 2, 2> &m) noexcept
 {
 	return m[0, 0] * m[1, 1] - m[0, 1] * m[1, 0];
 }
 
 template <typename T>
 [[nodiscard]]
-constexpr auto determinant(const internal::matrix<T, 3, 3> &m) noexcept
+constexpr auto determinant(const matrix<T, 3, 3> &m) noexcept
 {
 	return m[0, 0] * (m[1, 1] * m[2, 2] - m[1, 2] * m[2, 1]) - m[0, 1] * (m[1, 0] * m[2, 2] - m[1, 2] * m[2, 0]) + m[0, 2] * (m[1, 0] * m[2, 1] - m[1, 1] * m[2, 0]);
 }
 
 template <typename T>
 [[nodiscard]]
-constexpr auto determinant(const internal::matrix<T, 4, 4> &m) noexcept
+constexpr auto determinant(const matrix<T, 4, 4> &m) noexcept
 {
 	return m[0, 0] * (m[1, 1] * (m[2, 2] * m[3, 3] - m[2, 3] * m[3, 2]) - m[1, 2] * (m[2, 1] * m[3, 3] - m[2, 3] * m[3, 1]) + m[1, 3] * (m[2, 1] * m[3, 2] - m[2, 2] * m[3, 1])) - m[0, 1] * (m[1, 0] * (m[2, 2] * m[3, 3] - m[2, 3] * m[3, 2]) - m[1, 2] * (m[2, 0] * m[3, 3] - m[2, 3] * m[3, 0]) + m[1, 3] * (m[2, 0] * m[3, 2] - m[2, 2] * m[3, 0])) + m[0, 2] * (m[1, 0] * (m[2, 1] * m[3, 3] - m[2, 3] * m[3, 1]) - m[1, 1] * (m[2, 0] * m[3, 3] - m[2, 3] * m[3, 0]) + m[1, 3] * (m[2, 0] * m[3, 1] - m[2, 1] * m[3, 0])) - m[0, 3] * (m[1, 0] * (m[2, 1] * m[3, 2] - m[2, 2] * m[3, 1]) - m[1, 1] * (m[2, 0] * m[3, 2] - m[2, 2] * m[3, 0]) + m[1, 2] * (m[2, 0] * m[3, 1] - m[2, 1] * m[3, 0]));
 }
 
 template <typename T, std::size_t N>
 [[nodiscard]]
-constexpr auto determinant(internal::matrix<T, N, N> m) noexcept
+constexpr auto determinant(matrix<T, N, N> m) noexcept
 {
 	T determinant{1};
 
@@ -419,7 +421,7 @@ constexpr auto length(const T x) noexcept
 
 template <typename T, std::size_t M, std::size_t N>
 [[nodiscard]]
-constexpr auto length(const internal::matrix<T, M, N> &x) noexcept
+constexpr auto length(const matrix<T, M, N> &x) noexcept
 	requires (M == 1 || N == 1)
 {
 	if constexpr (M * N == 2) {
@@ -443,7 +445,7 @@ constexpr auto distance(const T x, const U y) noexcept
 
 template <typename T, std::size_t M, std::size_t N, typename U>
 [[nodiscard]]
-constexpr auto distance(const internal::matrix<T, M, N> &x, const U y) noexcept
+constexpr auto distance(const matrix<T, M, N> &x, const U y) noexcept
 	requires (std::is_arithmetic_v<U> && (M == 1 || N == 1))
 {
 	return length(x - y);
@@ -451,7 +453,7 @@ constexpr auto distance(const internal::matrix<T, M, N> &x, const U y) noexcept
 
 template <typename T, typename U, std::size_t M, std::size_t N>
 [[nodiscard]]
-constexpr auto distance(const T x, const internal::matrix<U, M, N> &y) noexcept
+constexpr auto distance(const T x, const matrix<U, M, N> &y) noexcept
 	requires (std::is_arithmetic_v<T> && (M == 1 || N == 1))
 {
 	return length(x - y);
@@ -459,7 +461,7 @@ constexpr auto distance(const T x, const internal::matrix<U, M, N> &y) noexcept
 
 template <typename T, std::size_t M1, std::size_t N1, typename U, std::size_t M2, std::size_t N2>
 [[nodiscard]]
-constexpr auto distance(const internal::matrix<T, M1, N1> &x, const internal::matrix<U, M2, N2> &y) noexcept
+constexpr auto distance(const matrix<T, M1, N1> &x, const matrix<U, M2, N2> &y) noexcept
 	requires ((M1 == 1 || N1 == 1) && (M2 == 1 || N2 == 1) && M1 * N1 == M2 * N2)
 {
 	return length(x - y);
@@ -475,7 +477,7 @@ constexpr auto dot(const T x, const U y) noexcept
 
 template <typename T, std::size_t M, std::size_t N, typename U>
 [[nodiscard]]
-constexpr auto dot(const internal::matrix<T, M, N> &x, const U y) noexcept
+constexpr auto dot(const matrix<T, M, N> &x, const U y) noexcept
 	requires (std::is_arithmetic_v<U> && (M == 1 || N == 1))
 {
 	return std::ranges::fold_left(x | std::views::transform([y] [[nodiscard]] (const auto x) noexcept -> auto {
@@ -485,7 +487,7 @@ constexpr auto dot(const internal::matrix<T, M, N> &x, const U y) noexcept
 
 template <typename T, typename U, std::size_t M, std::size_t N>
 [[nodiscard]]
-constexpr auto dot(const T x, const internal::matrix<U, M, N> &y) noexcept
+constexpr auto dot(const T x, const matrix<U, M, N> &y) noexcept
 	requires (std::is_arithmetic_v<T> && (M == 1 || N == 1))
 {
 	return std::ranges::fold_left(y | std::views::transform([x] [[nodiscard]] (const auto y) noexcept -> auto {
@@ -495,7 +497,7 @@ constexpr auto dot(const T x, const internal::matrix<U, M, N> &y) noexcept
 
 template <typename T, std::size_t M1, std::size_t N1, typename U, std::size_t M2, std::size_t N2>
 [[nodiscard]]
-constexpr auto dot(const internal::matrix<T, M1, N1> &x, const internal::matrix<U, M2, N2> &y) noexcept
+constexpr auto dot(const matrix<T, M1, N1> &x, const matrix<U, M2, N2> &y) noexcept
 	requires ((M1 == 1 || N1 == 1) && (M2 == 1 || N2 == 1) && M1 * N1 == M2 * N2)
 {
 	return std::ranges::fold_left(std::views::zip(x, y) | std::views::transform([] [[nodiscard]] (const auto xy) noexcept -> auto {
@@ -508,31 +510,31 @@ template <typename T, typename U>
 constexpr auto dst(const T src0, const U src1) noexcept
 	requires (std::is_arithmetic_v<T> && std::is_arithmetic_v<U>)
 {
-	return internal::matrix<std::common_type_t<T, U>, 1, 4>{1, src0 * src1, src0, src1};
+	return matrix<std::common_type_t<T, U>, 1, 4>{1, src0 * src1, src0, src1};
 }
 
 template <typename T, std::size_t M, std::size_t N, typename U>
 [[nodiscard]]
-constexpr auto dst(const internal::matrix<T, M, N> &src0, const U src1) noexcept
+constexpr auto dst(const matrix<T, M, N> &src0, const U src1) noexcept
 	requires (std::is_arithmetic_v<U> && (M == 1 || N == 1) && M * N == 4)
 {
-	return internal::matrix<std::common_type_t<T, U>, M, N>{1, src0.y() * src1, src0.z(), src1};
+	return matrix<std::common_type_t<T, U>, M, N>{1, src0.y() * src1, src0.z(), src1};
 }
 
 template <typename T, typename U, std::size_t M, std::size_t N>
 [[nodiscard]]
-constexpr auto dst(const T src0, const internal::matrix<U, M, N> &src1) noexcept
+constexpr auto dst(const T src0, const matrix<U, M, N> &src1) noexcept
 	requires (std::is_arithmetic_v<T> && (M == 1 || N == 1) && M * N == 4)
 {
-	return internal::matrix<std::common_type_t<T, U>, M, N>{1, src0 * src1.y(), src0, src1.w()};
+	return matrix<std::common_type_t<T, U>, M, N>{1, src0 * src1.y(), src0, src1.w()};
 }
 
 template <typename T, std::size_t M1, std::size_t N1, typename U, std::size_t M2, std::size_t N2>
 [[nodiscard]]
-constexpr auto dst(const internal::matrix<T, M1, N1> &src0, const internal::matrix<U, M2, N2> &src1) noexcept
+constexpr auto dst(const matrix<T, M1, N1> &src0, const matrix<U, M2, N2> &src1) noexcept
 	requires ((M1 == 1 || N1 == 1) && (M2 == 1 || N2 == 1) && M1 * N1 == 4 && M2 * N2 == 4)
 {
-	return internal::matrix<std::common_type_t<T, U>, M1, N1>{1, src0.y() * src1.y(), src0.z(), src1.w()};
+	return matrix<std::common_type_t<T, U>, M1, N1>{1, src0.y() * src1.y(), src0.z(), src1.w()};
 }
 
 STELLARLIB_LIN_INTRINSICS_SINGLE_ARG_OPERATION_IMPL(exp, x, {
@@ -548,24 +550,24 @@ template <typename T, typename U, typename V>
 constexpr auto faceforward(const T n, const U i, const V ng) noexcept
 	requires (std::is_arithmetic_v<T> && std::is_arithmetic_v<U> && std::is_arithmetic_v<V>)
 {
-	return dot(i, ng) < 0 ? n : -n;
+	return std::common_type_t<T, U, V>{dot(i, ng) < 0 ? n : -n};
 }
 
 template <typename T, std::size_t M, std::size_t N, typename U, typename V>
 [[nodiscard]]
-constexpr auto faceforward(const internal::matrix<T, M, N> &n, const U i, const V ng) noexcept
+constexpr auto faceforward(const matrix<T, M, N> &n, const U i, const V ng) noexcept
 	requires (std::is_arithmetic_v<U> && std::is_arithmetic_v<V> && (M == 1 || N == 1))
 {
-	return dot(i, ng) < 0 ? n : -n;
+	return matrix<std::common_type_t<T, U, V>, M, N>{dot(i, ng) < 0 ? n : -n};
 }
 
 template <typename T, typename U, std::size_t M, std::size_t N, typename V>
 [[nodiscard]]
-constexpr auto faceforward(const T n, const internal::matrix<U, M, N> &i, const V ng) noexcept
-	-> internal::matrix<T, M, N>
+constexpr auto faceforward(const T n, const matrix<U, M, N> &i, const V ng) noexcept
+	-> matrix<std::common_type_t<T, U, V>, M, N>
 	requires (std::is_arithmetic_v<T> && std::is_arithmetic_v<V> && (M == 1 || N == 1))
 {
-	internal::matrix<T, M, N> res;
+	matrix<std::common_type_t<T, U, V>, M, N> res;
 
 	if (dot(i, ng) < 0) {
 		for (auto &res : res) {
@@ -583,11 +585,11 @@ constexpr auto faceforward(const T n, const internal::matrix<U, M, N> &i, const 
 
 template <typename T, typename U, typename V, std::size_t M, std::size_t N>
 [[nodiscard]]
-constexpr auto faceforward(const T n, const U i, const internal::matrix<V, M, N> &ng) noexcept
-	-> internal::matrix<T, M, N>
+constexpr auto faceforward(const T n, const U i, const matrix<V, M, N> &ng) noexcept
+	-> matrix<std::common_type_t<T, U, V>, M, N>
 	requires (std::is_arithmetic_v<T> && std::is_arithmetic_v<U> && (M == 1 || N == 1))
 {
-	internal::matrix<T, M, N> res;
+	matrix<std::common_type_t<T, U, V>, M, N> res;
 
 	if (dot(i, ng) < 0) {
 		for (auto &res : res) {
@@ -605,27 +607,27 @@ constexpr auto faceforward(const T n, const U i, const internal::matrix<V, M, N>
 
 template <typename T, std::size_t M1, std::size_t N1, typename U, std::size_t M2, std::size_t N2, typename V>
 [[nodiscard]]
-constexpr auto faceforward(const internal::matrix<T, M1, N1> &n, const internal::matrix<U, M2, N2> &i, const V ng) noexcept
+constexpr auto faceforward(const matrix<T, M1, N1> &n, const matrix<U, M2, N2> &i, const V ng) noexcept
 	requires (std::is_arithmetic_v<V> && (M1 == 1 || N1 == 1) && (M2 == 1 || N2 == 1) && M1 * N1 == M2 * N2)
 {
-	return dot(i, ng) < 0 ? n : -n;
+	return matrix<std::common_type_t<T, U, V>, M1, N1>{dot(i, ng) < 0 ? n : -n};
 }
 
 template <typename T, std::size_t M1, std::size_t N1, typename U, typename V, std::size_t M2, std::size_t N2>
 [[nodiscard]]
-constexpr auto faceforward(const internal::matrix<T, M1, N1> &n, const U i, const internal::matrix<V, M2, N2> &ng) noexcept
+constexpr auto faceforward(const matrix<T, M1, N1> &n, const U i, const matrix<V, M2, N2> &ng) noexcept
 	requires (std::is_arithmetic_v<U> && (M1 == 1 || N1 == 1) && (M2 == 1 || N2 == 1) && M1 * N1 == M2 * N2)
 {
-	return dot(i, ng) < 0 ? n : -n;
+	return matrix<std::common_type_t<T, U, V>, M1, N1>{dot(i, ng) < 0 ? n : -n};
 }
 
 template <typename T, typename U, std::size_t M1, std::size_t N1, typename V, std::size_t M2, std::size_t N2>
 [[nodiscard]]
-constexpr auto faceforward(const T n, const internal::matrix<U, M1, N1> &i, const internal::matrix<V, M2, N2> &ng) noexcept
-	-> internal::matrix<T, M1, N1>
+constexpr auto faceforward(const T n, const matrix<U, M1, N1> &i, const matrix<V, M2, N2> &ng) noexcept
+	-> matrix<std::common_type_t<T, U, V>, M1, N1>
 	requires (std::is_arithmetic_v<T> && (M1 == 1 || N1 == 1) && (M2 == 1 || N2 == 1) && M1 * N1 == M2 * N2)
 {
-	internal::matrix<T, M1, N1> res;
+	matrix<std::common_type_t<T, U, V>, M1, N1> res;
 
 	if (dot(i, ng) < 0) {
 		for (auto &res : res) {
@@ -643,10 +645,10 @@ constexpr auto faceforward(const T n, const internal::matrix<U, M1, N1> &i, cons
 
 template <typename T, std::size_t M1, std::size_t N1, typename U, std::size_t M2, std::size_t N2, typename V, std::size_t M3, std::size_t N3>
 [[nodiscard]]
-constexpr auto faceforward(const internal::matrix<T, M1, N1> &n, const internal::matrix<U, M2, N2> &i, const internal::matrix<V, M3, N3> &ng) noexcept
+constexpr auto faceforward(const matrix<T, M1, N1> &n, const matrix<U, M2, N2> &i, const matrix<V, M3, N3> &ng) noexcept
 	requires ((M1 == 1 || N1 == 1) && (M2 == 1 || N2 == 1) && (M3 == 1 || N3 == 1) && M1 * N1 == M2 * N2 && M2 * N2 == M3 * N3)
 {
-	return dot(i, ng) < 0 ? n : -n;
+	return matrix<std::common_type_t<T, U, V>, M1, N1>{dot(i, ng) < 0 ? n : -n};
 }
 
 STELLARLIB_LIN_INTRINSICS_SINGLE_ARG_OPERATION_IMPL(floor, x, {
@@ -686,7 +688,7 @@ template <typename T, typename U, typename V>
 constexpr auto lit(const T n_dot_l, const U n_dot_h, const V m) noexcept
 	requires (std::is_arithmetic_v<T> && std::is_arithmetic_v<U> && std::is_arithmetic_v<V>)
 {
-	return internal::matrix<std::common_type_t<T, U, V>, 1, 4>{1, max(n_dot_l, std::common_type_t<T, U, V>{}), n_dot_l < 0 || n_dot_h < 0 ? 0 : pow(n_dot_h, m), 1};
+	return matrix<std::common_type_t<T, U, V>, 1, 4>{1, max(n_dot_l, std::common_type_t<T, U, V>{}), n_dot_l < 0 || n_dot_h < 0 ? 0 : pow(n_dot_h, m), 1};
 }
 
 STELLARLIB_LIN_INTRINSICS_SINGLE_ARG_OPERATION_IMPL(log, x, {
@@ -724,11 +726,11 @@ constexpr auto modf(const T x, U &ip) noexcept
 
 template <typename T, typename U, std::size_t M, std::size_t N>
 [[nodiscard]]
-constexpr auto modf(const T x, internal::matrix<U, M, N> &ip) noexcept
-	-> internal::matrix<std::common_type_t<T, U>, M, N>
+constexpr auto modf(const T x, matrix<U, M, N> &ip) noexcept
+	-> matrix<std::common_type_t<T, U>, M, N>
 	requires (std::is_arithmetic_v<T>)
 {
-	internal::matrix<std::common_type_t<T, U>, M, N> res;
+	matrix<std::common_type_t<T, U>, M, N> res;
 	res.front() = modf(x, ip.front());
 
 	for (const auto i : std::views::iota(std::size_t{1}, M * N)) {
@@ -741,11 +743,11 @@ constexpr auto modf(const T x, internal::matrix<U, M, N> &ip) noexcept
 
 template <typename T, std::size_t M1, std::size_t N1, typename U, std::size_t M2, std::size_t N2>
 [[nodiscard]]
-constexpr auto modf(const internal::matrix<T, M1, N1> &x, internal::matrix<U, M2, N2> &ip) noexcept
-	-> internal::matrix<std::common_type_t<T, U>, M1, N1>
+constexpr auto modf(const matrix<T, M1, N1> &x, matrix<U, M2, N2> &ip) noexcept
+	-> matrix<std::common_type_t<T, U>, M1, N1>
 	requires ((M1 == 1 || N1 == 1) && (M2 == 1 || N2 == 1) && M1 * N1 == M2 * N2 || M1 == M2 && N1 == N2)
 {
-	internal::matrix<std::common_type_t<T, U>, M1, N1> res;
+	matrix<std::common_type_t<T, U>, M1, N1> res;
 
 	for (const auto [res, x, ip] : std::views::zip(res, x, ip)) {
 		res = modf(x, ip);
@@ -764,7 +766,7 @@ constexpr auto mul(const T x, const U y) noexcept
 
 template <typename T, std::size_t M, std::size_t N, typename U>
 [[nodiscard]]
-constexpr auto mul(const internal::matrix<T, M, N> &x, const U y) noexcept
+constexpr auto mul(const matrix<T, M, N> &x, const U y) noexcept
 	requires (std::is_arithmetic_v<U>)
 {
 	return x * y;
@@ -772,7 +774,7 @@ constexpr auto mul(const internal::matrix<T, M, N> &x, const U y) noexcept
 
 template <typename T, typename U, std::size_t M, std::size_t N>
 [[nodiscard]]
-constexpr auto mul(const T x, const internal::matrix<U, M, N> &y) noexcept
+constexpr auto mul(const T x, const matrix<U, M, N> &y) noexcept
 	requires (std::is_arithmetic_v<T>)
 {
 	return x * y;
@@ -780,14 +782,14 @@ constexpr auto mul(const T x, const internal::matrix<U, M, N> &y) noexcept
 
 template <typename T, std::size_t M1, std::size_t N1, typename U, std::size_t M2, std::size_t N2>
 [[nodiscard]]
-constexpr auto mul(const internal::matrix<T, M1, N1> &x, const internal::matrix<U, M2, N2> &y) noexcept
-	-> internal::matrix<std::common_type_t<T, U>, M1 == 1 || N1 == 1 ? 1 : M1, M2 == 1 || N2 == 1 ? 1 : N2>
+constexpr auto mul(const matrix<T, M1, N1> &x, const matrix<U, M2, N2> &y) noexcept
+	-> matrix<std::common_type_t<T, U>, M1 == 1 || N1 == 1 ? 1 : M1, M2 == 1 || N2 == 1 ? 1 : N2>
 	requires ((M1 == 1 || N1 == 1) && M1 * N1 == M2 || (M2 == 1 || N2 == 1) && M2 * N2 == N1 || N1 == M2)
 {
 	constexpr auto M{M1 == 1 || N1 == 1 ? 1 : M1};
 	constexpr auto N{(M1 == 1 || N1 == 1) && M1 * N1 == M2 ? M2 : N1};
 	constexpr auto P{M2 == 1 || N2 == 1 ? 1 : N2};
-	internal::matrix<std::common_type_t<T, U>, M, P> res{};
+	matrix<std::common_type_t<T, U>, M, P> res{};
 
 	for (const auto m : std::views::iota(std::size_t{}, M)) {
 		for (const auto n : std::views::iota(std::size_t{}, N)) {
@@ -810,7 +812,7 @@ constexpr auto normalize(const T x) noexcept
 
 template <typename T, std::size_t M, std::size_t N>
 [[nodiscard]]
-constexpr auto normalize(const internal::matrix<T, M, N> &x) noexcept
+constexpr auto normalize(const matrix<T, M, N> &x) noexcept
 	requires (M == 1 || N == 1)
 {
 	return x / length(x);
@@ -824,9 +826,37 @@ STELLARLIB_LIN_INTRINSICS_SINGLE_ARG_OPERATION_IMPL(rcp, x, {
 	return 1 / x;
 });
 
-STELLARLIB_LIN_INTRINSICS_DOUBLE_ARG_OPERATION_IMPL(reflect, i, n, {
-	return i - 2 * n * dot(i, n);
-});
+template <typename T, typename U>
+[[nodiscard]]
+constexpr auto reflect(const T i, const U n) noexcept
+	requires (std::is_arithmetic_v<T> && std::is_arithmetic_v<U>)
+{
+	return i - std::common_type_t<T, U>{2} * n * dot(i, n);
+}
+
+template <typename T, std::size_t M, std::size_t N, typename U>
+[[nodiscard]]
+constexpr auto reflect(const matrix<T, M, N> &i, const U n) noexcept
+	requires (std::is_arithmetic_v<U> && (M == 1 || N == 1))
+{
+	return i - std::common_type_t<T, U>{2} * n * dot(i, n);
+}
+
+template <typename T, typename U, std::size_t M, std::size_t N>
+[[nodiscard]]
+constexpr auto reflect(const T i, const matrix<U, M, N> &n) noexcept
+	requires (std::is_arithmetic_v<T> && (M == 1 || N == 1))
+{
+	return i - std::common_type_t<T, U>{2} * n * dot(i, n);
+}
+
+template <typename T, std::size_t M1, std::size_t N1, typename U, std::size_t M2, std::size_t N2>
+[[nodiscard]]
+constexpr auto reflect(const matrix<T, M1, N1> &i, const matrix<U, M2, N2> &n) noexcept
+	requires ((M1 == 1 || N1 == 1) && (M2 == 1 || N2 == 1) && M1 * N1 == M2 * N2)
+{
+	return i - std::common_type_t<T, U>{2} * n * dot(i, n);
+}
 
 #define STELLARLIB_LIN_INTRINSICS_REFRACT_IMPL(zero)\
 {\
@@ -848,21 +878,21 @@ STELLARLIB_LIN_INTRINSICS_REFRACT_IMPL((std::common_type_t<T, U, V>{}));
 
 template <typename T, std::size_t M, std::size_t N, typename U, typename V>
 [[nodiscard]]
-constexpr auto refract(const internal::matrix<T, M, N> &i, const U n, const V eta) noexcept
+constexpr auto refract(const matrix<T, M, N> &i, const U n, const V eta) noexcept
 	requires (std::is_arithmetic_v<U> && std::is_arithmetic_v<V> && (M == 1 || N == 1))
-STELLARLIB_LIN_INTRINSICS_REFRACT_IMPL((internal::matrix<std::common_type_t<T, U, V>, M, N>{}));
+STELLARLIB_LIN_INTRINSICS_REFRACT_IMPL((matrix<std::common_type_t<T, U, V>, M, N>{}));
 
 template <typename T, typename U, std::size_t M, std::size_t N, typename V>
 [[nodiscard]]
-constexpr auto refract(const T i, const internal::matrix<U, M, N> &n, const V eta) noexcept
+constexpr auto refract(const T i, const matrix<U, M, N> &n, const V eta) noexcept
 	requires (std::is_arithmetic_v<T> && std::is_arithmetic_v<V> && (M == 1 || N == 1))
-STELLARLIB_LIN_INTRINSICS_REFRACT_IMPL((internal::matrix<std::common_type_t<T, U, V>, M, N>{}));
+STELLARLIB_LIN_INTRINSICS_REFRACT_IMPL((matrix<std::common_type_t<T, U, V>, M, N>{}));
 
 template <typename T, std::size_t M1, std::size_t N1, typename U, std::size_t M2, std::size_t N2, typename V>
 [[nodiscard]]
-constexpr auto refract(const internal::matrix<T, M1, N1> &i, const internal::matrix<U, M2, N2> &n, const V eta) noexcept
+constexpr auto refract(const matrix<T, M1, N1> &i, const matrix<U, M2, N2> &n, const V eta) noexcept
 	requires (std::is_arithmetic_v<V> && (M1 == 1 || N1 == 1) && (M2 == 1 || N2 == 1) && M1 * N1 == M2 * N2)
-STELLARLIB_LIN_INTRINSICS_REFRACT_IMPL((internal::matrix<std::common_type_t<T, U, V>, M1, N1>{}));
+STELLARLIB_LIN_INTRINSICS_REFRACT_IMPL((matrix<std::common_type_t<T, U, V>, M1, N1>{}));
 
 STELLARLIB_LIN_INTRINSICS_SINGLE_ARG_OPERATION_IMPL(round, x, {
 	return std::round(x);
@@ -893,7 +923,7 @@ constexpr void sincos(const T x, U &s, V &c) noexcept
 }
 
 template <typename T, typename U, std::size_t M, std::size_t N, typename V>
-constexpr void sincos(const T x, internal::matrix<U, M, N> &s, V &c) noexcept
+constexpr void sincos(const T x, matrix<U, M, N> &s, V &c) noexcept
 	requires (std::is_arithmetic_v<T> && std::is_arithmetic_v<V>)
 {
 	sincos(x, s.front(), c);
@@ -904,7 +934,7 @@ constexpr void sincos(const T x, internal::matrix<U, M, N> &s, V &c) noexcept
 }
 
 template <typename T, typename U, typename V, std::size_t M, std::size_t N>
-constexpr void sincos(const T x, U &s, internal::matrix<V, M, N> &c) noexcept
+constexpr void sincos(const T x, U &s, matrix<V, M, N> &c) noexcept
 	requires (std::is_arithmetic_v<T> && std::is_arithmetic_v<U>)
 {
 	sincos(x, s, c.front());
@@ -915,7 +945,7 @@ constexpr void sincos(const T x, U &s, internal::matrix<V, M, N> &c) noexcept
 }
 
 template <typename T, typename U, std::size_t M1, std::size_t N1, typename V, std::size_t M2, std::size_t N2>
-constexpr void sincos(const T x, internal::matrix<U, M1, N1> &s, internal::matrix<V, M2, N2> &c) noexcept
+constexpr void sincos(const T x, matrix<U, M1, N1> &s, matrix<V, M2, N2> &c) noexcept
 	requires (std::is_arithmetic_v<T> && ((M1 == 1 || N1 == 1) && (M2 == 1 || N2 == 1) && M1 * N1 == M2 * N2 || M1 == M2 && N2 == N1))
 {
 	sincos(x, s.front(), c.front());
@@ -927,7 +957,7 @@ constexpr void sincos(const T x, internal::matrix<U, M1, N1> &s, internal::matri
 }
 
 template <typename T, std::size_t M1, std::size_t N1, typename U, std::size_t M2, std::size_t N2, typename V, std::size_t M3, std::size_t N3>
-constexpr void sincos(const internal::matrix<T, M1, N1> &x, internal::matrix<U, M2, N2> &s, internal::matrix<V, M3, N3> &c) noexcept
+constexpr void sincos(const matrix<T, M1, N1> &x, matrix<U, M2, N2> &s, matrix<V, M3, N3> &c) noexcept
 	requires ((M1 == 1 || N1 == 1) && (M2 == 1 || N2 == 1) && (M3 == 1 || N3 == 1) && M1 * N1 == M2 * N2 && M2 * N2 == M3 * N3 || M1 == M2 && M2 == M3 && N1 == N2 && N2 == N3)
 {
 	for (const auto [x, s, c] : std::views::zip(x, s, c)) {
@@ -966,10 +996,10 @@ constexpr auto transpose(const T x) noexcept
 
 template <typename T, std::size_t M, std::size_t N>
 [[nodiscard]]
-constexpr auto transpose(const internal::matrix<T, M, N> &x) noexcept
-	-> internal::matrix<T, N, M>
+constexpr auto transpose(const matrix<T, M, N> &x) noexcept
+	-> matrix<T, N, M>
 {
-	internal::matrix<T, N, M> res;
+	matrix<T, N, M> res;
 
 	for (const auto m : std::views::iota(std::size_t{}, M)) {
 		for (const auto n : std::views::iota(std::size_t{}, N)) {
