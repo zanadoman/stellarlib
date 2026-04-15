@@ -1,0 +1,30 @@
+name: Doxygen
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  doxygen:
+    runs-on: ubuntu-latest
+
+    container:
+      image: archlinux:latest
+
+    steps:
+    - uses: actions/checkout@v6
+
+    - name: Install prerequisites
+      run: |
+        pacman-key --init
+        pacman -Syu --noconfirm doxygen
+
+    - name: Generate documentation
+      run: doxygen
+
+    - name: Upload documentation
+      uses: actions/upload-artifact@v7
+      with:
+        path: html
