@@ -1,0 +1,28 @@
+name: GTest
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    container:
+      image: archlinux:latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install prerequisites
+        run: pacman -Syu --noconfirm cmake ninja clang lld sdl3 gtest valgrind
+
+      - name: Build tests
+        run: |
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -G Ninja --toolchain cmake/x86_64-linux-gnu.cmake
+          cmake --build build -t tests
+
+      - name: Run tests
+        run: env DEBUGINFOD_URLS=https://debuginfod.archlinux.org valgrind build/tests

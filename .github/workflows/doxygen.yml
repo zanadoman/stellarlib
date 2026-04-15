@@ -7,24 +7,43 @@ on:
     branches: [ "main" ]
 
 jobs:
-  doxygen:
+  generate:
     runs-on: ubuntu-latest
 
     container:
       image: archlinux:latest
 
     steps:
-    - uses: actions/checkout@v6
+      - uses: actions/checkout@v6
 
-    - name: Install prerequisites
-      run: |
-        pacman-key --init
-        pacman -Syu --noconfirm doxygen
+      - name: Install prerequisites
+        run: |
+          pacman-key --init
+          pacman -Syu --noconfirm doxygen
 
-    - name: Generate documentation
-      run: doxygen
+      - name: Generate documentation
+        run: doxygen
 
-    - name: Upload documentation
-      uses: actions/upload-artifact@v7
-      with:
-        path: html
+      - name: Upload documentation
+        id: doxygen
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: html
+
+  deploy:
+    needs: generate
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy documentation
+        id: doxygen
+        uses: actions/deploy-pages@v5

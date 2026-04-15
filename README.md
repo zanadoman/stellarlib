@@ -147,7 +147,7 @@ env JAVA_HOME=/usr/lib/jvm/java-21-openjdk ANDROID_HOME=/opt/android-sdk cmake -
 
 </details>
 
-## Documentation
+## [Documentation](https://zanadoman.github.io/stellarlib/)
 
 ```sh
 doxygen                      # Generate documentation
