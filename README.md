@@ -11,7 +11,10 @@ Opinionated, cross-platform game engine library in [C++23](https://en.cppreferen
   - [x] Simple, consistent, and foolproof interface
   - [x] Deferred modifications during iterations
   - [ ] Parent–child entity relationships
-- [ ] Linear Algebra Library
+- [x] Linear Algebra Utilities
+  - [x] Generic vector and matrix implementation
+  - [x] Common shader intrinsics functions
+  - [ ] 2D/3D transformations
 
 ## Build Instructions
 
@@ -81,6 +84,13 @@ env JAVA_HOME=/usr/lib/jvm/java-8-openjdk /opt/android-sdk/tools/bin/sdkmanager 
 
 </details>
 
+<details>
+<summary>Documentation Generator</summary>
+
+- [Doxygen](https://archlinux.org/packages/extra/x86_64/doxygen/)
+
+</details>
+
 ### Build & Run
 
 The CMake configuration defines the following build targets:
@@ -136,6 +146,13 @@ env JAVA_HOME=/usr/lib/jvm/java-21-openjdk ANDROID_HOME=/opt/android-sdk cmake -
 ```
 
 </details>
+
+## Documentation
+
+```sh
+doxygen                      # Generate documentation
+$BROWSER html/index.html     # Open documentation
+```
 
 ## Contributing
 

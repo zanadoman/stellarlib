@@ -33,7 +33,7 @@
 #include <cstdint>
 
 /**
- * @brief Linear algebra module
+ * @brief Linear algebra utilities
  */
 namespace stellarlib::lin
 {
@@ -47,7 +47,7 @@ template <typename T, std::size_t M = 4, std::size_t N = 4>
 using matrix = internal::matrix<T, M, N>;
 
 /**
- * @brief Generic ND vector with per-component operations
+ * @brief Generic N-dimensional vector with per-component operations
  * @tparam T Arithmetic type of the components
  * @tparam N Dimension of the vector
  */
