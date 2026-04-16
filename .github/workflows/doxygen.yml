@@ -17,15 +17,12 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Install prerequisites
-        run: |
-          pacman-key --init
-          pacman -Syu --noconfirm doxygen
+        run: pacman -Syu --noconfirm doxygen
 
       - name: Generate documentation
         run: doxygen
 
       - name: Upload documentation
-        id: doxygen
         uses: actions/upload-pages-artifact@v5
         with:
           path: html
@@ -45,5 +42,4 @@ jobs:
 
     steps:
       - name: Deploy documentation
-        id: doxygen
         uses: actions/deploy-pages@v5

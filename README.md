@@ -150,8 +150,7 @@ env JAVA_HOME=/usr/lib/jvm/java-21-openjdk ANDROID_HOME=/opt/android-sdk cmake -
 ## [Documentation](https://zanadoman.github.io/stellarlib/)
 
 ```sh
-doxygen                      # Generate documentation
-$BROWSER html/index.html     # Open documentation
+$BROWSER build/html/index.html     # Browse local documentation (doxygen required)
 ```
 
 ## Contributing
