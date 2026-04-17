@@ -28,119 +28,133 @@
 #include <stellarlib/lin/matrix.hpp>
 
 #include <cstddef>
-#include <ranges>
 #include <type_traits>
 
+/**
+ * @brief Linear algebra utilities
+ */
 namespace stellarlib::lin
 {
-template <typename T, std::size_t N>
+/**
+ * @brief Translates a 3x3 transformation matrix using a 2D vector
+ */
+template <typename T, typename U, std::size_t M, std::size_t N>
 [[nodiscard]]
-constexpr auto identity() noexcept
-	-> internal::matrix<T, N, N>
+constexpr auto translate(const internal::matrix<T, 3, 3> &m, const internal::matrix<U, M, N> &v) noexcept
+	-> internal::matrix<std::common_type_t<T, U>, 3, 3>
+	requires (M * N == 2)
 {
-	internal::matrix<T, N, N> res;
-
-	for (const auto i : std::views::iota(std::size_t{}, N * N)) {
-		res.std::template array<T, N * N>::operator[](i) = i % (N + 1) ? 0 : 1;
-	}
-
+	internal::matrix<std::common_type_t<T, U>, 3, 3> res;
+	res[0] = m[0];
+	res[1] = m[1];
+	res[2] = m[0] * v.x() + m[1] * v.y() + m[2];
 	return res;
 }
 
-template <typename T>
+/**
+ * @brief Translates a 4x4 transformation matrix using a 3D vector
+ */
+template <typename T, typename U, std::size_t M, std::size_t N>
 [[nodiscard]]
-constexpr auto perspective(const T fovy, const T aspect, const T near, const T far) noexcept
-	-> internal::matrix<T, 4, 4>
+constexpr auto translate(const internal::matrix<T, 4, 4> &m, const internal::matrix<U, M, N> &v) noexcept
+	-> internal::matrix<std::common_type_t<T, U>, 4, 4>
+	requires (M * N == 3)
+{
+	internal::matrix<std::common_type_t<T, U>, 4, 4> res;
+	res[0] = m[0];
+	res[1] = m[1];
+	res[2] = m[2];
+	res[3] = m[0] * v.x() + m[1] * v.y() + m[2] * v.z() + m[3];
+	return res;
+}
+
+/**
+ * @brief Rotates a 3x3 transformation matrix using radians
+ */
+template <typename T, typename U>
+[[nodiscard]]
+constexpr auto rotate(const internal::matrix<T, 3, 3> &m, const U angle) noexcept
+	-> internal::matrix<std::common_type_t<T, U>, 3, 3>
+	requires (std::is_arithmetic_v<U>)
+{
+	const auto c{internal::cos(angle)};
+	const auto s{internal::sin(angle)};
+	internal::matrix<std::common_type_t<T, U>, 3, 3> res;
+	res[0] = m[0] * c + m[1] * s;
+	res[1] = m[0] * -s + m[1] * c;
+	res[2] = m[2];
+	return res;
+}
+
+/**
+ * @brief Rotates a 4x4 transformation matrix using radians and a 3D axis
+ */
+template <typename T, typename U, typename V, std::size_t M, std::size_t N>
+[[nodiscard]]
+constexpr auto rotate(const internal::matrix<T, 4, 4> &m, const U angle, const internal::matrix<V, M, N> &axis) noexcept
+	-> internal::matrix<std::common_type_t<T, U, V>, 4, 4>
+	requires (std::is_arithmetic_v<U> && M * N == 3)
+{
+	const auto c{internal::cos(angle)};
+	const auto n{internal::normalize(axis)};
+	const auto t{(1 - c) * n};
+	const auto s{internal::sin(angle)};
+	internal::matrix<std::common_type_t<T, U, V>, 4, 4> res;
+	res[0] = m[0] * internal::mad(t.x(), n.x(), c) + m[1] * (t.x() * n.y() + s * n.z()) + m[2] * (t.x() * n.z() - s * n.y());
+	res[1] = m[0] * (t.y() * n.x() - s * n.z()) + m[1] * internal::mad(t.y(), n.y(), c) + m[2] * (t.y() * n.z() + s * n.x());
+	res[2] = m[0] * (t.z() * n.x() + s * n.y()) + m[1] * (t.z() * n.y() - s * n.x()) + m[2] * internal::mad(t.z(), n.z(), c);
+	res[3] = m[3];
+	return res;
+}
+
+/**
+ * @brief Scales a 3x3 transformation matrix using a 2D vector
+ */
+template <typename T, typename U, std::size_t M, std::size_t N>
+[[nodiscard]]
+constexpr auto scale(const internal::matrix<T, 3, 3> &m, const internal::matrix<U, M, N> &v) noexcept
+	-> internal::matrix<std::common_type_t<T, U>, 3, 3>
+	requires (M * N == 2)
+{
+	internal::matrix<std::common_type_t<T, U>, 3, 3> res;
+	res[0] = m[0] * v.x();
+	res[1] = m[1] * v.y();
+	res[2] = m[2];
+	return res;
+}
+
+/**
+ * @brief Scales a 4x4 transformation matrix using a 3D vector
+ */
+template <typename T, typename U, std::size_t M, std::size_t N>
+[[nodiscard]]
+constexpr auto scale(const internal::matrix<T, 4, 4> &m, const internal::matrix<U, M, N> &v) noexcept
+	-> internal::matrix<std::common_type_t<T, U>, 4, 4>
+	requires (M * N == 3)
+{
+	internal::matrix<std::common_type_t<T, U>, 4, 4> res;
+	res[0] = m[0] * v.x();
+	res[1] = m[1] * v.y();
+	res[2] = m[2] * v.z();
+	res[3] = m[3];
+	return res;
+}
+
+/**
+ * @brief Constructs a 4x4 perspective matrix
+ */
+template <typename T, typename U, typename V>
+[[nodiscard]]
+constexpr auto perspective(const T fovy, const U aspect, const V near) noexcept
+	requires (std::is_arithmetic_v<T> && std::is_arithmetic_v<U> && std::is_arithmetic_v<V>)
 {
 	const auto f{internal::rcp(internal::tan(fovy / 2))};
 
-	return internal::matrix<T, 4, 4>{
+	return internal::matrix<std::common_type_t<T, U, V>, 4, 4>{
 		f / aspect, 0, 0, 0,
 		0, f, 0, 0,
-		0, 0, (far + near) / (near - far), -1,
-		0, 0, 2 * far * near / (near - far), 0
-	};
-}
-
-template <typename T, std::size_t M, std::size_t N>
-[[nodiscard]]
-constexpr auto translate(const internal::matrix<T, M, N> &v) noexcept
-	requires (M * N == 2)
-{
-	return internal::matrix<T, internal::max(M, N) + 1, internal::max(M, N) + 1>{
-		1, 0, 0,
-		0, 1, 0,
-		v.x(), v.y(), 1
-	};
-}
-
-template <typename T, std::size_t M, std::size_t N>
-[[nodiscard]]
-constexpr auto translate(const internal::matrix<T, M, N> &v) noexcept
-	requires (M * N == 3)
-{
-	return internal::matrix<T, internal::max(M, N) + 1, internal::max(M, N) + 1>{
-		1, 0, 0, 0,
-		0, 1, 0, 0,
-		0, 0, 1, 0,
-		v.x(), v.y(), v.z(), 1
-	};
-}
-
-template <typename T, std::size_t M, std::size_t N>
-[[nodiscard]]
-constexpr auto rotate(const T angle, const T axis) noexcept
-	requires (std::is_arithmetic_v<T> && M * N == 2)
-{
-	const auto cos{internal::cos(angle)};
-	const auto sin{internal::sin(angle) * internal::normalize(axis)};
-
-	return internal::matrix<T, internal::max(M, N) + 1, internal::max(M, N) + 1>{
-		cos, sin, 0,
-		-sin, cos, 0,
-		0, 0, 1
-	};
-}
-
-template <typename T, std::size_t M, std::size_t N>
-[[nodiscard]]
-constexpr auto rotate(const T angle, const internal::matrix<T, M, N> &axis) noexcept
-	requires (std::is_arithmetic_v<T> && M * N == 3)
-{
-	const auto cos{internal::cos(angle)};
-	const auto sin{internal::sin(angle)};
-	const auto normal{internal::normalize(axis)};
-
-	return internal::matrix<T, internal::max(M, N) + 1, internal::max(M, N) + 1>{
-		1, 0, 0, 0,
-		0, 1, 0, 0,
-		0, 0, 1, 0,
-		0, 0, 0, 1
-	};
-}
-
-template <typename T, std::size_t M, std::size_t N>
-[[nodiscard]]
-constexpr auto scale(const internal::matrix<T, M, N> &v) noexcept
-	requires (M * N == 2)
-{
-	return internal::matrix<T, internal::max(M, N) + 1, internal::max(M, N) + 1>{
-		v.x(), 0, 0,
-		0, v.y(), 0,
-		0, 0, 1
-	};
-}
-
-template <typename T, std::size_t M, std::size_t N>
-[[nodiscard]]
-constexpr auto scale(const internal::matrix<T, M, N> &v) noexcept
-	requires (M * N == 3)
-{
-	return internal::matrix<T, internal::max(M, N) + 1, internal::max(M, N) + 1>{
-		v.x(), 0, 0, 0,
-		0, v.y(), 0, 0,
-		0, 0, v.z(), 0,
-		0, 0, 0, 1
+		0, 0, -1, -1,
+		0, 0, -near, 0
 	};
 }
 }

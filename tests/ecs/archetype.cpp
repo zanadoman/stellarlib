@@ -42,15 +42,6 @@ using namespace stellarlib;
 #pragma clang diagnostic ignored "-Wself-assign-overloaded"
 #pragma clang diagnostic ignored "-Wself-move"
 
-namespace
-{
-struct foo final {};
-
-struct bar final {};
-
-struct baz final {};
-}
-
 constexpr std::array<std::uintmax_t, 3> IDS{
 	std::numeric_limits<std::uintmax_t>::digits * 1 - 1,
 	std::numeric_limits<std::uintmax_t>::digits * 3 - 1,
@@ -64,6 +55,12 @@ static_assert(ext::bit_index(IDS[2]) < ext::bit_index(IDS[1]));
 
 namespace
 {
+struct foo final {};
+
+struct bar final {};
+
+struct baz final {};
+
 constexpr void check_ids(const ecs::archetype &archetype)
 {
 	for (const auto id : std::views::iota(std::uintmax_t{}, std::ranges::max(IDS))) {

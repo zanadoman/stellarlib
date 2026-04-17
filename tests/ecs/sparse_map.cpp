@@ -40,6 +40,7 @@ using namespace stellarlib;
 #pragma clang diagnostic ignored "-Wself-move"
 
 constexpr std::array<std::size_t, 5> KEYS{1, 2, 0, 4, 3};
+
 const std::array<std::shared_ptr<std::int32_t>, KEYS.size()> VALUES{
 	std::make_unique<std::int32_t>(0),
 	std::make_unique<std::int32_t>(5),
