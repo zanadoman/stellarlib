@@ -349,21 +349,21 @@ template <typename T>
 [[nodiscard]]
 constexpr auto determinant(const matrix<T, 2, 2> &m) noexcept
 {
-	return m[0, 0] * m[1, 1] - m[0, 1] * m[1, 0];
+	return m[0][0] * m[1][1] - m[0][1] * m[1][0];
 }
 
 template <typename T>
 [[nodiscard]]
 constexpr auto determinant(const matrix<T, 3, 3> &m) noexcept
 {
-	return m[0, 0] * (m[1, 1] * m[2, 2] - m[1, 2] * m[2, 1]) - m[0, 1] * (m[1, 0] * m[2, 2] - m[1, 2] * m[2, 0]) + m[0, 2] * (m[1, 0] * m[2, 1] - m[1, 1] * m[2, 0]);
+	return m[0][0] * (m[1][1] * m[2][2] - m[1][2] * m[2][1]) - m[0][1] * (m[1][0] * m[2][2] - m[1][2] * m[2][0]) + m[0][2] * (m[1][0] * m[2][1] - m[1][1] * m[2][0]);
 }
 
 template <typename T>
 [[nodiscard]]
 constexpr auto determinant(const matrix<T, 4, 4> &m) noexcept
 {
-	return m[0, 0] * (m[1, 1] * (m[2, 2] * m[3, 3] - m[2, 3] * m[3, 2]) - m[1, 2] * (m[2, 1] * m[3, 3] - m[2, 3] * m[3, 1]) + m[1, 3] * (m[2, 1] * m[3, 2] - m[2, 2] * m[3, 1])) - m[0, 1] * (m[1, 0] * (m[2, 2] * m[3, 3] - m[2, 3] * m[3, 2]) - m[1, 2] * (m[2, 0] * m[3, 3] - m[2, 3] * m[3, 0]) + m[1, 3] * (m[2, 0] * m[3, 2] - m[2, 2] * m[3, 0])) + m[0, 2] * (m[1, 0] * (m[2, 1] * m[3, 3] - m[2, 3] * m[3, 1]) - m[1, 1] * (m[2, 0] * m[3, 3] - m[2, 3] * m[3, 0]) + m[1, 3] * (m[2, 0] * m[3, 1] - m[2, 1] * m[3, 0])) - m[0, 3] * (m[1, 0] * (m[2, 1] * m[3, 2] - m[2, 2] * m[3, 1]) - m[1, 1] * (m[2, 0] * m[3, 2] - m[2, 2] * m[3, 0]) + m[1, 2] * (m[2, 0] * m[3, 1] - m[2, 1] * m[3, 0]));
+	return m[0][0] * (m[1][1] * (m[2][2] * m[3][3] - m[2][3] * m[3][2]) - m[1][2] * (m[2][1] * m[3][3] - m[2][3] * m[3][1]) + m[1][3] * (m[2][1] * m[3][2] - m[2][2] * m[3][1])) - m[0][1] * (m[1][0] * (m[2][2] * m[3][3] - m[2][3] * m[3][2]) - m[1][2] * (m[2][0] * m[3][3] - m[2][3] * m[3][0]) + m[1][3] * (m[2][0] * m[3][2] - m[2][2] * m[3][0])) + m[0][2] * (m[1][0] * (m[2][1] * m[3][3] - m[2][3] * m[3][1]) - m[1][1] * (m[2][0] * m[3][3] - m[2][3] * m[3][0]) + m[1][3] * (m[2][0] * m[3][1] - m[2][1] * m[3][0])) - m[0][3] * (m[1][0] * (m[2][1] * m[3][2] - m[2][2] * m[3][1]) - m[1][1] * (m[2][0] * m[3][2] - m[2][2] * m[3][0]) + m[1][2] * (m[2][0] * m[3][1] - m[2][1] * m[3][0]));
 }
 
 template <typename T, std::size_t N>
@@ -376,30 +376,30 @@ constexpr auto determinant(matrix<T, N, N> m) noexcept
 		auto pivot{i};
 
 		for (const auto j : std::views::iota(i + 1, N)) {
-			if (abs(m[pivot, i]) < abs(m[j, i])) {
+			if (abs(m[pivot][i]) < abs(m[j][i])) {
 				pivot = j;
 			}
 		}
 
 		if (pivot != i) {
 			for (const auto j : std::views::iota(i, N)) {
-				std::swap(m[i, j], m[pivot, j]);
+				std::swap(m[i][j], m[pivot][j]);
 			}
 
 			determinant *= -1;
 		}
 
-		if (!static_cast<bool>(m[i, i])) {
+		if (!static_cast<bool>(m[i][i])) {
 			return T{};
 		}
 
-		determinant *= m[i, i];
+		determinant *= m[i][i];
 
 		for (const auto j : std::views::iota(i + 1, N)) {
-			m[j, i] /= m[i, i];
+			m[j][i] /= m[i][i];
 
 			for (const auto k : std::views::iota(i + 1, N)) {
-				m[j, k] -= m[j, i] * m[i, k];
+				m[j][k] -= m[j][i] * m[i][k];
 			}
 		}
 	}

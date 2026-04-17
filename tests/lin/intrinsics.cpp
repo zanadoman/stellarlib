@@ -133,11 +133,14 @@ static_assert(lin::internal::degrees(std::numbers::pi_v<float>) == 180.0F);
 static_assert(lin::internal::all(lin::internal::degrees(lin::internal::matrix<float, 1, 2>{std::numbers::pi_v<float>, 2.0F * std::numbers::pi_v<float>}) == lin::internal::matrix<float, 1, 2>{180.0F, 360.0F}));
 static_assert(lin::internal::all(lin::internal::degrees(lin::internal::matrix<float, 2, 2>{std::numbers::pi_v<float>, 2.0F * std::numbers::pi_v<float>, std::numbers::pi_v<float>, 2.0F * std::numbers::pi_v<float>}) == lin::internal::matrix<float, 2, 2>{180.0F, 360.0F, 180.0F, 360.0F}));
 
-static_assert(lin::internal::determinant(lin::internal::matrix<float, 1, 1>{0.0F}) == 0.0F);
-static_assert(lin::internal::determinant(lin::internal::matrix<float, 2, 2>{0.5F, -0.5F, 0.5F, -0.5F}) == 0.0F);
-static_assert(lin::internal::determinant(lin::internal::matrix<float, 3, 3>{0.5F, -0.5F, 0.5F, -0.5F, 0.5F, -0.5F, 0.5F, -0.5F, 0.5F}) == 0.0F);
-static_assert(lin::internal::determinant(lin::internal::matrix<float, 4, 4>{0.5F, -0.5F, 0.5F, -0.5F, 0.5F, -0.5F, 0.5F, -0.5F, 0.5F, -0.5F, 0.5F, -0.5F, 0.5F, -0.5F, 0.5F, -0.5F}) == 0.0F);
-static_assert(lin::internal::determinant(lin::internal::matrix<float, 5, 5>{0.5F, -0.5F, 0.5F, -0.5F, 0.5F, -0.5F, 0.5F, -0.5F, 0.5F, -0.5F, 0.5F, -0.5F, 0.5F, -0.5F, 0.5F, -0.5F, 0.5F, -0.5F, 0.5F, -0.5F, 0.5F, -0.5F, 0.5F, -0.5F, 0.5F}) == 0.0F);
+TEST(stellarlib_lin_intrinsics, determinant)
+{
+	static_assert(lin::internal::determinant(lin::internal::matrix<float, 1, 1>{0.0F}) == 0.0F);
+	ASSERT_EQ(lin::internal::determinant(lin::internal::matrix<float, 2, 2>{0.5F, -0.5F, 0.5F, -0.5F}), 0.0F);
+	ASSERT_EQ(lin::internal::determinant(lin::internal::matrix<float, 3, 3>{0.5F, -0.5F, 0.5F, -0.5F, 0.5F, -0.5F, 0.5F, -0.5F, 0.5F}), 0.0F);
+	ASSERT_EQ(lin::internal::determinant(lin::internal::matrix<float, 4, 4>{0.5F, -0.5F, 0.5F, -0.5F, 0.5F, -0.5F, 0.5F, -0.5F, 0.5F, -0.5F, 0.5F, -0.5F, 0.5F, -0.5F, 0.5F, -0.5F}), 0.0F);
+	ASSERT_EQ(lin::internal::determinant(lin::internal::matrix<float, 5, 5>{0.5F, -0.5F, 0.5F, -0.5F, 0.5F, -0.5F, 0.5F, -0.5F, 0.5F, -0.5F, 0.5F, -0.5F, 0.5F, -0.5F, 0.5F, -0.5F, 0.5F, -0.5F, 0.5F, -0.5F, 0.5F, -0.5F, 0.5F, -0.5F, 0.5F}), 0.0F);
+}
 
 TEST(stellarlib_lin_intrinsics, sqrt)
 {

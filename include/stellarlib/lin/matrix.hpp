@@ -25,7 +25,6 @@
 #define STELLARLIB_LIN_MATRIX_HPP
 
 #include <array>
-#include <cmath>
 #include <cstddef>
 #include <format>
 #include <memory>
@@ -148,28 +147,18 @@ public:
 	STELLARLIB_LIN_MATRIX_ACCESSOR_DOUBLE_IMPL(w, a, 3);
 
 	[[nodiscard]]
-	constexpr auto operator[](const std::size_t m, const std::size_t n) const noexcept
-		requires (M != 1 && N != 1)
+	constexpr auto operator[](const std::size_t n) const noexcept
+		requires (M == 1 || N == 1)
 	{
-		if constexpr (std::is_constant_evaluated()) {
-			return std::array<T, M * N>::operator[](m * N + n);
-		}
-		else {
-			return std::array<T, M * N>::operator[](std::fma(m, N, n));
-		}
+		return std::array<T, M * N>::operator[](n);
 	}
 
 	[[nodiscard]]
-	constexpr auto operator[](const std::size_t m, const std::size_t n) noexcept
+	constexpr auto operator[](const std::size_t n) noexcept
 		-> auto &
-		requires (M != 1 && N != 1)
+		requires (M == 1 || N == 1)
 	{
-		if constexpr (std::is_constant_evaluated()) {
-			return std::array<T, M * N>::operator[](m * N + n);
-		}
-		else {
-			return std::array<T, M * N>::operator[](std::fma(m, N, n));
-		}
+		return std::array<T, M * N>::operator[](n);
 	}
 
 	STELLARLIB_LIN_MATRIX_SWIZZLE_DOUBLE_IMPL(xx, rr, 0, 0);
@@ -511,16 +500,20 @@ public:
 
 	[[nodiscard]]
 	constexpr auto operator[](const std::size_t m) const noexcept
-		-> matrix<T, 1, N>
+		-> const auto &
 		requires (M != 1 && N != 1)
 	{
-		matrix<T, 1, N> res;
+		using row [[gnu::may_alias]] = matrix<T, 1, N>;
+		return *reinterpret_cast<const row *>(std::addressof(std::array<T, M * N>::operator[](m * N)));
+	}
 
-		for (const auto n : std::views::iota(std::size_t{}, N)) {
-			res.std::template array<T, N>::operator[](n) = (*this)[m, n];
-		}
-
-		return res;
+	[[nodiscard]]
+	constexpr auto operator[](const std::size_t m) noexcept
+		-> auto &
+		requires (M != 1 && N != 1)
+	{
+		using row [[gnu::may_alias]] = matrix<T, 1, N>;
+		return *reinterpret_cast<row *>(std::addressof(std::array<T, M * N>::operator[](m * N)));
 	}
 
 private:

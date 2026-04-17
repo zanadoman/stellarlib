@@ -38,22 +38,22 @@ static_assert(lin::internal::all(lin::identity<float, 4>() == lin::internal::mat
 TEST(stellarlib_lib_transformations, perspective)
 {
 	const auto matrix{lin::perspective(1.0F, 2.0F, 1.0F, 2.0F)};
-	ASSERT_EQ((matrix[0, 0]), lin::internal::rcp(lin::internal::tan(0.5F)) / 2.0F);
-	ASSERT_EQ((matrix[1, 0]), 0.0F);
-	ASSERT_EQ((matrix[2, 0]), 0.0F);
-	ASSERT_EQ((matrix[3, 0]), 0.0F);
-	ASSERT_EQ((matrix[0, 1]), 0.0F);
-	ASSERT_EQ((matrix[1, 1]), lin::internal::rcp(lin::internal::tan(0.5F)));
-	ASSERT_EQ((matrix[2, 1]), 0.0F);
-	ASSERT_EQ((matrix[3, 1]), 0.0F);
-	ASSERT_EQ((matrix[0, 2]), 0.0F);
-	ASSERT_EQ((matrix[1, 2]), 0.0F);
-	ASSERT_EQ((matrix[2, 2]), -3.0F);
-	ASSERT_EQ((matrix[3, 2]), -4.0F);
-	ASSERT_EQ((matrix[0, 3]), 0.0F);
-	ASSERT_EQ((matrix[1, 3]), 0.0F);
-	ASSERT_EQ((matrix[2, 3]), -1.0F);
-	ASSERT_EQ((matrix[3, 3]), 0.0F);
+	ASSERT_EQ((matrix[0][0]), lin::internal::rcp(lin::internal::tan(0.5F)) / 2.0F);
+	ASSERT_EQ((matrix[1][0]), 0.0F);
+	ASSERT_EQ((matrix[2][0]), 0.0F);
+	ASSERT_EQ((matrix[3][0]), 0.0F);
+	ASSERT_EQ((matrix[0][1]), 0.0F);
+	ASSERT_EQ((matrix[1][1]), lin::internal::rcp(lin::internal::tan(0.5F)));
+	ASSERT_EQ((matrix[2][1]), 0.0F);
+	ASSERT_EQ((matrix[3][1]), 0.0F);
+	ASSERT_EQ((matrix[0][2]), 0.0F);
+	ASSERT_EQ((matrix[1][2]), 0.0F);
+	ASSERT_EQ((matrix[2][2]), -3.0F);
+	ASSERT_EQ((matrix[3][2]), -4.0F);
+	ASSERT_EQ((matrix[0][3]), 0.0F);
+	ASSERT_EQ((matrix[1][3]), 0.0F);
+	ASSERT_EQ((matrix[2][3]), -1.0F);
+	ASSERT_EQ((matrix[3][3]), 0.0F);
 }
 
 static_assert(lin::internal::all(lin::translate(lin::internal::matrix<float, 1, 2>{2.0F, 3.0F}) == lin::internal::matrix<float, 3, 3>{1.0F, 0.0F, 0.0F, 0.0F, 1.0F, 0.0F, 2.0F, 3.0F, 1.0F}));

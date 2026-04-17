@@ -308,14 +308,14 @@ TEST(stellarlib_ext_memory, arena_should_allocate_and_deallocate)
 	ASSERT_FALSE(std::bit_cast<std::size_t>(number1) % alignof(std::int32_t));
 	const auto string1{arena.allocate<std::string>()};
 	ASSERT_TRUE(string1);
-	ASSERT_EQ(std::bit_cast<const std::byte *>(string1) - std::bit_cast<const std::byte *>(number1), sizeof(std::int32_t) + (ext::padding<std::string, std::int32_t>::size));
+	ASSERT_EQ(std::bit_cast<std::size_t>(string1) - std::bit_cast<std::size_t>(number1), sizeof(std::int32_t) + (ext::padding<std::string, std::int32_t>::size));
 	ASSERT_FALSE((arena.allocate<std::array<std::byte, std::numeric_limits<std::uint16_t>::max()>>)());
 	const auto string2{arena.allocate<std::string>()};
 	ASSERT_TRUE(string2);
-	ASSERT_EQ(std::bit_cast<const std::byte *>(string2) - std::bit_cast<const std::byte *>(string1), sizeof(std::string) + (ext::padding<std::string, std::string>::size));
+	ASSERT_EQ(std::bit_cast<std::size_t>(string2) - std::bit_cast<std::size_t>(string1), sizeof(std::string) + (ext::padding<std::string, std::string>::size));
 	const auto number2{arena.allocate<std::int32_t>()};
 	ASSERT_TRUE(number2);
-	ASSERT_EQ(std::bit_cast<const std::byte *>(number2) - std::bit_cast<const std::byte *>(string2), sizeof(std::string) + (ext::padding<std::int32_t, std::string>::size));
+	ASSERT_EQ(std::bit_cast<std::size_t>(number2) - std::bit_cast<std::size_t>(string2), sizeof(std::string) + (ext::padding<std::int32_t, std::string>::size));
 	std::construct_at(number1, 5);
 	std::construct_at(string1, "hello");
 	std::construct_at(string2, "world");
@@ -440,7 +440,7 @@ TEST(stellarlib_ext_memory, arena_allocator_should_allocate_and_deallocate)
 	ASSERT_FALSE(std::bit_cast<std::size_t>(number1) % alignof(std::int32_t));
 	auto string1{allocator.allocate<std::string>()};
 	ASSERT_TRUE(string1);
-	ASSERT_EQ(std::bit_cast<const std::byte *>(string1) - std::bit_cast<const std::byte *>(number1), sizeof(std::int32_t) + (ext::padding<std::string, std::int32_t>::size));
+	ASSERT_EQ(std::bit_cast<std::size_t>(string1) - std::bit_cast<std::size_t>(number1), sizeof(std::int32_t) + (ext::padding<std::string, std::int32_t>::size));
 	auto array{allocator.allocate<std::array<std::byte, std::numeric_limits<std::uint16_t>::max()>>()};
 	ASSERT_TRUE(array);
 	ASSERT_FALSE(std::bit_cast<std::size_t>(array) % alignof(std::array<std::byte, std::numeric_limits<std::uint16_t>::max()>));
@@ -449,7 +449,7 @@ TEST(stellarlib_ext_memory, arena_allocator_should_allocate_and_deallocate)
 	ASSERT_FALSE(std::bit_cast<std::size_t>(string2) % alignof(std::string));
 	auto number2{allocator.allocate<std::int32_t>()};
 	ASSERT_TRUE(number2);
-	ASSERT_EQ(std::bit_cast<const std::byte *>(number2) - std::bit_cast<const std::byte *>(string2), sizeof(std::string) + (ext::padding<std::int32_t, std::string>::size));
+	ASSERT_EQ(std::bit_cast<std::size_t>(number2) - std::bit_cast<std::size_t>(string2), sizeof(std::string) + (ext::padding<std::int32_t, std::string>::size));
 	std::construct_at(number1, 5);
 	std::construct_at(string1, "hello");
 	std::construct_at(string2, "world");
@@ -492,16 +492,16 @@ TEST(stellarlib_ext_memory, arena_allocator_should_allocate_and_deallocate)
 	ASSERT_FALSE(std::bit_cast<std::size_t>(number1) % alignof(std::int32_t));
 	string1 = allocator.allocate<std::string>();
 	ASSERT_TRUE(string1);
-	ASSERT_EQ(std::bit_cast<const std::byte *>(string1) - std::bit_cast<const std::byte *>(number1), sizeof(std::int32_t) + (ext::padding<std::string, std::int32_t>::size));
+	ASSERT_EQ(std::bit_cast<std::size_t>(string1) - std::bit_cast<std::size_t>(number1), sizeof(std::int32_t) + (ext::padding<std::string, std::int32_t>::size));
 	array = allocator.allocate<std::array<std::byte, std::numeric_limits<std::uint16_t>::max()>>();
 	ASSERT_TRUE(array);
-	ASSERT_EQ(std::bit_cast<const std::byte *>(array) - std::bit_cast<const std::byte *>(string1), sizeof(std::string) + (ext::padding<std::array<std::byte, std::numeric_limits<std::uint16_t>::max()>, std::string>::size));
+	ASSERT_EQ(std::bit_cast<std::size_t>(array) - std::bit_cast<std::size_t>(string1), sizeof(std::string) + (ext::padding<std::array<std::byte, std::numeric_limits<std::uint16_t>::max()>, std::string>::size));
 	string2 = allocator.allocate<std::string>();
 	ASSERT_TRUE(string2);
-	ASSERT_EQ(std::bit_cast<const std::byte *>(string2) - std::bit_cast<const std::byte *>(array), sizeof(std::array<std::byte, std::numeric_limits<std::uint16_t>::max()>) + (ext::padding<std::string, std::array<std::byte, std::numeric_limits<std::uint16_t>::max()>>::size));
+	ASSERT_EQ(std::bit_cast<std::size_t>(string2) - std::bit_cast<std::size_t>(array), sizeof(std::array<std::byte, std::numeric_limits<std::uint16_t>::max()>) + (ext::padding<std::string, std::array<std::byte, std::numeric_limits<std::uint16_t>::max()>>::size));
 	number2 = allocator.allocate<std::int32_t>();
 	ASSERT_TRUE(number2);
-	ASSERT_EQ(std::bit_cast<const std::byte *>(number2) - std::bit_cast<const std::byte *>(string2), sizeof(std::string) + (ext::padding<std::int32_t, std::string>::size));
+	ASSERT_EQ(std::bit_cast<std::size_t>(number2) - std::bit_cast<std::size_t>(string2), sizeof(std::string) + (ext::padding<std::int32_t, std::string>::size));
 }
 
 TEST(stellarlib_ext_memory, arena_allocator_should_evaluate_equality)

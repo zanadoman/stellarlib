@@ -78,10 +78,6 @@ static_assert(lin::internal::matrix<std::int32_t, 1, 4>{1, 2, 3, 4}.z() == 3);
 static_assert(lin::internal::matrix<std::int32_t, 1, 4>{1, 2, 3, 4}.b() == 3);
 static_assert(lin::internal::matrix<std::int32_t, 1, 4>{1, 2, 3, 4}.w() == 4);
 static_assert(lin::internal::matrix<std::int32_t, 1, 4>{1, 2, 3, 4}.a() == 4);
-static_assert(lin::internal::matrix<std::int32_t, 2, 2>{1, 2, 3, 4}[0, 0] == 1);
-static_assert(lin::internal::matrix<std::int32_t, 2, 2>{1, 2, 3, 4}[0, 1] == 2);
-static_assert(lin::internal::matrix<std::int32_t, 2, 2>{1, 2, 3, 4}[1, 0] == 3);
-static_assert(lin::internal::matrix<std::int32_t, 2, 2>{1, 2, 3, 4}[1, 1] == 4);
 
 TEST(stellarlib_lin_matrix, should_provide_accessors)
 {
@@ -96,10 +92,12 @@ TEST(stellarlib_lin_matrix, should_provide_accessors)
 	matrix1.w() = 4;
 	ASSERT_TRUE(lin::internal::all(matrix1 == lin::internal::matrix<std::int32_t, 1, 4>{1, 2, 3, 4}));
 	lin::internal::matrix<std::int32_t, 2, 2> matrix2{};
-	matrix2[0, 0] = 1;
-	matrix2[0, 1] = 2;
-	matrix2[1, 0] = 3;
-	matrix2[1, 1] = 4;
+	matrix2[0][0] = 1;
+	matrix2[0][1] = 2;
+	matrix2[1][0] = 3;
+	matrix2[1][1] = 4;
+	ASSERT_TRUE(lin::internal::all(matrix2[0] == lin::internal::matrix<std::int32_t, 1, 2>{1, 2}));
+	ASSERT_TRUE(lin::internal::all(matrix2[1] == lin::internal::matrix<std::int32_t, 1, 2>{3, 4}));
 	ASSERT_TRUE(lin::internal::all(matrix2 == lin::internal::matrix<std::int32_t, 2, 2>{1, 2, 3, 4}));
 }
 
@@ -439,9 +437,6 @@ static_assert(lin::internal::all(lin::internal::matrix<std::int32_t, 1, 4>{1, 2,
 static_assert(lin::internal::all(lin::internal::matrix<std::int32_t, 1, 4>{1, 2, 3, 4}.wwwy() == lin::internal::matrix<std::int32_t, 1, 4>{4, 4, 4, 2}));
 static_assert(lin::internal::all(lin::internal::matrix<std::int32_t, 1, 4>{1, 2, 3, 4}.wwwz() == lin::internal::matrix<std::int32_t, 1, 4>{4, 4, 4, 3}));
 static_assert(lin::internal::all(lin::internal::matrix<std::int32_t, 1, 4>{1, 2, 3, 4}.wwww() == lin::internal::matrix<std::int32_t, 1, 4>{4, 4, 4, 4}));
-
-static_assert(lin::internal::all(lin::internal::matrix<std::int32_t, 2, 2>{1, 2, 3, 4}[0] == lin::internal::matrix<std::int32_t, 1, 2>{1, 2}));
-static_assert(lin::internal::all(lin::internal::matrix<std::int32_t, 2, 2>{1, 2, 3, 4}[1] == lin::internal::matrix<std::int32_t, 1, 2>{3, 4}));
 
 TEST(stellarlib_lin_matrix, should_increment)
 {
