@@ -50,6 +50,7 @@ static_assert(lin::internal::matrix<std::int16_t, 1, 1>{std::array<std::int16_t,
 static_assert(lin::internal::matrix<std::int16_t, 1, 1>{std::array<std::int8_t, 1>{5}} == 5);
 static_assert(lin::internal::matrix<std::int16_t, 1, 1>{lin::internal::matrix<std::int8_t, 1, 1>{5}} == 5);
 static_assert(static_cast<std::array<std::int16_t, 4>>(lin::internal::matrix<std::int16_t, 2, 2>{}) == std::array<std::int16_t, 4>{});
+static_assert(static_cast<std::array<std::int16_t, 4>>(lin::internal::matrix<std::int16_t, 2, 2>{1}) == std::array<std::int16_t, 4>{1, 0, 0, 1});
 static_assert(static_cast<std::array<std::int16_t, 4>>(lin::internal::matrix<std::int16_t, 2, 2>{1, 2, 3, 4}) == std::array<std::int16_t, 4>{1, 2, 3, 4});
 static_assert(static_cast<std::array<std::int16_t, 4>>(lin::internal::matrix<std::int16_t, 2, 2>{std::array<std::int16_t, 4>{1, 2, 3, 4}}) == std::array<std::int16_t, 4>{1, 2, 3, 4});
 static_assert(static_cast<std::array<std::int16_t, 4>>(lin::internal::matrix<std::int16_t, 2, 2>{std::array<std::int8_t, 4>{1, 2, 3, 4}}) == std::array<std::int16_t, 4>{1, 2, 3, 4});

@@ -44,6 +44,16 @@ public:
 	[[nodiscard]]
 	constexpr matrix() noexcept = default;
 
+	template <typename U>
+	[[nodiscard]]
+	explicit constexpr matrix(const U elem) noexcept
+		requires (std::is_convertible_v<U, T> && M == N)
+	{
+		for (const auto i : std::views::iota(std::size_t{}, M * N)) {
+			std::array<T, M * N>::operator[](i) = i % (N + 1) ? 0 : static_cast<T>(elem);
+		}
+	}
+
 	template <typename ...Args>
 	[[nodiscard]]
 	explicit constexpr matrix(Args &&...args) noexcept
