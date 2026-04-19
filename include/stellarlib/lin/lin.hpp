@@ -54,466 +54,1104 @@ using matrix = internal::matrix<T, M, N>;
 template <typename T, std::size_t N = 4>
 using vector = matrix<T, 1, N>;
 
-/// 1D boolean vector
+/**
+ * @brief 1D boolean vector
+ */
 using bool1 = vector<bool, 1>;
-/// 2D boolean vector
+
+/**
+ * @brief 2D boolean vector
+ */
 using bool2 = vector<bool, 2>;
-/// 3D boolean vector
+
+/**
+ * @brief 3D boolean vector
+ */
 using bool3 = vector<bool, 3>;
-/// 4D boolean vector
+
+/**
+ * @brief 4D boolean vector
+ */
 using bool4 = vector<bool>;
 
-/// 1D char vector
+/**
+ * @brief 1D char vector
+ */
 using char1 = vector<std::int8_t, 1>;
-/// 2D char vector
+
+/**
+ * @brief 2D char vector
+ */
 using char2 = vector<std::int8_t, 2>;
-/// 3D char vector
+
+/**
+ * @brief 3D char vector
+ */
 using char3 = vector<std::int8_t, 3>;
-/// 4D char vector
+
+/**
+ * @brief 4D char vector
+ */
 using char4 = vector<std::int8_t>;
 
-/// 1D unsigned char vector
+/**
+ * @brief 1D unsigned char vector
+ */
 using uchar1 = vector<std::uint8_t, 1>;
-/// 2D unsigned char vector
+
+/**
+ * @brief 2D unsigned char vector
+ */
 using uchar2 = vector<std::uint8_t, 2>;
-/// 3D unsigned char vector
+
+/**
+ * @brief 3D unsigned char vector
+ */
 using uchar3 = vector<std::uint8_t, 3>;
-/// 4D unsigned char vector
+
+/**
+ * @brief 4D unsigned char vector
+ */
 using uchar4 = vector<std::uint8_t>;
 
-/// 1D short vector
+/**
+ * @brief 1D short vector
+ */
 using short1 = vector<std::int16_t, 1>;
-/// 2D short vector
+
+/**
+ * @brief 2D short vector
+ */
 using short2 = vector<std::int16_t, 2>;
-/// 3D short vector
+
+/**
+ * @brief 3D short vector
+ */
 using short3 = vector<std::int16_t, 3>;
-/// 4D short vector
+
+/**
+ * @brief 4D short vector
+ */
 using short4 = vector<std::int16_t>;
 
-/// 1D unsigned short vector
+/**
+ * @brief 1D unsigned short vector
+ */
 using ushort1 = vector<std::uint16_t, 1>;
-/// 2D unsigned short vector
+
+/**
+ * @brief 2D unsigned short vector
+ */
 using ushort2 = vector<std::uint16_t, 2>;
-/// 3D unsigned short vector
+
+/**
+ * @brief 3D unsigned short vector
+ */
 using ushort3 = vector<std::uint16_t, 3>;
-/// 4D unsigned short vector
+
+/**
+ * @brief 4D unsigned short vector
+ */
 using ushort4 = vector<std::uint16_t>;
 
-/// 1D integer vector
+/**
+ * @brief 1D integer vector
+ */
 using int1 = vector<std::int32_t, 1>;
-/// 2D integer vector
+
+/**
+ * @brief 2D integer vector
+ */
 using int2 = vector<std::int32_t, 2>;
-/// 3D integer vector
+
+/**
+ * @brief 3D integer vector
+ */
 using int3 = vector<std::int32_t, 3>;
-/// 4D integer vector
+
+/**
+ * @brief 4D integer vector
+ */
 using int4 = vector<std::int32_t>;
 
-/// 1D unsigned integer vector
+/**
+ * @brief 1D unsigned integer vector
+ */
 using uint1 = vector<std::uint32_t, 1>;
-/// 2D unsigned integer vector
+
+/**
+ * @brief 2D unsigned integer vector
+ */
 using uint2 = vector<std::uint32_t, 2>;
-/// 3D unsigned integer vector
+
+/**
+ * @brief 3D unsigned integer vector
+ */
 using uint3 = vector<std::uint32_t, 3>;
-/// 4D unsigned integer vector
+
+/**
+ * @brief 4D unsigned integer vector
+ */
 using uint4 = vector<std::uint32_t>;
 
-/// 1D long vector
+/**
+ * @brief 1D long vector
+ */
 using long1 = vector<std::int64_t, 1>;
-/// 2D long vector
+
+/**
+ * @brief 2D long vector
+ */
 using long2 = vector<std::int64_t, 2>;
-/// 3D long vector
+
+/**
+ * @brief 3D long vector
+ */
 using long3 = vector<std::int64_t, 3>;
-/// 4D long vector
+
+/**
+ * @brief 4D long vector
+ */
 using long4 = vector<std::int64_t>;
 
-/// 1D unsigned long vector
+/**
+ * @brief 1D unsigned long vector
+ */
 using ulong1 = vector<std::uint64_t, 1>;
-/// 2D unsigned long vector
+
+/**
+ * @brief 2D unsigned long vector
+ */
 using ulong2 = vector<std::uint64_t, 2>;
-/// 3D unsigned long vector
+
+/**
+ * @brief 3D unsigned long vector
+ */
 using ulong3 = vector<std::uint64_t, 3>;
-/// 4D unsigned long vector
+
+/**
+ * @brief 4D unsigned long vector
+ */
 using ulong4 = vector<std::uint64_t>;
 
-/// 1D float vector
+/**
+ * @brief 1D float vector
+ */
 using float1 = vector<float, 1>;
-/// 2D float vector
+
+/**
+ * @brief 2D float vector
+ */
 using float2 = vector<float, 2>;
-/// 3D float vector
+
+/**
+ * @brief 3D float vector
+ */
 using float3 = vector<float, 3>;
-/// 4D float vector
+
+/**
+ * @brief 4D float vector
+ */
 using float4 = vector<float>;
 
-/// 1D double vector
+/**
+ * @brief 1D double vector
+ */
 using double1 = vector<double, 1>;
-/// 2D double vector
+
+/**
+ * @brief 2D double vector
+ */
 using double2 = vector<double, 2>;
-/// 3D double vector
+
+/**
+ * @brief 3D double vector
+ */
 using double3 = vector<double, 3>;
-/// 4D double vector
+
+/**
+ * @brief 4D double vector
+ */
 using double4 = vector<double>;
 
-/// 1x1 boolean matrix
+/**
+ * @brief 1x1 boolean matrix
+ */
 using bool1x1 = bool1;
-/// 2x1 boolean matrix
+
+/**
+ * @brief 2x1 boolean matrix
+ */
 using bool2x1 = matrix<bool, 2, 1>;
-/// 3x1 boolean matrix
+
+/**
+ * @brief 3x1 boolean matrix
+ */
 using bool3x1 = matrix<bool, 3, 1>;
-/// 4x1 boolean matrix
+
+/**
+ * @brief 4x1 boolean matrix
+ */
 using bool4x1 = matrix<bool, 4, 1>;
-/// 1x2 boolean matrix
+
+/**
+ * @brief 1x2 boolean matrix
+ */
 using bool1x2 = bool2;
-/// 2x2 boolean matrix
+
+/**
+ * @brief 2x2 boolean matrix
+ */
 using bool2x2 = matrix<bool, 2, 2>;
-/// 3x2 boolean matrix
+
+/**
+ * @brief 3x2 boolean matrix
+ */
 using bool3x2 = matrix<bool, 3, 2>;
-/// 4x2 boolean matrix
+
+/**
+ * @brief 4x2 boolean matrix
+ */
 using bool4x2 = matrix<bool, 4, 2>;
-/// 1x3 boolean matrix
+
+/**
+ * @brief 1x3 boolean matrix
+ */
 using bool1x3 = bool3;
-/// 2x3 boolean matrix
+
+/**
+ * @brief 2x3 boolean matrix
+ */
 using bool2x3 = matrix<bool, 2, 3>;
-/// 3x3 boolean matrix
+
+/**
+ * @brief 3x3 boolean matrix
+ */
 using bool3x3 = matrix<bool, 3, 3>;
-/// 4x3 boolean matrix
+
+/**
+ * @brief 4x3 boolean matrix
+ */
 using bool4x3 = matrix<bool, 4, 3>;
-/// 1x4 boolean matrix
+
+/**
+ * @brief 1x4 boolean matrix
+ */
 using bool1x4 = bool4;
-/// 2x4 boolean matrix
+
+/**
+ * @brief 2x4 boolean matrix
+ */
 using bool2x4 = matrix<bool, 2>;
-/// 3x4 boolean matrix
+
+/**
+ * @brief 3x4 boolean matrix
+ */
 using bool3x4 = matrix<bool, 3>;
-/// 4x4 boolean matrix
+
+/**
+ * @brief 4x4 boolean matrix
+ */
 using bool4x4 = matrix<bool>;
 
-/// 1x1 char matrix
+/**
+ * @brief 1x1 char matrix
+ */
 using char1x1 = char1;
-/// 2x1 char matrix
+
+/**
+ * @brief 2x1 char matrix
+ */
 using char2x1 = matrix<std::int8_t, 2, 1>;
-/// 3x1 char matrix
+
+/**
+ * @brief 3x1 char matrix
+ */
 using char3x1 = matrix<std::int8_t, 3, 1>;
-/// 4x1 char matrix
+
+/**
+ * @brief 4x1 char matrix
+ */
 using char4x1 = matrix<std::int8_t, 4, 1>;
-/// 1x2 char matrix
+
+/**
+ * @brief 1x2 char matrix
+ */
 using char1x2 = char2;
-/// 2x2 char matrix
+
+/**
+ * @brief 2x2 char matrix
+ */
 using char2x2 = matrix<std::int8_t, 2, 2>;
-/// 3x2 char matrix
+
+/**
+ * @brief 3x2 char matrix
+ */
 using char3x2 = matrix<std::int8_t, 3, 2>;
-/// 4x2 char matrix
+
+/**
+ * @brief 4x2 char matrix
+ */
 using char4x2 = matrix<std::int8_t, 4, 2>;
-/// 1x3 char matrix
+
+/**
+ * @brief 1x3 char matrix
+ */
 using char1x3 = char3;
-/// 2x3 char matrix
+
+/**
+ * @brief 2x3 char matrix
+ */
 using char2x3 = matrix<std::int8_t, 2, 3>;
-/// 3x3 char matrix
+
+/**
+ * @brief 3x3 char matrix
+ */
 using char3x3 = matrix<std::int8_t, 3, 3>;
-/// 4x3 char matrix
+
+/**
+ * @brief 4x3 char matrix
+ */
 using char4x3 = matrix<std::int8_t, 4, 3>;
-/// 1x4 char matrix
+
+/**
+ * @brief 1x4 char matrix
+ */
 using char1x4 = char4;
-/// 2x4 char matrix
+
+/**
+ * @brief 2x4 char matrix
+ */
 using char2x4 = matrix<std::int8_t, 2>;
-/// 3x4 char matrix
+
+/**
+ * @brief 3x4 char matrix
+ */
 using char3x4 = matrix<std::int8_t, 3>;
-/// 4x4 char matrix
+
+/**
+ * @brief 4x4 char matrix
+ */
 using char4x4 = matrix<std::int8_t>;
 
-/// 1x1 unsigned char matrix
+/**
+ * @brief 1x1 unsigned char matrix
+ */
 using uchar1x1 = uchar1;
-/// 2x1 unsigned char matrix
+
+/**
+ * @brief 2x1 unsigned char matrix
+ */
 using uchar2x1 = matrix<std::uint8_t, 2, 1>;
-/// 3x1 unsigned char matrix
+
+/**
+ * @brief 3x1 unsigned char matrix
+ */
 using uchar3x1 = matrix<std::uint8_t, 3, 1>;
-/// 4x1 unsigned char matrix
+
+/**
+ * @brief 4x1 unsigned char matrix
+ */
 using uchar4x1 = matrix<std::uint8_t, 4, 1>;
-/// 1x2 unsigned char matrix
+
+/**
+ * @brief 1x2 unsigned char matrix
+ */
 using uchar1x2 = uchar2;
-/// 2x2 unsigned char matrix
+
+/**
+ * @brief 2x2 unsigned char matrix
+ */
 using uchar2x2 = matrix<std::uint8_t, 2, 2>;
-/// 3x2 unsigned char matrix
+
+/**
+ * @brief 3x2 unsigned char matrix
+ */
 using uchar3x2 = matrix<std::uint8_t, 3, 2>;
-/// 4x2 unsigned char matrix
+
+/**
+ * @brief 4x2 unsigned char matrix
+ */
 using uchar4x2 = matrix<std::uint8_t, 4, 2>;
-/// 1x3 unsigned char matrix
+
+/**
+ * @brief 1x3 unsigned char matrix
+ */
 using uchar1x3 = uchar3;
-/// 2x3 unsigned char matrix
+
+/**
+ * @brief 2x3 unsigned char matrix
+ */
 using uchar2x3 = matrix<std::uint8_t, 2, 3>;
-/// 3x3 unsigned char matrix
+
+/**
+ * @brief 3x3 unsigned char matrix
+ */
 using uchar3x3 = matrix<std::uint8_t, 3, 3>;
-/// 4x3 unsigned char matrix
+
+/**
+ * @brief 4x3 unsigned char matrix
+ */
 using uchar4x3 = matrix<std::uint8_t, 4, 3>;
-/// 1x4 unsigned char matrix
+
+/**
+ * @brief 1x4 unsigned char matrix
+ */
 using uchar1x4 = uchar4;
-/// 2x4 unsigned char matrix
+
+/**
+ * @brief 2x4 unsigned char matrix
+ */
 using uchar2x4 = matrix<std::uint8_t, 2>;
-/// 3x4 unsigned char matrix
+
+/**
+ * @brief 3x4 unsigned char matrix
+ */
 using uchar3x4 = matrix<std::uint8_t, 3>;
-/// 4x4 unsigned char matrix
+
+/**
+ * @brief 4x4 unsigned char matrix
+ */
 using uchar4x4 = matrix<std::uint8_t>;
 
-/// 1x1 short matrix
+/**
+ * @brief 1x1 short matrix
+ */
 using short1x1 = short1;
-/// 2x1 short matrix
+
+/**
+ * @brief 2x1 short matrix
+ */
 using short2x1 = matrix<std::int16_t, 2, 1>;
-/// 3x1 short matrix
+
+/**
+ * @brief 3x1 short matrix
+ */
 using short3x1 = matrix<std::int16_t, 3, 1>;
-/// 4x1 short matrix
+
+/**
+ * @brief 4x1 short matrix
+ */
 using short4x1 = matrix<std::int16_t, 4, 1>;
-/// 1x2 short matrix
+
+/**
+ * @brief 1x2 short matrix
+ */
 using short1x2 = short2;
-/// 2x2 short matrix
+
+/**
+ * @brief 2x2 short matrix
+ */
 using short2x2 = matrix<std::int16_t, 2, 2>;
-/// 3x2 short matrix
+
+/**
+ * @brief 3x2 short matrix
+ */
 using short3x2 = matrix<std::int16_t, 3, 2>;
-/// 4x2 short matrix
+
+/**
+ * @brief 4x2 short matrix
+ */
 using short4x2 = matrix<std::int16_t, 4, 2>;
-/// 1x3 short matrix
+
+/**
+ * @brief 1x3 short matrix
+ */
 using short1x3 = short3;
-/// 2x3 short matrix
+
+/**
+ * @brief 2x3 short matrix
+ */
 using short2x3 = matrix<std::int16_t, 2, 3>;
-/// 3x3 short matrix
+
+/**
+ * @brief 3x3 short matrix
+ */
 using short3x3 = matrix<std::int16_t, 3, 3>;
-/// 4x3 short matrix
+
+/**
+ * @brief 4x3 short matrix
+ */
 using short4x3 = matrix<std::int16_t, 4, 3>;
-/// 1x4 short matrix
+
+/**
+ * @brief 1x4 short matrix
+ */
 using short1x4 = short4;
-/// 2x4 short matrix
+
+/**
+ * @brief 2x4 short matrix
+ */
 using short2x4 = matrix<std::int16_t, 2>;
-/// 3x4 short matrix
+
+/**
+ * @brief 3x4 short matrix
+ */
 using short3x4 = matrix<std::int16_t, 3>;
-/// 4x4 short matrix
+
+/**
+ * @brief 4x4 short matrix
+ */
 using short4x4 = matrix<std::int16_t>;
 
-/// 1x1 unsigned short matrix
+/**
+ * @brief 1x1 unsigned short matrix
+ */
 using ushort1x1 = ushort1;
-/// 2x1 unsigned short matrix
+
+/**
+ * @brief 2x1 unsigned short matrix
+ */
 using ushort2x1 = matrix<std::uint16_t, 2, 1>;
-/// 3x1 unsigned short matrix
+
+/**
+ * @brief 3x1 unsigned short matrix
+ */
 using ushort3x1 = matrix<std::uint16_t, 3, 1>;
-/// 4x1 unsigned short matrix
+
+/**
+ * @brief 4x1 unsigned short matrix
+ */
 using ushort4x1 = matrix<std::uint16_t, 4, 1>;
-/// 1x2 unsigned short matrix
+
+/**
+ * @brief 1x2 unsigned short matrix
+ */
 using ushort1x2 = ushort2;
-/// 2x2 unsigned short matrix
+
+/**
+ * @brief 2x2 unsigned short matrix
+ */
 using ushort2x2 = matrix<std::uint16_t, 2, 2>;
-/// 3x2 unsigned short matrix
+
+/**
+ * @brief 3x2 unsigned short matrix
+ */
 using ushort3x2 = matrix<std::uint16_t, 3, 2>;
-/// 4x2 unsigned short matrix
+
+/**
+ * @brief 4x2 unsigned short matrix
+ */
 using ushort4x2 = matrix<std::uint16_t, 4, 2>;
-/// 1x3 unsigned short matrix
+
+/**
+ * @brief 1x3 unsigned short matrix
+ */
 using ushort1x3 = ushort3;
-/// 2x3 unsigned short matrix
+
+/**
+ * @brief 2x3 unsigned short matrix
+ */
 using ushort2x3 = matrix<std::uint16_t, 2, 3>;
-/// 3x3 unsigned short matrix
+
+/**
+ * @brief 3x3 unsigned short matrix
+ */
 using ushort3x3 = matrix<std::uint16_t, 3, 3>;
-/// 4x3 unsigned short matrix
+
+/**
+ * @brief 4x3 unsigned short matrix
+ */
 using ushort4x3 = matrix<std::uint16_t, 4, 3>;
-/// 1x4 unsigned short matrix
+
+/**
+ * @brief 1x4 unsigned short matrix
+ */
 using ushort1x4 = ushort4;
-/// 2x4 unsigned short matrix
+
+/**
+ * @brief 2x4 unsigned short matrix
+ */
 using ushort2x4 = matrix<std::uint16_t, 2>;
-/// 3x4 unsigned short matrix
+
+/**
+ * @brief 3x4 unsigned short matrix
+ */
 using ushort3x4 = matrix<std::uint16_t, 3>;
-/// 4x4 unsigned short matrix
+
+/**
+ * @brief 4x4 unsigned short matrix
+ */
 using ushort4x4 = matrix<std::uint16_t>;
 
-/// 1x1 integer matrix
+/**
+ * @brief 1x1 integer matrix
+ */
 using int1x1 = int1;
-/// 2x1 integer matrix
+
+/**
+ * @brief 2x1 integer matrix
+ */
 using int2x1 = matrix<std::int32_t, 2, 1>;
-/// 3x1 integer matrix
+
+/**
+ * @brief 3x1 integer matrix
+ */
 using int3x1 = matrix<std::int32_t, 3, 1>;
-/// 4x1 integer matrix
+
+/**
+ * @brief 4x1 integer matrix
+ */
 using int4x1 = matrix<std::int32_t, 4, 1>;
-/// 1x2 integer matrix
+
+/**
+ * @brief 1x2 integer matrix
+ */
 using int1x2 = int2;
-/// 2x2 integer matrix
+
+/**
+ * @brief 2x2 integer matrix
+ */
 using int2x2 = matrix<std::int32_t, 2, 2>;
-/// 3x2 integer matrix
+
+/**
+ * @brief 3x2 integer matrix
+ */
 using int3x2 = matrix<std::int32_t, 3, 2>;
-/// 4x2 integer matrix
+
+/**
+ * @brief 4x2 integer matrix
+ */
 using int4x2 = matrix<std::int32_t, 4, 2>;
-/// 1x3 integer matrix
+
+/**
+ * @brief 1x3 integer matrix
+ */
 using int1x3 = int3;
-/// 2x3 integer matrix
+
+/**
+ * @brief 2x3 integer matrix
+ */
 using int2x3 = matrix<std::int32_t, 2, 3>;
-/// 3x3 integer matrix
+
+/**
+ * @brief 3x3 integer matrix
+ */
 using int3x3 = matrix<std::int32_t, 3, 3>;
-/// 4x3 integer matrix
+
+/**
+ * @brief 4x3 integer matrix
+ */
 using int4x3 = matrix<std::int32_t, 4, 3>;
-/// 1x4 integer matrix
+
+/**
+ * @brief 1x4 integer matrix
+ */
 using int1x4 = int4;
-/// 2x4 integer matrix
+
+/**
+ * @brief 2x4 integer matrix
+ */
 using int2x4 = matrix<std::int32_t, 2>;
-/// 3x4 integer matrix
+
+/**
+ * @brief 3x4 integer matrix
+ */
 using int3x4 = matrix<std::int32_t, 3>;
-/// 4x4 integer matrix
+
+/**
+ * @brief 4x4 integer matrix
+ */
 using int4x4 = matrix<std::int32_t>;
 
-/// 1x1 unsigned integer matrix
+/**
+ * @brief 1x1 unsigned integer matrix
+ */
 using uint1x1 = uint1;
-/// 2x1 unsigned integer matrix
+
+/**
+ * @brief 2x1 unsigned integer matrix
+ */
 using uint2x1 = matrix<std::uint32_t, 2, 1>;
-/// 3x1 unsigned integer matrix
+
+/**
+ * @brief 3x1 unsigned integer matrix
+ */
 using uint3x1 = matrix<std::uint32_t, 3, 1>;
-/// 4x1 unsigned integer matrix
+
+/**
+ * @brief 4x1 unsigned integer matrix
+ */
 using uint4x1 = matrix<std::uint32_t, 4, 1>;
-/// 1x2 unsigned integer matrix
+
+/**
+ * @brief 1x2 unsigned integer matrix
+ */
 using uint1x2 = uint2;
-/// 2x2 unsigned integer matrix
+
+/**
+ * @brief 2x2 unsigned integer matrix
+ */
 using uint2x2 = matrix<std::uint32_t, 2, 2>;
-/// 3x2 unsigned integer matrix
+
+/**
+ * @brief 3x2 unsigned integer matrix
+ */
 using uint3x2 = matrix<std::uint32_t, 3, 2>;
-/// 4x2 unsigned integer matrix
+
+/**
+ * @brief 4x2 unsigned integer matrix
+ */
 using uint4x2 = matrix<std::uint32_t, 4, 2>;
-/// 1x3 unsigned integer matrix
+
+/**
+ * @brief 1x3 unsigned integer matrix
+ */
 using uint1x3 = uint3;
-/// 2x3 unsigned integer matrix
+
+/**
+ * @brief 2x3 unsigned integer matrix
+ */
 using uint2x3 = matrix<std::uint32_t, 2, 3>;
-/// 3x3 unsigned integer matrix
+
+/**
+ * @brief 3x3 unsigned integer matrix
+ */
 using uint3x3 = matrix<std::uint32_t, 3, 3>;
-/// 4x3 unsigned integer matrix
+
+/**
+ * @brief 4x3 unsigned integer matrix
+ */
 using uint4x3 = matrix<std::uint32_t, 4, 3>;
-/// 1x4 unsigned integer matrix
+
+/**
+ * @brief 1x4 unsigned integer matrix
+ */
 using uint1x4 = uint4;
-/// 2x4 unsigned integer matrix
+
+/**
+ * @brief 2x4 unsigned integer matrix
+ */
 using uint2x4 = matrix<std::uint32_t, 2>;
-/// 3x4 unsigned integer matrix
+
+/**
+ * @brief 3x4 unsigned integer matrix
+ */
 using uint3x4 = matrix<std::uint32_t, 3>;
-/// 4x4 unsigned integer matrix
+
+/**
+ * @brief 4x4 unsigned integer matrix
+ */
 using uint4x4 = matrix<std::uint32_t>;
 
-/// 1x1 long matrix
+/**
+ * @brief 1x1 long matrix
+ */
 using long1x1 = long1;
-/// 2x1 long matrix
+
+/**
+ * @brief 2x1 long matrix
+ */
 using long2x1 = matrix<std::int64_t, 2, 1>;
-/// 3x1 long matrix
+
+/**
+ * @brief 3x1 long matrix
+ */
 using long3x1 = matrix<std::int64_t, 3, 1>;
-/// 4x1 long matrix
+
+/**
+ * @brief 4x1 long matrix
+ */
 using long4x1 = matrix<std::int64_t, 4, 1>;
-/// 1x2 long matrix
+
+/**
+ * @brief 1x2 long matrix
+ */
 using long1x2 = long2;
-/// 2x2 long matrix
+
+/**
+ * @brief 2x2 long matrix
+ */
 using long2x2 = matrix<std::int64_t, 2, 2>;
-/// 3x2 long matrix
+
+/**
+ * @brief 3x2 long matrix
+ */
 using long3x2 = matrix<std::int64_t, 3, 2>;
-/// 4x2 long matrix
+
+/**
+ * @brief 4x2 long matrix
+ */
 using long4x2 = matrix<std::int64_t, 4, 2>;
-/// 1x3 long matrix
+
+/**
+ * @brief 1x3 long matrix
+ */
 using long1x3 = long3;
-/// 2x3 long matrix
+
+/**
+ * @brief 2x3 long matrix
+ */
 using long2x3 = matrix<std::int64_t, 2, 3>;
-/// 3x3 long matrix
+
+/**
+ * @brief 3x3 long matrix
+ */
 using long3x3 = matrix<std::int64_t, 3, 3>;
-/// 4x3 long matrix
+
+/**
+ * @brief 4x3 long matrix
+ */
 using long4x3 = matrix<std::int64_t, 4, 3>;
-/// 1x4 long matrix
+
+/**
+ * @brief 1x4 long matrix
+ */
 using long1x4 = long4;
-/// 2x4 long matrix
+
+/**
+ * @brief 2x4 long matrix
+ */
 using long2x4 = matrix<std::int64_t, 2>;
-/// 3x4 long matrix
+
+/**
+ * @brief 3x4 long matrix
+ */
 using long3x4 = matrix<std::int64_t, 3>;
-/// 4x4 long matrix
+
+/**
+ * @brief 4x4 long matrix
+ */
 using long4x4 = matrix<std::int64_t>;
 
-/// 1x1 unsigned long matrix
+/**
+ * @brief 1x1 unsigned long matrix
+ */
 using ulong1x1 = ulong1;
-/// 2x1 unsigned long matrix
+
+/**
+ * @brief 2x1 unsigned long matrix
+ */
 using ulong2x1 = matrix<std::uint64_t, 2, 1>;
-/// 3x1 unsigned long matrix
+
+/**
+ * @brief 3x1 unsigned long matrix
+ */
 using ulong3x1 = matrix<std::uint64_t, 3, 1>;
-/// 4x1 unsigned long matrix
+
+/**
+ * @brief 4x1 unsigned long matrix
+ */
 using ulong4x1 = matrix<std::uint64_t, 4, 1>;
-/// 1x2 unsigned long matrix
+
+/**
+ * @brief 1x2 unsigned long matrix
+ */
 using ulong1x2 = ulong2;
-/// 2x2 unsigned long matrix
+
+/**
+ * @brief 2x2 unsigned long matrix
+ */
 using ulong2x2 = matrix<std::uint64_t, 2, 2>;
-/// 3x2 unsigned long matrix
+
+/**
+ * @brief 3x2 unsigned long matrix
+ */
 using ulong3x2 = matrix<std::uint64_t, 3, 2>;
-/// 4x2 unsigned long matrix
+
+/**
+ * @brief 4x2 unsigned long matrix
+ */
 using ulong4x2 = matrix<std::uint64_t, 4, 2>;
-/// 1x3 unsigned long matrix
+
+/**
+ * @brief 1x3 unsigned long matrix
+ */
 using ulong1x3 = ulong3;
-/// 2x3 unsigned long matrix
+
+/**
+ * @brief 2x3 unsigned long matrix
+ */
 using ulong2x3 = matrix<std::uint64_t, 2, 3>;
-/// 3x3 unsigned long matrix
+
+/**
+ * @brief 3x3 unsigned long matrix
+ */
 using ulong3x3 = matrix<std::uint64_t, 3, 3>;
-/// 4x3 unsigned long matrix
+
+/**
+ * @brief 4x3 unsigned long matrix
+ */
 using ulong4x3 = matrix<std::uint64_t, 4, 3>;
-/// 1x4 unsigned long matrix
+
+/**
+ * @brief 1x4 unsigned long matrix
+ */
 using ulong1x4 = ulong4;
-/// 2x4 unsigned long matrix
+
+/**
+ * @brief 2x4 unsigned long matrix
+ */
 using ulong2x4 = matrix<std::uint64_t, 2>;
-/// 3x4 unsigned long matrix
+
+/**
+ * @brief 3x4 unsigned long matrix
+ */
 using ulong3x4 = matrix<std::uint64_t, 3>;
-/// 4x4 unsigned long matrix
+
+/**
+ * @brief 4x4 unsigned long matrix
+ */
 using ulong4x4 = matrix<std::uint64_t>;
 
-/// 1x1 float matrix
+/**
+ * @brief 1x1 float matrix
+ */
 using float1x1 = float1;
-/// 2x1 float matrix
+
+/**
+ * @brief 2x1 float matrix
+ */
 using float2x1 = matrix<float, 2, 1>;
-/// 3x1 float matrix
+
+/**
+ * @brief 3x1 float matrix
+ */
 using float3x1 = matrix<float, 3, 1>;
-/// 4x1 float matrix
+
+/**
+ * @brief 4x1 float matrix
+ */
 using float4x1 = matrix<float, 4, 1>;
-/// 1x2 float matrix
+
+/**
+ * @brief 1x2 float matrix
+ */
 using float1x2 = float2;
-/// 2x2 float matrix
+
+/**
+ * @brief 2x2 float matrix
+ */
 using float2x2 = matrix<float, 2, 2>;
-/// 3x2 float matrix
+
+/**
+ * @brief 3x2 float matrix
+ */
 using float3x2 = matrix<float, 3, 2>;
-/// 4x2 float matrix
+
+/**
+ * @brief 4x2 float matrix
+ */
 using float4x2 = matrix<float, 4, 2>;
-/// 1x3 float matrix
+
+/**
+ * @brief 1x3 float matrix
+ */
 using float1x3 = float3;
-/// 2x3 float matrix
+
+/**
+ * @brief 2x3 float matrix
+ */
 using float2x3 = matrix<float, 2, 3>;
-/// 3x3 float matrix
+
+/**
+ * @brief 3x3 float matrix
+ */
 using float3x3 = matrix<float, 3, 3>;
-/// 4x3 float matrix
+
+/**
+ * @brief 4x3 float matrix
+ */
 using float4x3 = matrix<float, 4, 3>;
-/// 1x4 float matrix
+
+/**
+ * @brief 1x4 float matrix
+ */
 using float1x4 = float4;
-/// 2x4 float matrix
+
+/**
+ * @brief 2x4 float matrix
+ */
 using float2x4 = matrix<float, 2>;
-/// 3x4 float matrix
+
+/**
+ * @brief 3x4 float matrix
+ */
 using float3x4 = matrix<float, 3>;
-/// 4x4 float matrix
+
+/**
+ * @brief 4x4 float matrix
+ */
 using float4x4 = matrix<float>;
 
-/// 1x1 double matrix
+/**
+ * @brief 1x1 double matrix
+ */
 using double1x1 = double1;
-/// 2x1 double matrix
+
+/**
+ * @brief 2x1 double matrix
+ */
 using double2x1 = matrix<double, 2, 1>;
-/// 3x1 double matrix
+
+/**
+ * @brief 3x1 double matrix
+ */
 using double3x1 = matrix<double, 3, 1>;
-/// 4x1 double matrix
+
+/**
+ * @brief 4x1 double matrix
+ */
 using double4x1 = matrix<double, 4, 1>;
-/// 1x2 double matrix
+
+/**
+ * @brief 1x2 double matrix
+ */
 using double1x2 = double2;
-/// 2x2 double matrix
+
+/**
+ * @brief 2x2 double matrix
+ */
 using double2x2 = matrix<double, 2, 2>;
-/// 3x2 double matrix
+
+/**
+ * @brief 3x2 double matrix
+ */
 using double3x2 = matrix<double, 3, 2>;
-/// 4x2 double matrix
+
+/**
+ * @brief 4x2 double matrix
+ */
 using double4x2 = matrix<double, 4, 2>;
-/// 1x3 double matrix
+
+/**
+ * @brief 1x3 double matrix
+ */
 using double1x3 = double3;
-/// 2x3 double matrix
+
+/**
+ * @brief 2x3 double matrix
+ */
 using double2x3 = matrix<double, 2, 3>;
-/// 3x3 double matrix
+
+/**
+ * @brief 3x3 double matrix
+ */
 using double3x3 = matrix<double, 3, 3>;
-/// 4x3 double matrix
+
+/**
+ * @brief 4x3 double matrix
+ */
 using double4x3 = matrix<double, 4, 3>;
-/// 1x4 double matrix
+
+/**
+ * @brief 1x4 double matrix
+ */
 using double1x4 = double4;
-/// 2x4 double matrix
+
+/**
+ * @brief 2x4 double matrix
+ */
 using double2x4 = matrix<double, 2>;
-/// 3x4 double matrix
+
+/**
+ * @brief 3x4 double matrix
+ */
 using double3x4 = matrix<double, 3>;
-/// 4x4 double matrix
+
+/**
+ * @brief 4x4 double matrix
+ */
 using double4x4 = matrix<double>;
 
 /**

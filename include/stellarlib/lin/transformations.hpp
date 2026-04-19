@@ -37,6 +37,9 @@ namespace stellarlib::lin
 {
 /**
  * @brief Translates a 3x3 transformation matrix using a 2D vector
+ * @param m 3x3 transformation matrix to be translated
+ * @param v 2D translation vector
+ * @return Translated 3x3 transformation matrix
  */
 template <typename T, typename U, std::size_t M, std::size_t N>
 [[nodiscard]]
@@ -53,6 +56,9 @@ constexpr auto translate(const internal::matrix<T, 3, 3> &m, const internal::mat
 
 /**
  * @brief Translates a 4x4 transformation matrix using a 3D vector
+ * @param m 4x4 transformation matrix to be translated
+ * @param v 3D translation vector
+ * @return Translated 4x4 transformation matrix
  */
 template <typename T, typename U, std::size_t M, std::size_t N>
 [[nodiscard]]
@@ -70,6 +76,9 @@ constexpr auto translate(const internal::matrix<T, 4, 4> &m, const internal::mat
 
 /**
  * @brief Rotates a 3x3 transformation matrix using radians
+ * @param m 3x3 transformation matrix to be rotated
+ * @param angle Rotation angle in radians
+ * @return Rotated 3x3 transformation matrix
  */
 template <typename T, typename U>
 [[nodiscard]]
@@ -88,6 +97,10 @@ constexpr auto rotate(const internal::matrix<T, 3, 3> &m, const U angle) noexcep
 
 /**
  * @brief Rotates a 4x4 transformation matrix using radians and a 3D axis
+ * @param m 4x4 transformation matrix to be rotated
+ * @param angle Rotation angle in radians
+ * @param axis 3D rotation axis
+ * @return Rotated 4x4 transformation matrix
  */
 template <typename T, typename U, typename V, std::size_t M, std::size_t N>
 [[nodiscard]]
@@ -109,6 +122,9 @@ constexpr auto rotate(const internal::matrix<T, 4, 4> &m, const U angle, const i
 
 /**
  * @brief Scales a 3x3 transformation matrix using a 2D vector
+ * @param m 3x3 transformation matrix to be scaled
+ * @param v 2D scaling vector
+ * @return Scaled 3x3 transformation matrix
  */
 template <typename T, typename U, std::size_t M, std::size_t N>
 [[nodiscard]]
@@ -125,6 +141,9 @@ constexpr auto scale(const internal::matrix<T, 3, 3> &m, const internal::matrix<
 
 /**
  * @brief Scales a 4x4 transformation matrix using a 3D vector
+ * @param m 4x4 transformation matrix to be scaled
+ * @param v 3D scaling vector
+ * @return Scaled 4x4 transformation matrix
  */
 template <typename T, typename U, std::size_t M, std::size_t N>
 [[nodiscard]]
@@ -142,6 +161,10 @@ constexpr auto scale(const internal::matrix<T, 4, 4> &m, const internal::matrix<
 
 /**
  * @brief Constructs a 4x4 perspective matrix
+ * @param fovy Vertical field of view of the camera
+ * @param aspect Aspect ratio of the viewport
+ * @param near Distance of the near clipping plane
+ * @return Constructed 4x4 perspective matrix
  */
 template <typename T, typename U, typename V>
 [[nodiscard]]

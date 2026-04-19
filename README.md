@@ -14,7 +14,10 @@ Opinionated, cross-platform game engine library in [C++23](https://en.cppreferen
 - [x] Linear Algebra Utilities
   - [x] Generic vector and matrix implementation
   - [x] Common shader intrinsics functions
-  - [ ] 2D/3D transformations
+  - [x] Common 2D/3D transformations
+- [ ] State management
+  - [ ] Scene management
+  - [ ] Asset management
 
 ## Build Instructions
 
