@@ -41,7 +41,7 @@ template <typename T>
 [[nodiscard]]
 constexpr auto bit_index(const T arg) noexcept
 {
-	return arg / std::numeric_limits<T>::digits;
+	return static_cast<T>(arg / std::numeric_limits<T>::digits);
 }
 
 /**
@@ -54,7 +54,7 @@ template <typename T>
 [[nodiscard]]
 constexpr auto bit_mask(const T arg) noexcept
 {
-	return T{1} << static_cast<T>(arg % std::numeric_limits<T>::digits);
+	return static_cast<T>(T{1} << static_cast<T>(arg % std::numeric_limits<T>::digits));
 }
 }
 
