@@ -92,7 +92,20 @@ public:
 	}
 
 	[[nodiscard]]
+	constexpr auto at(const Key key) noexcept
+	{
+		return contains(key) ? _values.begin() + _sparse[key] : nullptr;
+	}
+
+	[[nodiscard]]
 	constexpr auto operator[](const Key key) const noexcept
+		-> const auto &
+	{
+		return _values[_sparse[key]];
+	}
+
+	[[nodiscard]]
+	constexpr auto operator[](const Key key) noexcept
 		-> auto &
 	{
 		return _values[_sparse[key]];
@@ -101,11 +114,23 @@ public:
 	[[nodiscard]]
 	constexpr auto values() const noexcept
 	{
-		return _values | std::views::all;
+		return std::ranges::subrange{_values.begin(), _values.end()};
+	}
+
+	[[nodiscard]]
+	constexpr auto values() noexcept
+	{
+		return std::ranges::subrange{_values.begin(), _values.end()};
 	}
 
 	[[nodiscard]]
 	constexpr auto zip() const noexcept
+	{
+		return std::views::zip(std::ranges::subrange{static_cast<const Key *>(_keys.begin()), static_cast<const Key *>(_keys.end())}, values());
+	}
+
+	[[nodiscard]]
+	constexpr auto zip() noexcept
 	{
 		return std::views::zip(std::ranges::subrange{static_cast<const Key *>(_keys.begin()), static_cast<const Key *>(_keys.end())}, values());
 	}

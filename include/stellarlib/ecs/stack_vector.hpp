@@ -109,6 +109,13 @@ public:
 
 	[[nodiscard]]
 	constexpr auto operator[](const SizeType index) const noexcept
+		-> const auto &
+	{
+		return _begin[index];
+	}
+
+	[[nodiscard]]
+	constexpr auto operator[](const SizeType index) noexcept
 		-> auto &
 	{
 		return _begin[index];
@@ -117,11 +124,23 @@ public:
 	[[nodiscard]]
 	constexpr auto begin() const noexcept
 	{
+		return static_cast<const T *>(_begin);
+	}
+
+	[[nodiscard]]
+	constexpr auto begin() noexcept
+	{
 		return _begin;
 	}
 
 	[[nodiscard]]
 	constexpr auto end() const noexcept
+	{
+		return static_cast<const T *>(_end);
+	}
+
+	[[nodiscard]]
+	constexpr auto end() noexcept
 	{
 		return _end;
 	}

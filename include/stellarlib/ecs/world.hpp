@@ -272,6 +272,23 @@ public:
 	}
 
 	/**
+	 * @brief Returns a tuple of pointers to the specified components of an entity
+	 * @tparam T Component types
+	 * @param entity ID of the entity (can be invalid)
+	 * @return Tuple of pointers to the specified components of the entity, invalid components are indicated with nullptrs
+	 */
+	template <typename ...T>
+	[[nodiscard]]
+	constexpr auto at(const std::uint32_t entity) noexcept
+		requires (static_cast<bool>(sizeof...(T)))
+	{
+		return [this] <std::size_t ...I> [[nodiscard]] (const auto entity, const std::index_sequence<I...>) noexcept -> auto {
+			const auto &ids{internal::sparse_storage::ids<T...>()};
+			return std::tuple{_components.at<T>(ids[I]).at(entity)...};
+		}(entity, std::index_sequence_for<T...>{});
+	}
+
+	/**
 	 * @brief Returns a reference to the archetype of an entity
 	 * @param entity ID of the entity
 	 * @return Reference to the archetype of the entity
@@ -291,6 +308,24 @@ public:
 	template <typename ...T>
 	[[nodiscard]]
 	constexpr auto operator[](const std::uint32_t entity) const noexcept
+		requires (static_cast<bool>(sizeof...(T)))
+	{
+		return [this] <std::size_t ...I> [[nodiscard]] (const auto entity, const std::index_sequence<I...>) noexcept -> auto {
+			const auto &ids{internal::sparse_storage::ids<T...>()};
+			return std::tuple<const T &...>{_components.operator[]<T>(ids[I])[entity]...};
+		}(entity, std::index_sequence_for<T...>{});
+	}
+
+	/**
+	 * @brief Returns a tuple of references to the specified components of an entity
+	 * @tparam T Component types
+	 * @param entity ID of the entity
+	 * @return Tuple of references to the specified components of the entity
+	 * @warning Invalid entity ID or component types can lead to undefined behavior
+	 */
+	template <typename ...T>
+	[[nodiscard]]
+	constexpr auto operator[](const std::uint32_t entity) noexcept
 		requires (static_cast<bool>(sizeof...(T)))
 	{
 		return [this] <std::size_t ...I> [[nodiscard]] (const auto entity, const std::index_sequence<I...>) noexcept -> auto {
@@ -366,7 +401,7 @@ public:
 			return _archetypes[index].second;
 		}) | std::views::join | std::views::transform([components = [this] <std::size_t ...I> [[nodiscard]] (const std::index_sequence<I...>) noexcept -> auto {
 			const auto &ids{internal::sparse_storage::ids<T...>()};
-			return std::tuple<const internal::sparse_map<std::uint32_t, T> &...>{_components.operator[]<T>(ids[I])...};
+			return std::tuple<internal::sparse_map<std::uint32_t, T> &...>{_components.operator[]<T>(ids[I])...};
 		}(std::index_sequence_for<T...>{})] [[nodiscard]] (const auto entity) noexcept -> auto {
 			return [] <std::size_t ...I> [[nodiscard]] (const auto entity, const auto &components, const std::index_sequence<I...>) noexcept -> auto {
 				return std::tuple<std::uint32_t, T &...>{entity, std::get<I>(components)[entity]...};

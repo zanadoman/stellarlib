@@ -98,6 +98,14 @@ public:
 	template <typename T>
 	[[nodiscard]]
 	constexpr auto operator[](const std::uint16_t id) const noexcept
+		-> const auto &
+	{
+		return static_cast<const sparse_map<std::uint32_t, T> &>(*_maps[id]);
+	}
+
+	template <typename T>
+	[[nodiscard]]
+	constexpr auto operator[](const std::uint16_t id) noexcept
 		-> auto &
 	{
 		return static_cast<sparse_map<std::uint32_t, T> &>(*_maps[id]);
