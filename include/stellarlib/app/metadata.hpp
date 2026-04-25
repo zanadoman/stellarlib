@@ -21,65 +21,76 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef STELLARLIB_APP_CONTEXT_HPP
-#define STELLARLIB_APP_CONTEXT_HPP
+#ifndef STELLARLIB_APP_METADATA_HPP
+#define STELLARLIB_APP_METADATA_HPP
 
-#include <stellarlib/app/scene.hpp>
-#include <stellarlib/ecs/ecs.hpp>
+#include <stellarlib/app/subsystem.hpp>
+
+#include <string>
 
 namespace stellarlib::app
 {
-class clock;
-class metadata;
-
-class context final
+class metadata final : public internal::subsystem<metadata>
 {
+friend internal::subsystem<metadata>;
+
 public:
-	class impl;
+	struct info final
+	{
+		std::string name;
+		std::string version;
+		std::string identifier;
+		std::string creator;
+		std::string copyright;
+		std::string url;
+		std::string type;
+	};
 
 	[[nodiscard]]
-	explicit context(impl &impl) noexcept;
+	constexpr metadata(const metadata &) noexcept = delete;
 
 	[[nodiscard]]
-	constexpr context(const context &) noexcept = delete;
+	constexpr metadata(metadata &&) noexcept = delete;
+
+	constexpr auto operator=(const metadata &) noexcept
+		-> metadata & = delete;
+
+	constexpr auto operator=(metadata &&) noexcept
+		-> metadata & = delete;
+
+	~metadata();
 
 	[[nodiscard]]
-	constexpr context(context &&) noexcept = delete;
-
-	constexpr auto operator=(const context &) noexcept
-		-> context & = delete;
-
-	constexpr auto operator=(context &&) noexcept
-		-> context & = delete;
-
-	~context() noexcept;
+	auto name() const
+		-> std::string;
 
 	[[nodiscard]]
-	auto world() const noexcept
-		-> const ecs::world &;
+	auto version() const
+		-> std::string;
 
 	[[nodiscard]]
-	auto world() noexcept
-		-> ecs::world &;
+	auto identifier() const
+		-> std::string;
 
 	[[nodiscard]]
-	auto clock() const noexcept
-		-> const clock &;
+	auto creator() const
+		-> std::string;
 
 	[[nodiscard]]
-	auto clock() noexcept
-		-> class clock &;
+	auto copyright() const
+		-> std::string;
 
 	[[nodiscard]]
-	auto metadata() const noexcept
-		-> const metadata &;
+	auto url() const
+		-> std::string;
 
 	[[nodiscard]]
-	auto metadata() noexcept
-		-> class metadata &;
+	auto type() const
+		-> std::string;
 
 private:
-	impl &_impl;
+	[[nodiscard]]
+	explicit metadata(const info &info);
 };
 }
 

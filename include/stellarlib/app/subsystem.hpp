@@ -65,14 +65,16 @@ private:
 
 	constexpr ~subsystem() noexcept = default;
 
-	constexpr void iterate(ecs::world &world)
+	template <typename ...Args>
+	constexpr auto iterate(Args &&...args)
 	{
-		static_cast<Derived &>(*this).iterate(world);
+		return static_cast<Derived &>(*this).iterate(std::forward<Args>(args)...);
 	}
 
-	constexpr void event(ecs::world &world, const SDL_Event *event)
+	template <typename ...Args>
+	constexpr auto event(Args &&...args)
 	{
-		static_cast<Derived &>(*this).event(world, event);
+		return static_cast<Derived &>(*this).event(std::forward<Args>(args)...);
 	}
 };
 }

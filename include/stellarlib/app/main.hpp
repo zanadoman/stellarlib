@@ -25,6 +25,7 @@
 #define STELLARLIB_APP_MAIN_HPP
 
 #include <stellarlib/app/clock.hpp>
+#include <stellarlib/app/metadata.hpp>
 #include <stellarlib/app/scene.hpp>
 
 #include <string>
@@ -34,6 +35,7 @@ namespace stellarlib::app
 {
 struct info
 {
+	metadata::info metadata;
 	clock::info clock;
 	scene *scene;
 };

@@ -25,6 +25,7 @@
 #include "context_impl.hpp"
 
 #include <stellarlib/app/clock.hpp>
+#include <stellarlib/app/metadata.hpp>
 #include <stellarlib/ecs/ecs.hpp>
 
 namespace stellarlib::app
@@ -45,6 +46,18 @@ auto context::world() noexcept
 	-> ecs::world &
 {
 	return _impl.world();
+}
+
+auto context::metadata() const noexcept
+	-> const class metadata &
+{
+	return _impl.metadata();
+}
+
+auto context::metadata() noexcept
+	-> class metadata &
+{
+	return _impl.metadata();
 }
 
 auto context::clock() const noexcept

@@ -35,12 +35,6 @@
 
 namespace stellarlib::app
 {
-clock::clock(const info &info)
-	: _max_delta{info.max_delta}
-{
-	set_target_frequency(info.target_frequency);
-}
-
 clock::~clock() = default;
 
 auto clock::tick() const
@@ -77,6 +71,12 @@ auto clock::delta() const
 	-> float
 {
 	return _delta;
+}
+
+clock::clock(const info &info)
+	: _max_delta{info.max_delta}
+{
+	set_target_frequency(info.target_frequency);
 }
 
 void clock::iterate()

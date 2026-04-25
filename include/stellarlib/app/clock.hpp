@@ -42,9 +42,6 @@ public:
 	};
 
 	[[nodiscard]]
-	explicit clock(const info &info);
-
-	[[nodiscard]]
 	constexpr clock(const clock &) noexcept = delete;
 
 	[[nodiscard]]
@@ -82,6 +79,9 @@ private:
 	std::uint64_t _last_tick{};
 	float _max_delta{};
 	float _delta{};
+
+	[[nodiscard]]
+	explicit clock(const info &info);
 
 	void iterate();
 };

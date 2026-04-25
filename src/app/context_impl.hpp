@@ -28,6 +28,7 @@
 
 #include <stellarlib/app/clock.hpp>
 #include <stellarlib/app/main.hpp>
+#include <stellarlib/app/metadata.hpp>
 #include <stellarlib/app/scene.hpp>
 #include <stellarlib/ecs/ecs.hpp>
 
@@ -67,6 +68,14 @@ public:
 		-> ecs::world &;
 
 	[[nodiscard]]
+	auto metadata() const noexcept
+		-> const class metadata &;
+
+	[[nodiscard]]
+	auto metadata() noexcept
+		-> class metadata &;
+
+	[[nodiscard]]
 	auto clock() const noexcept
 		-> const class clock &;
 
@@ -84,6 +93,7 @@ public:
 
 private:
 	ecs::world _world;
+	[[no_unique_address]] class metadata _metadata;
 	class clock _clock;
 	std::unique_ptr<scene> _scene;
 };

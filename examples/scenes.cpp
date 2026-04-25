@@ -133,6 +133,15 @@ auto app::main([[maybe_unused]] const std::vector<std::string> &args)
 {
 	SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%s", args.front().c_str());
 	return {
+		.metadata = {
+			.name = "scenes",
+			.version = "0.1.0",
+			.identifier = "org.stellarlib.scenes",
+			.creator = "Domán Zana",
+			.copyright = "Copyright (C) 2025-2026 Domán Zana",
+			.url = "https://zanadoman.github.io/stellarlib/examples_2scenes_8cpp-example.html",
+			.type = "application"
+		},
 		.clock = {
 			.target_frequency = 60.0F,
 			.max_delta = 50.0F

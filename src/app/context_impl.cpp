@@ -35,7 +35,8 @@
 namespace stellarlib::app
 {
 context::impl::impl(const app::info &info)
-	: _clock{info.clock}
+	: _metadata{internal::subsystem<class metadata>::create(info.metadata)}
+	, _clock{internal::subsystem<class clock>::create(info.clock)}
 	, _scene{info.scene}
 {
 	_scene->begin(context{*this});
@@ -74,7 +75,7 @@ auto context::impl::iterate()
 	-> SDL_AppResult
 {
 	const auto scene{_scene->update(context{*this})};
-	static_cast<internal::subsystem<app::clock> &>(_clock).iterate();
+	static_cast<internal::subsystem<class clock> &>(_clock).iterate();
 
 	if (!static_cast<bool>(scene)) {
 		return SDL_APP_SUCCESS;
