@@ -21,13 +21,52 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef STELLARLIB_STELLARLIB_HPP
-#define STELLARLIB_STELLARLIB_HPP
+#ifndef STELLARLIB_APP_CONTEXT_HPP
+#define STELLARLIB_APP_CONTEXT_HPP
 
-/* IWYU pragma: begin_exports */
-#include <stellarlib/app/app.hpp>
+#include <stellarlib/app/scene.hpp>
 #include <stellarlib/ecs/ecs.hpp>
-#include <stellarlib/lin/lin.hpp>
-/* IWYU pragma: end_exports */
+
+namespace stellarlib::app
+{
+class context final
+{
+public:
+	struct info final
+	{
+		scene *scene;
+	};
+
+	class impl;
+
+	[[nodiscard]]
+	explicit context(impl &impl) noexcept;
+
+	[[nodiscard]]
+	constexpr context(const context &) noexcept = delete;
+
+	[[nodiscard]]
+	constexpr context(context &&) noexcept = delete;
+
+	constexpr auto operator=(const context &) noexcept
+		-> context & = delete;
+
+	constexpr auto operator=(context &&) noexcept
+		-> context & = delete;
+
+	~context() noexcept;
+
+	[[nodiscard]]
+	auto world() const noexcept
+		-> const ecs::world &;
+
+	[[nodiscard]]
+	auto world() noexcept
+		-> ecs::world &;
+
+private:
+	impl &_impl;
+};
+}
 
 #endif

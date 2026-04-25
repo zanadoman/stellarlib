@@ -21,13 +21,42 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef STELLARLIB_STELLARLIB_HPP
-#define STELLARLIB_STELLARLIB_HPP
+#ifndef STELLARLIB_APP_SCENE_HPP
+#define STELLARLIB_APP_SCENE_HPP
 
-/* IWYU pragma: begin_exports */
-#include <stellarlib/app/app.hpp>
-#include <stellarlib/ecs/ecs.hpp>
-#include <stellarlib/lin/lin.hpp>
-/* IWYU pragma: end_exports */
+namespace stellarlib::app
+{
+class context;
+
+class scene
+{
+public:
+	virtual ~scene() noexcept;
+
+	virtual void begin(context ctx);
+
+	[[nodiscard]]
+	virtual constexpr auto update(context)
+		-> scene * = 0;
+
+	virtual void end(context ctx);
+
+protected:
+	[[nodiscard]]
+	scene() noexcept;
+
+	[[nodiscard]]
+	scene(const scene &) noexcept;
+
+	[[nodiscard]]
+	scene(scene &&) noexcept;
+
+	auto operator=(const scene &) noexcept
+		-> scene &;
+
+	auto operator=(scene &&) noexcept
+		-> scene &;
+};
+}
 
 #endif

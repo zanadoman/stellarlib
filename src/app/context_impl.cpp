@@ -21,13 +21,60 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef STELLARLIB_STELLARLIB_HPP
-#define STELLARLIB_STELLARLIB_HPP
+#include <stellarlib/app/context.hpp>
+#include "context_impl.hpp"
 
-/* IWYU pragma: begin_exports */
-#include <stellarlib/app/app.hpp>
 #include <stellarlib/ecs/ecs.hpp>
-#include <stellarlib/lin/lin.hpp>
-/* IWYU pragma: end_exports */
 
-#endif
+#include <SDL3/SDL_events.h>
+#include <SDL3/SDL_init.h>
+
+namespace stellarlib::app
+{
+context::impl::impl(const info &info)
+	: _scene{info.scene}
+{
+	_scene->begin(context{*this});
+}
+
+context::impl::~impl()
+{
+	_scene->end(context{*this});
+}
+
+auto context::impl::world() const noexcept
+	-> const ecs::world &
+{
+	return _world;
+}
+
+auto context::impl::world() noexcept
+	-> ecs::world &
+{
+	return _world;
+}
+
+auto context::impl::iterate()
+	-> SDL_AppResult
+{
+	const auto scene{_scene->update(context{*this})};
+
+	if (!static_cast<bool>(scene)) {
+		return SDL_APP_SUCCESS;
+	}
+
+	if (scene != _scene.get()) {
+		_scene->end(context{*this});
+		_scene.reset(scene);
+		_scene->begin(context{*this});
+	}
+
+	return SDL_APP_CONTINUE;
+}
+
+auto context::impl::event(const SDL_Event *event)
+	-> SDL_AppResult
+{
+	return event->type == SDL_EVENT_QUIT ? SDL_APP_SUCCESS : SDL_APP_CONTINUE;
+}
+}

@@ -21,13 +21,28 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef STELLARLIB_STELLARLIB_HPP
-#define STELLARLIB_STELLARLIB_HPP
+#include <stellarlib/app/context.hpp>
+#include "context_impl.hpp"
 
-/* IWYU pragma: begin_exports */
-#include <stellarlib/app/app.hpp>
 #include <stellarlib/ecs/ecs.hpp>
-#include <stellarlib/lin/lin.hpp>
-/* IWYU pragma: end_exports */
 
-#endif
+namespace stellarlib::app
+{
+context::context(impl &impl) noexcept
+	: _impl{impl}
+{}
+
+context::~context() noexcept = default;
+
+auto context::world() const noexcept
+	-> const ecs::world &
+{
+	return _impl.world();
+}
+
+auto context::world() noexcept
+	-> ecs::world &
+{
+	return _impl.world();
+}
+}

@@ -21,13 +21,61 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef STELLARLIB_STELLARLIB_HPP
-#define STELLARLIB_STELLARLIB_HPP
+#ifndef STELLARLIB_APP_CONTEXT_IMPL_HPP
+#define STELLARLIB_APP_CONTEXT_IMPL_HPP
 
-/* IWYU pragma: begin_exports */
-#include <stellarlib/app/app.hpp>
+#include <stellarlib/app/context.hpp>
+
+#include <stellarlib/app/scene.hpp>
 #include <stellarlib/ecs/ecs.hpp>
-#include <stellarlib/lin/lin.hpp>
-/* IWYU pragma: end_exports */
+
+#include <SDL3/SDL_events.h>
+#include <SDL3/SDL_init.h>
+
+#include <memory>
+
+namespace stellarlib::app
+{
+class context::impl final
+{
+public:
+	[[nodiscard]]
+	explicit impl(const info &info);
+
+	[[nodiscard]]
+	constexpr impl(const impl &) noexcept = delete;
+
+	[[nodiscard]]
+	constexpr impl(impl &&) noexcept = delete;
+
+	constexpr auto operator=(const impl &) noexcept
+		-> impl & = delete;
+
+	constexpr auto operator=(impl &&) noexcept
+		-> impl & = delete;
+
+	~impl();
+
+	[[nodiscard]]
+	auto world() const noexcept
+		-> const ecs::world &;
+
+	[[nodiscard]]
+	auto world() noexcept
+		-> ecs::world &;
+
+	[[nodiscard]]
+	auto iterate()
+		-> SDL_AppResult;
+
+	[[nodiscard]]
+	auto event(const SDL_Event *event)
+		-> SDL_AppResult;
+
+private:
+	ecs::world _world;
+	std::unique_ptr<scene> _scene;
+};
+}
 
 #endif

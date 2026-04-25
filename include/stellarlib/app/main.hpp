@@ -21,13 +21,22 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef STELLARLIB_STELLARLIB_HPP
-#define STELLARLIB_STELLARLIB_HPP
+#ifndef STELLARLIB_APP_MAIN_HPP
+#define STELLARLIB_APP_MAIN_HPP
 
-/* IWYU pragma: begin_exports */
-#include <stellarlib/app/app.hpp>
-#include <stellarlib/ecs/ecs.hpp>
-#include <stellarlib/lin/lin.hpp>
-/* IWYU pragma: end_exports */
+#include <stellarlib/app/context.hpp>
+
+#include <string>
+#include <vector>
+
+namespace stellarlib::app
+{
+[[noreturn]]
+void terminate_handler() noexcept;
+
+[[nodiscard]]
+auto main(const std::vector<std::string> &args)
+	-> context::info;
+}
 
 #endif
