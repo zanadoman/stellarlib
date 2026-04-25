@@ -25,12 +25,15 @@
 #define STELLARLIB_APP_SUBSYSTEM_HPP
 
 #include <stellarlib/app/context.hpp>
+#include <stellarlib/ecs/ecs.hpp>
 
 #include <SDL3/SDL_events.h>
 
+#include <utility>
+
 namespace stellarlib::app::internal
 {
-template <class Derived>
+template <typename Derived>
 class subsystem
 {
 friend Derived;
@@ -50,19 +53,26 @@ public:
 		-> subsystem & = delete;
 
 private:
+	template <typename ...Args>
+	[[nodiscard]]
+	static constexpr auto create(Args &&...args)
+	{
+		return Derived{std::forward<Args>(args)...};
+	}
+
 	[[nodiscard]]
 	constexpr subsystem() noexcept = default;
 
 	constexpr ~subsystem() noexcept = default;
 
-	constexpr void iterate()
+	constexpr void iterate(ecs::world &world)
 	{
-		static_cast<Derived &>(*this).iterate();
+		static_cast<Derived &>(*this).iterate(world);
 	}
 
-	constexpr void event(const SDL_Event *event)
+	constexpr void event(ecs::world &world, const SDL_Event *event)
 	{
-		static_cast<Derived &>(*this).event(event);
+		static_cast<Derived &>(*this).event(world, event);
 	}
 };
 }
