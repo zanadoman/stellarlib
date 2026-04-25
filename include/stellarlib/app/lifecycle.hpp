@@ -33,48 +33,62 @@
 
 namespace stellarlib::app::internal
 {
-template <typename Derived>
-class subsystem
+class lifecycle final
 {
-friend Derived;
 friend context::impl;
 
 public:
 	[[nodiscard]]
-	constexpr subsystem(const subsystem &) noexcept = delete;
+	constexpr lifecycle() noexcept = delete;
 
 	[[nodiscard]]
-	constexpr subsystem(subsystem &&) noexcept = delete;
+	constexpr lifecycle(const lifecycle &) noexcept = delete;
 
-	constexpr auto operator=(const subsystem &) noexcept
-		-> subsystem & = delete;
+	[[nodiscard]]
+	constexpr lifecycle(lifecycle &&) noexcept = delete;
 
-	constexpr auto operator=(subsystem &&) noexcept
-		-> subsystem & = delete;
+	constexpr auto operator=(const lifecycle &) noexcept
+		-> lifecycle & = delete;
+
+	constexpr auto operator=(lifecycle &&) noexcept
+		-> lifecycle & = delete;
+
+	constexpr ~lifecycle() noexcept = delete;
 
 private:
-	template <typename ...Args>
+	template <typename T, typename ...Args>
 	[[nodiscard]]
-	static constexpr auto create(Args &&...args)
+	static constexpr auto construct(Args &&...args)
 	{
-		return Derived{std::forward<Args>(args)...};
+		return T{std::forward<Args>(args)...};
 	}
 
+	template <typename T, typename ...Args>
 	[[nodiscard]]
-	constexpr subsystem() noexcept = default;
-
-	constexpr ~subsystem() noexcept = default;
-
-	template <typename ...Args>
-	constexpr auto iterate(Args &&...args)
+	static constexpr auto iterate(const T &self, Args &&...args)
 	{
-		return static_cast<Derived &>(*this).iterate(std::forward<Args>(args)...);
+		return self.iterate(std::forward<Args>(args)...);
 	}
 
-	template <typename ...Args>
-	constexpr auto event(Args &&...args)
+	template <typename T, typename ...Args>
+	[[nodiscard]]
+	static constexpr auto iterate(T &self, Args &&...args)
 	{
-		return static_cast<Derived &>(*this).event(std::forward<Args>(args)...);
+		return self.iterate(std::forward<Args>(args)...);
+	}
+
+	template <typename T, typename ...Args>
+	[[nodiscard]]
+	static constexpr auto event(const T &self, Args &&...args)
+	{
+		return self.event(std::forward<Args>(args)...);
+	}
+
+	template <typename T, typename ...Args>
+	[[nodiscard]]
+	static constexpr auto event(T &self, Args &&...args)
+	{
+		return self.event(std::forward<Args>(args)...);
 	}
 };
 }

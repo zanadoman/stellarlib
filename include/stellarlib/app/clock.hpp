@@ -24,15 +24,15 @@
 #ifndef STELLARLIB_APP_CLOCK_HPP
 #define STELLARLIB_APP_CLOCK_HPP
 
-#include <stellarlib/app/subsystem.hpp>
+#include <stellarlib/app/lifecycle.hpp>
 
 #include <cstdint>
 
 namespace stellarlib::app
 {
-class clock final : public internal::subsystem<clock>
+class clock final
 {
-friend internal::subsystem<clock>;
+friend internal::lifecycle;
 
 public:
 	struct info final

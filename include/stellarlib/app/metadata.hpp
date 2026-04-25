@@ -24,15 +24,15 @@
 #ifndef STELLARLIB_APP_METADATA_HPP
 #define STELLARLIB_APP_METADATA_HPP
 
-#include <stellarlib/app/subsystem.hpp>
+#include <stellarlib/app/lifecycle.hpp>
 
 #include <string>
 
 namespace stellarlib::app
 {
-class metadata final : public internal::subsystem<metadata>
+class metadata final
 {
-friend internal::subsystem<metadata>;
+friend internal::lifecycle;
 
 public:
 	struct info final

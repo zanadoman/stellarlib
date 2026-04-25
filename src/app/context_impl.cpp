@@ -26,7 +26,8 @@
 
 #include <stellarlib/app/clock.hpp>
 #include <stellarlib/app/main.hpp>
-#include <stellarlib/app/subsystem.hpp>
+#include <stellarlib/app/metadata.hpp>
+#include <stellarlib/app/lifecycle.hpp>
 #include <stellarlib/ecs/ecs.hpp>
 
 #include <SDL3/SDL_events.h>
@@ -35,8 +36,8 @@
 namespace stellarlib::app
 {
 context::impl::impl(const app::info &info)
-	: _metadata{internal::subsystem<class metadata>::create(info.metadata)}
-	, _clock{internal::subsystem<class clock>::create(info.clock)}
+	: _metadata{internal::lifecycle::construct<class metadata>(info.metadata)}
+	, _clock{internal::lifecycle::construct<class clock>(info.clock)}
 	, _scene{info.scene}
 {
 	_scene->begin(context{*this});
@@ -59,6 +60,18 @@ auto context::impl::world() noexcept
 	return _world;
 }
 
+auto context::impl::metadata() const noexcept
+	-> const class metadata &
+{
+	return _metadata;
+}
+
+auto context::impl::metadata() noexcept
+	-> class metadata &
+{
+	return _metadata;
+}
+
 auto context::impl::clock() const noexcept
 	-> const class clock &
 {
@@ -75,7 +88,7 @@ auto context::impl::iterate()
 	-> SDL_AppResult
 {
 	const auto scene{_scene->update(context{*this})};
-	static_cast<internal::subsystem<class clock> &>(_clock).iterate();
+	internal::lifecycle::iterate(_clock);
 
 	if (!static_cast<bool>(scene)) {
 		return SDL_APP_SUCCESS;

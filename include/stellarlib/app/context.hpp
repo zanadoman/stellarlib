@@ -24,7 +24,6 @@
 #ifndef STELLARLIB_APP_CONTEXT_HPP
 #define STELLARLIB_APP_CONTEXT_HPP
 
-#include <stellarlib/app/scene.hpp>
 #include <stellarlib/ecs/ecs.hpp>
 
 namespace stellarlib::app

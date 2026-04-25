@@ -24,10 +24,10 @@
 #ifndef STELLARLIB_APP_SCENE_HPP
 #define STELLARLIB_APP_SCENE_HPP
 
+#include <stellarlib/app/context.hpp>
+
 namespace stellarlib::app
 {
-class context;
-
 class scene
 {
 public:
