@@ -129,10 +129,14 @@ public:
 }
 
 auto app::main([[maybe_unused]] const std::vector<std::string> &args)
-	-> app::context::info
+	-> app::info
 {
 	SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%s", args.front().c_str());
 	return {
+		.clock = {
+			.target_frequency = 60.0F,
+			.max_delta = 50.0F
+		},
 		.scene = new scene1{}
 	};
 }

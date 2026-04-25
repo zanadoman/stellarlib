@@ -21,29 +21,50 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef STELLARLIB_APP_MAIN_HPP
-#define STELLARLIB_APP_MAIN_HPP
+#ifndef STELLARLIB_APP_SUBSYSTEM_HPP
+#define STELLARLIB_APP_SUBSYSTEM_HPP
 
-#include <stellarlib/app/clock.hpp>
-#include <stellarlib/app/scene.hpp>
+#include <stellarlib/app/context.hpp>
 
-#include <string>
-#include <vector>
+#include <SDL3/SDL_events.h>
 
-namespace stellarlib::app
+namespace stellarlib::app::internal
 {
-struct info
+template <class Derived>
+class subsystem
 {
-	clock::info clock;
-	scene *scene;
+friend Derived;
+friend context::impl;
+
+public:
+	[[nodiscard]]
+	constexpr subsystem(const subsystem &) noexcept = delete;
+
+	[[nodiscard]]
+	constexpr subsystem(subsystem &&) noexcept = delete;
+
+	constexpr auto operator=(const subsystem &) noexcept
+		-> subsystem & = delete;
+
+	constexpr auto operator=(subsystem &&) noexcept
+		-> subsystem & = delete;
+
+private:
+	[[nodiscard]]
+	constexpr subsystem() noexcept = default;
+
+	constexpr ~subsystem() noexcept = default;
+
+	constexpr void iterate()
+	{
+		static_cast<Derived &>(*this).iterate();
+	}
+
+	constexpr void event(const SDL_Event *event)
+	{
+		static_cast<Derived &>(*this).event(event);
+	}
 };
-
-[[noreturn]]
-void terminate_handler() noexcept;
-
-[[nodiscard]]
-auto main(const std::vector<std::string> &args)
-	-> info;
 }
 
 #endif

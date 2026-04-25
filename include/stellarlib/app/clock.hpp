@@ -21,71 +21,69 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef STELLARLIB_APP_CONTEXT_IMPL_HPP
-#define STELLARLIB_APP_CONTEXT_IMPL_HPP
+#ifndef STELLARLIB_APP_CLOCK_HPP
+#define STELLARLIB_APP_CLOCK_HPP
 
-#include <stellarlib/app/context.hpp>
+#include <stellarlib/app/subsystem.hpp>
 
-#include <stellarlib/app/clock.hpp>
-#include <stellarlib/app/main.hpp>
-#include <stellarlib/app/scene.hpp>
-#include <stellarlib/ecs/ecs.hpp>
-
-#include <SDL3/SDL_events.h>
-#include <SDL3/SDL_init.h>
-
-#include <memory>
+#include <cstdint>
 
 namespace stellarlib::app
 {
-class context::impl final
+class clock final : public internal::subsystem<clock>
 {
+friend internal::subsystem<clock>;
+
 public:
-	[[nodiscard]]
-	explicit impl(const app::info &info);
+	struct info final
+	{
+		float target_frequency;
+		float max_delta;
+	};
 
 	[[nodiscard]]
-	constexpr impl(const impl &) noexcept = delete;
+	explicit clock(const info &info);
 
 	[[nodiscard]]
-	constexpr impl(impl &&) noexcept = delete;
-
-	constexpr auto operator=(const impl &) noexcept
-		-> impl & = delete;
-
-	constexpr auto operator=(impl &&) noexcept
-		-> impl & = delete;
-
-	~impl();
+	constexpr clock(const clock &) noexcept = delete;
 
 	[[nodiscard]]
-	auto world() const noexcept
-		-> const ecs::world &;
+	constexpr clock(clock &&) noexcept = delete;
+
+	constexpr auto operator=(const clock &) noexcept
+		-> clock & = delete;
+
+	constexpr auto operator=(clock &&) noexcept
+		-> clock & = delete;
+
+	~clock();
 
 	[[nodiscard]]
-	auto world() noexcept
-		-> ecs::world &;
+	auto tick() const
+		-> std::uint64_t;
 
 	[[nodiscard]]
-	auto clock() const noexcept
-		-> const class clock &;
+	auto target_frequency() const
+		-> float;
+
+	void set_target_frequency(float target_frequency);
 
 	[[nodiscard]]
-	auto clock() noexcept
-		-> class clock &;
+	auto max_delta() const
+		-> float;
+
+	void set_max_delta(float max_delta);
 
 	[[nodiscard]]
-	auto iterate()
-		-> SDL_AppResult;
-
-	[[nodiscard]]
-	auto event(const SDL_Event *event)
-		-> SDL_AppResult;
+	auto delta() const
+		-> float;
 
 private:
-	ecs::world _world;
-	class clock _clock;
-	std::unique_ptr<scene> _scene;
+	std::uint64_t _last_tick{};
+	float _max_delta{};
+	float _delta{};
+
+	void iterate();
 };
 }
 

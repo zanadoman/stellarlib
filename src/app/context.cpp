@@ -24,6 +24,7 @@
 #include <stellarlib/app/context.hpp>
 #include "context_impl.hpp"
 
+#include <stellarlib/app/clock.hpp>
 #include <stellarlib/ecs/ecs.hpp>
 
 namespace stellarlib::app
@@ -44,5 +45,17 @@ auto context::world() noexcept
 	-> ecs::world &
 {
 	return _impl.world();
+}
+
+auto context::clock() const noexcept
+	-> const class clock &
+{
+	return _impl.clock();
+}
+
+auto context::clock() noexcept
+	-> class clock &
+{
+	return _impl.clock();
 }
 }

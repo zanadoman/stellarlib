@@ -29,14 +29,11 @@
 
 namespace stellarlib::app
 {
+class clock;
+
 class context final
 {
 public:
-	struct info final
-	{
-		scene *scene;
-	};
-
 	class impl;
 
 	[[nodiscard]]
@@ -63,6 +60,14 @@ public:
 	[[nodiscard]]
 	auto world() noexcept
 		-> ecs::world &;
+
+	[[nodiscard]]
+	auto clock() const noexcept
+		-> const clock &;
+
+	[[nodiscard]]
+	auto clock() noexcept
+		-> class clock &;
 
 private:
 	impl &_impl;

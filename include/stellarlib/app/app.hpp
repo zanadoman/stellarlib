@@ -25,6 +25,7 @@
 #define STELLARLIB_APP_APP_HPP
 
 /* IWYU pragma: begin_exports */
+#include <stellarlib/app/clock.hpp>
 #include <stellarlib/app/context.hpp>
 #include <stellarlib/app/main.hpp>
 #include <stellarlib/app/scene.hpp>

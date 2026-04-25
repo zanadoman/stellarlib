@@ -24,6 +24,9 @@
 #include <stellarlib/app/context.hpp>
 #include "context_impl.hpp"
 
+#include <stellarlib/app/clock.hpp>
+#include <stellarlib/app/main.hpp>
+#include <stellarlib/app/subsystem.hpp>
 #include <stellarlib/ecs/ecs.hpp>
 
 #include <SDL3/SDL_events.h>
@@ -31,8 +34,9 @@
 
 namespace stellarlib::app
 {
-context::impl::impl(const info &info)
-	: _scene{info.scene}
+context::impl::impl(const app::info &info)
+	: _clock{info.clock}
+	, _scene{info.scene}
 {
 	_scene->begin(context{*this});
 }
@@ -54,10 +58,23 @@ auto context::impl::world() noexcept
 	return _world;
 }
 
+auto context::impl::clock() const noexcept
+	-> const class clock &
+{
+	return _clock;
+}
+
+auto context::impl::clock() noexcept
+	-> class clock &
+{
+	return _clock;
+}
+
 auto context::impl::iterate()
 	-> SDL_AppResult
 {
 	const auto scene{_scene->update(context{*this})};
+	static_cast<internal::subsystem<app::clock> &>(_clock).iterate();
 
 	if (!static_cast<bool>(scene)) {
 		return SDL_APP_SUCCESS;
