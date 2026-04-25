@@ -24,8 +24,6 @@
 #ifndef STELLARLIB_APP_SCENE_HPP
 #define STELLARLIB_APP_SCENE_HPP
 
-#include <stellarlib/app/context.hpp>
-
 namespace stellarlib::app
 {
 class scene
@@ -33,13 +31,13 @@ class scene
 public:
 	virtual ~scene() noexcept;
 
-	virtual void begin(context ctx);
+	virtual void begin(class context &ctx);
 
 	[[nodiscard]]
-	virtual constexpr auto update(context)
+	virtual constexpr auto update(class context &)
 		-> scene * = 0;
 
-	virtual void end(context ctx);
+	virtual void end(class context &ctx);
 
 protected:
 	[[nodiscard]]

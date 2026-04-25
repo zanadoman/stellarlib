@@ -32,7 +32,7 @@ namespace stellarlib::app
 {
 class metadata final
 {
-friend internal::lifecycle;
+friend internal::lifecycle<class context>;
 
 public:
 	struct info final

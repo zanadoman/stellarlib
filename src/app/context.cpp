@@ -22,53 +22,88 @@
 */
 
 #include <stellarlib/app/context.hpp>
-#include "context_impl.hpp"
 
 #include <stellarlib/app/clock.hpp>
 #include <stellarlib/app/metadata.hpp>
+#include <stellarlib/app/lifecycle.hpp>
 #include <stellarlib/ecs/ecs.hpp>
+
+#include <SDL3/SDL_events.h>
+#include <SDL3/SDL_init.h>
 
 namespace stellarlib::app
 {
-context::context(impl &impl) noexcept
-	: _impl{impl}
-{}
+context::~context()
+{
+	_scene->end(*this);
+}
 
-context::~context() noexcept = default;
-
-auto context::world() const noexcept
+auto context::world() const
 	-> const ecs::world &
 {
-	return _impl.world();
+	return _world;
 }
 
-auto context::world() noexcept
+auto context::world()
 	-> ecs::world &
 {
-	return _impl.world();
+	return _world;
 }
 
-auto context::metadata() const noexcept
-	-> const class metadata &
+auto context::metadata() const
+	-> const app::metadata &
 {
-	return _impl.metadata();
+	return _metadata;
 }
 
-auto context::metadata() noexcept
-	-> class metadata &
+auto context::metadata()
+	-> app::metadata &
 {
-	return _impl.metadata();
+	return _metadata;
 }
 
-auto context::clock() const noexcept
-	-> const class clock &
+auto context::clock() const
+	-> const app::clock &
 {
-	return _impl.clock();
+	return _clock;
 }
 
-auto context::clock() noexcept
-	-> class clock &
+auto context::clock()
+	-> app::clock &
 {
-	return _impl.clock();
+	return _clock;
+}
+
+context::context(const info &info)
+	: _metadata{internal::lifecycle<context>::construct<app::metadata>(info.metadata)}
+	, _clock{internal::lifecycle<context>::construct<app::clock>(info.clock)}
+	, _scene{info.scene}
+{
+	_scene->begin(*this);
+}
+
+auto context::iterate()
+	-> SDL_AppResult
+{
+	const auto scene{_scene->update(*this)};
+	internal::lifecycle<context>::iterate(_clock);
+
+	if (!static_cast<bool>(scene)) {
+		return SDL_APP_SUCCESS;
+	}
+
+	if (scene != _scene.get()) {
+		_scene->end(*this);
+		_scene.reset(scene);
+		_scene->begin(*this);
+	}
+
+	return SDL_APP_CONTINUE;
+}
+
+auto context::event(const SDL_Event *event)
+	-> SDL_AppResult
+{
+	return event->type == SDL_EVENT_QUIT ? SDL_APP_SUCCESS : SDL_APP_CONTINUE;
 }
 }

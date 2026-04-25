@@ -21,21 +21,17 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef STELLARLIB_APP_SUBSYSTEM_HPP
-#define STELLARLIB_APP_SUBSYSTEM_HPP
-
-#include <stellarlib/app/context.hpp>
-#include <stellarlib/ecs/ecs.hpp>
-
-#include <SDL3/SDL_events.h>
+#ifndef STELLARLIB_APP_LIFECYCLE_HPP
+#define STELLARLIB_APP_LIFECYCLE_HPP
 
 #include <utility>
 
 namespace stellarlib::app::internal
 {
+template <typename Parent>
 class lifecycle final
 {
-friend context::impl;
+friend Parent;
 
 public:
 	[[nodiscard]]
@@ -56,39 +52,39 @@ public:
 	constexpr ~lifecycle() noexcept = delete;
 
 private:
-	template <typename T, typename ...Args>
+	template <typename Child, typename ...Args>
 	[[nodiscard]]
 	static constexpr auto construct(Args &&...args)
 	{
-		return T{std::forward<Args>(args)...};
+		return Child{std::forward<Args>(args)...};
 	}
 
-	template <typename T, typename ...Args>
+	template <typename Child, typename ...Args>
 	[[nodiscard]]
-	static constexpr auto iterate(const T &self, Args &&...args)
+	static constexpr auto iterate(const Child &child, Args &&...args)
 	{
-		return self.iterate(std::forward<Args>(args)...);
+		return child.iterate(std::forward<Args>(args)...);
 	}
 
-	template <typename T, typename ...Args>
+	template <typename Child, typename ...Args>
 	[[nodiscard]]
-	static constexpr auto iterate(T &self, Args &&...args)
+	static constexpr auto iterate(Child &child, Args &&...args)
 	{
-		return self.iterate(std::forward<Args>(args)...);
+		return child.iterate(std::forward<Args>(args)...);
 	}
 
-	template <typename T, typename ...Args>
+	template <typename Child, typename ...Args>
 	[[nodiscard]]
-	static constexpr auto event(const T &self, Args &&...args)
+	static constexpr auto event(const Child &child, Args &&...args)
 	{
-		return self.event(std::forward<Args>(args)...);
+		return child.event(std::forward<Args>(args)...);
 	}
 
-	template <typename T, typename ...Args>
+	template <typename Child, typename ...Args>
 	[[nodiscard]]
-	static constexpr auto event(T &self, Args &&...args)
+	static constexpr auto event(Child &child, Args &&...args)
 	{
-		return self.event(std::forward<Args>(args)...);
+		return child.event(std::forward<Args>(args)...);
 	}
 };
 }

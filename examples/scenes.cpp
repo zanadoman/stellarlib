@@ -63,20 +63,20 @@ public:
 		SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%p: destructor", static_cast<void *>(this));
 	}
 
-	constexpr void begin([[maybe_unused]] const app::context ctx) noexcept final
+	constexpr void begin([[maybe_unused]] app::context &ctx) noexcept final
 	{
 		SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%p: begin", static_cast<void *>(this));
 	}
 
 	[[nodiscard]]
-	constexpr auto update([[maybe_unused]] const app::context ctx) noexcept
+	constexpr auto update([[maybe_unused]] app::context &ctx) noexcept
 		-> app::scene * final
 	{
 		SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%p: update", static_cast<void *>(this));
 		return nullptr;
 	}
 
-	constexpr void end([[maybe_unused]] const app::context ctx) noexcept final
+	constexpr void end([[maybe_unused]] app::context &ctx) noexcept final
 	{
 		SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%p: end", static_cast<void *>(this));
 	}
@@ -108,20 +108,20 @@ public:
 		SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%p: destructor", static_cast<void *>(this));
 	}
 
-	constexpr void begin([[maybe_unused]] const app::context ctx) noexcept final
+	constexpr void begin([[maybe_unused]] app::context &ctx) noexcept final
 	{
 		SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%p: begin", static_cast<void *>(this));
 	}
 
 	[[nodiscard]]
-	constexpr auto update([[maybe_unused]] const app::context ctx)
+	constexpr auto update([[maybe_unused]] app::context &ctx)
 		-> app::scene * final
 	{
 		SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%p: update", static_cast<void *>(this));
 		return new scene2{};
 	}
 
-	constexpr void end([[maybe_unused]] const app::context ctx) noexcept final
+	constexpr void end([[maybe_unused]] app::context &ctx) noexcept final
 	{
 		SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%p: end", static_cast<void *>(this));
 	}

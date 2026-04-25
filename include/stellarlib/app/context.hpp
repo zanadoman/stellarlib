@@ -24,20 +24,27 @@
 #ifndef STELLARLIB_APP_CONTEXT_HPP
 #define STELLARLIB_APP_CONTEXT_HPP
 
+#include <stellarlib/app/clock.hpp>
+#include <stellarlib/app/lifecycle.hpp>
+#include <stellarlib/app/metadata.hpp>
+#include <stellarlib/app/scene.hpp>
 #include <stellarlib/ecs/ecs.hpp>
+
+#include <SDL3/SDL_init.h>
 
 namespace stellarlib::app
 {
-class clock;
-class metadata;
-
 class context final
 {
-public:
-	class impl;
+friend internal::lifecycle<class main>;
 
-	[[nodiscard]]
-	explicit context(impl &impl) noexcept;
+public:
+	struct info final
+	{
+		metadata::info metadata;
+		clock::info clock;
+		scene *scene;
+	};
 
 	[[nodiscard]]
 	constexpr context(const context &) noexcept = delete;
@@ -51,34 +58,48 @@ public:
 	constexpr auto operator=(context &&) noexcept
 		-> context & = delete;
 
-	~context() noexcept;
+	~context();
 
 	[[nodiscard]]
-	auto world() const noexcept
+	auto world() const
 		-> const ecs::world &;
 
 	[[nodiscard]]
-	auto world() noexcept
+	auto world()
 		-> ecs::world &;
 
 	[[nodiscard]]
-	auto clock() const noexcept
-		-> const clock &;
+	auto clock() const
+		-> const app::clock &;
 
 	[[nodiscard]]
-	auto clock() noexcept
-		-> class clock &;
+	auto clock()
+		-> app::clock &;
 
 	[[nodiscard]]
-	auto metadata() const noexcept
-		-> const metadata &;
+	auto metadata() const
+		-> const app::metadata &;
 
 	[[nodiscard]]
-	auto metadata() noexcept
-		-> class metadata &;
+	auto metadata()
+		-> app::metadata &;
 
 private:
-	impl &_impl;
+	ecs::world _world;
+	[[no_unique_address]] app::metadata _metadata;
+	app::clock _clock;
+	std::unique_ptr<scene> _scene;
+
+	[[nodiscard]]
+	explicit context(const info &info);
+
+	[[nodiscard]]
+	auto iterate()
+		-> SDL_AppResult;
+
+	[[nodiscard]]
+	auto event(const SDL_Event *event)
+		-> SDL_AppResult;
 };
 }
 

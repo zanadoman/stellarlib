@@ -32,7 +32,7 @@ namespace stellarlib::app
 {
 class clock final
 {
-friend internal::lifecycle;
+friend internal::lifecycle<class context>;
 
 public:
 	struct info final

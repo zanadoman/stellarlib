@@ -29,9 +29,9 @@ namespace stellarlib::app
 {
 scene::~scene() noexcept = default;
 
-void scene::begin([[maybe_unused]] const context ctx) {}
+void scene::begin([[maybe_unused]] context &ctx) {}
 
-void scene::end([[maybe_unused]] const context ctx) {}
+void scene::end([[maybe_unused]] context &ctx) {}
 
 scene::scene() noexcept = default;
 

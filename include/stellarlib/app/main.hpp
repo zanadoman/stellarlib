@@ -25,6 +25,7 @@
 #define STELLARLIB_APP_MAIN_HPP
 
 #include <stellarlib/app/clock.hpp>
+#include <stellarlib/app/context.hpp>
 #include <stellarlib/app/metadata.hpp>
 #include <stellarlib/app/scene.hpp>
 
@@ -33,15 +34,9 @@
 
 namespace stellarlib::app
 {
-struct info
-{
-	metadata::info metadata;
-	clock::info clock;
-	scene *scene;
-};
+class main;
 
-[[noreturn]]
-void terminate_handler() noexcept;
+using info = context::info;
 
 [[nodiscard]]
 auto main(const std::vector<std::string> &args)
