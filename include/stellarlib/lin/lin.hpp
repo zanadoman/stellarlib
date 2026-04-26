@@ -27,6 +27,7 @@
 /* IWYU pragma: begin_exports */
 #include <stellarlib/lin/intrinsics.hpp>
 #include <stellarlib/lin/matrix.hpp>
+#include <stellarlib/lin/transformations.hpp>
 /* IWYU pragma: end_exports */
 
 #include <cstddef>
