@@ -24,7 +24,7 @@
 #ifndef STELLARLIB_APP_METADATA_HPP
 #define STELLARLIB_APP_METADATA_HPP
 
-#include <stellarlib/app/lifecycle.hpp>
+#include <stellarlib/app/fwd.hpp>
 
 #include <string>
 
@@ -32,7 +32,7 @@ namespace stellarlib::app
 {
 class metadata final
 {
-friend internal::lifecycle<class context>;
+friend internal::bridge<context>;
 
 public:
 	struct info final

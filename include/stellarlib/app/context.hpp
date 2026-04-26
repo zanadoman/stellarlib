@@ -25,9 +25,8 @@
 #define STELLARLIB_APP_CONTEXT_HPP
 
 #include <stellarlib/app/clock.hpp>
-#include <stellarlib/app/lifecycle.hpp>
+#include <stellarlib/app/fwd.hpp>
 #include <stellarlib/app/metadata.hpp>
-#include <stellarlib/app/scene.hpp>
 #include <stellarlib/ecs/ecs.hpp>
 
 #include <SDL3/SDL_init.h>
@@ -40,7 +39,7 @@ namespace stellarlib::app
 {
 class context final
 {
-friend internal::lifecycle<class main>;
+friend internal::bridge<main>;
 
 public:
 	struct info final

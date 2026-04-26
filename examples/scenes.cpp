@@ -63,6 +63,7 @@ public:
 		SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%p: destructor", static_cast<void *>(this));
 	}
 
+private:
 	constexpr void begin([[maybe_unused]] app::context &ctx) noexcept final
 	{
 		SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%p: begin", static_cast<void *>(this));
@@ -108,6 +109,7 @@ public:
 		SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%p: destructor", static_cast<void *>(this));
 	}
 
+private:
 	constexpr void begin([[maybe_unused]] app::context &ctx) noexcept final
 	{
 		SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%p: begin", static_cast<void *>(this));

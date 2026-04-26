@@ -24,7 +24,7 @@
 #ifndef STELLARLIB_APP_CLOCK_HPP
 #define STELLARLIB_APP_CLOCK_HPP
 
-#include <stellarlib/app/lifecycle.hpp>
+#include <stellarlib/app/fwd.hpp>
 
 #include <cstdint>
 
@@ -32,7 +32,7 @@ namespace stellarlib::app
 {
 class clock final
 {
-friend internal::lifecycle<class context>;
+friend internal::bridge<context>;
 
 public:
 	struct info final

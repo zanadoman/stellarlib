@@ -21,24 +21,26 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef STELLARLIB_APP_MAIN_HPP
-#define STELLARLIB_APP_MAIN_HPP
+#include <stellarlib/app/lifecycle.hpp>
 
 #include <stellarlib/app/context.hpp>
+#include <stellarlib/app/scene.hpp>
 
-#include <optional>
-#include <string>
-#include <vector>
-
-namespace stellarlib::app
+namespace stellarlib::app::internal
 {
-class main;
-
-using info = std::optional<context::info>;
-
-[[nodiscard]]
-auto main(const std::vector<std::string> &args)
-	-> info;
+void lifecycle::begin(scene &scene, context &ctx)
+{
+	scene.begin(ctx);
 }
 
-#endif
+auto lifecycle::update(scene &scene, context &ctx)
+	-> app::scene *
+{
+	return scene.update(ctx);
+}
+
+void lifecycle::end(scene &scene, context &ctx)
+{
+	scene.end(ctx);
+}
+}
