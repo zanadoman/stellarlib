@@ -32,6 +32,10 @@
 
 #include <SDL3/SDL_init.h>
 
+#include <functional>
+#include <memory>
+#include <variant>
+
 namespace stellarlib::app
 {
 class context final
@@ -43,7 +47,7 @@ public:
 	{
 		metadata::info metadata;
 		clock::info clock;
-		scene *scene;
+		std::variant<scene *, std::function<scene * (context &)>> main;
 	};
 
 	[[nodiscard]]

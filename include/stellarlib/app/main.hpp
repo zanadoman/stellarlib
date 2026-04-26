@@ -29,6 +29,7 @@
 #include <stellarlib/app/metadata.hpp>
 #include <stellarlib/app/scene.hpp>
 
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -36,7 +37,7 @@ namespace stellarlib::app
 {
 class main;
 
-using info = context::info;
+using info = std::optional<context::info>;
 
 [[nodiscard]]
 auto main(const std::vector<std::string> &args)

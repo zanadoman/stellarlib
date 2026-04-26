@@ -92,8 +92,8 @@ public:
 			std::abort();
 		});
 
-		if (const auto info{app::main({argv, argv + argc})}; info.scene) {
-			*appstate = new context{internal::lifecycle<main>::construct<context>(info)};
+		if (const auto info{app::main({argv, argv + argc})}) {
+			*appstate = new context{internal::lifecycle<main>::construct<context>(*info)};
 			return SDL_APP_CONTINUE;
 		}
 

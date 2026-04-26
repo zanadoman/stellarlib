@@ -31,11 +31,17 @@
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_init.h>
 
+#include <functional>
+#include <memory>
+#include <variant>
+
 namespace stellarlib::app
 {
 context::~context()
 {
-	_scene->end(*this);
+	if (_scene) {
+		_scene->end(*this);
+	}
 }
 
 auto context::world() const
@@ -77,14 +83,26 @@ auto context::clock()
 context::context(const info &info)
 	: _metadata{internal::lifecycle<context>::construct<app::metadata>(info.metadata)}
 	, _clock{internal::lifecycle<context>::construct<app::clock>(info.clock)}
-	, _scene{info.scene}
 {
-	_scene->begin(*this);
+	if (const auto main{std::get_if<scene *>(std::addressof(info.main))}) {
+		_scene.reset(*main);
+	}
+	else if (const auto callback{std::get_if<std::function<scene * (context &)>>(std::addressof(info.main))}; *callback) {
+		_scene.reset((*callback)(*this));
+	}
+
+	if (_scene) {
+		_scene->begin(*this);
+	}
 }
 
 auto context::iterate()
 	-> SDL_AppResult
 {
+	if (!_scene) {
+		return SDL_APP_SUCCESS;
+	}
+
 	const auto scene{_scene->update(*this)};
 	internal::lifecycle<context>::iterate(_clock);
 
