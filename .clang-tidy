@@ -92,6 +92,7 @@ Checks: >
   -hicpp-member-init,
   -hicpp-no-malloc,
   -hicpp-vararg,
+  -misc-override-with-different-visibility,
   -performance-trivially-destructible,
   -portability-template-virtual-member-function,
   -readability-convert-member-functions-to-static,

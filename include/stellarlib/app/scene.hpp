@@ -24,20 +24,16 @@
 #ifndef STELLARLIB_APP_SCENE_HPP
 #define STELLARLIB_APP_SCENE_HPP
 
+#include <stellarlib/app/fwd.hpp>
+
 namespace stellarlib::app
 {
 class scene
 {
+friend internal::lifecycle;
+
 public:
 	virtual ~scene() noexcept;
-
-	virtual void begin(class context &ctx);
-
-	[[nodiscard]]
-	virtual constexpr auto update(class context &)
-		-> scene * = 0;
-
-	virtual void end(class context &ctx);
 
 protected:
 	[[nodiscard]]
@@ -54,6 +50,14 @@ protected:
 
 	auto operator=(scene &&) noexcept
 		-> scene &;
+
+	virtual void begin(context &ctx);
+
+	[[nodiscard]]
+	virtual constexpr auto update(context &)
+		-> scene * = 0;
+
+	virtual void end(context &ctx);
 };
 }
 

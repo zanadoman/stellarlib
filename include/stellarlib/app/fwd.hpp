@@ -21,24 +21,28 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef STELLARLIB_APP_MAIN_HPP
-#define STELLARLIB_APP_MAIN_HPP
-
-#include <stellarlib/app/context.hpp>
-
-#include <optional>
-#include <string>
-#include <vector>
+#ifndef STELLARLIB_APP_FWD_HPP
+#define STELLARLIB_APP_FWD_HPP
 
 namespace stellarlib::app
 {
+class clock;
+
+class context;
+
 class main;
 
-using info = std::optional<context::info>;
+class metadata;
 
-[[nodiscard]]
-auto main(const std::vector<std::string> &args)
-	-> info;
+class scene;
+
+namespace internal
+{
+template <typename System>
+class bridge;
+
+class lifecycle;
+}
 }
 
 #endif

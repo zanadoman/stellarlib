@@ -24,7 +24,7 @@
 #include <stellarlib/app/main.hpp>
 
 #include <stellarlib/app/context.hpp>
-#include <stellarlib/app/lifecycle.hpp>
+#include <stellarlib/app/bridge.hpp>
 
 #include <SDL3/SDL_error.h>
 #include <SDL3/SDL_events.h>
@@ -93,7 +93,7 @@ public:
 		});
 
 		if (const auto info{app::main({argv, argv + argc})}) {
-			*appstate = new context{internal::lifecycle<main>::construct<context>(*info)};
+			*appstate = new context{internal::bridge<main>::init<context>(*info)};
 			return SDL_APP_CONTINUE;
 		}
 
@@ -103,13 +103,13 @@ public:
 	[[nodiscard]]
 	static constexpr auto iterate(void *appstate)
 	{
-		return internal::lifecycle<main>::iterate(*static_cast<stellarlib::app::context *>(appstate));
+		return internal::bridge<main>::iterate(*static_cast<stellarlib::app::context *>(appstate));
 	}
 
 	[[nodiscard]]
 	static constexpr auto event(void *appstate, SDL_Event *event)
 	{
-		return internal::lifecycle<main>::event(*static_cast<stellarlib::app::context *>(appstate), event);
+		return internal::bridge<main>::event(*static_cast<stellarlib::app::context *>(appstate), event);
 	}
 
 	static constexpr void quit(void *appstate, [[maybe_unused]] const SDL_AppResult result)
@@ -139,7 +139,7 @@ auto SDL_AppEvent(void *appstate, SDL_Event *event)
 	return stellarlib::app::main::event(appstate, event);
 }
 
-void SDL_AppQuit(void *appstate, [[maybe_unused]] const SDL_AppResult result)
+void SDL_AppQuit(void *appstate, const SDL_AppResult result)
 {
 	stellarlib::app::main::quit(appstate, result);
 }

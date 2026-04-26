@@ -24,8 +24,10 @@
 #include <stellarlib/app/context.hpp>
 
 #include <stellarlib/app/clock.hpp>
-#include <stellarlib/app/metadata.hpp>
 #include <stellarlib/app/lifecycle.hpp>
+#include <stellarlib/app/metadata.hpp>
+#include <stellarlib/app/bridge.hpp>
+#include <stellarlib/app/scene.hpp>
 #include <stellarlib/ecs/ecs.hpp>
 
 #include <SDL3/SDL_events.h>
@@ -40,7 +42,7 @@ namespace stellarlib::app
 context::~context()
 {
 	if (_scene) {
-		_scene->end(*this);
+		internal::lifecycle::end(*_scene, *this);
 	}
 }
 
@@ -81,8 +83,8 @@ auto context::clock()
 }
 
 context::context(const info &info)
-	: _metadata{internal::lifecycle<context>::construct<app::metadata>(info.metadata)}
-	, _clock{internal::lifecycle<context>::construct<app::clock>(info.clock)}
+	: _metadata{internal::bridge<context>::init<app::metadata>(info.metadata)}
+	, _clock{internal::bridge<context>::init<app::clock>(info.clock)}
 {
 	if (const auto main{std::get_if<scene *>(std::addressof(info.main))}) {
 		_scene.reset(*main);
@@ -92,7 +94,7 @@ context::context(const info &info)
 	}
 
 	if (_scene) {
-		_scene->begin(*this);
+		internal::lifecycle::begin(*_scene, *this);
 	}
 }
 
@@ -103,17 +105,17 @@ auto context::iterate()
 		return SDL_APP_SUCCESS;
 	}
 
-	const auto scene{_scene->update(*this)};
-	internal::lifecycle<context>::iterate(_clock);
+	const auto scene{internal::lifecycle::update(*_scene, *this)};
+	internal::bridge<context>::iterate(_clock);
 
 	if (!static_cast<bool>(scene)) {
 		return SDL_APP_SUCCESS;
 	}
 
 	if (scene != _scene.get()) {
-		_scene->end(*this);
+		internal::lifecycle::end(*_scene, *this);
 		_scene.reset(scene);
-		_scene->begin(*this);
+		internal::lifecycle::begin(*_scene, *this);
 	}
 
 	return SDL_APP_CONTINUE;

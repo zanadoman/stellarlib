@@ -24,14 +24,13 @@
 #ifndef STELLARLIB_APP_LIFECYCLE_HPP
 #define STELLARLIB_APP_LIFECYCLE_HPP
 
-#include <utility>
+#include <stellarlib/app/fwd.hpp>
 
 namespace stellarlib::app::internal
 {
-template <typename Parent>
 class lifecycle final
 {
-friend Parent;
+friend context;
 
 public:
 	[[nodiscard]]
@@ -52,40 +51,13 @@ public:
 	constexpr ~lifecycle() noexcept = delete;
 
 private:
-	template <typename Child, typename ...Args>
-	[[nodiscard]]
-	static constexpr auto construct(Args &&...args)
-	{
-		return Child{std::forward<Args>(args)...};
-	}
+	static void begin(scene &scene, context &ctx);
 
-	template <typename Child, typename ...Args>
 	[[nodiscard]]
-	static constexpr auto iterate(const Child &child, Args &&...args)
-	{
-		return child.iterate(std::forward<Args>(args)...);
-	}
+	static auto update(scene &scene, context &ctx)
+		-> app::scene *;
 
-	template <typename Child, typename ...Args>
-	[[nodiscard]]
-	static constexpr auto iterate(Child &child, Args &&...args)
-	{
-		return child.iterate(std::forward<Args>(args)...);
-	}
-
-	template <typename Child, typename ...Args>
-	[[nodiscard]]
-	static constexpr auto event(const Child &child, Args &&...args)
-	{
-		return child.event(std::forward<Args>(args)...);
-	}
-
-	template <typename Child, typename ...Args>
-	[[nodiscard]]
-	static constexpr auto event(Child &child, Args &&...args)
-	{
-		return child.event(std::forward<Args>(args)...);
-	}
+	static void end(scene &scene, context &ctx);
 };
 }
 
