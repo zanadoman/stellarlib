@@ -121,7 +121,7 @@ auto context::iterate()
 	return SDL_APP_CONTINUE;
 }
 
-auto context::event(const SDL_Event *event)
+auto context::event(const SDL_Event *event) const
 	-> SDL_AppResult
 {
 	return event->type == SDL_EVENT_QUIT ? SDL_APP_SUCCESS : SDL_APP_CONTINUE;

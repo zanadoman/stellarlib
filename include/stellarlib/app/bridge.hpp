@@ -24,7 +24,7 @@
 #ifndef STELLARLIB_APP_BRIDGE_HPP
 #define STELLARLIB_APP_BRIDGE_HPP
 
-#include <utility>
+#include <SDL3/SDL_events.h>
 
 namespace stellarlib::app::internal
 {
@@ -52,39 +52,25 @@ public:
 	constexpr ~bridge() noexcept = delete;
 
 private:
-	template <typename Subsystem, typename ...Args>
+	template <typename Subsystem, typename Info>
 	[[nodiscard]]
-	static constexpr auto init(Args &&...args)
+	static constexpr auto init(const Info &info)
 	{
-		return Subsystem{std::forward<Args>(args)...};
+		return Subsystem{info};
 	}
 
-	template <typename Subsystem, typename ...Args>
+	template <typename Subsystem>
 	[[nodiscard]]
-	static constexpr auto iterate(const Subsystem &child, Args &&...args)
+	static constexpr auto iterate(Subsystem &subsystem)
 	{
-		return child.iterate(std::forward<Args>(args)...);
+		return subsystem.iterate();
 	}
 
-	template <typename Subsystem, typename ...Args>
+	template <typename Subsystem>
 	[[nodiscard]]
-	static constexpr auto iterate(Subsystem &child, Args &&...args)
+	static constexpr auto event(Subsystem &subsystem, const SDL_Event *event)
 	{
-		return child.iterate(std::forward<Args>(args)...);
-	}
-
-	template <typename Subsystem, typename ...Args>
-	[[nodiscard]]
-	static constexpr auto event(const Subsystem &child, Args &&...args)
-	{
-		return child.event(std::forward<Args>(args)...);
-	}
-
-	template <typename Subsystem, typename ...Args>
-	[[nodiscard]]
-	static constexpr auto event(Subsystem &child, Args &&...args)
-	{
-		return child.event(std::forward<Args>(args)...);
+		return subsystem.event(event);
 	}
 };
 }
