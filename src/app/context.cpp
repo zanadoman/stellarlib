@@ -24,7 +24,6 @@
 #include <stellarlib/app/context.hpp>
 
 #include <stellarlib/app/clock.hpp>
-#include <stellarlib/app/lifecycle.hpp>
 #include <stellarlib/app/metadata.hpp>
 #include <stellarlib/app/bridge.hpp>
 #include <stellarlib/app/scene.hpp>
@@ -35,6 +34,7 @@
 
 #include <functional>
 #include <memory>
+#include <utility>
 #include <variant>
 
 namespace stellarlib::app
@@ -42,7 +42,7 @@ namespace stellarlib::app
 context::~context()
 {
 	if (_scene) {
-		internal::lifecycle::end(*_scene, *this);
+		_scene->end(*this);
 	}
 }
 
@@ -82,19 +82,19 @@ auto context::clock()
 	return _clock;
 }
 
-context::context(const info &info)
+context::context(info info)
 	: _metadata{internal::bridge<context>::init<app::metadata>(info.metadata)}
 	, _clock{internal::bridge<context>::init<app::clock>(info.clock)}
 {
-	if (const auto main{std::get_if<scene *>(std::addressof(info.main))}) {
-		_scene.reset(*main);
+	if (auto main{std::get_if<std::unique_ptr<scene>>(std::addressof(info.main))}) {
+		_scene = std::move(*main);
 	}
-	else if (const auto callback{std::get_if<std::function<scene * (context &)>>(std::addressof(info.main))}; *callback) {
-		_scene.reset((*callback)(*this));
+	else if (const auto callback{std::get_if<std::function<std::unique_ptr<scene> (context &)>>(std::addressof(info.main))}; *callback) {
+		_scene = (*callback)(*this);
 	}
 
 	if (_scene) {
-		internal::lifecycle::begin(*_scene, *this);
+		_scene->begin(*this);
 	}
 }
 
@@ -105,17 +105,18 @@ auto context::iterate()
 		return SDL_APP_SUCCESS;
 	}
 
-	const auto scene{internal::lifecycle::update(*_scene, *this)};
+	auto scene{_scene->update(*this)};
 	internal::bridge<context>::iterate(_clock);
 
-	if (!static_cast<bool>(scene)) {
-		return SDL_APP_SUCCESS;
-	}
-
-	if (scene != _scene.get()) {
-		internal::lifecycle::end(*_scene, *this);
-		_scene.reset(scene);
-		internal::lifecycle::begin(*_scene, *this);
+	if (scene) {
+		if (*scene) {
+			_scene->end(*this);
+			_scene = std::move(*scene);
+			_scene->begin(*this);
+		}
+		else {
+			return SDL_APP_SUCCESS;
+		}
 	}
 
 	return SDL_APP_CONTINUE;

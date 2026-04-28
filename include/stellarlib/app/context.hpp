@@ -46,7 +46,7 @@ public:
 	{
 		metadata::info metadata;
 		clock::info clock;
-		std::variant<scene *, std::function<scene * (context &)>> main;
+		std::variant<std::unique_ptr<scene>, std::function<std::unique_ptr<scene> (context &)>> main;
 	};
 
 	[[nodiscard]]
@@ -94,7 +94,7 @@ private:
 	std::unique_ptr<scene> _scene;
 
 	[[nodiscard]]
-	explicit context(const info &info);
+	explicit context(info info);
 
 	[[nodiscard]]
 	auto iterate()

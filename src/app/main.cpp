@@ -38,6 +38,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <exception>
+#include <utility>
 
 namespace stellarlib::app
 {
@@ -92,8 +93,8 @@ public:
 			std::abort();
 		});
 
-		if (const auto info{app::main({argv, argv + argc})}) {
-			*appstate = new context{internal::bridge<main>::init<context>(*info)};
+		if (auto info{app::main({argv, argv + argc})}) {
+			*appstate = new context{internal::bridge<main>::init<context>(std::move(*info))};
 			return SDL_APP_CONTINUE;
 		}
 

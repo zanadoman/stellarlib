@@ -40,8 +40,6 @@ namespace internal
 {
 template <typename System>
 class bridge;
-
-class lifecycle;
 }
 }
 

@@ -30,6 +30,7 @@
 
 #include <SDL3/SDL_log.h>
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -71,7 +72,7 @@ private:
 
 	[[nodiscard]]
 	constexpr auto update([[maybe_unused]] app::context &ctx) noexcept
-		-> app::scene * final
+		-> transition final
 	{
 		SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%p: update", static_cast<void *>(this));
 		return nullptr;
@@ -117,10 +118,10 @@ private:
 
 	[[nodiscard]]
 	constexpr auto update([[maybe_unused]] app::context &ctx)
-		-> app::scene * final
+		-> transition final
 	{
 		SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%p: update", static_cast<void *>(this));
-		return new scene2{};
+		return std::make_unique<scene2>();
 	}
 
 	constexpr void end([[maybe_unused]] app::context &ctx) noexcept final
@@ -148,6 +149,6 @@ auto app::main([[maybe_unused]] const std::vector<std::string> &args)
 			.target_frequency = 60.0F,
 			.max_delta = 50.0F
 		},
-		.main = new scene1{}
+		.main = std::make_unique<scene1>()
 	}};
 }

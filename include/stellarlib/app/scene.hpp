@@ -26,14 +26,19 @@
 
 #include <stellarlib/app/fwd.hpp>
 
+#include <memory>
+#include <optional>
+
 namespace stellarlib::app
 {
 class scene
 {
-friend internal::lifecycle;
+friend context;
 
 public:
-	virtual ~scene() noexcept;
+	using transition = std::optional<std::unique_ptr<scene>>;
+
+	virtual ~scene() noexcept = 0;
 
 protected:
 	[[nodiscard]]
@@ -55,7 +60,7 @@ protected:
 
 	[[nodiscard]]
 	virtual constexpr auto update(context &)
-		-> scene * = 0;
+		-> transition = 0;
 
 	virtual void end(context &ctx);
 };

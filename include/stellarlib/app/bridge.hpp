@@ -26,6 +26,8 @@
 
 #include <SDL3/SDL_events.h>
 
+#include <utility>
+
 namespace stellarlib::app::internal
 {
 template <typename System>
@@ -54,9 +56,9 @@ public:
 private:
 	template <typename Subsystem, typename Info>
 	[[nodiscard]]
-	static constexpr auto init(const Info &info)
+	static constexpr auto init(Info &&info)
 	{
-		return Subsystem{info};
+		return Subsystem{std::forward<Info>(info)};
 	}
 
 	template <typename Subsystem>

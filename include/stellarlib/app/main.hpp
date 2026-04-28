@@ -25,6 +25,7 @@
 #define STELLARLIB_APP_MAIN_HPP
 
 #include <stellarlib/app/context.hpp>
+#include <stellarlib/app/scene.hpp>
 
 #include <optional>
 #include <string>
