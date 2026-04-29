@@ -27,21 +27,14 @@
 
 #include <SDL3/SDL_error.h>
 #include <SDL3/SDL_hints.h>
-#include <SDL3/SDL_timer.h>
 
-#include <cstdint>
+#include <chrono>
 #include <stdexcept>
 #include <string>
 
 namespace stellarlib::app
 {
 clock::~clock() = default;
-
-auto clock::tick() const
-	-> std::uint64_t
-{
-	return SDL_GetTicks();
-}
 
 auto clock::target_frequency() const
 	-> float
@@ -74,14 +67,15 @@ auto clock::delta() const
 }
 
 clock::clock(const info &info)
-	: _max_delta{info.max_delta}
+	: _last_tick{std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count()}
+	, _max_delta{info.max_delta}
 {
 	set_target_frequency(info.target_frequency);
 }
 
 void clock::iterate()
 {
-	const auto current_tick{tick()};
+	const auto current_tick{std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count()};
 	_delta = lin::min(static_cast<float>(current_tick - _last_tick), _max_delta);
 	_last_tick = current_tick;
 }

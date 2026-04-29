@@ -56,10 +56,6 @@ public:
 	~clock();
 
 	[[nodiscard]]
-	auto tick() const
-		-> std::uint64_t;
-
-	[[nodiscard]]
 	auto target_frequency() const
 		-> float;
 
@@ -76,7 +72,7 @@ public:
 		-> float;
 
 private:
-	std::uint64_t _last_tick{};
+	std::int64_t _last_tick{};
 	float _max_delta{};
 	float _delta{};
 
