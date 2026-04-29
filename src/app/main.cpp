@@ -66,6 +66,8 @@ public:
 	static constexpr auto init(void **appstate, const std::int32_t argc, char **argv)
 	{
 		std::set_terminate([] [[noreturn]] () noexcept -> void {
+			const auto exception{std::current_exception()};
+
 			constexpr auto report{[] (const char *what) noexcept -> void {
 				SDL_LogCritical(SDL_LOG_CATEGORY_ERROR, "%s", what);
 				const auto title{SDL_GetAppMetadataProperty(SDL_PROP_APP_METADATA_NAME_STRING)};
@@ -75,19 +77,19 @@ public:
 				}
 			}};
 
-			if (const auto exception{std::current_exception()}) {
-				try {
-					std::rethrow_exception(exception);
-				}
-				catch (const std::exception &exception) {
-					report(exception.what());
-				}
-				catch (...) {
-					report("Unknown exception");
-				}
-			}
-			else {
+			if (!exception) {
 				report("Unknown error");
+				std::abort();
+			}
+
+			try {
+				std::rethrow_exception(exception);
+			}
+			catch (const std::exception &exception) {
+				report(exception.what());
+			}
+			catch (...) {
+				report("Unknown exception");
 			}
 
 			std::abort();
@@ -104,18 +106,18 @@ public:
 	[[nodiscard]]
 	static constexpr auto iterate(void *appstate)
 	{
-		return internal::bridge<main>::iterate(*static_cast<stellarlib::app::context *>(appstate));
+		return internal::bridge<main>::iterate(*static_cast<context *>(appstate));
 	}
 
 	[[nodiscard]]
 	static constexpr auto event(void *appstate, SDL_Event *event)
 	{
-		return internal::bridge<main>::event(*static_cast<stellarlib::app::context *>(appstate), event);
+		return internal::bridge<main>::event(*static_cast<context *>(appstate), *event);
 	}
 
 	static constexpr void quit(void *appstate, [[maybe_unused]] const SDL_AppResult result)
 	{
-		delete static_cast<const stellarlib::app::context *>(appstate);
+		delete static_cast<const context *>(appstate);
 	}
 };
 }

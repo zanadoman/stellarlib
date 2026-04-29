@@ -70,7 +70,7 @@ private:
 
 	template <typename Subsystem>
 	[[nodiscard]]
-	static constexpr auto event(Subsystem &subsystem, const SDL_Event *event)
+	static constexpr auto event(Subsystem &subsystem, const SDL_Event &event)
 	{
 		return subsystem.event(event);
 	}

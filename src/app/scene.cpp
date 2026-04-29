@@ -23,15 +23,9 @@
 
 #include <stellarlib/app/scene.hpp>
 
-#include <stellarlib/app/context.hpp>
-
 namespace stellarlib::app
 {
 scene::~scene() noexcept = default;
-
-void scene::begin([[maybe_unused]] context &ctx) {}
-
-void scene::end([[maybe_unused]] context &ctx) {}
 
 scene::scene() noexcept = default;
 
@@ -44,4 +38,8 @@ auto scene::operator=(const scene &) noexcept
 
 auto scene::operator=(scene &&) noexcept
 	-> scene & = default;
+
+void scene::begin([[maybe_unused]] context &ctx) {}
+
+void scene::end([[maybe_unused]] context &ctx) {}
 }

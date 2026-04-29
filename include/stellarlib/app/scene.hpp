@@ -24,8 +24,6 @@
 #ifndef STELLARLIB_APP_SCENE_HPP
 #define STELLARLIB_APP_SCENE_HPP
 
-#include <stellarlib/app/fwd.hpp>
-
 #include <memory>
 #include <optional>
 
@@ -33,7 +31,7 @@ namespace stellarlib::app
 {
 class scene
 {
-friend context;
+friend class context;
 
 public:
 	using transition = std::optional<std::unique_ptr<scene>>;
@@ -56,13 +54,13 @@ protected:
 	auto operator=(scene &&) noexcept
 		-> scene &;
 
-	virtual void begin(context &ctx);
+	virtual void begin(class context &ctx);
 
 	[[nodiscard]]
-	virtual constexpr auto update(context &)
+	virtual constexpr auto update(class context &)
 		-> transition = 0;
 
-	virtual void end(context &ctx);
+	virtual void end(class context &ctx);
 };
 }
 

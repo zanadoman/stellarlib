@@ -33,7 +33,6 @@ namespace stellarlib::app
 {
 metadata::~metadata() = default;
 
-[[nodiscard]]
 auto metadata::name() const
 	-> std::string
 {
@@ -41,7 +40,6 @@ auto metadata::name() const
 	return static_cast<bool>(name) ? name : "";
 }
 
-[[nodiscard]]
 auto metadata::version() const
 	-> std::string
 {
@@ -49,7 +47,6 @@ auto metadata::version() const
 	return static_cast<bool>(version) ? version : "";
 }
 
-[[nodiscard]]
 auto metadata::identifier() const
 	-> std::string
 {
@@ -57,7 +54,6 @@ auto metadata::identifier() const
 	return static_cast<bool>(identifier) ? identifier : "";
 }
 
-[[nodiscard]]
 auto metadata::creator() const
 	-> std::string
 {
@@ -65,7 +61,6 @@ auto metadata::creator() const
 	return static_cast<bool>(creator) ? creator : "";
 }
 
-[[nodiscard]]
 auto metadata::copyright() const
 	-> std::string
 {
@@ -73,7 +68,6 @@ auto metadata::copyright() const
 	return static_cast<bool>(copyright) ? copyright : "";
 }
 
-[[nodiscard]]
 auto metadata::url() const
 	-> std::string
 {
@@ -81,7 +75,6 @@ auto metadata::url() const
 	return static_cast<bool>(url) ? url : "";
 }
 
-[[nodiscard]]
 auto metadata::type() const
 	-> std::string
 {

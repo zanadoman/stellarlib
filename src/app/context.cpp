@@ -23,9 +23,9 @@
 
 #include <stellarlib/app/context.hpp>
 
+#include <stellarlib/app/bridge.hpp>
 #include <stellarlib/app/clock.hpp>
 #include <stellarlib/app/metadata.hpp>
-#include <stellarlib/app/bridge.hpp>
 #include <stellarlib/app/scene.hpp>
 #include <stellarlib/ecs/ecs.hpp>
 
@@ -86,10 +86,10 @@ context::context(info info)
 	: _metadata{internal::bridge<context>::init<app::metadata>(info.metadata)}
 	, _clock{internal::bridge<context>::init<app::clock>(info.clock)}
 {
-	if (auto main{std::get_if<std::unique_ptr<scene>>(std::addressof(info.main))}) {
+	if (const auto main{std::get_if<std::unique_ptr<scene>>(std::addressof(info.main))}) {
 		_scene = std::move(*main);
 	}
-	else if (const auto callback{std::get_if<std::function<std::unique_ptr<scene> (context &)>>(std::addressof(info.main))}; *callback) {
+	else if (const auto callback{std::get_if<std::function<std::unique_ptr<scene> (context &)>>(std::addressof(info.main))}; static_cast<bool>(callback) && *callback) {
 		_scene = (*callback)(*this);
 	}
 
@@ -122,9 +122,9 @@ auto context::iterate()
 	return SDL_APP_CONTINUE;
 }
 
-auto context::event(const SDL_Event *event) const
+auto context::event(const SDL_Event &event) const
 	-> SDL_AppResult
 {
-	return event->type == SDL_EVENT_QUIT ? SDL_APP_SUCCESS : SDL_APP_CONTINUE;
+	return event.type == SDL_EVENT_QUIT ? SDL_APP_SUCCESS : SDL_APP_CONTINUE;
 }
 }

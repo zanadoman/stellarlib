@@ -24,11 +24,13 @@
 #ifndef STELLARLIB_APP_CONTEXT_HPP
 #define STELLARLIB_APP_CONTEXT_HPP
 
+#include <stellarlib/app/bridge.hpp>
 #include <stellarlib/app/clock.hpp>
-#include <stellarlib/app/fwd.hpp>
 #include <stellarlib/app/metadata.hpp>
+#include <stellarlib/app/scene.hpp>
 #include <stellarlib/ecs/ecs.hpp>
 
+#include <SDL3/SDL_events.h>
 #include <SDL3/SDL_init.h>
 
 #include <functional>
@@ -39,13 +41,13 @@ namespace stellarlib::app
 {
 class context final
 {
-friend internal::bridge<main>;
+friend internal::bridge<class main>;
 
 public:
 	struct info final
 	{
-		metadata::info metadata;
-		clock::info clock;
+		app::metadata::info metadata;
+		app::clock::info clock;
 		std::variant<std::unique_ptr<scene>, std::function<std::unique_ptr<scene> (context &)>> main;
 	};
 
@@ -72,20 +74,20 @@ public:
 		-> ecs::world &;
 
 	[[nodiscard]]
-	auto clock() const
-		-> const app::clock &;
-
-	[[nodiscard]]
-	auto clock()
-		-> app::clock &;
-
-	[[nodiscard]]
 	auto metadata() const
 		-> const app::metadata &;
 
 	[[nodiscard]]
 	auto metadata()
 		-> app::metadata &;
+
+	[[nodiscard]]
+	auto clock() const
+		-> const app::clock &;
+
+	[[nodiscard]]
+	auto clock()
+		-> app::clock &;
 
 private:
 	ecs::world _world;
@@ -101,7 +103,7 @@ private:
 		-> SDL_AppResult;
 
 	[[nodiscard]]
-	auto event(const SDL_Event *event) const
+	auto event(const SDL_Event &event) const
 		-> SDL_AppResult;
 };
 }

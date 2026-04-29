@@ -24,7 +24,7 @@
 #ifndef STELLARLIB_APP_CLOCK_HPP
 #define STELLARLIB_APP_CLOCK_HPP
 
-#include <stellarlib/app/fwd.hpp>
+#include <stellarlib/app/bridge.hpp>
 
 #include <cstdint>
 
@@ -32,7 +32,7 @@ namespace stellarlib::app
 {
 class clock final
 {
-friend internal::bridge<context>;
+friend internal::bridge<class context>;
 
 public:
 	struct info final
@@ -72,9 +72,9 @@ public:
 		-> float;
 
 private:
-	std::int64_t _last_tick{};
-	float _max_delta{};
 	float _delta{};
+	float _max_delta{};
+	std::int64_t _last_tick{};
 
 	[[nodiscard]]
 	explicit clock(const info &info);

@@ -44,6 +44,11 @@ auto clock::target_frequency() const
 
 void clock::set_target_frequency(const float target_frequency)
 {
+	if (target_frequency < 0.0F) {
+		SDL_InvalidParamError("target_frequency");
+		throw std::runtime_error{SDL_GetError()};
+	}
+
 	if (!SDL_SetHintWithPriority(SDL_HINT_MAIN_CALLBACK_RATE, std::to_string(target_frequency).c_str(), SDL_HINT_OVERRIDE)) {
 		throw std::runtime_error{SDL_GetError()};
 	}
@@ -57,6 +62,11 @@ auto clock::max_delta() const
 
 void clock::set_max_delta(const float max_delta)
 {
+	if (max_delta < 0.0F) {
+		SDL_InvalidParamError("max_delta");
+		throw std::runtime_error{SDL_GetError()};
+	}
+
 	_max_delta = max_delta;
 }
 
@@ -67,8 +77,8 @@ auto clock::delta() const
 }
 
 clock::clock(const info &info)
-	: _last_tick{std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count()}
-	, _max_delta{info.max_delta}
+	: _max_delta{info.max_delta}
+	, _last_tick{std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count()}
 {
 	set_target_frequency(info.target_frequency);
 }
