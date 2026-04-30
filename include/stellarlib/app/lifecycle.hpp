@@ -21,8 +21,8 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef STELLARLIB_APP_BRIDGE_HPP
-#define STELLARLIB_APP_BRIDGE_HPP
+#ifndef STELLARLIB_APP_LIFECYCLE_HPP
+#define STELLARLIB_APP_LIFECYCLE_HPP
 
 #include <SDL3/SDL_events.h>
 
@@ -31,27 +31,27 @@
 namespace stellarlib::app::internal
 {
 template <typename System>
-class bridge final
+class lifecycle final
 {
 friend System;
 
 public:
 	[[nodiscard]]
-	constexpr bridge() noexcept = delete;
+	constexpr lifecycle() noexcept = delete;
 
 	[[nodiscard]]
-	constexpr bridge(const bridge &) noexcept = delete;
+	constexpr lifecycle(const lifecycle &) noexcept = delete;
 
 	[[nodiscard]]
-	constexpr bridge(bridge &&) noexcept = delete;
+	constexpr lifecycle(lifecycle &&) noexcept = delete;
 
-	constexpr auto operator=(const bridge &) noexcept
-		-> bridge & = delete;
+	constexpr auto operator=(const lifecycle &) noexcept
+		-> lifecycle & = delete;
 
-	constexpr auto operator=(bridge &&) noexcept
-		-> bridge & = delete;
+	constexpr auto operator=(lifecycle &&) noexcept
+		-> lifecycle & = delete;
 
-	constexpr ~bridge() noexcept = delete;
+	constexpr ~lifecycle() noexcept = delete;
 
 private:
 	template <typename Subsystem, typename Info>
@@ -70,7 +70,7 @@ private:
 
 	template <typename Subsystem>
 	[[nodiscard]]
-	static constexpr auto event(Subsystem &subsystem, const SDL_Event &event)
+	static constexpr auto event(const Subsystem &subsystem, const SDL_Event &event)
 	{
 		return subsystem.event(event);
 	}

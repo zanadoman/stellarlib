@@ -24,8 +24,8 @@
 #ifndef STELLARLIB_APP_CONTEXT_HPP
 #define STELLARLIB_APP_CONTEXT_HPP
 
-#include <stellarlib/app/bridge.hpp>
 #include <stellarlib/app/clock.hpp>
+#include <stellarlib/app/lifecycle.hpp>
 #include <stellarlib/app/metadata.hpp>
 #include <stellarlib/app/scene.hpp>
 #include <stellarlib/ecs/ecs.hpp>
@@ -41,7 +41,7 @@ namespace stellarlib::app
 {
 class context final
 {
-friend internal::bridge<class main>;
+friend internal::lifecycle<class main>;
 
 public:
 	struct info final

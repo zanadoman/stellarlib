@@ -23,8 +23,8 @@
 
 #include <stellarlib/app/context.hpp>
 
-#include <stellarlib/app/bridge.hpp>
 #include <stellarlib/app/clock.hpp>
+#include <stellarlib/app/lifecycle.hpp>
 #include <stellarlib/app/metadata.hpp>
 #include <stellarlib/app/scene.hpp>
 #include <stellarlib/ecs/ecs.hpp>
@@ -83,8 +83,8 @@ auto context::clock()
 }
 
 context::context(info info)
-	: _metadata{internal::bridge<context>::init<app::metadata>(info.metadata)}
-	, _clock{internal::bridge<context>::init<app::clock>(info.clock)}
+	: _metadata{internal::lifecycle<context>::init<app::metadata>(info.metadata)}
+	, _clock{internal::lifecycle<context>::init<app::clock>(info.clock)}
 {
 	if (const auto main{std::get_if<std::unique_ptr<scene>>(std::addressof(info.main))}) {
 		_scene = std::move(*main);
@@ -106,7 +106,7 @@ auto context::iterate()
 	}
 
 	auto scene{_scene->update(*this)};
-	internal::bridge<context>::iterate(_clock);
+	internal::lifecycle<context>::iterate(_clock);
 
 	if (scene) {
 		if (*scene) {

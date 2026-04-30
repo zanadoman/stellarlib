@@ -24,7 +24,7 @@
 #include <stellarlib/app/main.hpp>
 
 #include <stellarlib/app/context.hpp>
-#include <stellarlib/app/bridge.hpp>
+#include <stellarlib/app/lifecycle.hpp>
 
 #include <SDL3/SDL_error.h>
 #include <SDL3/SDL_events.h>
@@ -33,11 +33,13 @@
 #define SDL_MAIN_USE_CALLBACKS
 #include <SDL3/SDL_main.h>
 #undef main
+#undef SDL_MAIN_USE_CALLBACKS
 #include <SDL3/SDL_messagebox.h>
 
 #include <cstdint>
 #include <cstdlib>
 #include <exception>
+#include <stdexcept>
 #include <utility>
 
 namespace stellarlib::app
@@ -63,9 +65,9 @@ public:
 	constexpr ~main() noexcept = delete;
 
 	[[nodiscard]]
-	static constexpr auto init(void **appstate, const std::int32_t argc, char **argv)
+	static constexpr auto init(void **appstate, const std::int32_t argc, const char *const *argv)
 	{
-		std::set_terminate([] [[noreturn]] () noexcept -> void {
+		std::set_terminate([] [[noreturn]] noexcept -> void {
 			const auto exception{std::current_exception()};
 
 			constexpr auto report{[] (const char *what) noexcept -> void {
@@ -96,7 +98,7 @@ public:
 		});
 
 		if (auto info{app::main({argv, argv + argc})}) {
-			*appstate = new context{internal::bridge<main>::init<context>(std::move(*info))};
+			*appstate = new context{internal::lifecycle<main>::init<context>(std::move(*info))};
 			return SDL_APP_CONTINUE;
 		}
 
@@ -106,17 +108,22 @@ public:
 	[[nodiscard]]
 	static constexpr auto iterate(void *appstate)
 	{
-		return internal::bridge<main>::iterate(*static_cast<context *>(appstate));
+		return internal::lifecycle<main>::iterate(*static_cast<context *>(appstate));
 	}
 
 	[[nodiscard]]
-	static constexpr auto event(void *appstate, SDL_Event *event)
+	static constexpr auto event(const void *appstate, const SDL_Event *event)
 	{
-		return internal::bridge<main>::event(*static_cast<context *>(appstate), *event);
+		return internal::lifecycle<main>::event(*static_cast<const context *>(appstate), *event);
 	}
 
-	static constexpr void quit(void *appstate, [[maybe_unused]] const SDL_AppResult result)
+	static constexpr void quit(const void *appstate, const SDL_AppResult result)
 	{
+		if (result != SDL_APP_SUCCESS) {
+			SDL_InvalidParamError("result");
+			throw std::invalid_argument{SDL_GetError()};
+		}
+
 		delete static_cast<const context *>(appstate);
 	}
 };

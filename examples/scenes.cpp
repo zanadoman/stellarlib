@@ -147,7 +147,7 @@ auto app::main([[maybe_unused]] const std::vector<std::string> &args)
 		},
 		.clock = {
 			.target_frequency = 60.0F,
-			.max_delta = 50.0F
+			.max_delta = 0.05F
 		},
 		.main = std::make_unique<scene1>()
 	}};
