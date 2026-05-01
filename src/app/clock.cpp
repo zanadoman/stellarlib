@@ -89,8 +89,7 @@ auto clock::delta() const
 }
 
 clock::clock(const info &info)
-	: _frame{now()}
-	, _max_delta{info.max_delta}
+	: _max_delta{info.max_delta}
 {
 	set_target_frequency(info.target_frequency);
 }

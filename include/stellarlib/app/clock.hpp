@@ -79,7 +79,7 @@ public:
 
 private:
 	float _delta{};
-	float _frame{};
+	float _frame{now()};
 	float _max_delta{};
 
 	[[nodiscard]]

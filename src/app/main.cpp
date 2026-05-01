@@ -127,30 +127,27 @@ public:
 		delete static_cast<const context *>(appstate);
 	}
 };
-}
 
-extern "C"
-{
-auto SDL_AppInit(void **appstate, const std::int32_t argc, char **argv)
+extern "C" auto SDL_AppInit(void **appstate, const std::int32_t argc, char **argv)
 	-> SDL_AppResult
 {
-	return stellarlib::app::main::init(appstate, argc, argv);
+	return main::init(appstate, argc, argv);
 }
 
-auto SDL_AppIterate(void *appstate)
+extern "C" auto SDL_AppIterate(void *appstate)
 	-> SDL_AppResult
 {
-	return stellarlib::app::main::iterate(appstate);
+	return main::iterate(appstate);
 }
 
-auto SDL_AppEvent(void *appstate, SDL_Event *event)
+extern "C" auto SDL_AppEvent(void *appstate, SDL_Event *event)
 	-> SDL_AppResult
 {
-	return stellarlib::app::main::event(appstate, event);
+	return main::event(appstate, event);
 }
 
-void SDL_AppQuit(void *appstate, const SDL_AppResult result)
+extern "C" void SDL_AppQuit(void *appstate, const SDL_AppResult result)
 {
-	stellarlib::app::main::quit(appstate, result);
+	main::quit(appstate, result);
 }
 }
