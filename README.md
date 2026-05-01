@@ -104,7 +104,7 @@ The CMake configuration defines the following build targets:
 - Each `.cpp` file in the `examples` directory can be built as its own target (e.g., `example.cpp` &rarr; `example`)
 
 ```sh
-cmake -B build -DCMAKE_BUILD_TYPE=Release -G Ninja --toolchain cmake/x86_64-linux-gnu.cmake     # Configure cmake
+cmake -B build -DCMAKE_BUILD_TYPE=Release -G Ninja --toolchain cmake/x86_64-linux-gnu.cmake     # Configure CMake
 cmake --build build                                                                             # Build stellarlib
 cmake --install build                                                                           # Install stellarlib
 cmake --build build -t example                                                                  # Build a target
@@ -115,7 +115,7 @@ build/example                                                                   
 <summary>x86_64-w64-mingw32</summary>
 
 ```sh
-cmake -B build -DCMAKE_BUILD_TYPE=Release -G Ninja --toolchain cmake/x86_64-w64-mingw32.cmake     # Configure cmake
+cmake -B build -DCMAKE_BUILD_TYPE=Release -G Ninja --toolchain cmake/x86_64-w64-mingw32.cmake     # Configure CMake
 cmake --build build                                                                               # Build stellarlib
 cmake --install build                                                                             # Install stellarlib
 cmake --build build -t example                                                                    # Build a target
@@ -128,7 +128,7 @@ build/example.exe                                                               
 <summary>x86_64-linux-android</summary>
 
 ```sh
-cmake -B build -DCMAKE_BUILD_TYPE=Release -G Ninja --toolchain cmake/x86_64-linux-android.cmake             # Configure cmake
+cmake -B build -DCMAKE_BUILD_TYPE=Release -G Ninja --toolchain cmake/x86_64-linux-android.cmake             # Configure CMake
 cmake --build build                                                                                         # Build stellarlib
 cmake --install build                                                                                       # Install stellarlib
 env JAVA_HOME=/usr/lib/jvm/java-21-openjdk ANDROID_HOME=/opt/android-sdk cmake --build build -t example     # Build a target
@@ -141,7 +141,7 @@ env JAVA_HOME=/usr/lib/jvm/java-21-openjdk ANDROID_HOME=/opt/android-sdk cmake -
 <summary>aarch64-linux-android</summary>
 
 ```sh
-cmake -B build -DCMAKE_BUILD_TYPE=Release -G Ninja --toolchain cmake/aarch64-linux-android.cmake            # Configure cmake
+cmake -B build -DCMAKE_BUILD_TYPE=Release -G Ninja --toolchain cmake/aarch64-linux-android.cmake            # Configure CMake
 cmake --build build                                                                                         # Build stellarlib
 cmake --install build                                                                                       # Install stellarlib
 env JAVA_HOME=/usr/lib/jvm/java-21-openjdk ANDROID_HOME=/opt/android-sdk cmake --build build -t example     # Build a target
