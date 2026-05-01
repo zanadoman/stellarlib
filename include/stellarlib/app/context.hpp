@@ -33,6 +33,7 @@
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_init.h>
 
+#include <cstdint>
 #include <functional>
 #include <memory>
 #include <variant>
@@ -93,7 +94,9 @@ private:
 	ecs::world _world;
 	[[no_unique_address]] app::metadata _metadata;
 	app::clock _clock;
+	std::uint32_t _padding1;
 	std::unique_ptr<scene> _scene;
+	std::uint64_t _padding2;
 
 	[[nodiscard]]
 	explicit context(info info);

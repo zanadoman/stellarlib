@@ -26,8 +26,6 @@
 
 #include <stellarlib/app/lifecycle.hpp>
 
-#include <cstdint>
-
 namespace stellarlib::app
 {
 class clock final
@@ -56,10 +54,18 @@ public:
 	~clock();
 
 	[[nodiscard]]
+	auto now() const
+		-> float;
+
+	[[nodiscard]]
 	auto target_frequency() const
 		-> float;
 
 	void set_target_frequency(float target_frequency);
+
+	[[nodiscard]]
+	auto frame() const
+		-> float;
 
 	[[nodiscard]]
 	auto max_delta() const
@@ -73,8 +79,8 @@ public:
 
 private:
 	float _delta{};
+	float _frame{};
 	float _max_delta{};
-	std::int64_t _last_tick{};
 
 	[[nodiscard]]
 	explicit clock(const info &info);

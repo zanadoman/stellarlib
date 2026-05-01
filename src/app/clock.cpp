@@ -27,14 +27,20 @@
 
 #include <SDL3/SDL_error.h>
 #include <SDL3/SDL_hints.h>
+#include <SDL3/SDL_timer.h>
 
-#include <chrono>
 #include <stdexcept>
 #include <string>
 
 namespace stellarlib::app
 {
 clock::~clock() = default;
+
+auto clock::now() const
+	-> float
+{
+	return static_cast<float>(SDL_NS_TO_SECONDS(static_cast<double>(SDL_GetTicksNS())));
+}
 
 auto clock::target_frequency() const
 	-> float
@@ -52,6 +58,12 @@ void clock::set_target_frequency(const float target_frequency)
 	if (!SDL_SetHintWithPriority(SDL_HINT_MAIN_CALLBACK_RATE, std::to_string(target_frequency).c_str(), SDL_HINT_OVERRIDE)) {
 		throw std::runtime_error{SDL_GetError()};
 	}
+}
+
+auto clock::frame() const
+	-> float
+{
+	return _frame;
 }
 
 auto clock::max_delta() const
@@ -77,16 +89,16 @@ auto clock::delta() const
 }
 
 clock::clock(const info &info)
-	: _max_delta{info.max_delta}
-	, _last_tick{std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count()}
+	: _frame{now()}
+	, _max_delta{info.max_delta}
 {
 	set_target_frequency(info.target_frequency);
 }
 
 void clock::iterate()
 {
-	const auto current_tick{std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count()};
-	_delta = lin::min(static_cast<float>(current_tick - _last_tick) / 1000.0F, _max_delta);
-	_last_tick = current_tick;
+	const auto frame{now()};
+	_delta = lin::min(frame - _frame, _max_delta);
+	_frame = frame;
 }
 }
