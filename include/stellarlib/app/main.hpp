@@ -30,15 +30,23 @@
 #include <string>
 #include <vector>
 
+/**
+ * @brief Application runtime
+ */
 namespace stellarlib::app
 {
-class main;
+/**
+ * @brief Main initialization descriptor
+ */
+using info = context::info;
 
-using info = std::optional<context::info>;
-
+/**
+ * @brief External entry point (implement this for interactive applications)
+ * @return Initialization descriptor or std::nullopt to terminate the application
+ */
 [[nodiscard]]
 auto main(const std::vector<std::string> &args)
-	-> info;
+	-> std::optional<info>;
 }
 
 #endif

@@ -27,39 +27,80 @@
 #include <memory>
 #include <optional>
 
+/**
+ * @brief Application runtime
+ */
 namespace stellarlib::app
 {
+/**
+ * @brief Application scene interface
+ */
 class scene
 {
 friend class context;
 
 public:
-	using transition = std::optional<std::unique_ptr<scene>>;
-
+	/**
+	 * @brief Destructor
+	 */
 	virtual ~scene() noexcept = 0;
 
 protected:
+	/**
+	 * @brief Default constructor
+	 */
 	[[nodiscard]]
 	scene() noexcept;
 
+	/**
+	 * @brief Copy constructor
+	 * @param other Other instance
+	 */
 	[[nodiscard]]
-	scene(const scene &) noexcept;
+	scene(const scene &other) noexcept;
 
+	/**
+	 * @brief Move constructor
+	 * @param other Other instance
+	 */
 	[[nodiscard]]
-	scene(scene &&) noexcept;
+	scene(scene &&other) noexcept;
 
-	auto operator=(const scene &) noexcept
+	/**
+	 * @brief Copy assignment operator
+	 * @param other Other instance
+	 * @return Current instance
+	 */
+	auto operator=(const scene &other) noexcept
 		-> scene &;
 
-	auto operator=(scene &&) noexcept
+	/**
+	 * @brief Move assignment operator
+	 * @param other Other instance
+	 * @return Current instance
+	 */
+	auto operator=(scene &&other) noexcept
 		-> scene &;
 
+	/**
+	 * @brief Called after the previous scene has finished deactivation and before the first update
+	 * @param ctx Global application context
+	 */
 	virtual void begin(class context &ctx);
 
+	/**
+	 * @brief Called once per frame
+	 * @param ctx Global application context
+	 * @return std::nullopt to continue execution, a scene instance to request a transition or nullptr to terminate the application
+	 */
 	[[nodiscard]]
-	virtual constexpr auto update(class context &)
-		-> transition = 0;
+	virtual constexpr auto update(class context &ctx)
+		-> std::optional<std::unique_ptr<scene>> = 0;
 
+	/**
+	 * @brief Called after the last update and before the next scene begins activation
+	 * @param ctx Global application context
+	 */
 	virtual void end(class context &ctx);
 };
 }

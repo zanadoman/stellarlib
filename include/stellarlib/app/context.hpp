@@ -38,61 +38,120 @@
 #include <memory>
 #include <variant>
 
+/**
+ * @brief Application runtime
+ */
 namespace stellarlib::app
 {
+/**
+ * @brief Application context
+ */
 class context final
 {
 friend internal::lifecycle<class main>;
 
 public:
+	/**
+	 * @brief Context initialization descriptor
+	 */
 	struct info final
 	{
+		/**
+		 * @brief Metadata initialization descriptor
+		 */
 		app::metadata::info metadata;
+
+		/**
+		 * @brief Clock initialization descriptor
+		 */
 		app::clock::info clock;
+
+		/**
+		 * @brief Initial scene, application termination, or deferred scene factory
+		 */
 		std::variant<std::unique_ptr<scene>, std::function<std::unique_ptr<scene> (context &)>> main;
 	};
 
+	/**
+	 * @brief Deleted copy constructor
+	 */
 	[[nodiscard]]
 	constexpr context(const context &) noexcept = delete;
 
+	/**
+	 * @brief Deleted move constructor
+	 */
 	[[nodiscard]]
 	constexpr context(context &&) noexcept = delete;
 
+	/**
+	 * @brief Deleted copy assignment operator
+	 */
 	constexpr auto operator=(const context &) noexcept
 		-> context & = delete;
 
+	/**
+	 * @brief Deleted move assignment operator
+	 */
 	constexpr auto operator=(context &&) noexcept
 		-> context & = delete;
 
+	/**
+	 * @brief Destructor
+	 */
 	~context();
 
+	/**
+	 * @brief Returns a reference to the ECS subsystem
+	 * @return Reference to the ECS subsystem
+	 */
 	[[nodiscard]]
 	auto world() const
 		-> const ecs::world &;
 
+	/**
+	 * @brief Returns a reference to the ECS subsystem
+	 * @return Reference to the ECS subsystem
+	 */
 	[[nodiscard]]
 	auto world()
 		-> ecs::world &;
 
+	/**
+	 * @brief Returns a reference to the metadata subsystem
+	 * @return Reference to the metadata subsystem
+	 */
 	[[nodiscard]]
 	auto metadata() const
 		-> const app::metadata &;
 
+	/**
+	 * @brief Returns a reference to the metadata subsystem
+	 * @return Reference to the metadata subsystem
+	 */
 	[[nodiscard]]
 	auto metadata()
 		-> app::metadata &;
 
+	/**
+	 * @brief Returns a reference to the clock subsystem
+	 * @return Reference to the clock subsystem
+	 */
 	[[nodiscard]]
 	auto clock() const
 		-> const app::clock &;
 
+	/**
+	 * @brief Returns a reference to the clock subsystem
+	 * @return Reference to the clock subsystem
+	 */
 	[[nodiscard]]
 	auto clock()
 		-> app::clock &;
 
 private:
-	ecs::world _world;
 	[[no_unique_address]] app::metadata _metadata;
+	ecs::world _world;
 	app::clock _clock;
 	std::uint32_t _padding1;
 	std::unique_ptr<scene> _scene;

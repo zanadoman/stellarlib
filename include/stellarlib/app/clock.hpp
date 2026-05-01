@@ -26,53 +26,112 @@
 
 #include <stellarlib/app/lifecycle.hpp>
 
+/**
+ * @brief Application runtime
+ */
 namespace stellarlib::app
 {
+/**
+ * @brief Clock subsystem
+ */
 class clock final
 {
 friend internal::lifecycle<class context>;
 
 public:
+	/**
+	 * @brief Clock initialization descriptor
+	 */
 	struct info final
 	{
+		/**
+		 * @brief Target scene update frequency in hertz [0.0F, +INF) (0.0F means as fast as possible)
+		 */
 		float target_frequency;
+
+		/**
+		 * @brief Maximum allowed delta time in seconds [0.0F, +INF)
+		 */
 		float max_delta;
 	};
 
+	/**
+	 * @brief Deleted copy constructor
+	 */
 	[[nodiscard]]
 	constexpr clock(const clock &) noexcept = delete;
 
+	/**
+	 * @brief Deleted move constructor
+	 */
 	[[nodiscard]]
 	constexpr clock(clock &&) noexcept = delete;
 
+	/**
+	 * @brief Deleted copy assignment operator
+	 */
 	constexpr auto operator=(const clock &) noexcept
 		-> clock & = delete;
 
+	/**
+	 * @brief Deleted move assignment operator
+	 */
 	constexpr auto operator=(clock &&) noexcept
 		-> clock & = delete;
 
+	/**
+	 * @brief Destructor
+	 */
 	~clock();
 
+	/**
+	 * @brief Returns the elapsed time in seconds since context initialization
+	 * @return Elapsed time in seconds since context initialization
+	 */
 	[[nodiscard]]
 	auto now() const
 		-> float;
 
+	/**
+	 * @brief Returns the target scene update frequency in hertz [0.0F, +INF) (0.0F means as fast as possible)
+	 * @return Target scene update frequency in hertz [0.0F, +INF) (0.0F means as fast as possible)
+	 */
 	[[nodiscard]]
 	auto target_frequency() const
 		-> float;
 
+	/**
+	 * @brief Sets the target scene update frequency in hertz [0.0F, +INF) (0.0F means as fast as possible)
+	 * @param target_frequency Target scene update frequency in hertz [0.0F, +INF) (0.0F means as fast as possible)
+	 */
 	void set_target_frequency(float target_frequency);
 
+	/**
+	 * @brief Returns the elapsed time in seconds between context initialization and the last scene update
+	 * @return Elapsed time in seconds between context initialization and the last scene update
+	 */
 	[[nodiscard]]
 	auto frame() const
 		-> float;
 
+	/**
+	 * @brief Returns the maximum allowed delta time in seconds [0.0F, +INF)
+	 * @return Maximum allowed delta time in seconds [0.0F, +INF)
+	 */
 	[[nodiscard]]
 	auto max_delta() const
 		-> float;
 
+	/**
+	 * @brief Sets the maximum allowed delta time in seconds [0.0F, +INF)
+	 * @param max_delta Maximum allowed delta time in seconds [0.0F, +INF)
+	 */
 	void set_max_delta(float max_delta);
 
+	/**
+	 * @brief Returns the elapsed time in seconds between the previous and current scene updates
+	 * @return Elapsed time in seconds between the previous and current scene updates
+	 */
 	[[nodiscard]]
 	auto delta() const
 		-> float;

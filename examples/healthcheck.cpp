@@ -29,6 +29,7 @@
 #include <stellarlib/stellarlib.hpp>
 
 #include <cassert>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -62,7 +63,7 @@ constexpr void check_clock(app::context &ctx)
 }
 
 auto app::main(const std::vector<std::string> &args)
-	-> app::info
+	-> std::optional<app::info>
 {
 	assert(!args.empty());
 	assert(args.front().contains("healthcheck"));

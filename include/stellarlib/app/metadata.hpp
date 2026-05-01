@@ -28,62 +28,141 @@
 
 #include <string>
 
+/**
+ * @brief Application runtime
+ */
 namespace stellarlib::app
 {
+/**
+ * @brief Metadata subsystem
+ */
 class metadata final
 {
 friend internal::lifecycle<class context>;
 
 public:
+	/**
+	 * @brief Metadata initialization descriptor
+	 */
 	struct info final
 	{
+		/**
+		 * @brief Name of the application
+		 */
 		std::string name;
+
+		/**
+		 * @brief Version of the application
+		 */
 		std::string version;
+
+		/**
+		 * @brief Reverse-domain identifier of the application
+		 */
 		std::string identifier;
+
+		/**
+		 * @brief Creator of the application
+		 */
 		std::string creator;
+
+		/**
+		 * @brief Copyright notice of the application
+		 */
 		std::string copyright;
+
+		/**
+		 * @brief URL of the application's website
+		 */
 		std::string url;
+
+		/**
+		 * @brief Type of the application ("application", "game")
+		 */
 		std::string type;
 	};
 
+	/**
+	 * @brief Deleted copy constructor
+	 */
 	[[nodiscard]]
 	constexpr metadata(const metadata &) noexcept = delete;
 
+	/**
+	 * @brief Deleted move constructor
+	 */
 	[[nodiscard]]
 	constexpr metadata(metadata &&) noexcept = delete;
 
+	/**
+	 * @brief Deleted copy assignment operator
+	 */
 	constexpr auto operator=(const metadata &) noexcept
 		-> metadata & = delete;
 
+	/**
+	 * @brief Deleted move assignment operator
+	 */
 	constexpr auto operator=(metadata &&) noexcept
 		-> metadata & = delete;
 
+	/**
+	 * @brief Destructor
+	 */
 	~metadata();
 
+	/**
+	 * @brief Returns the name of the application
+	 * @return Name of the application
+	 */
 	[[nodiscard]]
 	auto name() const
 		-> std::string;
 
+	/**
+	 * @brief Returns the version of the application
+	 * @return Version of the application
+	 */
 	[[nodiscard]]
 	auto version() const
 		-> std::string;
 
+	/**
+	 * @brief Returns the reverse-domain identifier of the application
+	 * @return Reverse-domain identifier of the application
+	 */
 	[[nodiscard]]
 	auto identifier() const
 		-> std::string;
 
+	/**
+	 * @brief Returns the creator of the application
+	 * @return Creator of the application
+	 */
 	[[nodiscard]]
 	auto creator() const
 		-> std::string;
 
+	/**
+	 * @brief Returns the copyright notice of the application
+	 * @return Copyright notice of the application
+	 */
 	[[nodiscard]]
 	auto copyright() const
 		-> std::string;
 
+	/**
+	 * @brief Returns the URL of the application's website
+	 * @return URL of the application's website
+	 */
 	[[nodiscard]]
 	auto url() const
 		-> std::string;
 
+	/**
+	 * @brief Returns the type of the application ("application", "game")
+	 * @return Type of the application ("application", "game")
+	 */
 	[[nodiscard]]
 	auto type() const
 		-> std::string;
