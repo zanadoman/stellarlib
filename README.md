@@ -112,8 +112,10 @@ env JAVA_HOME=/usr/lib/jvm/java-8-openjdk /opt/android-sdk/tools/bin/sdkmanager 
 The CMake configuration defines the following build targets:
 
 - `stellarlib` (default target)
-- Each `.cpp` file in the `tests` directory can be built as an individual target (e.g., `example.cpp` &rarr; `test_example`)
+- `docs` (requires Doxygen)
 - `tests` (all tests combined)
+- Each `.cpp` file in the `tests` directory can be built as an individual target (e.g., `example.cpp` &rarr; `test_example`)
+- `examples` (all examples combined)
 - Each `.cpp` file in the `examples` directory can be built as its own target (e.g., `example.cpp` &rarr; `example`)
 
 ```sh
@@ -166,7 +168,7 @@ env JAVA_HOME=/usr/lib/jvm/java-21-openjdk ANDROID_HOME=/opt/android-sdk cmake -
 ## [Documentation](https://zanadoman.github.io/stellarlib/)
 
 ```sh
-$BROWSER build/html/index.html     # Browse local documentation (doxygen required)
+$BROWSER build/html/index.html     # Browse local documentation (requires Doxygen)
 ```
 
 ## Contributing

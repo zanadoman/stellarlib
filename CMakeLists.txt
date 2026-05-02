@@ -75,6 +75,7 @@ if(TARGET GTest::gtest_main)
 endif()
 
 file(GLOB_RECURSE EXAMPLES ${CMAKE_SOURCE_DIR}/examples/*.cpp)
+add_custom_target(examples)
 foreach(SOURCE ${EXAMPLES})
 	get_filename_component(EXAMPLE ${SOURCE} NAME_WLE)
 	if(ANDROID)
@@ -110,6 +111,7 @@ foreach(SOURCE ${EXAMPLES})
 			COMMAND_EXPAND_LISTS
 		)
 	endif()
+	add_dependencies(examples ${EXAMPLE})
 endforeach()
 
 include(GNUInstallDirs)
