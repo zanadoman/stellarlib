@@ -7,17 +7,30 @@ Opinionated, cross-platform game engine library in [C++23](https://en.cppreferen
 - [x] Project Setup
   - [x] CMake, Clang, and Doxygen integration
   - [x] Linux, Windows, and Android support
+- [x] Standard Library Extensions
+  - [x] Vector/arena allocators
+  - [x] Bitset utilities
+  - [x] Extended type properties
+  - [x] Sequential/type ID generators
+  - [x] Compile-time padding
+  - [ ] File system utilities
 - [x] Entity Component System
   - [x] Simple, consistent, and foolproof interface
   - [x] Deferred modifications during iterations
   - [ ] Parent–child entity relationships
+  - [ ] World serialization/deserialization
 - [x] Linear Algebra Utilities
   - [x] Generic vector and matrix implementation
   - [x] Common shader intrinsics functions
   - [x] Common 2D/3D transformations
-- [ ] State management
-  - [ ] Scene management
-  - [ ] Asset management
+- [x] Application Runtime
+  - [x] Scene management
+  - [x] Metadata subsystem
+  - [x] Clock subsystem
+  - [ ] Input subsystem
+  - [ ] Window subsystem
+  - [ ] Universal renderer
+  - [ ] Audio subsystem
 
 ## Build Instructions
 
