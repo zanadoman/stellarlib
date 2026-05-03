@@ -13,7 +13,7 @@ Opinionated, cross-platform game engine library in [C++23](https://en.cppreferen
   - [x] Extended type properties
   - [x] Sequential/type ID generators
   - [x] Compile-time padding
-  - [ ] File system utilities
+  - [x] File system utilities
 - [x] Entity Component System
   - [x] Simple, consistent, and foolproof interface
   - [x] Deferred modifications during iterations
