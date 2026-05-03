@@ -73,6 +73,11 @@ public:
 		app::window::info window;
 
 		/**
+		 * @brief Explicit padding
+		 */
+		std::uint64_t padding;
+
+		/**
 		 * @brief Initial scene, application termination, or deferred scene factory
 		 */
 		std::variant<std::unique_ptr<scene>, std::function<std::unique_ptr<scene> (context &)>> main;
@@ -174,10 +179,11 @@ public:
 private:
 	[[no_unique_address]] app::metadata _metadata;
 	app::clock _clock;
-	std::uint32_t _padding;
+	std::uint32_t _padding1;
 	app::window _window;
 	ecs::world _world;
 	std::unique_ptr<scene> _scene;
+	std::uint64_t _padding2;
 
 	[[nodiscard]]
 	explicit context(info info);

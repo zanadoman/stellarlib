@@ -10,6 +10,7 @@
 -Wno-float-equal
 -Wno-global-constructors
 -Wno-logical-op-parentheses
+-Wno-missing-designated-field-initializers
 -Wno-overloaded-shift-op-parentheses
 -Wno-shadow
 -Wno-unsafe-buffer-usage

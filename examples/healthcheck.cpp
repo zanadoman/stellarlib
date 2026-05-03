@@ -60,6 +60,13 @@ constexpr void check_clock(app::context &ctx)
 	assert(ctx.clock().max_delta() == 0.025F);
 	assert(!static_cast<bool>(ctx.clock().delta()));
 }
+
+constexpr void check_window(app::context &ctx)
+{
+	assert(ctx.window().title() == "org.stellarlib.healthcheck");
+	ctx.window().set_title("healthcheck");
+	assert(ctx.window().title() == "healthcheck");
+}
 }
 
 auto app::main(const std::vector<std::string> &args)
@@ -83,11 +90,12 @@ auto app::main(const std::vector<std::string> &args)
 			.max_delta = 0.05F
 		},
 		.window = {
-			.title = "healthcheck"
+			.title = "org.stellarlib.healthcheck"
 		},
 		.main = [] [[nodiscard]] (app::context &ctx) -> auto {
 			check_metadata(ctx);
 			check_clock(ctx);
+			check_window(ctx);
 			return nullptr;
 		}
 	}};
