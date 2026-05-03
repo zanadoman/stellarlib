@@ -67,6 +67,7 @@ auto app::main(const std::vector<std::string> &args)
 {
 	assert(!args.empty());
 	assert(args.front().contains("healthcheck"));
+
 	return {{
 		.metadata = {
 			.name = "healthcheck",
@@ -81,7 +82,7 @@ auto app::main(const std::vector<std::string> &args)
 			.target_frequency = 60.0F,
 			.max_delta = 0.05F
 		},
-		.main = [] (app::context &ctx) -> auto {
+		.main = [] [[nodiscard]] (app::context &ctx) -> auto {
 			check_metadata(ctx);
 			check_clock(ctx);
 			return nullptr;

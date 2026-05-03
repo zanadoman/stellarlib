@@ -28,21 +28,18 @@
 
 #include <stellarlib/stellarlib.hpp>
 
-#include <SDL3/SDL_init.h>
-#include <SDL3/SDL_log.h>
-#include <SDL3/SDL_main.h> /* IWYU pragma: keep */
-
 #include <cstdint>
 #include <cstdlib>
+#include <iostream>
 #include <string>
 
 using namespace stellarlib;
 
+[[nodiscard]]
 auto main([[maybe_unused]] const std::int32_t argc, [[maybe_unused]] char **argv)
 	-> std::int32_t
 {
 	ecs::world world{};
-	SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%s", std::get<0>(world.operator[]<std::string>(world.spawn(std::string{"hello, world"}))).c_str());
-	SDL_Quit();
+	std::cout << std::get<0>(world.operator[]<std::string>(world.spawn(std::string{"hello, world"}))) << '\n';
 	return EXIT_SUCCESS;
 }

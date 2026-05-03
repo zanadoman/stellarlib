@@ -45,7 +45,7 @@ public:
 	[[nodiscard]]
 	constexpr scene2() noexcept
 	{
-		SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%p: constructor", static_cast<void *>(this));
+		SDL_Log("%p: constructor", static_cast<const void *>(this));
 	}
 
 	[[nodiscard]]
@@ -62,26 +62,26 @@ public:
 
 	constexpr ~scene2() noexcept final
 	{
-		SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%p: destructor", static_cast<void *>(this));
+		SDL_Log("%p: destructor", static_cast<const void *>(this));
 	}
 
 private:
 	constexpr void begin([[maybe_unused]] app::context &ctx) noexcept final
 	{
-		SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%p: begin", static_cast<void *>(this));
+		SDL_Log("%p: begin", static_cast<const void *>(this));
 	}
 
 	[[nodiscard]]
 	constexpr auto update([[maybe_unused]] app::context &ctx) noexcept
 		-> std::optional<std::unique_ptr<app::scene>> final
 	{
-		SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%p: update", static_cast<void *>(this));
+		SDL_Log("%p: update", static_cast<const void *>(this));
 		return nullptr;
 	}
 
 	constexpr void end([[maybe_unused]] app::context &ctx) noexcept final
 	{
-		SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%p: end", static_cast<void *>(this));
+		SDL_Log("%p: end", static_cast<const void *>(this));
 	}
 };
 
@@ -91,7 +91,7 @@ public:
 	[[nodiscard]]
 	constexpr scene1() noexcept
 	{
-		SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%p: constructor", static_cast<void *>(this));
+		SDL_Log("%p: constructor", static_cast<const void *>(this));
 	}
 
 	[[nodiscard]]
@@ -108,26 +108,26 @@ public:
 
 	constexpr ~scene1() noexcept final
 	{
-		SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%p: destructor", static_cast<void *>(this));
+		SDL_Log("%p: destructor", static_cast<const void *>(this));
 	}
 
 private:
 	constexpr void begin([[maybe_unused]] app::context &ctx) noexcept final
 	{
-		SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%p: begin", static_cast<void *>(this));
+		SDL_Log("%p: begin", static_cast<const void *>(this));
 	}
 
 	[[nodiscard]]
 	constexpr auto update([[maybe_unused]] app::context &ctx)
 		-> std::optional<std::unique_ptr<app::scene>> final
 	{
-		SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%p: update", static_cast<void *>(this));
+		SDL_Log("%p: update", static_cast<const void *>(this));
 		return std::make_unique<scene2>();
 	}
 
 	constexpr void end([[maybe_unused]] app::context &ctx) noexcept final
 	{
-		SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%p: end", static_cast<void *>(this));
+		SDL_Log("%p: end", static_cast<const void *>(this));
 	}
 };
 }
@@ -135,7 +135,8 @@ private:
 auto app::main(const std::vector<std::string> &args)
 	-> std::optional<app::info>
 {
-	SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%s", args.front().c_str());
+	SDL_Log("%s", args.front().c_str());
+
 	return {{
 		.metadata = {
 			.name = "scenes",
