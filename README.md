@@ -112,11 +112,9 @@ env JAVA_HOME=/usr/lib/jvm/java-8-openjdk /opt/android-sdk/tools/bin/sdkmanager 
 The CMake configuration defines the following build targets:
 
 - `stellarlib` (default target)
+- `examples` (each `.cpp` file in the `examples` directory can be built as its own target (e.g., `example.cpp` &rarr; `example`))
 - `docs` (requires Doxygen)
-- `tests` (all tests combined)
-- Each `.cpp` file in the `tests` directory can be built as an individual target (e.g., `example.cpp` &rarr; `test_example`)
-- `examples` (all examples combined)
-- Each `.cpp` file in the `examples` directory can be built as its own target (e.g., `example.cpp` &rarr; `example`)
+- `tests` (each `.cpp` file in the `tests` directory can be built as an individual target (e.g., `example.cpp` &rarr; `test_example`))
 
 ```sh
 cmake -B build -DCMAKE_BUILD_TYPE=Release -G Ninja --toolchain cmake/x86_64-linux-gnu.cmake     # Configure CMake

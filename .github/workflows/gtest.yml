@@ -22,11 +22,11 @@ jobs:
       - name: Configure CMake
         run: cmake -B build -DCMAKE_BUILD_TYPE=Release -G Ninja --toolchain cmake/x86_64-linux-gnu.cmake
 
+      - name: Build examples
+        run: cmake --build build -t examples
+
       - name: Build tests
         run: cmake --build build -t tests
 
       - name: Run tests
         run: env DEBUGINFOD_URLS=https://debuginfod.archlinux.org valgrind build/tests
-
-      - name: Build examples
-        run: cmake --build build -t examples

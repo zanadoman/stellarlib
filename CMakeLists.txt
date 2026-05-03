@@ -35,45 +35,6 @@ elseif(ANDROID)
 	file(MAKE_DIRECTORY ${ANDROID_JNI_DIR})
 endif()
 
-find_program(DOXYGEN doxygen)
-if(DOXYGEN)
-	file(GLOB_RECURSE HEADERS ${CMAKE_SOURCE_DIR}/include/${PROJECT_NAME}/*.hpp)
-	add_custom_command(
-		OUTPUT ${CMAKE_BINARY_DIR}/html
-		COMMAND ${CMAKE_COMMAND} -E env DOXYGEN_OUTPUT_DIRECTORY=${CMAKE_BINARY_DIR} ${DOXYGEN}
-		DEPENDS ${CMAKE_SOURCE_DIR}/README.md ${HEADERS}
-		WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-	)
-	add_custom_target(docs ALL DEPENDS ${CMAKE_BINARY_DIR}/html)
-endif()
-
-find_package(GTest)
-if(TARGET GTest::gtest_main)
-	file(GLOB_RECURSE TESTS ${CMAKE_SOURCE_DIR}/tests/*.cpp)
-	foreach(SOURCE ${TESTS})
-		get_filename_component(TEST ${SOURCE} NAME_WLE)
-		set(TEST test_${TEST})
-		add_executable(${TEST} EXCLUDE_FROM_ALL ${SOURCE})
-		target_link_libraries(${TEST} GTest::gtest_main ${PROJECT_NAME})
-		if(WIN32)
-			add_custom_command(
-				TARGET ${TEST} POST_BUILD
-				COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:tests> $<TARGET_RUNTIME_DLLS:tests>
-				COMMAND_EXPAND_LISTS
-			)
-		endif()
-	endforeach()
-	add_executable(tests EXCLUDE_FROM_ALL ${TESTS})
-	target_link_libraries(tests GTest::gtest_main ${PROJECT_NAME})
-	if(WIN32)
-		add_custom_command(
-			TARGET tests POST_BUILD
-			COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:tests> $<TARGET_RUNTIME_DLLS:tests>
-			COMMAND_EXPAND_LISTS
-		)
-	endif()
-endif()
-
 file(GLOB_RECURSE EXAMPLES ${CMAKE_SOURCE_DIR}/examples/*.cpp)
 add_custom_target(examples)
 foreach(SOURCE ${EXAMPLES})
@@ -113,6 +74,45 @@ foreach(SOURCE ${EXAMPLES})
 	endif()
 	add_dependencies(examples ${EXAMPLE})
 endforeach()
+
+find_program(DOXYGEN doxygen)
+if(DOXYGEN)
+	file(GLOB_RECURSE HEADERS ${CMAKE_SOURCE_DIR}/include/${PROJECT_NAME}/*.hpp)
+	add_custom_command(
+		OUTPUT ${CMAKE_BINARY_DIR}/html
+		COMMAND ${CMAKE_COMMAND} -E env DOXYGEN_OUTPUT_DIRECTORY=${CMAKE_BINARY_DIR} ${DOXYGEN}
+		DEPENDS ${CMAKE_SOURCE_DIR}/Doxyfile ${CMAKE_SOURCE_DIR}/README.md ${HEADERS} ${EXAMPLES}
+		WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+	)
+	add_custom_target(docs ALL DEPENDS ${CMAKE_BINARY_DIR}/html)
+endif()
+
+find_package(GTest)
+if(TARGET GTest::gtest_main)
+	file(GLOB_RECURSE TESTS ${CMAKE_SOURCE_DIR}/tests/*.cpp)
+	foreach(SOURCE ${TESTS})
+		get_filename_component(TEST ${SOURCE} NAME_WLE)
+		set(TEST test_${TEST})
+		add_executable(${TEST} EXCLUDE_FROM_ALL ${SOURCE})
+		target_link_libraries(${TEST} GTest::gtest_main ${PROJECT_NAME})
+		if(WIN32)
+			add_custom_command(
+				TARGET ${TEST} POST_BUILD
+				COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:tests> $<TARGET_RUNTIME_DLLS:tests>
+				COMMAND_EXPAND_LISTS
+			)
+		endif()
+	endforeach()
+	add_executable(tests EXCLUDE_FROM_ALL ${TESTS})
+	target_link_libraries(tests GTest::gtest_main ${PROJECT_NAME})
+	if(WIN32)
+		add_custom_command(
+			TARGET tests POST_BUILD
+			COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:tests> $<TARGET_RUNTIME_DLLS:tests>
+			COMMAND_EXPAND_LISTS
+		)
+	endif()
+endif()
 
 include(GNUInstallDirs)
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})

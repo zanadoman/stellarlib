@@ -77,7 +77,7 @@ public:
 		std::string url;
 
 		/**
-		 * @brief Type of the application ("application", "game")
+		 * @brief Type of the application (e.g., "application", "game")
 		 */
 		std::string type;
 	};
@@ -160,8 +160,8 @@ public:
 		-> std::string;
 
 	/**
-	 * @brief Returns the type of the application ("application", "game")
-	 * @return Type of the application ("application", "game")
+	 * @brief Returns the type of the application (e.g., "application", "game")
+	 * @return Type of the application (e.g., "application", "game")
 	 */
 	[[nodiscard]]
 	auto type() const
