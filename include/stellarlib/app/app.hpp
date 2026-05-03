@@ -30,6 +30,7 @@
 #include <stellarlib/app/main.hpp>
 #include <stellarlib/app/metadata.hpp>
 #include <stellarlib/app/scene.hpp>
+#include <stellarlib/app/window.hpp>
 /* IWYU pragma: end_exports */
 
 #endif

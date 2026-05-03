@@ -27,6 +27,7 @@
 #include <stellarlib/app/lifecycle.hpp>
 #include <stellarlib/app/metadata.hpp>
 #include <stellarlib/app/scene.hpp>
+#include <stellarlib/app/window.hpp>
 #include <stellarlib/ecs/ecs.hpp>
 
 #include <SDL3/SDL_events.h>
@@ -44,18 +45,6 @@ context::~context()
 	if (_scene) {
 		_scene->end(*this);
 	}
-}
-
-auto context::world() const
-	-> const ecs::world &
-{
-	return _world;
-}
-
-auto context::world()
-	-> ecs::world &
-{
-	return _world;
 }
 
 auto context::metadata() const
@@ -82,9 +71,34 @@ auto context::clock()
 	return _clock;
 }
 
+auto context::window() const
+	-> const app::window &
+{
+	return _window;
+}
+
+auto context::window()
+	-> app::window &
+{
+	return _window;
+}
+
+auto context::world() const
+	-> const ecs::world &
+{
+	return _world;
+}
+
+auto context::world()
+	-> ecs::world &
+{
+	return _world;
+}
+
 context::context(info info)
 	: _metadata{internal::lifecycle<context>::init<app::metadata>(info.metadata)}
 	, _clock{internal::lifecycle<context>::init<app::clock>(info.clock)}
+	, _window{internal::lifecycle<context>::init<app::window>(info.window)}
 {
 	if (const auto main{std::get_if<std::unique_ptr<scene>>(std::addressof(info.main))}) {
 		_scene = std::move(*main);
@@ -105,8 +119,9 @@ auto context::iterate()
 		return SDL_APP_SUCCESS;
 	}
 
-	auto scene{_scene->update(*this)};
 	internal::lifecycle<context>::iterate(_clock);
+	auto scene{_scene->update(*this)};
+	internal::lifecycle<context>::iterate(_window);
 
 	if (scene) {
 		if (*scene) {
@@ -125,6 +140,11 @@ auto context::iterate()
 auto context::event(const SDL_Event &event) const
 	-> SDL_AppResult
 {
-	return event.type == SDL_EVENT_QUIT ? SDL_APP_SUCCESS : SDL_APP_CONTINUE;
+	if (event.type == SDL_EVENT_QUIT) {
+		return SDL_APP_SUCCESS;
+	}
+
+	internal::lifecycle<context>::event(_window, event);
+	return SDL_APP_CONTINUE;
 }
 }

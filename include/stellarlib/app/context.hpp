@@ -28,6 +28,7 @@
 #include <stellarlib/app/lifecycle.hpp>
 #include <stellarlib/app/metadata.hpp>
 #include <stellarlib/app/scene.hpp>
+#include <stellarlib/app/window.hpp>
 #include <stellarlib/ecs/ecs.hpp>
 
 #include <SDL3/SDL_events.h>
@@ -67,6 +68,11 @@ public:
 		app::clock::info clock;
 
 		/**
+		 * @brief Window initialization descriptor
+		 */
+		app::window::info window;
+
+		/**
 		 * @brief Initial scene, application termination, or deferred scene factory
 		 */
 		std::variant<std::unique_ptr<scene>, std::function<std::unique_ptr<scene> (context &)>> main;
@@ -102,22 +108,6 @@ public:
 	~context();
 
 	/**
-	 * @brief Returns a reference to the ECS subsystem
-	 * @return Reference to the ECS subsystem
-	 */
-	[[nodiscard]]
-	auto world() const
-		-> const ecs::world &;
-
-	/**
-	 * @brief Returns a reference to the ECS subsystem
-	 * @return Reference to the ECS subsystem
-	 */
-	[[nodiscard]]
-	auto world()
-		-> ecs::world &;
-
-	/**
 	 * @brief Returns a reference to the metadata subsystem
 	 * @return Reference to the metadata subsystem
 	 */
@@ -149,13 +139,45 @@ public:
 	auto clock()
 		-> app::clock &;
 
+	/**
+	 * @brief Returns a reference to the window subsystem
+	 * @return Reference to the window subsystem
+	 */
+	[[nodiscard]]
+	auto window() const
+		-> const app::window &;
+
+	/**
+	 * @brief Returns a reference to the window subsystem
+	 * @return Reference to the window subsystem
+	 */
+	[[nodiscard]]
+	auto window()
+		-> app::window &;
+
+	/**
+	 * @brief Returns a reference to the ECS subsystem
+	 * @return Reference to the ECS subsystem
+	 */
+	[[nodiscard]]
+	auto world() const
+		-> const ecs::world &;
+
+	/**
+	 * @brief Returns a reference to the ECS subsystem
+	 * @return Reference to the ECS subsystem
+	 */
+	[[nodiscard]]
+	auto world()
+		-> ecs::world &;
+
 private:
 	[[no_unique_address]] app::metadata _metadata;
-	ecs::world _world;
 	app::clock _clock;
-	std::uint32_t _padding1;
+	std::uint32_t _padding;
+	app::window _window;
+	ecs::world _world;
 	std::unique_ptr<scene> _scene;
-	std::uint64_t _padding2;
 
 	[[nodiscard]]
 	explicit context(info info);
