@@ -24,11 +24,14 @@
 #ifndef STELLARLIB_RES_IMAGE_HPP
 #define STELLARLIB_RES_IMAGE_HPP
 
+#include <stellarlib/lin/lin.hpp>
+
 #include <SDL3/SDL_surface.h>
 
 #include <cstdint>
 #include <filesystem>
 #include <memory>
+#include <span>
 
 namespace stellarlib::res
 {
@@ -37,6 +40,9 @@ class image final
 public:
 	[[nodiscard]]
 	explicit image(const std::filesystem::path &path);
+
+	[[nodiscard]]
+	explicit image(const lin::ushort2 &size);
 
 	[[nodiscard]]
 	image(const image &other);
@@ -53,12 +59,32 @@ public:
 	~image();
 
 	[[nodiscard]]
-	auto width()
-		-> std::uint32_t;
+	auto size() const
+		-> lin::ushort2;
 
 	[[nodiscard]]
-	auto height()
-		-> std::uint32_t;
+	auto operator[](const lin::ushort2 &coord) const
+		-> const lin::uchar4 &;
+
+	[[nodiscard]]
+	auto operator[](const lin::ushort2 &coord)
+		-> lin::uchar4 &;
+
+	[[nodiscard]]
+	auto data() const
+		-> std::span<const std::uint8_t>;
+
+	[[nodiscard]]
+	auto data()
+		-> std::span<std::uint8_t>;
+
+	[[nodiscard]]
+	auto sample(lin::float2 coord)
+		-> lin::float4;
+
+	void paint(const lin::ushort2 &coord, lin::float4 color);
+
+	void save(const std::filesystem::path &path) const;
 
 private:
 	std::unique_ptr<SDL_Surface, void (*)(SDL_Surface *)> _handle;

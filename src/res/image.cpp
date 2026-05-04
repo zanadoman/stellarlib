@@ -23,13 +23,17 @@
 
 #include <stellarlib/res/image.hpp>
 
+#include <stellarlib/lin/lin.hpp>
+
 #include <SDL3/SDL_error.h>
 #include <SDL3/SDL_pixels.h>
 #include <SDL3/SDL_surface.h>
 
+#include <cstddef>
 #include <cstdint>
 #include <filesystem>
 #include <memory>
+#include <span>
 #include <stdexcept>
 
 namespace stellarlib::res
@@ -47,6 +51,14 @@ image::image(const std::filesystem::path &path)
 
 	_handle.reset(SDL_ConvertSurface(_handle.get(), SDL_PIXELFORMAT_ABGR8888));
 
+	if (!_handle) {
+		throw std::runtime_error{SDL_GetError()};
+	}
+}
+
+image::image(const lin::ushort2 &size)
+	: _handle{SDL_CreateSurface(static_cast<std::int32_t>(lin::round(size.x())), static_cast<std::int32_t>(lin::round(size.y())), SDL_PIXELFORMAT_ABGR8888), SDL_DestroySurface}
+{
 	if (!_handle) {
 		throw std::runtime_error{SDL_GetError()};
 	}
@@ -78,15 +90,53 @@ auto image::operator=(image &&other) noexcept
 
 image::~image() = default;
 
-auto image::width()
-	-> std::uint32_t
+auto image::size() const
+	-> lin::ushort2
 {
-	return static_cast<std::uint32_t>(_handle->w);
+	return lin::ushort2{_handle->w, _handle->h};
 }
 
-auto image::height()
-	-> std::uint32_t
+auto image::operator[](const lin::ushort2 &coord) const
+	-> const lin::uchar4 &
 {
-	return static_cast<std::uint32_t>(_handle->h);
+	return *(static_cast<const lin::uchar4 *>(_handle->pixels) + lin::mad(coord.y(), _handle->pitch, coord.x()));
+}
+
+auto image::operator[](const lin::ushort2 &coord)
+	-> lin::uchar4 &
+{
+	return *(static_cast<lin::uchar4 *>(_handle->pixels) + lin::mad(coord.y(), _handle->w, coord.x()));
+}
+
+auto image::data() const
+	-> std::span<const std::uint8_t>
+{
+	return {static_cast<const std::uint8_t *>(_handle->pixels), static_cast<std::size_t>(_handle->pitch * _handle->h)};
+}
+
+auto image::data()
+	-> std::span<std::uint8_t>
+{
+	return {static_cast<std::uint8_t *>(_handle->pixels), static_cast<std::size_t>(_handle->pitch * _handle->h)};
+}
+
+auto image::sample(lin::float2 coord)
+	-> lin::float4
+{
+	coord = lin::saturate(coord * size());
+	return lin::float4{(*this)[lin::ushort2{coord.x(), coord.y()}]} / 255.0F;
+}
+
+void image::paint(const lin::ushort2 &coord, lin::float4 color)
+{
+	color *= 255.0F;
+	(*this)[coord] = lin::uchar4{color.r(), color.g(), color.b(), color.a()};
+}
+
+void image::save(const std::filesystem::path &path) const
+{
+	if (!SDL_SavePNG(_handle.get(), path.c_str())) {
+		throw std::runtime_error{SDL_GetError()};
+	}
 }
 }
