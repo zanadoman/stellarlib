@@ -32,12 +32,37 @@
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
+#include <limits>
 #include <memory>
+#include <optional>
 #include <span>
 #include <stdexcept>
 
 namespace stellarlib::res
 {
+image::image(lin::uint2 size)
+	: _handle{nullptr, nullptr}
+{
+	if (lin::any(lin::cast<std::uint32_t>(std::numeric_limits<std::int32_t>::max()) < size)) {
+		SDL_InvalidParamError("size");
+		throw std::runtime_error{SDL_GetError()};
+	}
+
+	_handle = {SDL_CreateSurface(lin::cast<std::int32_t>(size.x()), lin::cast<std::int32_t>(size.y()), SDL_PIXELFORMAT_ABGR8888), SDL_DestroySurface};
+
+	if (!_handle) {
+		throw std::runtime_error{SDL_GetError()};
+	}
+}
+
+image::image(lin::uint2 size, const lin::uchar4 color)
+	: image{size}
+{
+	for (auto &pixel : pixels()) {
+		pixel = color;
+	}
+}
+
 image::image(const std::filesystem::path &path)
 	: _handle{SDL_LoadPNG(path.c_str()), SDL_DestroySurface}
 {
@@ -51,14 +76,6 @@ image::image(const std::filesystem::path &path)
 
 	_handle.reset(SDL_ConvertSurface(_handle.get(), SDL_PIXELFORMAT_ABGR8888));
 
-	if (!_handle) {
-		throw std::runtime_error{SDL_GetError()};
-	}
-}
-
-image::image(const lin::ushort2 &size)
-	: _handle{SDL_CreateSurface(static_cast<std::int32_t>(lin::round(size.x())), static_cast<std::int32_t>(lin::round(size.y())), SDL_PIXELFORMAT_ABGR8888), SDL_DestroySurface}
-{
 	if (!_handle) {
 		throw std::runtime_error{SDL_GetError()};
 	}
@@ -91,46 +108,148 @@ auto image::operator=(image &&other) noexcept
 image::~image() = default;
 
 auto image::size() const
-	-> lin::ushort2
+	-> lin::uint2
 {
-	return lin::ushort2{_handle->w, _handle->h};
+	return lin::uint2{_handle->w, _handle->h};
 }
 
-auto image::operator[](const lin::ushort2 &coord) const
+auto image::operator[](lin::uint2 coord) const
 	-> const lin::uchar4 &
 {
-	return *(static_cast<const lin::uchar4 *>(_handle->pixels) + lin::mad(coord.y(), _handle->pitch, coord.x()));
+	return *(static_cast<const lin::uchar4 *>(_handle->pixels) + lin::mad(coord.y(), lin::cast<std::uint32_t>(_handle->w), coord.x()));
 }
 
-auto image::operator[](const lin::ushort2 &coord)
+auto image::operator[](lin::uint2 coord)
 	-> lin::uchar4 &
 {
-	return *(static_cast<lin::uchar4 *>(_handle->pixels) + lin::mad(coord.y(), _handle->w, coord.x()));
+	return *(static_cast<lin::uchar4 *>(_handle->pixels) + lin::mad(coord.y(), lin::cast<std::uint32_t>(_handle->w), coord.x()));
 }
 
-auto image::data() const
+auto image::bytes() const
 	-> std::span<const std::uint8_t>
 {
-	return {static_cast<const std::uint8_t *>(_handle->pixels), static_cast<std::size_t>(_handle->pitch * _handle->h)};
+	return {static_cast<const std::uint8_t *>(_handle->pixels), lin::cast<std::size_t>(_handle->pitch * _handle->h)};
 }
 
-auto image::data()
+auto image::bytes()
 	-> std::span<std::uint8_t>
 {
-	return {static_cast<std::uint8_t *>(_handle->pixels), static_cast<std::size_t>(_handle->pitch * _handle->h)};
+	return {static_cast<std::uint8_t *>(_handle->pixels), lin::cast<std::size_t>(_handle->pitch * _handle->h)};
 }
 
-auto image::sample(lin::float2 coord)
+auto image::pixels() const
+	-> std::span<const lin::uchar4>
+{
+	return {static_cast<const lin::uchar4 *>(_handle->pixels), lin::cast<std::size_t>(_handle->w * _handle->h)};
+}
+
+auto image::pixels()
+	-> std::span<lin::uchar4>
+{
+	return {static_cast<lin::uchar4 *>(_handle->pixels), lin::cast<std::size_t>(_handle->w * _handle->h)};
+}
+
+auto image::operator==(const image &other) const
+	-> bool
+{
+	return std::ranges::equal(other.bytes(), bytes());
+}
+
+auto image::sample(lin::float2 uv, const address_mode address_mode, const filter filter) const
 	-> lin::float4
 {
-	coord = lin::saturate(coord * size());
-	return lin::float4{(*this)[lin::ushort2{coord.x(), coord.y()}]} / 255.0F;
+	switch (address_mode) {
+	case address_mode::repeat:
+		uv = (uv - lin::floor(uv)) * lin::cast<float>(size());
+		break;
+	case address_mode::mirrored_repeat:
+		uv = uv * 0.5F;
+		uv = (1.0F - lin::abs(((uv - lin::floor(uv)) * 2.0F) - 1.0F)) * lin::cast<float>(size());
+		break;
+	case address_mode::clamp_to_edge:
+		uv = lin::clamp(uv * lin::cast<float>(size()), 0.0F, lin::cast<float>(size() - std::uint32_t{1}));
+		break;
+	default:
+		SDL_InvalidParamError("address_mode");
+		throw std::invalid_argument{SDL_GetError()};
+	}
+
+	switch (filter) {
+	case filter::nearest:
+		return lin::float4{(*this)[lin::cast<std::uint32_t>(uv)]} / 255.0F;
+	case filter::linear: {
+		uv -= 0.5F;
+		const auto iuv{lin::floor(uv)};
+		const auto tl{lin::max(iuv, 0.0F)};
+		const auto br{lin::min(iuv + 1.0F, lin::cast<float>(size() - std::uint32_t{1}))};
+		const auto s{uv - iuv};
+		return lin::lerp(lin::lerp(lin::float4{(*this)[lin::cast<std::uint32_t>(tl)]}, lin::float4{(*this)[lin::cast<std::uint32_t>(lin::float2{br.x(), tl.y()})]}, s.x()), lin::lerp(lin::float4{(*this)[lin::cast<std::uint32_t>(lin::float2{tl.x(), br.y()})]}, lin::float4{(*this)[lin::cast<std::uint32_t>(br)]}, s.x()), s.y()) / 255.0F;
+	}
+	default:
+		SDL_InvalidParamError("filter");
+		throw std::invalid_argument{SDL_GetError()};
+	}
 }
 
-void image::paint(const lin::ushort2 &coord, lin::float4 color)
+void image::blend(const lin::uint2 &position, const lin::float4 &src, const std::optional<blend_state> &blend_state)
 {
-	color *= 255.0F;
-	(*this)[coord] = lin::uchar4{color.r(), color.g(), color.b(), color.a()};
+	if (!blend_state.has_value()) {
+		(*this)[position] = lin::cast<std::uint8_t>(lin::saturate(src) * 255.0F);
+		return;
+	}
+
+	const auto dst{lin::float4{(*this)[position]} / 255.0F};
+
+	constexpr auto resolve_factor{[] [[nodiscard]] (blend_factor blend_factor, const lin::float4 &src, const lin::float4 &dst) -> auto {
+		switch (blend_factor) {
+		case blend_factor::zero:
+			return lin::float4{0.0F, 0.0F, 0.0F, 0.0F};
+		case blend_factor::one:
+			return lin::float4{1.0F, 1.0F, 1.0F, 1.0F};
+		case blend_factor::src_color:
+			return src;
+		case blend_factor::one_minus_src_color:
+			return 1.0F - src;
+		case blend_factor::dst_color:
+			return dst;
+		case blend_factor::one_minus_dst_color:
+			return 1.0F - dst;
+		case blend_factor::src_alpha:
+			return src.aaaa();
+		case blend_factor::one_minus_src_alpha:
+			return 1.0F - src.aaaa();
+		case blend_factor::dst_alpha:
+			return dst.aaaa();
+		case blend_factor::one_minus_dst_alpha:
+			return 1.0F - dst.aaaa();
+		case blend_factor::src_alpha_saturate:
+			return lin::min(src.aaaa(), 1.0F - dst.a());
+		default:
+			SDL_InvalidParamError("blend_factor");
+			throw std::invalid_argument{SDL_GetError()};
+		}
+	}};
+
+	constexpr auto resolve_op{[] [[nodiscard]] (blend_op blend_op, const lin::float4 &lhs, const lin::float4 &rhs) -> auto {
+		switch (blend_op) {
+		case blend_op::add:
+			return lhs + rhs;
+		case blend_op::substract:
+			return lhs - rhs;
+		case blend_op::reverse_substract:
+			return rhs - lhs;
+		case blend_op::min:
+			return lin::min(lhs, rhs);
+		case blend_op::max:
+			return lin::max(lhs, rhs);
+		default:
+			SDL_InvalidParamError("blend_op");
+			throw std::invalid_argument{SDL_GetError()};
+		}
+	}};
+
+	const auto color{resolve_op(blend_state->color_blend_op, src * resolve_factor(blend_state->src_color_blend_factor, src, dst), dst * resolve_factor(blend_state->dst_color_blend_factor, src, dst))};
+	(*this)[position] = lin::cast<std::uint8_t>(lin::saturate(lin::float4{color.r(), color.g(), color.b(), resolve_op(blend_state->alpha_blend_op, src * resolve_factor(blend_state->src_alpha_blend_factor, src, dst), dst * resolve_factor(blend_state->dst_alpha_blend_factor, src, dst)).a()}) * 255.0F);
 }
 
 void image::save(const std::filesystem::path &path) const

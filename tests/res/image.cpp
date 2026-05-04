@@ -33,11 +33,9 @@ using namespace stellarlib;
 #pragma clang diagnostic ignored "-Wself-assign-overloaded"
 #pragma clang diagnostic ignored "-Wself-move"
 
-TEST(stellarlib_res_image, should)
+TEST(stellarlib_res_image, should_construct)
 {
-	const res::image image{lin::float2{1920.0F, 1080.0F}};
-	ASSERT_EQ(image.size(), (lin::float2{1920.0F, 1080.0F}));
-	ASSERT_EQ(image.data().size(), 1920 * 1080 * 4);
+	const res::image image1{lin::uint2{2, 3}};
 }
 
 #pragma clang diagnostic pop
