@@ -286,6 +286,29 @@ STELLARLIB_LIN_INTRINSICS_DOUBLE_ARG_OPERATION_IMPL(atan2, y, x, {
 	return std::atan2(y, x);
 });
 
+template <typename T, typename U>
+[[nodiscard]]
+constexpr auto cast(const U x) noexcept
+	requires (std::is_arithmetic_v<T> && std::is_arithmetic_v<U>)
+{
+	return static_cast<T>(x);
+}
+
+template <typename T, typename U, std::size_t M, std::size_t N>
+[[nodiscard]]
+constexpr auto cast(const matrix<U, M, N> &x) noexcept
+	-> matrix<T, M, N>
+	requires (std::is_arithmetic_v<T>)
+{
+	matrix<T, M, N> res;
+
+	for (const auto [res, x] : std::views::zip(res, x)) {
+		res = static_cast<T>(x);
+	}
+
+	return res;
+}
+
 STELLARLIB_LIN_INTRINSICS_SINGLE_ARG_OPERATION_IMPL(ceil, x, {
 	return std::ceil(x);
 });

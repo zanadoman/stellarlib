@@ -86,6 +86,10 @@ TEST(stellarlib_lin_intrinsics, atan2)
 	ASSERT_TRUE(lin::internal::all(lin::internal::atan2(lin::internal::matrix<float, 2, 2>{0.5F, -0.5F, 0.5F, -0.5F}, lin::internal::matrix<float, 2, 2>{-0.5F, 0.5F, -0.5F, 0.5F}) == lin::internal::matrix<float, 2, 2>{std::atan2f(0.5F, -0.5F), std::atan2f(-0.5F, 0.5F), std::atan2f(0.5F, -0.5F), std::atan2f(-0.5F, 0.5F)}));
 }
 
+static_assert(lin::internal::cast<std::int32_t>(0.0F) == 0);
+static_assert(lin::internal::all(lin::internal::cast<std::int32_t>(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}) == lin::internal::matrix<std::int32_t, 1, 2>{0, 0}));
+static_assert(lin::internal::all(lin::internal::cast<std::int32_t>(lin::internal::matrix<float, 2, 2>{0.5F, -0.5F, 0.5F, -0.5F}) == lin::internal::matrix<std::int32_t, 2, 2>{0, 0, 0, 0}));
+
 TEST(stellarlib_lin_intrinsics, ceil)
 {
 	ASSERT_EQ(lin::internal::ceil(0.0F), 0.0F);

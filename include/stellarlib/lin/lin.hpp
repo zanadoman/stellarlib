@@ -1191,6 +1191,11 @@ using internal::atan;
 using internal::atan2;
 
 /**
+ * @brief Casts x from type U to type T (per-component)
+ */
+using internal::cast;
+
+/**
  * @brief Returns the smallest integer value that is greater than or equal to x (per-component)
  */
 using internal::ceil;
