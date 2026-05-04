@@ -21,14 +21,48 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef STELLARLIB_STELLARLIB_HPP
-#define STELLARLIB_STELLARLIB_HPP
+#ifndef STELLARLIB_RES_IMAGE_HPP
+#define STELLARLIB_RES_IMAGE_HPP
 
-/* IWYU pragma: begin_exports */
-#include <stellarlib/app/app.hpp>
-#include <stellarlib/ecs/ecs.hpp>
-#include <stellarlib/lin/lin.hpp>
-#include <stellarlib/res/res.hpp>
-/* IWYU pragma: end_exports */
+#include <SDL3/SDL_surface.h>
+
+#include <cstdint>
+#include <filesystem>
+#include <memory>
+
+namespace stellarlib::res
+{
+class image final
+{
+public:
+	[[nodiscard]]
+	explicit image(const std::filesystem::path &path);
+
+	[[nodiscard]]
+	image(const image &other);
+
+	[[nodiscard]]
+	image(image &&other) noexcept;
+
+	auto operator=(const image &other)
+		-> image &;
+
+	auto operator=(image &&other) noexcept
+		-> image &;
+
+	~image();
+
+	[[nodiscard]]
+	auto width()
+		-> std::uint32_t;
+
+	[[nodiscard]]
+	auto height()
+		-> std::uint32_t;
+
+private:
+	std::unique_ptr<SDL_Surface, void (*)(SDL_Surface *)> _handle;
+};
+}
 
 #endif

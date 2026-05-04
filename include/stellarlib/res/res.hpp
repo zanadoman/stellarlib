@@ -21,14 +21,11 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef STELLARLIB_STELLARLIB_HPP
-#define STELLARLIB_STELLARLIB_HPP
+#ifndef STELLARLIB_RES_RES_HPP
+#define STELLARLIB_RES_RES_HPP
 
 /* IWYU pragma: begin_exports */
-#include <stellarlib/app/app.hpp>
-#include <stellarlib/ecs/ecs.hpp>
-#include <stellarlib/lin/lin.hpp>
-#include <stellarlib/res/res.hpp>
+#include <stellarlib/res/image.hpp>
 /* IWYU pragma: end_exports */
 
 #endif
