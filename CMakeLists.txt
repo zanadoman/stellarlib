@@ -37,6 +37,9 @@ endif()
 
 file(GLOB_RECURSE EXAMPLES CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/examples/*.cpp)
 add_custom_target(examples)
+if(ANDROID)
+	add_custom_target(apks)
+endif()
 foreach(SOURCE ${EXAMPLES})
 	get_filename_component(EXAMPLE ${SOURCE} NAME_WLE)
 	if(ANDROID)
@@ -53,8 +56,9 @@ foreach(SOURCE ${EXAMPLES})
 			COMMAND_EXPAND_LISTS
 		)
 	elseif(ANDROID)
+		set_property(GLOBAL PROPERTY JOB_POOLS apk_pool=1)
 		add_custom_command(
-			TARGET ${EXAMPLE} POST_BUILD
+			OUTPUT ${CMAKE_BINARY_DIR}/${EXAMPLE}.apk
 			COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:SDL3::SDL3> ${ANDROID_JNI_DIR}
 			COMMAND ${CMAKE_COMMAND} -E copy_if_different
 				$<TARGET_FILE:${EXAMPLE}>
@@ -68,10 +72,13 @@ foreach(SOURCE ${EXAMPLES})
 			COMMAND ${CMAKE_COMMAND} -E copy_if_different
 				${CMAKE_SOURCE_DIR}/android/app/build/outputs/apk/debug/app-debug.apk
 				${CMAKE_BINARY_DIR}/${EXAMPLE}.apk
-			BYPRODUCTS ${EXAMPLE}.apk
+			DEPENDS ${EXAMPLE}
 			WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/android
+			JOB_POOL apk_pool
 			COMMAND_EXPAND_LISTS
 		)
+		add_custom_target(${EXAMPLE}_apk DEPENDS ${CMAKE_BINARY_DIR}/${EXAMPLE}.apk)
+		add_dependencies(apks ${EXAMPLE}_apk)
 	endif()
 	add_dependencies(examples ${EXAMPLE})
 endforeach()
