@@ -56,6 +56,7 @@ foreach(SOURCE ${EXAMPLES})
 			COMMAND_EXPAND_LISTS
 		)
 	elseif(ANDROID)
+		set(APK ${EXAMPLE}_apk)
 		set_property(GLOBAL PROPERTY JOB_POOLS apk_pool=1)
 		add_custom_command(
 			OUTPUT ${CMAKE_BINARY_DIR}/${EXAMPLE}.apk
@@ -77,30 +78,18 @@ foreach(SOURCE ${EXAMPLES})
 			JOB_POOL apk_pool
 			COMMAND_EXPAND_LISTS
 		)
-		add_custom_target(${EXAMPLE}_apk DEPENDS ${CMAKE_BINARY_DIR}/${EXAMPLE}.apk)
-		add_dependencies(apks ${EXAMPLE}_apk)
+		add_custom_target(${APK} DEPENDS ${CMAKE_BINARY_DIR}/${EXAMPLE}.apk)
+		add_dependencies(apks ${APK})
 	endif()
 	add_dependencies(examples ${EXAMPLE})
 endforeach()
-
-find_program(DOXYGEN doxygen)
-if(DOXYGEN)
-	file(GLOB_RECURSE HEADERS CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/include/${PROJECT_NAME}/*.hpp)
-	add_custom_command(
-		OUTPUT ${CMAKE_BINARY_DIR}/html
-		COMMAND ${CMAKE_COMMAND} -E env DOXYGEN_OUTPUT_DIRECTORY=${CMAKE_BINARY_DIR} ${DOXYGEN}
-		DEPENDS ${CMAKE_SOURCE_DIR}/Doxyfile ${CMAKE_SOURCE_DIR}/README.md ${HEADERS} ${EXAMPLES}
-		WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-	)
-	add_custom_target(docs ALL DEPENDS ${CMAKE_BINARY_DIR}/html)
-endif()
 
 find_package(GTest)
 if(TARGET GTest::gtest_main)
 	file(GLOB_RECURSE TESTS CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/tests/*.cpp)
 	foreach(SOURCE ${TESTS})
 		get_filename_component(TEST ${SOURCE} NAME_WLE)
-		set(TEST test_${TEST})
+		set(TEST ${TEST}_test)
 		add_executable(${TEST} EXCLUDE_FROM_ALL ${SOURCE})
 		target_link_libraries(${TEST} PRIVATE GTest::gtest_main ${PROJECT_NAME})
 		if(WIN32)
@@ -122,6 +111,18 @@ if(TARGET GTest::gtest_main)
 	endif()
 endif()
 
+find_program(DOXYGEN doxygen)
+if(DOXYGEN)
+	file(GLOB_RECURSE HEADERS CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/include/${PROJECT_NAME}/*.hpp)
+	add_custom_command(
+		OUTPUT ${CMAKE_BINARY_DIR}/html
+		COMMAND ${CMAKE_COMMAND} -E env DOXYGEN_OUTPUT_DIRECTORY=${CMAKE_BINARY_DIR} ${DOXYGEN}
+		DEPENDS ${CMAKE_SOURCE_DIR}/Doxyfile ${CMAKE_SOURCE_DIR}/README.md ${HEADERS} ${EXAMPLES}
+		WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+	)
+	add_custom_target(docs ALL DEPENDS ${CMAKE_BINARY_DIR}/html)
+endif()
+
 include(GNUInstallDirs)
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Targets)
@@ -134,6 +135,4 @@ configure_package_config_file(
 )
 install(FILES ${CMAKE_BINARY_DIR}/${PROJECT_NAME}Config.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
 install(FILES ${CMAKE_SOURCE_DIR}/LICENSE DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/licenses/${PROJECT_NAME})
-if(DOXYGEN)
-	install(DIRECTORY ${CMAKE_BINARY_DIR}/html DESTINATION ${CMAKE_INSTALL_DOCDIR})
-endif()
+install(DIRECTORY ${CMAKE_BINARY_DIR}/html DESTINATION ${CMAKE_INSTALL_DOCDIR} OPTIONAL)

@@ -127,25 +127,29 @@ public:
 	}
 };
 
-extern "C" auto SDL_AppInit(void **appstate, const std::int32_t argc, char **argv)
+extern "C"
+auto SDL_AppInit(void **appstate, const std::int32_t argc, char **argv)
 	-> SDL_AppResult
 {
 	return host::init(appstate, argc, argv);
 }
 
-extern "C" auto SDL_AppIterate(void *appstate)
+extern "C"
+auto SDL_AppIterate(void *appstate)
 	-> SDL_AppResult
 {
 	return host::iterate(appstate);
 }
 
-extern "C" auto SDL_AppEvent(void *appstate, SDL_Event *event)
+extern "C"
+auto SDL_AppEvent(void *appstate, SDL_Event *event)
 	-> SDL_AppResult
 {
 	return host::event(appstate, event);
 }
 
-extern "C" void SDL_AppQuit(void *appstate, const SDL_AppResult result)
+extern "C"
+void SDL_AppQuit(void *appstate, const SDL_AppResult result)
 {
 	host::quit(appstate, result);
 }
