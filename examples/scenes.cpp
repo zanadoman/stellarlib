@@ -133,7 +133,7 @@ private:
 }
 
 auto app::init(const std::vector<std::string> &args)
-	-> std::optional<app::info>
+	-> std::optional<info>
 {
 	SDL_Log("%s", args.front().c_str());
 
@@ -154,6 +154,6 @@ auto app::init(const std::vector<std::string> &args)
 		.window = {
 			.title = "scenes"
 		},
-		.init = std::make_unique<scene1>()
+		.entry = std::make_unique<scene1>()
 	}};
 }

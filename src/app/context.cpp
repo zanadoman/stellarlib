@@ -100,10 +100,10 @@ context::context(info info)
 	, _clock{internal::lifecycle<context>::init<app::clock>(info.clock)}
 	, _window{internal::lifecycle<context>::init<app::window>(info.window)}
 {
-	if (const auto init{std::get_if<std::unique_ptr<scene>>(std::addressof(info.init))}) {
-		_scene = std::move(*init);
+	if (const auto entry{std::get_if<std::unique_ptr<scene>>(std::addressof(info.entry))}) {
+		_scene = std::move(*entry);
 	}
-	else if (const auto callback{std::get_if<std::function<std::unique_ptr<scene> (context &)>>(std::addressof(info.init))}; static_cast<bool>(callback) && *callback) {
+	else if (const auto callback{std::get_if<std::function<std::unique_ptr<scene> (context &)>>(std::addressof(info.entry))}; static_cast<bool>(callback) && *callback) {
 		_scene = (*callback)(*this);
 	}
 
