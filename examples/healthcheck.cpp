@@ -69,11 +69,11 @@ constexpr void check_window(app::context &ctx)
 }
 }
 
-auto app::main(const std::vector<std::string> &args)
+auto app::init(const std::vector<std::string> &args)
 	-> std::optional<app::info>
 {
 	assert(!args.empty());
-	assert(args.front().contains("healthcheck"));
+	assert(!args.front().empty());
 
 	return {{
 		.metadata = {
@@ -92,7 +92,7 @@ auto app::main(const std::vector<std::string> &args)
 		.window = {
 			.title = "org.stellarlib.healthcheck"
 		},
-		.main = [] [[nodiscard]] (app::context &ctx) -> auto {
+		.init = [] [[nodiscard]] (app::context &ctx) -> auto {
 			check_metadata(ctx);
 			check_clock(ctx);
 			check_window(ctx);
