@@ -33,7 +33,22 @@ elseif(ANDROID)
 	file(REMOVE_RECURSE ${ANDROID_JNI_DIR})
 	set(ANDROID_JNI_DIR ${ANDROID_JNI_DIR}/${ANDROID_ABI})
 	file(MAKE_DIRECTORY ${ANDROID_JNI_DIR})
+	set(ANDROID_ASSETS_DIR ${CMAKE_SOURCE_DIR}/android/app/src/main/assets)
+	file(REMOVE_RECURSE ${ANDROID_ASSETS_DIR})
 endif()
+
+file(GLOB_RECURSE ASSETS CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/assets/*)
+if(ANDROID)
+	set(ASSETS_DIR ${ANDROID_ASSETS_DIR}/assets)
+else()
+	set(ASSETS_DIR ${CMAKE_BINARY_DIR}/assets)
+endif()
+add_custom_command(
+	OUTPUT ${ASSETS_DIR}
+	COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different ${CMAKE_SOURCE_DIR}/assets ${ASSETS_DIR}
+	DEPENDS ${ASSETS}
+)
+add_custom_target(resources DEPENDS ${ASSETS_DIR})
 
 file(GLOB_RECURSE EXAMPLES CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/examples/*.cpp)
 add_custom_target(examples)
@@ -47,6 +62,7 @@ foreach(SOURCE ${EXAMPLES})
 		target_link_options(${EXAMPLE} PRIVATE -uSDL_main)
 	else()
 		add_executable(${EXAMPLE} WIN32 EXCLUDE_FROM_ALL ${SOURCE})
+		add_dependencies(${EXAMPLE} resources)
 	endif()
 	target_link_libraries(${EXAMPLE} PRIVATE ${PROJECT_NAME})
 	if(WIN32)
@@ -79,6 +95,7 @@ foreach(SOURCE ${EXAMPLES})
 			COMMAND_EXPAND_LISTS
 		)
 		add_custom_target(${APK} DEPENDS ${CMAKE_BINARY_DIR}/${EXAMPLE}.apk)
+		add_dependencies(${APK} resources)
 		add_dependencies(apks ${APK})
 	endif()
 	add_dependencies(examples ${EXAMPLE})
@@ -92,6 +109,7 @@ if(TARGET GTest::gtest_main)
 		set(TEST ${TEST}_test)
 		add_executable(${TEST} EXCLUDE_FROM_ALL ${SOURCE})
 		target_link_libraries(${TEST} PRIVATE GTest::gtest_main ${PROJECT_NAME})
+		add_dependencies(${TEST} resources)
 		if(WIN32)
 			add_custom_command(
 				TARGET ${TEST} POST_BUILD
@@ -102,6 +120,7 @@ if(TARGET GTest::gtest_main)
 	endforeach()
 	add_executable(tests EXCLUDE_FROM_ALL ${TESTS})
 	target_link_libraries(tests PRIVATE GTest::gtest_main ${PROJECT_NAME})
+	add_dependencies(tests resources)
 	if(WIN32)
 		add_custom_command(
 			TARGET tests POST_BUILD

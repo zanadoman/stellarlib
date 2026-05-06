@@ -29,6 +29,7 @@
 #include <SDL3/SDL_pixels.h>
 #include <SDL3/SDL_surface.h>
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
