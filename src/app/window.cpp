@@ -91,8 +91,8 @@ void window::iterate()
 void window::event(const SDL_Event &event) const
 {
 	if (event.type == SDL_EVENT_WINDOW_DESTROYED && event.window.windowID == SDL_GetWindowID(_handle.get())) {
-		SDL_Unsupported();
-		throw std::runtime_error{SDL_GetError()};
+		SDL_InvalidParamError("event");
+		throw std::invalid_argument{SDL_GetError()};
 	}
 }
 }

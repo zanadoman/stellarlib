@@ -49,7 +49,7 @@ namespace stellarlib::app
  */
 class context final
 {
-friend internal::lifecycle<class main>;
+friend internal::lifecycle<class host>;
 
 public:
 	/**
@@ -80,7 +80,7 @@ public:
 		/**
 		 * @brief Initial scene, application termination, or deferred scene factory
 		 */
-		std::variant<std::unique_ptr<scene>, std::function<std::unique_ptr<scene> (context &)>> main;
+		std::variant<std::unique_ptr<scene>, std::function<std::unique_ptr<scene> (context &)>> init;
 	};
 
 	/**

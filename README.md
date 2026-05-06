@@ -86,7 +86,6 @@ env JAVA_HOME=/usr/lib/jvm/java-8-openjdk /opt/android-sdk/tools/bin/sdkmanager 
 - [Valgrind](https://archlinux.org/packages/extra/x86_64/valgrind/)
 - [Vulkan Validation Layers](https://archlinux.org/packages/extra/x86_64/vulkan-validation-layers/)
 - [RenderDoc](https://archlinux.org/packages/extra/x86_64/renderdoc/)
-- [ImageMagick](https://archlinux.org/packages/extra/x86_64/imagemagick/)
 
 </details>
 
@@ -113,6 +112,7 @@ The CMake configuration defines the following build targets:
 
 - `stellarlib` (default target)
 - `examples` (each `.cpp` file in the `examples` directory can be built as its own target (e.g., `example.cpp` &rarr; `example`))
+- `apks` (when targeting Android, each example has an associated APK target (e.g., `example` &rarr; `example_apk`))
 - `docs` (requires Doxygen)
 - `tests` (each `.cpp` file in the `tests` directory can be built as an individual target (e.g., `example.cpp` &rarr; `test_example`))
 

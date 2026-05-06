@@ -11,10 +11,10 @@ set(CMAKE_CXX_FLAGS_RELEASE -flto)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 find_program(CMAKE_CXX_CLANG_TIDY clang-tidy)
 
-file(GLOB_RECURSE SOURCES ${CMAKE_SOURCE_DIR}/src/*.cpp)
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/src/*.cpp)
 add_library(${PROJECT_NAME} STATIC ${SOURCES})
 find_package(SDL3 REQUIRED)
-target_link_libraries(${PROJECT_NAME} SDL3::SDL3)
+target_link_libraries(${PROJECT_NAME} INTERFACE SDL3::SDL3)
 if(WIN32)
 	file(
 		GLOB_RECURSE WIN32_RUNTIME_DLLS
@@ -35,16 +35,20 @@ elseif(ANDROID)
 	file(MAKE_DIRECTORY ${ANDROID_JNI_DIR})
 endif()
 
-file(GLOB_RECURSE EXAMPLES ${CMAKE_SOURCE_DIR}/examples/*.cpp)
+file(GLOB_RECURSE EXAMPLES CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/examples/*.cpp)
 add_custom_target(examples)
+if(ANDROID)
+	add_custom_target(apks)
+endif()
 foreach(SOURCE ${EXAMPLES})
 	get_filename_component(EXAMPLE ${SOURCE} NAME_WLE)
 	if(ANDROID)
 		add_library(${EXAMPLE} SHARED EXCLUDE_FROM_ALL ${SOURCE})
+		target_link_options(${EXAMPLE} PRIVATE -uSDL_main)
 	else()
 		add_executable(${EXAMPLE} WIN32 EXCLUDE_FROM_ALL ${SOURCE})
 	endif()
-	target_link_libraries(${EXAMPLE} ${PROJECT_NAME})
+	target_link_libraries(${EXAMPLE} PRIVATE ${PROJECT_NAME})
 	if(WIN32)
 		add_custom_command(
 			TARGET ${EXAMPLE} POST_BUILD
@@ -52,8 +56,9 @@ foreach(SOURCE ${EXAMPLES})
 			COMMAND_EXPAND_LISTS
 		)
 	elseif(ANDROID)
+		set_property(GLOBAL PROPERTY JOB_POOLS apk_pool=1)
 		add_custom_command(
-			TARGET ${EXAMPLE} POST_BUILD
+			OUTPUT ${CMAKE_BINARY_DIR}/${EXAMPLE}.apk
 			COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:SDL3::SDL3> ${ANDROID_JNI_DIR}
 			COMMAND ${CMAKE_COMMAND} -E copy_if_different
 				$<TARGET_FILE:${EXAMPLE}>
@@ -67,17 +72,20 @@ foreach(SOURCE ${EXAMPLES})
 			COMMAND ${CMAKE_COMMAND} -E copy_if_different
 				${CMAKE_SOURCE_DIR}/android/app/build/outputs/apk/debug/app-debug.apk
 				${CMAKE_BINARY_DIR}/${EXAMPLE}.apk
-			BYPRODUCTS ${EXAMPLE}.apk
+			DEPENDS ${EXAMPLE}
 			WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/android
+			JOB_POOL apk_pool
 			COMMAND_EXPAND_LISTS
 		)
+		add_custom_target(${EXAMPLE}_apk DEPENDS ${CMAKE_BINARY_DIR}/${EXAMPLE}.apk)
+		add_dependencies(apks ${EXAMPLE}_apk)
 	endif()
 	add_dependencies(examples ${EXAMPLE})
 endforeach()
 
 find_program(DOXYGEN doxygen)
 if(DOXYGEN)
-	file(GLOB_RECURSE HEADERS ${CMAKE_SOURCE_DIR}/include/${PROJECT_NAME}/*.hpp)
+	file(GLOB_RECURSE HEADERS CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/include/${PROJECT_NAME}/*.hpp)
 	add_custom_command(
 		OUTPUT ${CMAKE_BINARY_DIR}/html
 		COMMAND ${CMAKE_COMMAND} -E env DOXYGEN_OUTPUT_DIRECTORY=${CMAKE_BINARY_DIR} ${DOXYGEN}
@@ -89,12 +97,12 @@ endif()
 
 find_package(GTest)
 if(TARGET GTest::gtest_main)
-	file(GLOB_RECURSE TESTS ${CMAKE_SOURCE_DIR}/tests/*.cpp)
+	file(GLOB_RECURSE TESTS CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/tests/*.cpp)
 	foreach(SOURCE ${TESTS})
 		get_filename_component(TEST ${SOURCE} NAME_WLE)
 		set(TEST test_${TEST})
 		add_executable(${TEST} EXCLUDE_FROM_ALL ${SOURCE})
-		target_link_libraries(${TEST} GTest::gtest_main ${PROJECT_NAME})
+		target_link_libraries(${TEST} PRIVATE GTest::gtest_main ${PROJECT_NAME})
 		if(WIN32)
 			add_custom_command(
 				TARGET ${TEST} POST_BUILD
@@ -104,7 +112,7 @@ if(TARGET GTest::gtest_main)
 		endif()
 	endforeach()
 	add_executable(tests EXCLUDE_FROM_ALL ${TESTS})
-	target_link_libraries(tests GTest::gtest_main ${PROJECT_NAME})
+	target_link_libraries(tests PRIVATE GTest::gtest_main ${PROJECT_NAME})
 	if(WIN32)
 		add_custom_command(
 			TARGET tests POST_BUILD

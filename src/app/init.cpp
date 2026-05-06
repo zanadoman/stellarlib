@@ -21,7 +21,7 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#include <stellarlib/app/main.hpp>
+#include <stellarlib/app/init.hpp>
 
 #include <stellarlib/app/context.hpp>
 #include <stellarlib/app/lifecycle.hpp>
@@ -32,7 +32,6 @@
 #include <SDL3/SDL_log.h>
 #define SDL_MAIN_USE_CALLBACKS
 #include <SDL3/SDL_main.h>
-#undef main
 #undef SDL_MAIN_USE_CALLBACKS
 #include <SDL3/SDL_messagebox.h>
 
@@ -44,25 +43,25 @@
 
 namespace stellarlib::app
 {
-class main final
+class host final
 {
 public:
 	[[nodiscard]]
-	constexpr main() noexcept = delete;
+	constexpr host() noexcept = delete;
 
 	[[nodiscard]]
-	constexpr main(const main &) noexcept = delete;
+	constexpr host(const host &) noexcept = delete;
 
 	[[nodiscard]]
-	constexpr main(main &&) noexcept = delete;
+	constexpr host(host &&) noexcept = delete;
 
-	constexpr auto operator=(const main &) noexcept
-		-> main & = delete;
+	constexpr auto operator=(const host &) noexcept
+		-> host & = delete;
 
-	constexpr auto operator=(main &&) noexcept
-		-> main & = delete;
+	constexpr auto operator=(host &&) noexcept
+		-> host & = delete;
 
-	constexpr ~main() noexcept = delete;
+	constexpr ~host() noexcept = delete;
 
 	[[nodiscard]]
 	static constexpr auto init(void **appstate, const std::int32_t argc, const char *const *argv)
@@ -97,8 +96,8 @@ public:
 			std::abort();
 		});
 
-		if (auto info{app::main({argv, argv + argc})}) {
-			*appstate = new context{internal::lifecycle<main>::init<context>(std::move(*info))};
+		if (auto info{app::init({argv, argv + argc})}) {
+			*appstate = new context{internal::lifecycle<host>::init<context>(std::move(*info))};
 			return SDL_APP_CONTINUE;
 		}
 
@@ -108,13 +107,13 @@ public:
 	[[nodiscard]]
 	static constexpr auto iterate(void *appstate)
 	{
-		return internal::lifecycle<main>::iterate(*static_cast<context *>(appstate));
+		return internal::lifecycle<host>::iterate(*static_cast<context *>(appstate));
 	}
 
 	[[nodiscard]]
 	static constexpr auto event(const void *appstate, const SDL_Event *event)
 	{
-		return internal::lifecycle<main>::event(*static_cast<const context *>(appstate), *event);
+		return internal::lifecycle<host>::event(*static_cast<const context *>(appstate), *event);
 	}
 
 	static constexpr void quit(const void *appstate, const SDL_AppResult result)
@@ -131,23 +130,23 @@ public:
 extern "C" auto SDL_AppInit(void **appstate, const std::int32_t argc, char **argv)
 	-> SDL_AppResult
 {
-	return main::init(appstate, argc, argv);
+	return host::init(appstate, argc, argv);
 }
 
 extern "C" auto SDL_AppIterate(void *appstate)
 	-> SDL_AppResult
 {
-	return main::iterate(appstate);
+	return host::iterate(appstate);
 }
 
 extern "C" auto SDL_AppEvent(void *appstate, SDL_Event *event)
 	-> SDL_AppResult
 {
-	return main::event(appstate, event);
+	return host::event(appstate, event);
 }
 
 extern "C" void SDL_AppQuit(void *appstate, const SDL_AppResult result)
 {
-	main::quit(appstate, result);
+	host::quit(appstate, result);
 }
 }

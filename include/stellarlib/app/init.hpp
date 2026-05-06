@@ -21,12 +21,32 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef STELLARLIB_APP_MAIN_HPP
-#define STELLARLIB_APP_MAIN_HPP
+#ifndef STELLARLIB_APP_INIT_HPP
+#define STELLARLIB_APP_INIT_HPP
 
-#include <SDL3/SDL_platform_defines.h>
-#ifdef SDL_PLATFORM_ANDROID
-#include <SDL3/SDL_main.h> /* IWYU pragma: export */
-#endif
+#include <stellarlib/app/context.hpp>
+
+#include <optional>
+#include <string>
+#include <vector>
+
+/**
+ * @brief Application runtime
+ */
+namespace stellarlib::app
+{
+/**
+ * @brief Main initialization descriptor
+ */
+using info = context::info;
+
+/**
+ * @brief External entry point (implement this for interactive applications)
+ * @return Initialization descriptor or std::nullopt to terminate the application
+ */
+[[nodiscard]]
+auto init(const std::vector<std::string> &args)
+	-> std::optional<info>;
+}
 
 #endif

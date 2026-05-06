@@ -28,9 +28,10 @@
 
 #include <stellarlib/stellarlib.hpp>
 
+#include <SDL3/SDL_log.h>
+
 #include <cstdint>
 #include <cstdlib>
-#include <iostream>
 #include <string>
 
 using namespace stellarlib;
@@ -40,6 +41,6 @@ auto main([[maybe_unused]] const std::int32_t argc, [[maybe_unused]] char **argv
 	-> std::int32_t
 {
 	ecs::world world{};
-	std::cout << std::get<0>(world.operator[]<std::string>(world.spawn(std::string{"hello, world"}))) << '\n';
+	SDL_Log("%s", std::get<0>(world.operator[]<std::string>(world.spawn(std::string{"hello, world"}))).c_str());
 	return EXIT_SUCCESS;
 }
