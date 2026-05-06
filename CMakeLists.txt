@@ -56,6 +56,7 @@ foreach(SOURCE ${EXAMPLES})
 			COMMAND_EXPAND_LISTS
 		)
 	elseif(ANDROID)
+		set(APK ${EXAMPLE}_apk)
 		set_property(GLOBAL PROPERTY JOB_POOLS apk_pool=1)
 		add_custom_command(
 			OUTPUT ${CMAKE_BINARY_DIR}/${EXAMPLE}.apk
@@ -77,8 +78,8 @@ foreach(SOURCE ${EXAMPLES})
 			JOB_POOL apk_pool
 			COMMAND_EXPAND_LISTS
 		)
-		add_custom_target(${EXAMPLE}_apk DEPENDS ${CMAKE_BINARY_DIR}/${EXAMPLE}.apk)
-		add_dependencies(apks ${EXAMPLE}_apk)
+		add_custom_target(${APK} DEPENDS ${CMAKE_BINARY_DIR}/${EXAMPLE}.apk)
+		add_dependencies(apks ${APK})
 	endif()
 	add_dependencies(examples ${EXAMPLE})
 endforeach()
@@ -100,7 +101,7 @@ if(TARGET GTest::gtest_main)
 	file(GLOB_RECURSE TESTS CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/tests/*.cpp)
 	foreach(SOURCE ${TESTS})
 		get_filename_component(TEST ${SOURCE} NAME_WLE)
-		set(TEST test_${TEST})
+		set(TEST ${TEST}_test)
 		add_executable(${TEST} EXCLUDE_FROM_ALL ${SOURCE})
 		target_link_libraries(${TEST} PRIVATE GTest::gtest_main ${PROJECT_NAME})
 		if(WIN32)
