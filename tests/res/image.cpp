@@ -27,6 +27,7 @@
 #include <stellarlib/lin/lin.hpp>
 
 #include <SDL3/SDL_pixels.h>
+#include <SDL3/SDL_surface.h>
 
 #include <gtest/gtest.h>
 
@@ -80,20 +81,20 @@ static_assert(res::image::format == SDL_PIXELFORMAT_ABGR8888);
 
 TEST(stellarlib_res_image, should_init_from_size)
 {
-	ASSERT_THROW(static_cast<void>(res::image{lin::uint2{0, 0}}), std::invalid_argument);
 	ASSERT_THROW(static_cast<void>(res::image{lin::uint2{-1, -1}}), std::invalid_argument);
-	const res::image image1{lin::uint2{3, 2}};
-	ASSERT_TRUE(lin::all(image1.size() == lin::uint2{3, 2}));
-	ASSERT_TRUE(lin::all(image1[lin::uint2{0, 0}] == lin::uchar4{0, 0, 0, 0}));
-	ASSERT_TRUE(lin::all(image1[lin::uint2{0, 1}] == lin::uchar4{0, 0, 0, 0}));
-	ASSERT_TRUE(lin::all(image1[lin::uint2{1, 0}] == lin::uchar4{0, 0, 0, 0}));
-	ASSERT_TRUE(lin::all(image1[lin::uint2{1, 1}] == lin::uchar4{0, 0, 0, 0}));
-	ASSERT_TRUE(lin::all(image1[lin::uint2{2, 0}] == lin::uchar4{0, 0, 0, 0}));
-	ASSERT_TRUE(lin::all(image1[lin::uint2{2, 1}] == lin::uchar4{0, 0, 0, 0}));
-	ASSERT_EQ(image1.bytes().size(), 24);
-	ASSERT_TRUE(std::ranges::equal(image1.bytes(), std::views::repeat(0, 24)));
-	ASSERT_EQ(image1.pixels().size(), 6);
-	ASSERT_TRUE(std::ranges::all_of(image1.pixels(), [] [[nodiscard]] (const auto pixel) -> auto {
+	ASSERT_THROW(static_cast<void>(res::image{lin::uint2{0, 0}}), std::invalid_argument);
+	const res::image image{lin::uint2{3, 2}};
+	ASSERT_TRUE(lin::all(image.size() == lin::uint2{3, 2}));
+	ASSERT_TRUE(lin::all(image[lin::uint2{0, 0}] == lin::uchar4{0, 0, 0, 0}));
+	ASSERT_TRUE(lin::all(image[lin::uint2{0, 1}] == lin::uchar4{0, 0, 0, 0}));
+	ASSERT_TRUE(lin::all(image[lin::uint2{1, 0}] == lin::uchar4{0, 0, 0, 0}));
+	ASSERT_TRUE(lin::all(image[lin::uint2{1, 1}] == lin::uchar4{0, 0, 0, 0}));
+	ASSERT_TRUE(lin::all(image[lin::uint2{2, 0}] == lin::uchar4{0, 0, 0, 0}));
+	ASSERT_TRUE(lin::all(image[lin::uint2{2, 1}] == lin::uchar4{0, 0, 0, 0}));
+	ASSERT_EQ(image.bytes().size(), 24);
+	ASSERT_TRUE(std::ranges::equal(image.bytes(), std::views::repeat(0, 24)));
+	ASSERT_EQ(image.pixels().size(), 6);
+	ASSERT_TRUE(std::ranges::all_of(image.pixels(), [] [[nodiscard]] (const auto pixel) -> auto {
 		return lin::all(pixel == lin::uchar4{0, 0, 0, 0});
 	}));
 }
@@ -101,43 +102,15 @@ TEST(stellarlib_res_image, should_init_from_size)
 TEST(stellarlib_res_image, should_init_from_bytes)
 {
 	ASSERT_THROW(static_cast<void>(res::image{lin::uint2{-1, -1}, BYTES}), std::invalid_argument);
-	ASSERT_THROW(static_cast<void>(res::image{lin::uint2{2, 2}, BYTES}), std::invalid_argument);
-	ASSERT_THROW(static_cast<void>(res::image{lin::uint2{4, 2}, BYTES}), std::invalid_argument);
-	const res::image image3{lin::uint2{3, 2}, BYTES};
-	ASSERT_TRUE(lin::all(image3.size() == lin::uint2{3, 2}));
-	ASSERT_TRUE(lin::all(image3[lin::uint2{0, 0}] == lin::uchar4{255, 0, 0, 255}));
-	ASSERT_TRUE(lin::all(image3[lin::uint2{0, 1}] == lin::uchar4{255, 0, 0, 255}));
-	ASSERT_TRUE(lin::all(image3[lin::uint2{1, 0}] == lin::uchar4{0, 255, 0, 255}));
-	ASSERT_TRUE(lin::all(image3[lin::uint2{1, 1}] == lin::uchar4{0, 255, 0, 255}));
-	ASSERT_TRUE(lin::all(image3[lin::uint2{2, 0}] == lin::uchar4{0, 0, 255, 255}));
-	ASSERT_TRUE(lin::all(image3[lin::uint2{2, 1}] == lin::uchar4{0, 0, 255, 255}));
-	ASSERT_EQ(image3.bytes().size(), 24);
-	ASSERT_TRUE(std::ranges::equal(image3.bytes(), BYTES));
-	ASSERT_EQ(image3.pixels().size(), 6);
-	ASSERT_TRUE(std::ranges::equal(image3.pixels(), PIXELS, [] [[nodiscard]] (const auto lhs, const auto rhs) -> auto {
-		return lin::all(lhs == rhs);
-	}));
+	ASSERT_THROW(static_cast<void>(res::image{lin::uint2{0, 0}, BYTES}), std::invalid_argument);
+	check_rgb(res::image{lin::uint2{3, 2}, BYTES});
 }
 
 TEST(stellarlib_res_image, should_init_from_pixels)
 {
 	ASSERT_THROW(static_cast<void>(res::image{lin::uint2{-1, -1}, PIXELS}), std::invalid_argument);
-	ASSERT_THROW(static_cast<void>(res::image{lin::uint2{2, 2}, PIXELS}), std::invalid_argument);
-	ASSERT_THROW(static_cast<void>(res::image{lin::uint2{4, 2}, PIXELS}), std::invalid_argument);
-	const res::image image4{lin::uint2{3, 2}, PIXELS};
-	ASSERT_TRUE(lin::all(image4.size() == lin::uint2{3, 2}));
-	ASSERT_TRUE(lin::all(image4[lin::uint2{0, 0}] == lin::uchar4{255, 0, 0, 255}));
-	ASSERT_TRUE(lin::all(image4[lin::uint2{0, 1}] == lin::uchar4{255, 0, 0, 255}));
-	ASSERT_TRUE(lin::all(image4[lin::uint2{1, 0}] == lin::uchar4{0, 255, 0, 255}));
-	ASSERT_TRUE(lin::all(image4[lin::uint2{1, 1}] == lin::uchar4{0, 255, 0, 255}));
-	ASSERT_TRUE(lin::all(image4[lin::uint2{2, 0}] == lin::uchar4{0, 0, 255, 255}));
-	ASSERT_TRUE(lin::all(image4[lin::uint2{2, 1}] == lin::uchar4{0, 0, 255, 255}));
-	ASSERT_EQ(image4.bytes().size(), 24);
-	ASSERT_TRUE(std::ranges::equal(image4.bytes(), BYTES));
-	ASSERT_EQ(image4.pixels().size(), 6);
-	ASSERT_TRUE(std::ranges::equal(image4.pixels(), PIXELS, [] [[nodiscard]] (const auto lhs, const auto rhs) -> auto {
-		return lin::all(lhs == rhs);
-	}));
+	ASSERT_THROW(static_cast<void>(res::image{lin::uint2{0, 0}, PIXELS}), std::invalid_argument);
+	check_rgb(res::image{lin::uint2{3, 2}, PIXELS});
 }
 
 TEST(stellarlib_res_image, should_init_from_path)
@@ -150,8 +123,8 @@ TEST(stellarlib_res_image, should_copy_via_ctor)
 {
 	const res::image image1{ext::filesystem::base_directory_path() / "assets" / "tests" / "rgb.png"};
 	const auto image2{image1};
-	check_rgb(res::image{image2});
-	ASSERT_EQ(res::image{image2}, image1);
+	check_rgb(image2);
+	ASSERT_EQ(image2, image1);
 }
 
 TEST(stellarlib_res_image, should_skip_self_copy_via_assignment)
@@ -171,31 +144,9 @@ TEST(stellarlib_res_image, should_copy_via_assignment)
 	ASSERT_EQ(image2, image1);
 }
 
-TEST(stellarlib_res_image, should_cast_to_void_ptr)
+TEST(stellarlib_res_image, should_provide_handle)
 {
-	ASSERT_TRUE(static_cast<void *>(res::image{ext::filesystem::base_directory_path() / "assets" / "tests" / "rgb.png"}));
-}
-
-TEST(stellarlib_res_image, should_save)
-{
-	const res::image image{ext::filesystem::base_directory_path() / "assets" / "tests" / "rgb.png"};
-	std::filesystem::remove_all(ext::filesystem::base_directory_path() / "tmp");
-	ASSERT_THROW(image.save(ext::filesystem::base_directory_path() / "tmp" / "rgb.png"), std::runtime_error);
-	std::filesystem::create_directory(ext::filesystem::base_directory_path() / "tmp");
-	image.save(ext::filesystem::base_directory_path() / "tmp" / "rgb.png");
-	ASSERT_EQ(res::image{ext::filesystem::base_directory_path() / "tmp" / "rgb.png"}, image);
-}
-
-TEST(stellarlib_res_image, should_evaluate_equality)
-{
-	ASSERT_EQ((res::image{lin::uint2{3, 2}}), (res::image{lin::uint2{3, 2}}));
-	ASSERT_EQ((res::image{lin::uint2{3, 2}, BYTES}), (res::image{lin::uint2{3, 2}, PIXELS}));
-	ASSERT_EQ((res::image{lin::uint2{3, 2}, BYTES}), res::image{ext::filesystem::base_directory_path() / "assets" / "tests" / "rgb.png"});
-	ASSERT_EQ((res::image{lin::uint2{3, 2}, PIXELS}), res::image{ext::filesystem::base_directory_path() / "assets" / "tests" / "rgb.png"});
-	ASSERT_NE((res::image{lin::uint2{3, 2}}), (res::image{lin::uint2{2, 3}}));
-	ASSERT_NE((res::image{lin::uint2{3, 2}, BYTES}), (res::image{lin::uint2{3, 2}}));
-	ASSERT_NE((res::image{lin::uint2{3, 2}, PIXELS}), (res::image{lin::uint2{3, 2}}));
-	ASSERT_NE((res::image{ext::filesystem::base_directory_path() / "assets" / "tests" / "rgb.png"}), (res::image{lin::uint2{3, 2}}));
+	ASSERT_TRUE(static_cast<SDL_Surface *>(res::image{ext::filesystem::base_directory_path() / "assets" / "tests" / "rgb.png"}));
 }
 
 TEST(stellarlib_res_image, should_apply_repeat)
@@ -249,20 +200,13 @@ TEST(stellarlib_res_image, should_apply_nearest_filtering)
 TEST(stellarlib_res_image, should_apply_linear_filtering)
 {
 	const res::image input{ext::filesystem::base_directory_path() / "assets" / "tests" / "symmetric.png"};
-	res::image output1{input.size()};
-	for (const auto x : std::views::iota(std::uint32_t{}, output1.size().x())) {
-		for (const auto y : std::views::iota(std::uint32_t{}, output1.size().y())) {
-			output1.blend(lin::uint2{x, y}, input.sample((lin::float2{x, y} + 0.5F) / lin::cast<float>(output1.size()), res::image::address_mode::repeat, res::image::filter::linear), std::nullopt);
+	res::image output{input.size() * std::uint32_t{2}};
+	for (const auto x : std::views::iota(std::uint32_t{}, output.size().x())) {
+		for (const auto y : std::views::iota(std::uint32_t{}, output.size().y())) {
+			output.blend(lin::uint2{x, y}, input.sample((lin::float2{x, y} + 0.5F) / lin::cast<float>(output.size()), res::image::address_mode::repeat, res::image::filter::linear), std::nullopt);
 		}
 	}
-	ASSERT_EQ(output1, res::image{ext::filesystem::base_directory_path() / "assets" / "tests" / "linear1.png"});
-	res::image output2{input.size() * std::uint32_t{2}};
-	for (const auto x : std::views::iota(std::uint32_t{}, output2.size().x())) {
-		for (const auto y : std::views::iota(std::uint32_t{}, output2.size().y())) {
-			output2.blend(lin::uint2{x, y}, input.sample((lin::float2{x, y} + 0.5F) / lin::cast<float>(output2.size()), res::image::address_mode::repeat, res::image::filter::linear), std::nullopt);
-		}
-	}
-	ASSERT_EQ(output2, res::image{ext::filesystem::base_directory_path() / "assets" / "tests" / "linear2.png"});
+	ASSERT_EQ(output, res::image{ext::filesystem::base_directory_path() / "assets" / "tests" / "linear.png"});
 }
 
 TEST(stellarlib_res_image, should_apply_alpha_blending)
@@ -284,6 +228,44 @@ TEST(stellarlib_res_image, should_apply_alpha_blending)
 		}
 	}
 	ASSERT_EQ(output, res::image{ext::filesystem::base_directory_path() / "assets" / "tests" / "alpha_blending.png"});
+}
+
+TEST(stellarlib_res_image, should_evaluate_equality)
+{
+	ASSERT_EQ((res::image{lin::uint2{3, 2}}), (res::image{lin::uint2{3, 2}}));
+	ASSERT_EQ((res::image{lin::uint2{3, 2}, BYTES}), (res::image{lin::uint2{3, 2}, PIXELS}));
+	ASSERT_EQ((res::image{lin::uint2{3, 2}, PIXELS}), (res::image{lin::uint2{3, 2}, BYTES}));
+	ASSERT_EQ((res::image{lin::uint2{3, 2}, BYTES}), res::image{ext::filesystem::base_directory_path() / "assets" / "tests" / "rgb.png"});
+	ASSERT_EQ(res::image{ext::filesystem::base_directory_path() / "assets" / "tests" / "rgb.png"}, (res::image{lin::uint2{3, 2}, BYTES}));
+	ASSERT_EQ((res::image{lin::uint2{3, 2}, PIXELS}), res::image{ext::filesystem::base_directory_path() / "assets" / "tests" / "rgb.png"});
+	ASSERT_EQ(res::image{ext::filesystem::base_directory_path() / "assets" / "tests" / "rgb.png"}, (res::image{lin::uint2{3, 2}, PIXELS}));
+	ASSERT_NE((res::image{lin::uint2{3, 2}}), (res::image{lin::uint2{2, 3}}));
+	ASSERT_NE((res::image{lin::uint2{2, 3}}), (res::image{lin::uint2{3, 2}}));
+	ASSERT_NE((res::image{lin::uint2{3, 2}, BYTES}), (res::image{lin::uint2{3, 2}}));
+	ASSERT_NE((res::image{lin::uint2{3, 2}}), (res::image{lin::uint2{3, 2}, BYTES}));
+	ASSERT_NE((res::image{lin::uint2{3, 2}, PIXELS}), (res::image{lin::uint2{3, 2}}));
+	ASSERT_NE((res::image{lin::uint2{3, 2}}), (res::image{lin::uint2{3, 2}, PIXELS}));
+	ASSERT_NE(res::image{ext::filesystem::base_directory_path() / "assets" / "tests" / "rgb.png"}, (res::image{lin::uint2{3, 2}}));
+	ASSERT_NE((res::image{lin::uint2{3, 2}}), res::image{ext::filesystem::base_directory_path() / "assets" / "tests" / "rgb.png"});
+}
+
+TEST(stellarlib_res_image, should_save)
+{
+	const res::image image{ext::filesystem::base_directory_path() / "assets" / "tests" / "rgb.png"};
+	std::filesystem::remove_all(ext::filesystem::base_directory_path() / "tmp");
+	ASSERT_THROW(image.save(ext::filesystem::base_directory_path() / "tmp" / "rgb.png"), std::runtime_error);
+	std::filesystem::create_directory(ext::filesystem::base_directory_path() / "tmp");
+	image.save(ext::filesystem::base_directory_path() / "tmp" / "rgb.png");
+	ASSERT_EQ(res::image{ext::filesystem::base_directory_path() / "tmp" / "rgb.png"}, image);
+}
+
+TEST(stellarlib_res_image, should_clear)
+{
+	res::image image{lin::uint2{3, 2}};
+	image.clear(BYTES);
+	check_rgb(image);
+	image.clear(PIXELS);
+	check_rgb(image);
 }
 
 /* NOLINTEND(performance-unnecessary-copy-initialization) */

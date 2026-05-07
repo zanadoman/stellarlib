@@ -26,19 +26,16 @@
 
 #include <stellarlib/lin/lin.hpp>
 
-#include <SDL3/SDL_error.h>
 #include <SDL3/SDL_pixels.h>
 #include <SDL3/SDL_surface.h>
 
-#include <algorithm>
 #include <cstdint>
+#include <cstring>
 #include <filesystem>
-#include <iterator>
 #include <memory>
 #include <optional>
 #include <ranges>
 #include <span>
-#include <stdexcept>
 #include <utility>
 
 namespace stellarlib::res
@@ -100,17 +97,10 @@ public:
 
 	template <std::ranges::input_range R>
 	[[nodiscard]]
-	constexpr image(lin::uint2 size, R &&range)
+	constexpr image(const lin::uint2 size, R &&range)
 		: image{size}
 	{
-		auto &&r{std::forward<R>(range)};
-
-		if (std::ranges::distance(r) * sizeof(std::ranges::range_value_t<R>) != bytes().size()) {
-			SDL_InvalidParamError("range");
-			throw std::invalid_argument{SDL_GetError()};
-		}
-
-		std::ranges::copy(r, static_cast<std::ranges::range_value_t<R> *>(_handle->pixels));
+		clear(std::forward<R>(range));
 	}
 
 	[[nodiscard]]
@@ -131,7 +121,7 @@ public:
 	~image();
 
 	[[nodiscard]]
-	explicit operator void *() const;
+	explicit operator SDL_Surface *() const;
 
 	[[nodiscard]]
 	auto size() const
@@ -162,16 +152,24 @@ public:
 		-> std::span<lin::uchar4>;
 
 	[[nodiscard]]
-	auto operator==(const image &other) const
-		-> bool;
-
-	[[nodiscard]]
 	auto sample(lin::float2 uv, address_mode address_mode, filter filter) const
 		-> lin::float4;
 
 	void blend(lin::uint2 coord, const lin::float4 &src, const std::optional<blend_state> &blend_state);
 
+	[[nodiscard]]
+	auto operator==(const image &other) const
+		-> bool;
+
 	void save(const std::filesystem::path &path) const;
+
+	template <std::ranges::input_range R>
+	constexpr void clear(R &&range)
+	{
+		for (const auto [dst, src] : std::views::zip(std::span{static_cast<std::ranges::range_value_t<R> *>(_handle->pixels), bytes().size() / sizeof(std::ranges::range_value_t<R>)}, std::forward<R>(range))) {
+			std::memcpy(std::addressof(dst), std::addressof(src), sizeof(std::ranges::range_value_t<R>));
+		}
+	}
 
 private:
 	std::unique_ptr<SDL_Surface, void (*)(SDL_Surface *)> _handle;

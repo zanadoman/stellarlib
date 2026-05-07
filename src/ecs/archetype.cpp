@@ -135,7 +135,7 @@ auto archetype::contains(const std::uintmax_t id) const noexcept
 auto archetype::operator==(const archetype &other) const noexcept
 	-> bool
 {
-	return std::equal(_begin, _end, other._begin, other._end);
+	return std::equal(other._begin, other._end, _begin, _end);
 }
 
 auto archetype::operator<=(const archetype &other) const noexcept

@@ -106,7 +106,7 @@ auto image::operator=(image &&other) noexcept
 
 image::~image() = default;
 
-image::operator void *() const
+image::operator SDL_Surface *() const
 {
 	return _handle.get();
 }
@@ -151,12 +151,6 @@ auto image::pixels()
 	-> std::span<lin::uchar4>
 {
 	return {static_cast<lin::uchar4 *>(_handle->pixels), lin::cast<std::size_t>(_handle->w * _handle->h)};
-}
-
-auto image::operator==(const image &other) const
-	-> bool
-{
-	return lin::all(other.size() == size()) && std::ranges::equal(other.bytes(), bytes());
 }
 
 auto image::sample(lin::float2 uv, const address_mode address_mode, const filter filter) const
@@ -274,6 +268,12 @@ void image::blend(const lin::uint2 coord, const lin::float4 &src, const std::opt
 	const auto dst{lin::float4{(*this)[coord]} / 255.0F};
 	const auto color{resolve_op(blend_state->color_blend_op, src * resolve_factor(blend_state->src_color_blend_factor, src, dst), dst * resolve_factor(blend_state->dst_color_blend_factor, src, dst))};
 	(*this)[coord] = lin::cast<std::uint8_t>(lin::saturate(lin::float4{color.r(), color.g(), color.b(), resolve_op(blend_state->alpha_blend_op, src * resolve_factor(blend_state->src_alpha_blend_factor, src, dst), dst * resolve_factor(blend_state->dst_alpha_blend_factor, src, dst)).a()}) * 255.0F);
+}
+
+auto image::operator==(const image &other) const
+	-> bool
+{
+	return lin::all(other.size() == size()) && std::ranges::equal(other.bytes(), bytes());
 }
 
 void image::save(const std::filesystem::path &path) const

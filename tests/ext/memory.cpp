@@ -265,6 +265,7 @@ TEST(stellarlib_ext_memory, arena_should_skip_self_move_via_assignment)
 	ASSERT_EQ(arena.allocate<std::string>(), string1);
 	ASSERT_EQ(arena.allocate<std::string>(), string2);
 	ASSERT_EQ(arena.allocate<std::int32_t>(), number2);
+	ASSERT_EQ(arena, arena);
 }
 
 TEST(stellarlib_ext_memory, arena_should_move_via_assignment)
@@ -402,6 +403,7 @@ TEST(stellarlib_ext_memory, arena_allocator_should_skip_self_move_via_assignment
 	ASSERT_EQ(allocator.allocate<std::string>(), string1);
 	ASSERT_EQ(allocator.allocate<std::string>(), string2);
 	ASSERT_EQ(allocator.allocate<std::int32_t>(), number2);
+	ASSERT_EQ(allocator, allocator);
 }
 
 TEST(stellarlib_ext_memory, arena_allocator_should_move_via_assignment)
