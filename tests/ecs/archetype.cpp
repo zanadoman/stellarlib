@@ -86,6 +86,7 @@ TEST(stellarlib_ecs_archetype, should_copy_via_ctor)
 	}
 	const auto archetype2{archetype1};
 	check_ids(archetype2);
+	ASSERT_EQ(archetype2, archetype1);
 }
 
 TEST(stellarlib_ecs_archetype, should_move_via_ctor)
@@ -96,6 +97,7 @@ TEST(stellarlib_ecs_archetype, should_move_via_ctor)
 	}
 	const auto archetype2{std::move(archetype1)};
 	check_ids(archetype2);
+	ASSERT_EQ(archetype2, archetype1);
 }
 
 TEST(stellarlib_ecs_archetype, should_skip_self_copy_via_assignment)
@@ -106,6 +108,7 @@ TEST(stellarlib_ecs_archetype, should_skip_self_copy_via_assignment)
 	}
 	archetype = archetype;
 	check_ids(archetype);
+	ASSERT_EQ(archetype, archetype);
 }
 
 TEST(stellarlib_ecs_archetype, should_copy_via_assignment)
@@ -117,6 +120,7 @@ TEST(stellarlib_ecs_archetype, should_copy_via_assignment)
 	ecs::archetype archetype2{};
 	archetype2 = archetype1;
 	check_ids(archetype2);
+	ASSERT_EQ(archetype2, archetype1);
 }
 
 TEST(stellarlib_ecs_archetype, should_skip_self_move_via_assignment)
@@ -127,6 +131,7 @@ TEST(stellarlib_ecs_archetype, should_skip_self_move_via_assignment)
 	}
 	archetype = std::move(archetype);
 	check_ids(archetype);
+	ASSERT_EQ(archetype, archetype);
 }
 
 TEST(stellarlib_ecs_archetype, should_move_via_assignment)
@@ -138,6 +143,7 @@ TEST(stellarlib_ecs_archetype, should_move_via_assignment)
 	ecs::archetype archetype2{};
 	archetype2 = std::move(archetype1);
 	check_ids(archetype2);
+	ASSERT_EQ(archetype2, archetype1);
 }
 
 TEST(stellarlib_ecs_archetype, should_insert_and_erase_ids)

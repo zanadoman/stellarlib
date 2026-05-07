@@ -163,36 +163,40 @@ auto image::sample(lin::float2 uv, const address_mode address_mode, const filter
 	-> lin::float4
 {
 	switch (address_mode) {
-	case address_mode::repeat:
+	case address_mode::repeat: {
 		uv = (uv - lin::floor(uv)) * lin::cast<float>(size());
 		break;
-	case address_mode::mirrored_repeat:
+	}
+	case address_mode::mirrored_repeat: {
 		uv *= 0.5F;
 		uv = (1.0F - lin::abs((uv - lin::floor(uv)) * 2.0F - 1.0F)) * lin::cast<float>(size());
 		break;
-	case address_mode::clamp_to_edge:
+	}
+	case address_mode::clamp_to_edge: {
 		uv = lin::clamp(uv * lin::cast<float>(size()), 0.0F, lin::cast<float>(size() - std::uint32_t{1}));
 		break;
-	default:
+	}
+	default: {
 		SDL_InvalidParamError("address_mode");
 		throw std::invalid_argument{SDL_GetError()};
-	}
+	}}
 
 	switch (filter) {
-	case filter::nearest:
+	case filter::nearest: {
 		return lin::float4{(*this)[lin::cast<std::uint32_t>(uv)]} / 255.0F;
+	}
 	case filter::linear: {
 		uv -= 0.5F;
-		const auto iuv{lin::floor(uv)};
-		const auto tl{lin::max(iuv, 0.0F)};
-		const auto br{lin::min(iuv + 1.0F, lin::cast<float>(size() - std::uint32_t{1}))};
-		const auto s{uv - iuv};
+		const auto coord{lin::floor(uv)};
+		const auto tl{lin::max(coord, 0.0F)};
+		const auto br{lin::min(coord + 1.0F, lin::cast<float>(size() - std::uint32_t{1}))};
+		const auto s{uv - coord};
 		return lin::lerp(lin::lerp(lin::float4{(*this)[lin::cast<std::uint32_t>(tl)]}, lin::float4{(*this)[lin::cast<std::uint32_t>(lin::float2{br.x(), tl.y()})]}, s.x()), lin::lerp(lin::float4{(*this)[lin::cast<std::uint32_t>(lin::float2{tl.x(), br.y()})]}, lin::float4{(*this)[lin::cast<std::uint32_t>(br)]}, s.x()), s.y()) / 255.0F;
 	}
-	default:
+	default: {
 		SDL_InvalidParamError("filter");
 		throw std::invalid_argument{SDL_GetError()};
-	}
+	}}
 }
 
 void image::blend(const lin::uint2 coord, const lin::float4 &src, const std::optional<blend_state> &blend_state)
@@ -204,52 +208,67 @@ void image::blend(const lin::uint2 coord, const lin::float4 &src, const std::opt
 
 	constexpr auto resolve_op{[] [[nodiscard]] (const blend_op blend_op, const lin::float4 &lhs, const lin::float4 &rhs) -> auto {
 		switch (blend_op) {
-		case blend_op::add:
+		case blend_op::add: {
 			return lhs + rhs;
-		case blend_op::subtract:
+		}
+		case blend_op::subtract: {
 			return lhs - rhs;
-		case blend_op::reverse_subtract:
+		}
+		case blend_op::reverse_subtract: {
 			return rhs - lhs;
-		case blend_op::min:
+		}
+		case blend_op::min: {
 			return lin::min(lhs, rhs);
-		case blend_op::max:
+		}
+		case blend_op::max: {
 			return lin::max(lhs, rhs);
-		default:
+		}
+		default: {
 			SDL_InvalidParamError("blend_op");
 			throw std::invalid_argument{SDL_GetError()};
-		}
+		}}
 	}};
 
 	constexpr auto resolve_factor{[] [[nodiscard]] (const blend_factor blend_factor, const lin::float4 &src, const lin::float4 &dst) -> auto {
 		switch (blend_factor) {
-		case blend_factor::zero:
+		case blend_factor::zero: {
 			return lin::float4{0.0F, 0.0F, 0.0F, 0.0F};
-		case blend_factor::one:
+		}
+		case blend_factor::one: {
 			return lin::float4{1.0F, 1.0F, 1.0F, 1.0F};
-		case blend_factor::src_color:
+		}
+		case blend_factor::src_color: {
 			return src;
-		case blend_factor::one_minus_src_color:
+		}
+		case blend_factor::one_minus_src_color: {
 			return 1.0F - src;
-		case blend_factor::dst_color:
+		}
+		case blend_factor::dst_color: {
 			return dst;
-		case blend_factor::one_minus_dst_color:
+		}
+		case blend_factor::one_minus_dst_color: {
 			return 1.0F - dst;
-		case blend_factor::src_alpha:
+		}
+		case blend_factor::src_alpha: {
 			return src.aaaa();
-		case blend_factor::one_minus_src_alpha:
+		}
+		case blend_factor::one_minus_src_alpha: {
 			return 1.0F - src.aaaa();
-		case blend_factor::dst_alpha:
+		}
+		case blend_factor::dst_alpha: {
 			return dst.aaaa();
-		case blend_factor::one_minus_dst_alpha:
+		}
+		case blend_factor::one_minus_dst_alpha: {
 			return 1.0F - dst.aaaa();
+		}
 		case blend_factor::src_alpha_saturate: {
 			const auto f{lin::min(src.a(), 1.0F - dst.a())};
 			return lin::float4{f, f, f, 1.0F};
 		}
-		default:
+		default: {
 			SDL_InvalidParamError("blend_factor");
 			throw std::invalid_argument{SDL_GetError()};
-		}
+		}}
 	}};
 
 	const auto dst{lin::float4{(*this)[coord]} / 255.0F};
