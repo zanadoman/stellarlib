@@ -26,14 +26,20 @@
 
 #include <stellarlib/lin/lin.hpp>
 
+#include <SDL3/SDL_error.h>
+#include <SDL3/SDL_pixels.h>
 #include <SDL3/SDL_surface.h>
 
+#include <algorithm>
 #include <cstdint>
-#include <cstring>
 #include <filesystem>
+#include <iterator>
 #include <memory>
 #include <optional>
+#include <ranges>
 #include <span>
+#include <stdexcept>
+#include <utility>
 
 namespace stellarlib::res
 {
@@ -71,8 +77,8 @@ public:
 	enum class blend_op : std::uint8_t
 	{
 		add,
-		substract,
-		reverse_substract,
+		subtract,
+		reverse_subtract,
 		min,
 		max
 	};
@@ -87,23 +93,24 @@ public:
 		blend_op alpha_blend_op;
 	};
 
+	static constexpr auto format{SDL_PIXELFORMAT_ABGR8888};
+
 	[[nodiscard]]
 	explicit image(lin::uint2 size);
 
+	template <std::ranges::input_range R>
 	[[nodiscard]]
-	explicit image(lin::uint2 size, lin::uchar4 color);
-
-	template <typename T, std::size_t N>
-	[[nodiscard]]
-	explicit constexpr image(const lin::uint2 &size, const std::span<T, N> &src)
+	constexpr image(lin::uint2 size, R &&range)
 		: image{size}
 	{
-		if (src.size_bytes() != bytes().size_bytes()) {
-			SDL_InvalidParamError("src");
+		auto &&r{std::forward<R>(range)};
+
+		if (std::ranges::distance(r) * sizeof(std::ranges::range_value_t<R>) != bytes().size()) {
+			SDL_InvalidParamError("range");
 			throw std::invalid_argument{SDL_GetError()};
 		}
 
-		std::memcpy(bytes().data(), src.data(), bytes().size_bytes());
+		std::ranges::copy(r, static_cast<std::ranges::range_value_t<R> *>(_handle->pixels));
 	}
 
 	[[nodiscard]]
@@ -122,6 +129,9 @@ public:
 		-> image &;
 
 	~image();
+
+	[[nodiscard]]
+	explicit operator void *() const;
 
 	[[nodiscard]]
 	auto size() const
@@ -159,7 +169,7 @@ public:
 	auto sample(lin::float2 uv, address_mode address_mode, filter filter) const
 		-> lin::float4;
 
-	void blend(const lin::uint2 &position, const lin::float4 &src, const std::optional<blend_state> &blend_state);
+	void blend(lin::uint2 coord, const lin::float4 &src, const std::optional<blend_state> &blend_state);
 
 	void save(const std::filesystem::path &path) const;
 

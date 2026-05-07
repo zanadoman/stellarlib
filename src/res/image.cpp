@@ -26,7 +26,6 @@
 #include <stellarlib/lin/lin.hpp>
 
 #include <SDL3/SDL_error.h>
-#include <SDL3/SDL_pixels.h>
 #include <SDL3/SDL_surface.h>
 
 #include <algorithm>
@@ -41,26 +40,18 @@
 
 namespace stellarlib::res
 {
-image::image(lin::uint2 size)
+image::image(const lin::uint2 size)
 	: _handle{nullptr, nullptr}
 {
-	if (lin::any(lin::cast<std::uint32_t>(std::numeric_limits<std::int32_t>::max()) < size)) {
+	if (!lin::all(size) || lin::any(lin::cast<std::uint32_t>(std::numeric_limits<std::int32_t>::max()) < size)) {
 		SDL_InvalidParamError("size");
-		throw std::runtime_error{SDL_GetError()};
+		throw std::invalid_argument{SDL_GetError()};
 	}
 
-	_handle = {SDL_CreateSurface(lin::cast<std::int32_t>(size.x()), lin::cast<std::int32_t>(size.y()), SDL_PIXELFORMAT_ABGR8888), SDL_DestroySurface};
+	_handle = {SDL_CreateSurface(lin::cast<std::int32_t>(size.x()), lin::cast<std::int32_t>(size.y()), format), SDL_DestroySurface};
 
 	if (!_handle) {
 		throw std::runtime_error{SDL_GetError()};
-	}
-}
-
-image::image(lin::uint2 size, const lin::uchar4 color)
-	: image{size}
-{
-	for (auto &pixel : pixels()) {
-		pixel = color;
 	}
 }
 
@@ -71,11 +62,11 @@ image::image(const std::filesystem::path &path)
 		throw std::runtime_error{SDL_GetError()};
 	}
 
-	if (_handle->format == SDL_PIXELFORMAT_ABGR8888) {
+	if (_handle->format == format) {
 		return;
 	}
 
-	_handle.reset(SDL_ConvertSurface(_handle.get(), SDL_PIXELFORMAT_ABGR8888));
+	_handle.reset(SDL_ConvertSurface(_handle.get(), format));
 
 	if (!_handle) {
 		throw std::runtime_error{SDL_GetError()};
@@ -95,7 +86,14 @@ image::image(image &&other) noexcept = default;
 auto image::operator=(const image &other)
 	-> image &
 {
-	if (std::addressof(other) != this) {
+	if (std::addressof(other) == this) {
+		return *this;
+	}
+
+	if (lin::all(other.size() == size())) {
+		std::ranges::copy(other.bytes(), bytes().begin());
+	}
+	else {
 		std::destroy_at(this);
 		std::construct_at(this, other);
 	}
@@ -108,19 +106,24 @@ auto image::operator=(image &&other) noexcept
 
 image::~image() = default;
 
+image::operator void *() const
+{
+	return _handle.get();
+}
+
 auto image::size() const
 	-> lin::uint2
 {
 	return lin::uint2{_handle->w, _handle->h};
 }
 
-auto image::operator[](lin::uint2 coord) const
+auto image::operator[](const lin::uint2 coord) const
 	-> const lin::uchar4 &
 {
 	return *(static_cast<const lin::uchar4 *>(_handle->pixels) + lin::mad(coord.y(), lin::cast<std::uint32_t>(_handle->w), coord.x()));
 }
 
-auto image::operator[](lin::uint2 coord)
+auto image::operator[](const lin::uint2 coord)
 	-> lin::uchar4 &
 {
 	return *(static_cast<lin::uchar4 *>(_handle->pixels) + lin::mad(coord.y(), lin::cast<std::uint32_t>(_handle->w), coord.x()));
@@ -153,7 +156,7 @@ auto image::pixels()
 auto image::operator==(const image &other) const
 	-> bool
 {
-	return std::ranges::equal(other.bytes(), bytes());
+	return lin::all(other.size() == size()) && std::ranges::equal(other.bytes(), bytes());
 }
 
 auto image::sample(lin::float2 uv, const address_mode address_mode, const filter filter) const
@@ -164,8 +167,8 @@ auto image::sample(lin::float2 uv, const address_mode address_mode, const filter
 		uv = (uv - lin::floor(uv)) * lin::cast<float>(size());
 		break;
 	case address_mode::mirrored_repeat:
-		uv = uv * 0.5F;
-		uv = (1.0F - lin::abs(((uv - lin::floor(uv)) * 2.0F) - 1.0F)) * lin::cast<float>(size());
+		uv *= 0.5F;
+		uv = (1.0F - lin::abs((uv - lin::floor(uv)) * 2.0F - 1.0F)) * lin::cast<float>(size());
 		break;
 	case address_mode::clamp_to_edge:
 		uv = lin::clamp(uv * lin::cast<float>(size()), 0.0F, lin::cast<float>(size() - std::uint32_t{1}));
@@ -192,16 +195,32 @@ auto image::sample(lin::float2 uv, const address_mode address_mode, const filter
 	}
 }
 
-void image::blend(const lin::uint2 &position, const lin::float4 &src, const std::optional<blend_state> &blend_state)
+void image::blend(const lin::uint2 coord, const lin::float4 &src, const std::optional<blend_state> &blend_state)
 {
 	if (!blend_state.has_value()) {
-		(*this)[position] = lin::cast<std::uint8_t>(lin::saturate(src) * 255.0F);
+		(*this)[coord] = lin::cast<std::uint8_t>(lin::saturate(src) * 255.0F);
 		return;
 	}
 
-	const auto dst{lin::float4{(*this)[position]} / 255.0F};
+	constexpr auto resolve_op{[] [[nodiscard]] (const blend_op blend_op, const lin::float4 &lhs, const lin::float4 &rhs) -> auto {
+		switch (blend_op) {
+		case blend_op::add:
+			return lhs + rhs;
+		case blend_op::subtract:
+			return lhs - rhs;
+		case blend_op::reverse_subtract:
+			return rhs - lhs;
+		case blend_op::min:
+			return lin::min(lhs, rhs);
+		case blend_op::max:
+			return lin::max(lhs, rhs);
+		default:
+			SDL_InvalidParamError("blend_op");
+			throw std::invalid_argument{SDL_GetError()};
+		}
+	}};
 
-	constexpr auto resolve_factor{[] [[nodiscard]] (blend_factor blend_factor, const lin::float4 &src, const lin::float4 &dst) -> auto {
+	constexpr auto resolve_factor{[] [[nodiscard]] (const blend_factor blend_factor, const lin::float4 &src, const lin::float4 &dst) -> auto {
 		switch (blend_factor) {
 		case blend_factor::zero:
 			return lin::float4{0.0F, 0.0F, 0.0F, 0.0F};
@@ -223,34 +242,19 @@ void image::blend(const lin::uint2 &position, const lin::float4 &src, const std:
 			return dst.aaaa();
 		case blend_factor::one_minus_dst_alpha:
 			return 1.0F - dst.aaaa();
-		case blend_factor::src_alpha_saturate:
-			return lin::min(src.aaaa(), 1.0F - dst.a());
+		case blend_factor::src_alpha_saturate: {
+			const auto f{lin::min(src.a(), 1.0F - dst.a())};
+			return lin::float4{f, f, f, 1.0F};
+		}
 		default:
 			SDL_InvalidParamError("blend_factor");
 			throw std::invalid_argument{SDL_GetError()};
 		}
 	}};
 
-	constexpr auto resolve_op{[] [[nodiscard]] (blend_op blend_op, const lin::float4 &lhs, const lin::float4 &rhs) -> auto {
-		switch (blend_op) {
-		case blend_op::add:
-			return lhs + rhs;
-		case blend_op::substract:
-			return lhs - rhs;
-		case blend_op::reverse_substract:
-			return rhs - lhs;
-		case blend_op::min:
-			return lin::min(lhs, rhs);
-		case blend_op::max:
-			return lin::max(lhs, rhs);
-		default:
-			SDL_InvalidParamError("blend_op");
-			throw std::invalid_argument{SDL_GetError()};
-		}
-	}};
-
+	const auto dst{lin::float4{(*this)[coord]} / 255.0F};
 	const auto color{resolve_op(blend_state->color_blend_op, src * resolve_factor(blend_state->src_color_blend_factor, src, dst), dst * resolve_factor(blend_state->dst_color_blend_factor, src, dst))};
-	(*this)[position] = lin::cast<std::uint8_t>(lin::saturate(lin::float4{color.r(), color.g(), color.b(), resolve_op(blend_state->alpha_blend_op, src * resolve_factor(blend_state->src_alpha_blend_factor, src, dst), dst * resolve_factor(blend_state->dst_alpha_blend_factor, src, dst)).a()}) * 255.0F);
+	(*this)[coord] = lin::cast<std::uint8_t>(lin::saturate(lin::float4{color.r(), color.g(), color.b(), resolve_op(blend_state->alpha_blend_op, src * resolve_factor(blend_state->src_alpha_blend_factor, src, dst), dst * resolve_factor(blend_state->dst_alpha_blend_factor, src, dst)).a()}) * 255.0F);
 }
 
 void image::save(const std::filesystem::path &path) const
