@@ -23,14 +23,20 @@
 
 #include <stellarlib/app/window.hpp>
 
+#include <stellarlib/lin/lin.hpp>
+
 #include <SDL3/SDL_error.h>
 #include <SDL3/SDL_events.h>
+#include <SDL3/SDL_hints.h>
 #include <SDL3/SDL_init.h>
 #include <SDL3/SDL_pixels.h>
+#include <SDL3/SDL_surface.h>
 #include <SDL3/SDL_video.h>
 
 #include <algorithm>
 #include <cstdint>
+#include <cstring>
+#include <ranges>
 #include <stdexcept>
 #include <string>
 
@@ -56,6 +62,12 @@ void window::set_title(const std::string &title)
 
 window::window(const info &info)
 {
+	if (std::ranges::contains(std::views::iota(std::int32_t{}, SDL_GetNumVideoDrivers()) | std::views::transform([] [[nodiscard]] (const auto i) -> auto {
+		return std::strcmp(SDL_GetVideoDriver(i), "x11");
+	}), 0) && !SDL_SetHintWithPriority(SDL_HINT_VIDEO_DRIVER, "x11", SDL_HINT_OVERRIDE)) {
+		throw std::runtime_error{SDL_GetError()};
+	}
+
 	if (!SDL_InitSubSystem(SDL_INIT_VIDEO)) {
 		throw std::runtime_error{SDL_GetError()};
 	}
@@ -63,6 +75,10 @@ window::window(const info &info)
 	_handle = {SDL_CreateWindow(info.title.c_str(), 0, 0, SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE), SDL_DestroyWindow};
 
 	if (!_handle) {
+		throw std::runtime_error{SDL_GetError()};
+	}
+
+	if (!SDL_SetWindowIcon(_handle.get(), static_cast<SDL_Surface *>(info.icon)) && lin::cast<bool>(std::strcmp(SDL_GetError(), "That operation is not supported"))) {
 		throw std::runtime_error{SDL_GetError()};
 	}
 }

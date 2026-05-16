@@ -26,6 +26,7 @@
  * @details Runtime healthcheck
  */
 
+#include <stellarlib/ext/filesystem.hpp>
 #include <stellarlib/stellarlib.hpp>
 
 #include <cassert>
@@ -90,7 +91,8 @@ auto app::init(const std::vector<std::string> &args)
 			.max_delta = 0.05F
 		},
 		.window = {
-			.title = "org.stellarlib.healthcheck"
+			.title = "org.stellarlib.healthcheck",
+			.icon = res::image{ext::filesystem::base_directory_path() / "assets" / "tests" / "rgb.png"}
 		},
 		.entry = [] [[nodiscard]] (auto &ctx) -> auto {
 			check_metadata(ctx);

@@ -25,6 +25,7 @@
 #define STELLARLIB_APP_WINDOW_HPP
 
 #include <stellarlib/app/lifecycle.hpp>
+#include <stellarlib/res/res.hpp>
 
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_video.h>
@@ -54,6 +55,11 @@ public:
 		 * @brief Title of the window
 		 */
 		std::string title;
+
+		/**
+		 * @brief Icon of the window
+		 */
+		res::image icon;
 	};
 
 	/**

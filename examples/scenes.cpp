@@ -26,6 +26,7 @@
  * @details Scenes example
  */
 
+#include <stellarlib/ext/filesystem.hpp>
 #include <stellarlib/stellarlib.hpp>
 
 #include <SDL3/SDL_log.h>
@@ -152,7 +153,8 @@ auto app::init(const std::vector<std::string> &args)
 			.max_delta = 0.05F
 		},
 		.window = {
-			.title = "scenes"
+			.title = "scenes",
+			.icon = res::image{ext::filesystem::base_directory_path() / "assets" / "tests" / "rgb.png"}
 		},
 		.entry = std::make_unique<scene1>()
 	}};
