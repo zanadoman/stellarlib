@@ -37,6 +37,8 @@ using namespace stellarlib;
 #pragma clang diagnostic ignored "-Wself-assign-overloaded"
 #pragma clang diagnostic ignored "-Wself-move"
 
+/* NOLINTBEGIN(performance-unnecessary-copy-initialization) */
+
 TEST(stellarlib_ecs_command_queue, should_enqueue_and_execute_commands)
 {
 	ecs::internal::command_queue commands{};
@@ -72,5 +74,7 @@ TEST(stellarlib_ecs_command_queue, should_enqueue_and_execute_commands)
 	commands.execute();
 	ASSERT_EQ(count, std::numeric_limits<std::uint16_t>::max() * 3);
 }
+
+/* NOLINTEND(performance-unnecessary-copy-initialization) */
 
 #pragma clang diagnostic pop

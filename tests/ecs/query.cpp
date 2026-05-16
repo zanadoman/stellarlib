@@ -37,6 +37,8 @@ using namespace stellarlib;
 #pragma clang diagnostic ignored "-Wself-assign-overloaded"
 #pragma clang diagnostic ignored "-Wself-move"
 
+/* NOLINTBEGIN(performance-unnecessary-copy-initialization) */
+
 TEST(stellarlib_ecs_query, should_execute_callback)
 {
 	auto executed{false};
@@ -51,5 +53,7 @@ TEST(stellarlib_ecs_query, should_execute_callback)
 	}
 	ASSERT_TRUE(executed);
 }
+
+/* NOLINTEND(performance-unnecessary-copy-initialization) */
 
 #pragma clang diagnostic pop

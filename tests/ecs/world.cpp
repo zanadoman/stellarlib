@@ -39,6 +39,8 @@ using namespace stellarlib;
 #pragma clang diagnostic ignored "-Wself-assign-overloaded"
 #pragma clang diagnostic ignored "-Wself-move"
 
+/* NOLINTBEGIN(performance-unnecessary-copy-initialization) */
+
 namespace
 {
 [[nodiscard]]
@@ -482,5 +484,7 @@ TEST(stellarlib_ecs_world, should_clear_entities)
 	}
 	check_entities(world);
 }
+
+/* NOLINTEND(performance-unnecessary-copy-initialization) */
 
 #pragma clang diagnostic pop

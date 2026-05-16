@@ -42,6 +42,8 @@ using namespace stellarlib;
 #pragma clang diagnostic ignored "-Wself-assign-overloaded"
 #pragma clang diagnostic ignored "-Wself-move"
 
+/* NOLINTBEGIN(performance-unnecessary-copy-initialization) */
+
 constexpr std::array<std::uintmax_t, 3> IDS{
 	std::numeric_limits<std::uintmax_t>::digits * 1 - 1,
 	std::numeric_limits<std::uintmax_t>::digits * 3 - 1,
@@ -252,5 +254,7 @@ TEST(stellarlib_ecs_archetype, should_clear_ids)
 	}
 	check_ids(archetype);
 }
+
+/* NOLINTEND(performance-unnecessary-copy-initialization) */
 
 #pragma clang diagnostic pop

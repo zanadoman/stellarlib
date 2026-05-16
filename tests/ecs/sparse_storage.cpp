@@ -36,6 +36,8 @@ using namespace stellarlib;
 #pragma clang diagnostic ignored "-Wself-assign-overloaded"
 #pragma clang diagnostic ignored "-Wself-move"
 
+/* NOLINTBEGIN(performance-unnecessary-copy-initialization) */
+
 namespace
 {
 struct foo final {};
@@ -79,5 +81,7 @@ TEST(stellarlib_ecs_sparse_storage, should_clear_pairs)
 	ASSERT_FALSE(storage.operator[]<std::int32_t>(ecs::internal::sparse_storage::ids<std::int32_t>().front()).size());
 	ASSERT_FALSE(storage.operator[]<std::int64_t>(ecs::internal::sparse_storage::ids<std::int64_t>().front()).size());
 }
+
+/* NOLINTEND(performance-unnecessary-copy-initialization) */
 
 #pragma clang diagnostic pop

@@ -37,6 +37,8 @@ using namespace stellarlib;
 #pragma clang diagnostic ignored "-Wself-assign-overloaded"
 #pragma clang diagnostic ignored "-Wself-move"
 
+/* NOLINTBEGIN(performance-unnecessary-copy-initialization) */
+
 constexpr std::array<std::uint32_t, 5> KEYS{1, 2, 0, 4, 3};
 
 namespace
@@ -96,5 +98,7 @@ TEST(stellarlib_ecs_sparse_set, should_clear_keys)
 	}
 	check_keys(set);
 }
+
+/* NOLINTEND(performance-unnecessary-copy-initialization) */
 
 #pragma clang diagnostic pop

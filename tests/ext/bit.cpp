@@ -31,10 +31,14 @@ using namespace stellarlib;
 #pragma clang diagnostic ignored "-Wself-assign-overloaded"
 #pragma clang diagnostic ignored "-Wself-move"
 
+/* NOLINTBEGIN(performance-unnecessary-copy-initialization) */
+
 static_assert(ext::bit_index<std::uint8_t>(5) == 0);
 static_assert(ext::bit_index<std::uint8_t>(10) == 1);
 
 static_assert(ext::bit_mask<std::uint8_t>(5) == 0b0010'0000);
 static_assert(ext::bit_mask<std::uint8_t>(10) == 0b0000'0100);
+
+/* NOLINTEND(performance-unnecessary-copy-initialization) */
 
 #pragma clang diagnostic pop

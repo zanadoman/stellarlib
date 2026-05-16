@@ -36,6 +36,8 @@ using namespace stellarlib;
 #pragma clang diagnostic ignored "-Wself-assign-overloaded"
 #pragma clang diagnostic ignored "-Wself-move"
 
+/* NOLINTBEGIN(performance-unnecessary-copy-initialization) */
+
 TEST(stellarlib_lib_transformations, translate)
 {
 	ASSERT_TRUE(lin::internal::all(lin::internal::mul(lin::internal::matrix<float, 1, 3>{0.0F, 0.0F, 1.0F}, lin::translate(lin::internal::matrix<float, 3, 3>{1.0F}, lin::internal::matrix<float, 1, 2>{2.0F, 3.0F})) == lin::internal::matrix<float, 1, 3>{2.0F, 3.0F, 1.0F}));
@@ -141,5 +143,7 @@ TEST(stellarlib_lib_transformations, perspective)
 	ASSERT_LT(0.0F, near_tr.z());
 	ASSERT_NEAR(near_tr.w(), 1.0F, std::numeric_limits<float>::epsilon());
 }
+
+/* NOLINTEND(performance-unnecessary-copy-initialization) */
 
 #pragma clang diagnostic pop

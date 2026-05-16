@@ -32,6 +32,8 @@ using namespace stellarlib;
 #pragma clang diagnostic ignored "-Wself-assign-overloaded"
 #pragma clang diagnostic ignored "-Wself-move"
 
+/* NOLINTBEGIN(performance-unnecessary-copy-initialization) */
+
 namespace
 {
 class trivially_relocatable final
@@ -110,5 +112,7 @@ static_assert(!static_cast<bool>(ext::padding<std::uint8_t, std::uint64_t>::size
 static_assert(ext::padding<std::uint16_t, std::uint8_t>::size == sizeof(std::uint8_t));
 static_assert(ext::padding<std::uint32_t, std::uint8_t, std::uint8_t>::size == sizeof(std::uint16_t));
 static_assert(ext::padding<std::uint64_t, std::uint16_t, std::uint16_t>::size == sizeof(std::uint32_t));
+
+/* NOLINTEND(performance-unnecessary-copy-initialization) */
 
 #pragma clang diagnostic pop

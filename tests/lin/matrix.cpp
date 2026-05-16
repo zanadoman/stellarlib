@@ -41,6 +41,8 @@ using namespace stellarlib;
 #pragma clang diagnostic ignored "-Wself-assign-overloaded"
 #pragma clang diagnostic ignored "-Wself-move"
 
+/* NOLINTBEGIN(performance-unnecessary-copy-initialization) */
+
 static_assert(std::is_standard_layout_v<lin::internal::matrix<float, 2, 2>>);
 static_assert(sizeof(lin::internal::matrix<float, 2, 2>) == 4 * sizeof(float));
 static_assert(ext::is_trivially_relocatable_v<lin::internal::matrix<float, 2, 2>>);
@@ -673,5 +675,7 @@ TEST(stellarlib_lin_matrix, should_stream_and_format)
 	ASSERT_EQ(out2.view(), "[[1, 2], [3, 4]]");
 	ASSERT_EQ(std::format("{}", matrix2), out2.view());
 }
+
+/* NOLINTEND(performance-unnecessary-copy-initialization) */
 
 #pragma clang diagnostic pop

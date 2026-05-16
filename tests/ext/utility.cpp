@@ -33,6 +33,8 @@ using namespace stellarlib;
 #pragma clang diagnostic ignored "-Wself-assign-overloaded"
 #pragma clang diagnostic ignored "-Wself-move"
 
+/* NOLINTBEGIN(performance-unnecessary-copy-initialization) */
+
 namespace
 {
 struct foo final {};
@@ -73,5 +75,7 @@ TEST(stellarlib_ext_utility, scoped_typeid)
 	ASSERT_EQ((ext::scoped_typeid<baz, std::int64_t, std::int8_t>)(), -127);
 	ASSERT_EQ((ext::scoped_typeid<baz, std::int64_t, std::int8_t>)(), -127);
 }
+
+/* NOLINTEND(performance-unnecessary-copy-initialization) */
 
 #pragma clang diagnostic pop

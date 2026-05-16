@@ -31,6 +31,8 @@ using namespace stellarlib;
 #pragma clang diagnostic ignored "-Wself-assign-overloaded"
 #pragma clang diagnostic ignored "-Wself-move"
 
+/* NOLINTBEGIN(performance-unnecessary-copy-initialization) */
+
 TEST(stellarlib_ext_filesystem, base_directory_path)
 {
 	ASSERT_NO_THROW(static_cast<void>(ext::filesystem::base_directory_path()));
@@ -40,5 +42,7 @@ TEST(stellarlib_ext_filesystem, data_directory_path)
 {
 	ASSERT_NO_THROW(static_cast<void>(ext::filesystem::data_directory_path("stellarlib", "tests")));
 }
+
+/* NOLINTEND(performance-unnecessary-copy-initialization) */
 
 #pragma clang diagnostic pop

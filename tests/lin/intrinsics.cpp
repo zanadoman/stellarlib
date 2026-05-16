@@ -37,6 +37,8 @@ using namespace stellarlib;
 #pragma clang diagnostic ignored "-Wself-assign-overloaded"
 #pragma clang diagnostic ignored "-Wself-move"
 
+/* NOLINTBEGIN(performance-unnecessary-copy-initialization) */
+
 static_assert(lin::internal::abs(0.0F) == 0.0F);
 static_assert(lin::internal::all(lin::internal::abs(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}) == lin::internal::matrix<float, 1, 2>{0.5F, 0.5F}));
 static_assert(lin::internal::all(lin::internal::abs(lin::internal::matrix<float, 2, 2>{0.5F, -0.5F, 0.5F, -0.5F}) == lin::internal::matrix<float, 2, 2>{0.5F, 0.5F, 0.5F, 0.5F}));
@@ -519,5 +521,7 @@ TEST(stellarlib_lin_intrinsics, trunc)
 	ASSERT_TRUE(lin::internal::all(lin::internal::trunc(lin::internal::matrix<float, 1, 2>{0.5F, -0.5F}) == lin::internal::matrix<float, 1, 2>{0.0F, 0.0F}));
 	ASSERT_TRUE(lin::internal::all(lin::internal::trunc(lin::internal::matrix<float, 2, 2>{0.5F, -0.5F, 0.5F, -0.5F}) == lin::internal::matrix<float, 2, 2>{0.0F, 0.0F, 0.0F, 0.0F}));
 }
+
+/* NOLINTEND(performance-unnecessary-copy-initialization) */
 
 #pragma clang diagnostic pop
