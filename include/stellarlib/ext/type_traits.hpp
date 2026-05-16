@@ -24,6 +24,8 @@
 #ifndef STELLARLIB_EXT_TYPE_TRAITS_HPP
 #define STELLARLIB_EXT_TYPE_TRAITS_HPP
 
+#include <stellarlib/lin/lin.hpp>
+
 #include <array>
 #include <cstddef>
 #include <tuple>
@@ -80,7 +82,7 @@ struct padding final
 	/**
 	 * @brief Padding bytes
 	 */
-	[[no_unique_address]] std::conditional_t<static_cast<bool>(size), std::array<std::byte, size>, std::tuple<>> bytes;
+	[[no_unique_address]] std::conditional_t<lin::cast<bool>(size), std::array<std::byte, size>, std::tuple<>> bytes;
 };
 }
 

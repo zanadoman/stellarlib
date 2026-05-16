@@ -244,48 +244,6 @@ STELLARLIB_LIN_INTRINSICS_SINGLE_ARG_OPERATION_IMPL(acos, x, {
 	return std::acos(x);
 });
 
-template <typename T>
-[[nodiscard]]
-constexpr auto all(const T x) noexcept
-	requires (std::is_arithmetic_v<T>)
-{
-	return static_cast<bool>(x);
-}
-
-template <typename T, std::size_t M, std::size_t N>
-[[nodiscard]]
-constexpr auto all(const matrix<T, M, N> &x) noexcept
-{
-	return std::ranges::all_of(x, static_cast<bool (*)(T)>(all));
-}
-
-template <typename T>
-[[nodiscard]]
-constexpr auto any(const T x) noexcept
-	requires (std::is_arithmetic_v<T>)
-{
-	return static_cast<bool>(x);
-}
-
-template <typename T, std::size_t M, std::size_t N>
-[[nodiscard]]
-constexpr auto any(const matrix<T, M, N> &x) noexcept
-{
-	return std::ranges::any_of(x, static_cast<bool (*)(T)>(any));
-}
-
-STELLARLIB_LIN_INTRINSICS_SINGLE_ARG_OPERATION_IMPL(asin, x, {
-	return std::asin(x);
-});
-
-STELLARLIB_LIN_INTRINSICS_SINGLE_ARG_OPERATION_IMPL(atan, x, {
-	return std::atan(x);
-});
-
-STELLARLIB_LIN_INTRINSICS_DOUBLE_ARG_OPERATION_IMPL(atan2, y, x, {
-	return std::atan2(y, x);
-});
-
 template <typename T, typename U>
 [[nodiscard]]
 constexpr auto cast(const U x) noexcept
@@ -308,6 +266,48 @@ constexpr auto cast(const matrix<U, M, N> &x) noexcept
 
 	return res;
 }
+
+template <typename T>
+[[nodiscard]]
+constexpr auto all(const T x) noexcept
+	requires (std::is_arithmetic_v<T>)
+{
+	return cast<bool>(x);
+}
+
+template <typename T, std::size_t M, std::size_t N>
+[[nodiscard]]
+constexpr auto all(const matrix<T, M, N> &x) noexcept
+{
+	return std::ranges::all_of(x, static_cast<bool (*)(T)>(all));
+}
+
+template <typename T>
+[[nodiscard]]
+constexpr auto any(const T x) noexcept
+	requires (std::is_arithmetic_v<T>)
+{
+	return cast<bool>(x);
+}
+
+template <typename T, std::size_t M, std::size_t N>
+[[nodiscard]]
+constexpr auto any(const matrix<T, M, N> &x) noexcept
+{
+	return std::ranges::any_of(x, static_cast<bool (*)(T)>(any));
+}
+
+STELLARLIB_LIN_INTRINSICS_SINGLE_ARG_OPERATION_IMPL(asin, x, {
+	return std::asin(x);
+});
+
+STELLARLIB_LIN_INTRINSICS_SINGLE_ARG_OPERATION_IMPL(atan, x, {
+	return std::atan(x);
+});
+
+STELLARLIB_LIN_INTRINSICS_DOUBLE_ARG_OPERATION_IMPL(atan2, y, x, {
+	return std::atan2(y, x);
+});
 
 STELLARLIB_LIN_INTRINSICS_SINGLE_ARG_OPERATION_IMPL(ceil, x, {
 	return std::ceil(x);
@@ -412,7 +412,7 @@ constexpr auto determinant(matrix<T, N, N> m) noexcept
 			determinant *= -1;
 		}
 
-		if (!static_cast<bool>(m[i][i])) {
+		if (!cast<bool>(m[i][i])) {
 			return T{};
 		}
 
@@ -691,7 +691,7 @@ STELLARLIB_LIN_INTRINSICS_SINGLE_ARG_OPERATION_IMPL(frac, x, {
 });
 
 STELLARLIB_LIN_INTRINSICS_DOUBLE_ARG_OPERATION_IMPL(ldexp, x, exp, {
-	return std::ldexp(x, static_cast<std::int32_t>(exp));
+	return std::ldexp(x, cast<std::int32_t>(exp));
 });
 
 STELLARLIB_LIN_INTRINSICS_TRIPLE_ARG_OPERATION_IMPL(lerp, x, y, s, {
@@ -930,7 +930,7 @@ STELLARLIB_LIN_INTRINSICS_SINGLE_ARG_OPERATION_IMPL(saturate, x, {
 });
 
 STELLARLIB_LIN_INTRINSICS_SINGLE_ARG_OPERATION_IMPL(sign, x, {
-	return static_cast<T>((0 < x) - (x < 0));
+	return cast<T>((0 < x) - (x < 0));
 });
 
 STELLARLIB_LIN_INTRINSICS_SINGLE_ARG_OPERATION_IMPL(sin, x, {

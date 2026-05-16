@@ -69,7 +69,7 @@ public:
 		std::set_terminate([] [[noreturn]] noexcept -> void {
 			const auto exception{std::current_exception()};
 
-			constexpr auto report{[] (const char *what) noexcept -> void {
+			constexpr auto report{[] (const auto what) noexcept -> void {
 				SDL_LogCritical(SDL_LOG_CATEGORY_ERROR, "%s", what);
 				const auto title{SDL_GetAppMetadataProperty(SDL_PROP_APP_METADATA_NAME_STRING)};
 

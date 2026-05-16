@@ -200,7 +200,7 @@ void image::blend(const lin::uint2 coord, const lin::float4 &src, const std::opt
 		return;
 	}
 
-	constexpr auto resolve_op{[] [[nodiscard]] (const blend_op blend_op, const lin::float4 &lhs, const lin::float4 &rhs) -> auto {
+	constexpr auto resolve_op{[] [[nodiscard]] (const auto blend_op, const auto &lhs, const auto &rhs) -> auto {
 		switch (blend_op) {
 		case blend_op::add: {
 			return lhs + rhs;
@@ -223,7 +223,7 @@ void image::blend(const lin::uint2 coord, const lin::float4 &src, const std::opt
 		}}
 	}};
 
-	constexpr auto resolve_factor{[] [[nodiscard]] (const blend_factor blend_factor, const lin::float4 &src, const lin::float4 &dst) -> auto {
+	constexpr auto resolve_factor{[] [[nodiscard]] (const auto blend_factor, const auto &src, const auto &dst) -> auto {
 		switch (blend_factor) {
 		case blend_factor::zero: {
 			return lin::float4{0.0F, 0.0F, 0.0F, 0.0F};

@@ -26,6 +26,7 @@
 
 #include <stellarlib/ecs/sparse_storage.hpp>
 #include <stellarlib/ext/memory.hpp>
+#include <stellarlib/lin/lin.hpp>
 
 #include <cstdint>
 #include <type_traits>
@@ -49,7 +50,7 @@ public:
 	template <typename ...T>
 	[[nodiscard]]
 	static constexpr auto of() noexcept
-		-> std::conditional_t<static_cast<bool>(sizeof...(T)), const archetype &, archetype>
+		-> std::conditional_t<lin::cast<bool>(sizeof...(T)), const archetype &, archetype>
 	{
 		if constexpr (sizeof...(T)) {
 			static const auto cache{[] [[nodiscard]] noexcept -> archetype {

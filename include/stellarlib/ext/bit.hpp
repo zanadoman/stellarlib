@@ -24,6 +24,8 @@
 #ifndef STELLARLIB_EXT_BIT_HPP
 #define STELLARLIB_EXT_BIT_HPP
 
+#include <stellarlib/lin/lin.hpp>
+
 #include <limits>
 
 /**
@@ -41,7 +43,7 @@ template <typename T>
 [[nodiscard]]
 constexpr auto bit_index(const T arg) noexcept
 {
-	return static_cast<T>(arg / std::numeric_limits<T>::digits);
+	return lin::cast<T>(arg / std::numeric_limits<T>::digits);
 }
 
 /**
@@ -54,7 +56,7 @@ template <typename T>
 [[nodiscard]]
 constexpr auto bit_mask(const T arg) noexcept
 {
-	return static_cast<T>(T{1} << static_cast<T>(arg % std::numeric_limits<T>::digits));
+	return lin::cast<T>(T{1} << lin::cast<T>(arg % std::numeric_limits<T>::digits));
 }
 }
 

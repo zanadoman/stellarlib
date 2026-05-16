@@ -58,7 +58,7 @@ constexpr void check_clock(app::context &ctx)
 	assert(ctx.clock().max_delta() == 0.05F);
 	ctx.clock().set_max_delta(0.025F);
 	assert(ctx.clock().max_delta() == 0.025F);
-	assert(!static_cast<bool>(ctx.clock().delta()));
+	assert(!lin::cast<bool>(ctx.clock().delta()));
 }
 
 constexpr void check_window(app::context &ctx)
@@ -92,7 +92,7 @@ auto app::init(const std::vector<std::string> &args)
 		.window = {
 			.title = "org.stellarlib.healthcheck"
 		},
-		.entry = [] [[nodiscard]] (context &ctx) -> auto {
+		.entry = [] [[nodiscard]] (auto &ctx) -> auto {
 			check_metadata(ctx);
 			check_clock(ctx);
 			check_window(ctx);

@@ -33,6 +33,7 @@
 #include <stellarlib/ecs/stack_vector.hpp>
 #include <stellarlib/ext/type_traits.hpp>
 #include <stellarlib/ext/utility.hpp>
+#include <stellarlib/lin/lin.hpp>
 
 #include <algorithm>
 #include <cstddef>
@@ -153,7 +154,7 @@ public:
 	[[nodiscard]]
 	constexpr auto insert(const std::uint32_t entity, T &&...components) noexcept
 		-> std::expected<void, std::tuple<T...>>
-		requires (static_cast<bool>(sizeof...(T)))
+		requires (lin::cast<bool>(sizeof...(T)))
 	{
 		if (const auto pair{_entities.at(entity)}; (!pair || pair->second) && !spawning(entity)) {
 			return std::unexpected{std::tuple{std::forward<T>(components)...}};
@@ -233,7 +234,7 @@ public:
 	template <typename ...T>
 	[[nodiscard]]
 	constexpr auto contains(const std::uint32_t entity) const noexcept
-		requires (static_cast<bool>(sizeof...(T)))
+		requires (lin::cast<bool>(sizeof...(T)))
 	{
 		if (const auto pair{_entities.at(entity)}) {
 			return [] <std::size_t ...I> [[nodiscard]] (const auto &archetype, const std::index_sequence<I...>) noexcept -> auto {
@@ -263,7 +264,7 @@ public:
 	template <typename ...T>
 	[[nodiscard]]
 	constexpr auto at(const std::uint32_t entity) const noexcept
-		requires (static_cast<bool>(sizeof...(T)))
+		requires (lin::cast<bool>(sizeof...(T)))
 	{
 		return [this] <std::size_t ...I> [[nodiscard]] (const auto entity, const std::index_sequence<I...>) noexcept -> auto {
 			const auto &ids{internal::sparse_storage::ids<T...>()};
@@ -280,7 +281,7 @@ public:
 	template <typename ...T>
 	[[nodiscard]]
 	constexpr auto at(const std::uint32_t entity) noexcept
-		requires (static_cast<bool>(sizeof...(T)))
+		requires (lin::cast<bool>(sizeof...(T)))
 	{
 		return [this] <std::size_t ...I> [[nodiscard]] (const auto entity, const std::index_sequence<I...>) noexcept -> auto {
 			const auto &ids{internal::sparse_storage::ids<T...>()};
@@ -308,7 +309,7 @@ public:
 	template <typename ...T>
 	[[nodiscard]]
 	constexpr auto operator[](const std::uint32_t entity) const noexcept
-		requires (static_cast<bool>(sizeof...(T)))
+		requires (lin::cast<bool>(sizeof...(T)))
 	{
 		return [this] <std::size_t ...I> [[nodiscard]] (const auto entity, const std::index_sequence<I...>) noexcept -> auto {
 			const auto &ids{internal::sparse_storage::ids<T...>()};
@@ -326,7 +327,7 @@ public:
 	template <typename ...T>
 	[[nodiscard]]
 	constexpr auto operator[](const std::uint32_t entity) noexcept
-		requires (static_cast<bool>(sizeof...(T)))
+		requires (lin::cast<bool>(sizeof...(T)))
 	{
 		return [this] <std::size_t ...I> [[nodiscard]] (const auto entity, const std::index_sequence<I...>) noexcept -> auto {
 			const auto &ids{internal::sparse_storage::ids<T...>()};
@@ -392,7 +393,7 @@ public:
 				}
 			}
 			else {
-				_queries[id] = static_cast<std::uint16_t>(pair - _indices.begin());
+				_queries[id] = lin::cast<std::uint16_t>(pair - _indices.begin());
 			}
 		}
 
@@ -417,7 +418,7 @@ public:
 	 */
 	template <typename ...T>
 	constexpr void erase(const std::uint32_t entity) noexcept
-		requires (static_cast<bool>(sizeof...(T)))
+		requires (lin::cast<bool>(sizeof...(T)))
 	{
 		if (const auto pair{_entities.at(entity)}; (!pair || pair->second) && !spawning(entity)) {
 			return;
@@ -522,7 +523,7 @@ private:
 				_entities.insert(entity, pair - _archetypes.begin(), false);
 			}
 			else if constexpr (std::is_same_v<T, std::uint16_t>) {
-				_entities[entity].first = static_cast<std::uint16_t>(pair - _archetypes.begin());
+				_entities[entity].first = lin::cast<std::uint16_t>(pair - _archetypes.begin());
 			}
 
 			pair->second.insert(entity);

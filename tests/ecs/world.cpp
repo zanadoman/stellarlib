@@ -24,6 +24,7 @@
 #include <stellarlib/ecs/world.hpp>
 
 #include <stellarlib/ecs/archetype.hpp>
+#include <stellarlib/lin/lin.hpp>
 
 #include <algorithm>
 #include <cstdint>
@@ -46,7 +47,7 @@ namespace
 [[nodiscard]]
 constexpr auto number_of(const std::uint32_t entity)
 {
-	return static_cast<std::int32_t>(entity * 5);
+	return lin::cast<std::int32_t>(entity * 5);
 }
 
 [[nodiscard]]
@@ -239,7 +240,7 @@ TEST(stellarlib_ecs_world, should_spawn_and_despawn_entities)
 {
 	ecs::world world{};
 	for (const auto entity : std::views::iota(std::uint32_t{}, std::uint32_t{10})) {
-		if (static_cast<bool>(entity % 2)) {
+		if (lin::cast<bool>(entity % 2)) {
 			ASSERT_EQ(world.spawn(number_of(entity), string_of(entity)), entity);
 		}
 		else {
@@ -251,7 +252,7 @@ TEST(stellarlib_ecs_world, should_spawn_and_despawn_entities)
 		world.despawn(entity);
 		ASSERT_EQ(world.size(), entity);
 		check_despawned_entity(world, entity);
-		if (static_cast<bool>(entity % 2)) {
+		if (lin::cast<bool>(entity % 2)) {
 			ASSERT_EQ(world.spawn(string_of(entity), number_of(entity)), entity);
 		}
 		else {
@@ -296,7 +297,7 @@ TEST(stellarlib_ecs_world, should_insert_and_erase_components)
 	world.erase<std::int32_t, std::string>({});
 	world.erase<std::string, std::int32_t>({});
 	for (const auto entity : std::views::iota(std::uint32_t{}, std::uint32_t{10})) {
-		if (static_cast<bool>(entity % 2)) {
+		if (lin::cast<bool>(entity % 2)) {
 			world.spawn();
 			check_entity_without_components(world, entity);
 			*world.insert(entity, number_of(entity), string_of(entity));
@@ -347,15 +348,15 @@ TEST(stellarlib_ecs_world, should_handle_nested_modifications)
 			ASSERT_FALSE(world.spawning(entity));
 			ASSERT_FALSE(world.contains(entity));
 			ASSERT_FALSE(world.despawning(entity));
-			ASSERT_EQ(world.insert(entity, static_cast<bool>(entity % 2)).error(), std::tuple{static_cast<bool>(entity % 2)});
+			ASSERT_EQ(world.insert(entity, lin::cast<bool>(entity % 2)).error(), std::tuple{lin::cast<bool>(entity % 2)});
 			world.erase<bool>(entity);
 			world.erase<bool>(entity);
 			ASSERT_EQ(world.spawn(number_of(entity), string_of(entity)), entity);
 			ASSERT_TRUE(world.spawning(entity));
 			ASSERT_FALSE(world.contains(entity));
 			ASSERT_FALSE(world.despawning(entity));
-			*world.insert(entity, static_cast<bool>(entity % 2));
-			*world.insert(entity, static_cast<bool>(entity % 2));
+			*world.insert(entity, lin::cast<bool>(entity % 2));
+			*world.insert(entity, lin::cast<bool>(entity % 2));
 			ASSERT_FALSE(world.size());
 			check_entities(world);
 		}
@@ -374,15 +375,15 @@ TEST(stellarlib_ecs_world, should_handle_nested_modifications)
 		ASSERT_FALSE(world.spawning(entity));
 		ASSERT_TRUE(world.contains(entity));
 		ASSERT_TRUE(world.despawning(entity));
-		ASSERT_EQ(world.insert(entity, static_cast<bool>(entity % 2)).error(), std::tuple{static_cast<bool>(entity % 2)});
+		ASSERT_EQ(world.insert(entity, lin::cast<bool>(entity % 2)).error(), std::tuple{lin::cast<bool>(entity % 2)});
 		world.erase<bool>(entity);
 		world.erase<bool>(entity);
 		ASSERT_EQ(world.spawn(std::int32_t{number}, std::string{string}), entity);
 		ASSERT_FALSE(world.spawning(entity));
 		ASSERT_TRUE(world.contains(entity));
 		ASSERT_FALSE(world.despawning(entity));
-		*world.insert(entity, static_cast<bool>(entity % 2));
-		*world.insert(entity, static_cast<bool>(entity % 2));
+		*world.insert(entity, lin::cast<bool>(entity % 2));
+		*world.insert(entity, lin::cast<bool>(entity % 2));
 		ASSERT_EQ(world.size(), 10);
 		check_entities(world);
 	}
@@ -402,7 +403,7 @@ TEST(stellarlib_ecs_world, should_handle_nested_modifications)
 		ASSERT_FALSE(world.spawning(entity));
 		ASSERT_TRUE(world.contains(entity));
 		ASSERT_TRUE(world.despawning(entity));
-		ASSERT_EQ(world.insert(entity, static_cast<bool>(entity % 2)).error(), std::tuple{static_cast<bool>(entity % 2)});
+		ASSERT_EQ(world.insert(entity, lin::cast<bool>(entity % 2)).error(), std::tuple{lin::cast<bool>(entity % 2)});
 		world.erase<bool>(entity);
 		world.erase<bool>(entity);
 		ASSERT_EQ(world.spawn(std::int32_t{number}, std::string{string}), entity);

@@ -39,7 +39,7 @@ clock::~clock() = default;
 auto clock::now() const
 	-> float
 {
-	return static_cast<float>(SDL_NS_TO_SECONDS(static_cast<double>(SDL_GetTicksNS())));
+	return lin::cast<float>(SDL_NS_TO_SECONDS(lin::cast<double>(SDL_GetTicksNS())));
 }
 
 auto clock::target_frequency() const

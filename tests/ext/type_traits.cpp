@@ -23,6 +23,8 @@
 
 #include <stellarlib/ext/type_traits.hpp>
 
+#include <stellarlib/lin/lin.hpp>
+
 #include <cstdint>
 #include <type_traits>
 
@@ -108,7 +110,7 @@ static_assert(ext::is_trivially_relocatable_v<trivially_relocatable>);
 static_assert(!ext::is_trivially_relocatable_v<non_trivially_move_constructible>);
 static_assert(!ext::is_trivially_relocatable_v<non_trivially_destructible>);
 
-static_assert(!static_cast<bool>(ext::padding<std::uint8_t, std::uint64_t>::size));
+static_assert(!lin::cast<bool>(ext::padding<std::uint8_t, std::uint64_t>::size));
 static_assert(ext::padding<std::uint16_t, std::uint8_t>::size == sizeof(std::uint8_t));
 static_assert(ext::padding<std::uint32_t, std::uint8_t, std::uint8_t>::size == sizeof(std::uint16_t));
 static_assert(ext::padding<std::uint64_t, std::uint16_t, std::uint16_t>::size == sizeof(std::uint32_t));

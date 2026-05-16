@@ -24,6 +24,7 @@
 #include <stellarlib/ext/memory.hpp>
 
 #include <stellarlib/ext/type_traits.hpp>
+#include <stellarlib/lin/lin.hpp>
 
 #include <gtest/gtest.h>
 
@@ -469,7 +470,7 @@ TEST(stellarlib_ext_memory, arena_allocator_should_allocate_and_deallocate)
 	allocator.deallocate();
 	std::vector<void *> ptrs{};
 	for (const auto i : std::views::iota(std::uint16_t{}, std::numeric_limits<std::uint16_t>::max())) {
-		if (static_cast<bool>(i % 2)) {
+		if (lin::cast<bool>(i % 2)) {
 			ptrs.emplace_back(allocator.allocate<std::int32_t>());
 			ASSERT_TRUE(ptrs.back());
 			std::construct_at(static_cast<std::int32_t *>(ptrs.back()), i);
@@ -481,7 +482,7 @@ TEST(stellarlib_ext_memory, arena_allocator_should_allocate_and_deallocate)
 		}
 	}
 	for (const auto i : std::views::iota(std::uint16_t{}, std::numeric_limits<std::uint16_t>::max())) {
-		if (static_cast<bool>(i % 2)) {
+		if (lin::cast<bool>(i % 2)) {
 			ASSERT_EQ(*static_cast<const std::int32_t *>(ptrs[i]), i);
 			std::destroy_at(static_cast<std::int32_t *>(ptrs[i]));
 		}

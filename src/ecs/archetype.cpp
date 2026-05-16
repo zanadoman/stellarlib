@@ -24,6 +24,7 @@
 #include <stellarlib/ecs/archetype.hpp>
 
 #include <stellarlib/ext/bit.hpp>
+#include <stellarlib/lin/lin.hpp>
 
 #include <algorithm>
 #include <cstdint>
@@ -39,7 +40,7 @@ archetype::archetype() noexcept = default;
 archetype::archetype(const archetype &other) noexcept
 	: _size{other._size}
 {
-	if (static_cast<bool>(_size)) {
+	if (lin::cast<bool>(_size)) {
 		_capacity = _size;
 		allocate(_begin, _capacity);
 		_end = _begin + _size;
@@ -130,7 +131,7 @@ void archetype::insert(const archetype &other) noexcept
 auto archetype::contains(const std::uintmax_t id) const noexcept
 	-> bool
 {
-	return ext::bit_index(id) < _size && static_cast<bool>(_begin[ext::bit_index(id)] & ext::bit_mask(id));
+	return ext::bit_index(id) < _size && lin::cast<bool>(_begin[ext::bit_index(id)] & ext::bit_mask(id));
 }
 
 auto archetype::operator==(const archetype &other) const noexcept
@@ -161,8 +162,8 @@ void archetype::erase(const std::uintmax_t id) noexcept
 
 	_begin[ext::bit_index(id)] &= ~ext::bit_mask(id);
 
-	while (!static_cast<bool>(_begin[_size - 1])) {
-		if (!static_cast<bool>(--_size)) {
+	while (!lin::cast<bool>(_begin[_size - 1])) {
+		if (!lin::cast<bool>(--_size)) {
 			break;
 		}
 	}
@@ -176,7 +177,7 @@ void archetype::erase(const archetype &other) noexcept
 		lhs &= ~rhs;
 	}
 
-	while (static_cast<bool>(_size) && !static_cast<bool>(_begin[_size - 1])) {
+	while (lin::cast<bool>(_size) && !lin::cast<bool>(_begin[_size - 1])) {
 		--_size;
 	}
 

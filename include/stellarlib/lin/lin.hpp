@@ -1166,6 +1166,11 @@ using internal::abs;
 using internal::acos;
 
 /**
+ * @brief Casts x from type U to type T (per-component)
+ */
+using internal::cast;
+
+/**
  * @brief Determines if all components of x are truthy
  */
 using internal::all;
@@ -1189,11 +1194,6 @@ using internal::atan;
  * @brief Returns the arctangent of y and x (per-component)
  */
 using internal::atan2;
-
-/**
- * @brief Casts x from type U to type T (per-component)
- */
-using internal::cast;
 
 /**
  * @brief Returns the smallest integer value that is greater than or equal to x (per-component)
