@@ -30,6 +30,7 @@
 #include <limits>
 #include <memory>
 #include <ranges>
+#include <span>
 #include <type_traits>
 #include <utility>
 
@@ -114,25 +115,25 @@ public:
 	[[nodiscard]]
 	constexpr auto values() const noexcept
 	{
-		return std::ranges::subrange{_values.begin(), _values.end()};
+		return std::span{_values.begin(), _values.size()};
 	}
 
 	[[nodiscard]]
 	constexpr auto values() noexcept
 	{
-		return std::ranges::subrange{_values.begin(), _values.end()};
+		return std::span{_values.begin(), _values.size()};
 	}
 
 	[[nodiscard]]
 	constexpr auto zip() const noexcept
 	{
-		return std::views::zip(std::ranges::subrange{static_cast<const Key *>(_keys.begin()), static_cast<const Key *>(_keys.end())}, values());
+		return std::views::zip(std::span{static_cast<const Key *>(_keys.begin()), _keys.size()}, values());
 	}
 
 	[[nodiscard]]
 	constexpr auto zip() noexcept
 	{
-		return std::views::zip(std::ranges::subrange{static_cast<const Key *>(_keys.begin()), static_cast<const Key *>(_keys.end())}, values());
+		return std::views::zip(std::span{static_cast<const Key *>(_keys.begin()), _keys.size()}, values());
 	}
 
 	constexpr void erase(const Key key) noexcept final

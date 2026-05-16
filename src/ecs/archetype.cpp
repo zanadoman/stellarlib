@@ -29,6 +29,7 @@
 #include <cstdint>
 #include <memory>
 #include <ranges>
+#include <span>
 #include <utility>
 
 namespace stellarlib::ecs
@@ -110,7 +111,7 @@ void archetype::insert(const std::uintmax_t id) noexcept
 
 void archetype::insert(const archetype &other) noexcept
 {
-	for (const auto [lhs, rhs] : std::views::zip(std::ranges::subrange{_begin, _end}, std::ranges::subrange{other._begin, other._end})) {
+	for (const auto [lhs, rhs] : std::views::zip(std::span{_begin, _size}, std::span{other._begin, other._size})) {
 		lhs |= rhs;
 	}
 
@@ -141,7 +142,7 @@ auto archetype::operator==(const archetype &other) const noexcept
 auto archetype::operator<=(const archetype &other) const noexcept
 	-> bool
 {
-	return _size <= other._size && std::ranges::all_of(std::views::zip(std::ranges::subrange{_begin, _end}, std::ranges::subrange{other._begin, other._end}), [] [[nodiscard]] (const auto &pair) noexcept -> auto {
+	return _size <= other._size && std::ranges::all_of(std::views::zip(std::span{_begin, _size}, std::span{other._begin, other._size}), [] [[nodiscard]] (const auto &pair) noexcept -> auto {
 		return (std::get<0>(pair) & std::get<1>(pair)) == std::get<0>(pair);
 	});
 }
@@ -171,7 +172,7 @@ void archetype::erase(const std::uintmax_t id) noexcept
 
 void archetype::erase(const archetype &other) noexcept
 {
-	for (const auto [lhs, rhs] : std::views::zip(std::ranges::subrange{_begin, _end}, std::ranges::subrange{other._begin, other._end})) {
+	for (const auto [lhs, rhs] : std::views::zip(std::span{_begin, _size}, std::span{other._begin, other._size})) {
 		lhs &= ~rhs;
 	}
 
