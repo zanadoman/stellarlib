@@ -38,11 +38,20 @@
 #include <span>
 #include <utility>
 
+/**
+ * @brief Resource management utilities
+ */
 namespace stellarlib::res
 {
+/**
+ * @brief Image resource
+ */
 class image final
 {
 public:
+	/**
+	 * @brief Addressing mode
+	 */
 	enum class address_mode : std::uint8_t
 	{
 		repeat,
@@ -50,12 +59,18 @@ public:
 		clamp_to_edge
 	};
 
+	/**
+	 * @brief Filtering method
+	 */
 	enum class filter : std::uint8_t
 	{
 		nearest,
 		linear
 	};
 
+	/**
+	 * @brief Blending factor
+	 */
 	enum class blend_factor : std::uint8_t
 	{
 		zero,
@@ -71,6 +86,9 @@ public:
 		src_alpha_saturate
 	};
 
+	/**
+	 * @brief Blending operation
+	 */
 	enum class blend_op : std::uint8_t
 	{
 		add,
@@ -80,21 +98,59 @@ public:
 		max
 	};
 
+	/**
+	 * @brief Blend state
+	 */
 	struct blend_state final
 	{
+		/**
+		 * @brief Source color blending factor
+		 */
 		blend_factor src_color_blend_factor;
+
+		/**
+		 * @brief Destination color blending factor
+		 */
 		blend_factor dst_color_blend_factor;
+
+		/**
+		 * @brief Color blending operator
+		 */
 		blend_op color_blend_op;
+
+		/**
+		 * @brief Source alpha blending factor
+		 */
 		blend_factor src_alpha_blend_factor;
+
+		/**
+		 * @brief Destination alpha blending factor
+		 */
 		blend_factor dst_alpha_blend_factor;
+
+		/**
+		 * @brief Alpha blending operator
+		 */
 		blend_op alpha_blend_op;
 	};
 
+	/**
+	 * @brief Pixel format of the image
+	 */
 	static constexpr auto format{SDL_PIXELFORMAT_ABGR8888};
 
+	/**
+	 * @brief Constructs a zero initialized image with the specified size
+	 * @param size Size of the image
+	 */
 	[[nodiscard]]
 	explicit image(lin::uint2 size);
 
+	/**
+	 * @brief Constructs an image from the specified size and data
+	 * @param size Size of the image
+	 * @param range Data of the image
+	 */
 	template <std::ranges::input_range R>
 	[[nodiscard]]
 	constexpr image(const lin::uint2 size, R &&range)
@@ -103,66 +159,152 @@ public:
 		clear(std::forward<R>(range));
 	}
 
+	/**
+	 * @brief Constructs an image from a PNG image
+	 * @param path Path of the PNG image
+	 */
 	[[nodiscard]]
 	explicit image(const std::filesystem::path &path);
 
+	/**
+	 * @brief Copy constructor
+	 * @param other Other instance
+	 */
 	[[nodiscard]]
 	image(const image &other);
 
+	/**
+	 * @brief Move constructor
+	 * @param other Other instance
+	 */
 	[[nodiscard]]
-	image(image &&other) noexcept;
+	image(image &&other);
 
+	/**
+	 * @brief Copy assignment operator
+	 * @param other Other instance
+	 * @return Current instance
+	 */
 	auto operator=(const image &other)
 		-> image &;
 
-	auto operator=(image &&other) noexcept
+	/**
+	 * @brief Move assignment operator
+	 * @param other Other instance
+	 * @return Current instance
+	 */
+	auto operator=(image &&other)
 		-> image &;
 
+	/**
+	 * @brief Destructor
+	 */
 	~image();
 
+	/**
+	 * @brief Returns a pointer to the internal handle
+	 * @return Pointer to the internal handle
+	 * @warning Intended for internal/professional use
+	 */
 	[[nodiscard]]
 	explicit operator SDL_Surface *() const;
 
+	/**
+	 * @brief Returns the size of the image
+	 * @return Size of the image
+	 */
 	[[nodiscard]]
 	auto size() const
 		-> lin::uint2;
 
+	/**
+	 * @brief Returns the pixel at the specified coordinate
+	 * @param coord Coordinate of the pixel
+	 * @return The pixel at the specified coordinate
+	 */
 	[[nodiscard]]
 	auto operator[](lin::uint2 coord) const
 		-> const lin::uchar4 &;
 
+	/**
+	 * @brief Returns the pixel at the specified coordinate
+	 * @param coord Coordinate of the pixel
+	 * @return The pixel at the specified coordinate
+	 */
 	[[nodiscard]]
 	auto operator[](lin::uint2 coord)
 		-> lin::uchar4 &;
 
+	/**
+	 * @brief Returns the bytes of the image
+	 * @return Bytes of the image
+	 */
 	[[nodiscard]]
 	auto bytes() const
 		-> std::span<const std::uint8_t>;
 
+	/**
+	 * @brief Returns the bytes of the image
+	 * @return Bytes of the image
+	 */
 	[[nodiscard]]
 	auto bytes()
 		-> std::span<std::uint8_t>;
 
+	/**
+	 * @brief Returns the pixels of the image
+	 * @return Pixels of the image
+	 */
 	[[nodiscard]]
 	auto pixels() const
 		-> std::span<const lin::uchar4>;
 
+	/**
+	 * @brief Returns the pixels of the image
+	 * @return Pixels of the image
+	 */
 	[[nodiscard]]
 	auto pixels()
 		-> std::span<lin::uchar4>;
 
+	/**
+	 * @brief Samples a color from the image
+	 * @param uv UV coordinate
+	 * @param address_mode Addressing mode
+	 * @param filter Filtering method
+	 * @return Sampled color from the image
+	 */
 	[[nodiscard]]
 	auto sample(lin::float2 uv, address_mode address_mode, filter filter) const
 		-> lin::float4;
 
+	/**
+	 * @brief Blends a color into the image
+	 * @param coord Pixel coordinate
+	 * @param src Source color
+	 * @param blend_state Optional blend state
+	 */
 	void blend(lin::uint2 coord, const lin::float4 &src, const std::optional<blend_state> &blend_state);
 
+	/**
+	 * @brief Comparison operator
+	 * @param other Other instance
+	 * @return Result of the comparison
+	 */
 	[[nodiscard]]
 	auto operator==(const image &other) const
 		-> bool;
 
+	/**
+	 * @brief Saves the image as a PNG image
+	 * @param path Path of the PNG image
+	 */
 	void save(const std::filesystem::path &path) const;
 
+	/**
+	 * @brief Clears the image with the provided data
+	 * @param range Data of the image
+	 */
 	template <std::ranges::input_range R>
 	constexpr void clear(R &&range)
 	{

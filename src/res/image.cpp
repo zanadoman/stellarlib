@@ -56,7 +56,7 @@ image::image(const lin::uint2 size)
 }
 
 image::image(const std::filesystem::path &path)
-	: _handle{SDL_LoadPNG(path.c_str()), SDL_DestroySurface}
+	: _handle{SDL_LoadPNG(path.string().c_str()), SDL_DestroySurface}
 {
 	if (!_handle) {
 		throw std::runtime_error{SDL_GetError()};
@@ -81,7 +81,7 @@ image::image(const image &other)
 	}
 }
 
-image::image(image &&other) noexcept = default;
+image::image(image &&other) = default;
 
 auto image::operator=(const image &other)
 	-> image &
@@ -101,7 +101,7 @@ auto image::operator=(const image &other)
 	return *this;
 }
 
-auto image::operator=(image &&other) noexcept
+auto image::operator=(image &&other)
 	-> image & = default;
 
 image::~image() = default;
@@ -278,7 +278,7 @@ auto image::operator==(const image &other) const
 
 void image::save(const std::filesystem::path &path) const
 {
-	if (!SDL_SavePNG(_handle.get(), path.c_str())) {
+	if (!SDL_SavePNG(_handle.get(), path.string().c_str())) {
 		throw std::runtime_error{SDL_GetError()};
 	}
 }

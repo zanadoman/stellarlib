@@ -23,12 +23,14 @@ Opinionated, cross-platform game engine library in [C++23](https://en.cppreferen
   - [x] Generic vector and matrix implementation
   - [x] Common shader intrinsics functions
   - [x] Common 2D/3D transformations
+- [x] Resource Management Utilities
+  - [x] Image resource
 - [x] Application Runtime
   - [x] Scene management
   - [x] Metadata subsystem
   - [x] Clock subsystem
-  - [ ] Input subsystem
   - [ ] Window subsystem
+  - [ ] Input subsystem
   - [ ] Universal renderer
   - [ ] Audio subsystem
 
