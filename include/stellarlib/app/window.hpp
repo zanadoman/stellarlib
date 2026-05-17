@@ -30,7 +30,6 @@
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_video.h>
 
-#include <memory>
 #include <string>
 
 /**
@@ -106,7 +105,7 @@ public:
 	void set_title(const std::string &title);
 
 private:
-	std::unique_ptr<SDL_Window, void (*)(SDL_Window *)> _handle{nullptr, nullptr};
+	SDL_Window *_handle{};
 
 	[[nodiscard]]
 	explicit window(const info &info);
