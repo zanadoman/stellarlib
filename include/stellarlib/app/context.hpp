@@ -34,7 +34,8 @@
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_init.h>
 
-#include <cstdint>
+#include <array>
+#include <cstddef>
 #include <functional>
 #include <memory>
 #include <variant>
@@ -71,11 +72,6 @@ public:
 		 * @brief Window initialization descriptor
 		 */
 		app::window::info window;
-
-		/**
-		 * @brief Explicit padding
-		 */
-		std::uint64_t padding;
 
 		/**
 		 * @brief Initial scene, application termination, or deferred scene factory
@@ -179,11 +175,11 @@ public:
 private:
 	[[no_unique_address]] app::metadata _metadata;
 	app::clock _clock;
-	std::uint32_t _padding1;
+	std::array<std::byte, 4> _padding1;
 	app::window _window;
 	ecs::world _world;
 	std::unique_ptr<scene> _scene;
-	std::uint64_t _padding2;
+	std::array<std::byte, 8> _padding2;
 
 	[[nodiscard]]
 	explicit context(info info);
