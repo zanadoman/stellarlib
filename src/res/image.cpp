@@ -37,28 +37,28 @@
 #include <optional>
 #include <span>
 #include <stdexcept>
+#include <utility>
 
 namespace stellarlib::res
 {
 image::image(const lin::uint2 size)
-	: _handle{nullptr, nullptr}
 {
 	if (!lin::all(size) || lin::any(lin::cast<std::uint32_t>(std::numeric_limits<std::int32_t>::max()) < size)) {
 		SDL_InvalidParamError("size");
 		throw std::invalid_argument{SDL_GetError()};
 	}
 
-	_handle = {SDL_CreateSurface(lin::cast<std::int32_t>(size.x()), lin::cast<std::int32_t>(size.y()), format), SDL_DestroySurface};
+	_handle = SDL_CreateSurface(lin::cast<std::int32_t>(size.x()), lin::cast<std::int32_t>(size.y()), format);
 
-	if (!_handle) {
+	if (!static_cast<bool>(_handle)) {
 		throw std::runtime_error{SDL_GetError()};
 	}
 }
 
 image::image(const std::filesystem::path &path)
-	: _handle{SDL_LoadPNG(path.string().c_str()), SDL_DestroySurface}
+	: _handle{SDL_LoadPNG(path.string().c_str())}
 {
-	if (!_handle) {
+	if (!static_cast<bool>(_handle)) {
 		throw std::runtime_error{SDL_GetError()};
 	}
 
@@ -66,22 +66,26 @@ image::image(const std::filesystem::path &path)
 		return;
 	}
 
-	_handle.reset(SDL_ConvertSurface(_handle.get(), format));
+	const auto handle{SDL_ConvertSurface(_handle, format)};
+	SDL_DestroySurface(_handle);
+	_handle = handle;
 
-	if (!_handle) {
+	if (!static_cast<bool>(_handle)) {
 		throw std::runtime_error{SDL_GetError()};
 	}
 }
 
 image::image(const image &other)
-	: _handle{SDL_DuplicateSurface(other._handle.get()), SDL_DestroySurface}
+	: _handle{SDL_DuplicateSurface(other._handle)}
 {
-	if (!_handle) {
+	if (!static_cast<bool>(_handle)) {
 		throw std::runtime_error{SDL_GetError()};
 	}
 }
 
-image::image(image &&other) = default;
+image::image(image &&other)
+	: _handle{std::exchange(other._handle, {})}
+{}
 
 auto image::operator=(const image &other)
 	-> image &
@@ -102,13 +106,24 @@ auto image::operator=(const image &other)
 }
 
 auto image::operator=(image &&other)
-	-> image & = default;
+	-> image &
+{
+	if (std::addressof(other) != this) {
+		std::destroy_at(this);
+		std::construct_at(this, std::move(other));
+	}
 
-image::~image() = default;
+	return *this;
+}
+
+image::~image()
+{
+	SDL_DestroySurface(_handle);
+}
 
 image::operator SDL_Surface *() const
 {
-	return _handle.get();
+	return _handle;
 }
 
 auto image::size() const
@@ -278,7 +293,7 @@ auto image::operator==(const image &other) const
 
 void image::save(const std::filesystem::path &path) const
 {
-	if (!SDL_SavePNG(_handle.get(), path.string().c_str())) {
+	if (!SDL_SavePNG(_handle, path.string().c_str())) {
 		throw std::runtime_error{SDL_GetError()};
 	}
 }

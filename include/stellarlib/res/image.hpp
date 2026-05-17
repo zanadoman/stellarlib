@@ -314,7 +314,7 @@ public:
 	}
 
 private:
-	std::unique_ptr<SDL_Surface, void (*)(SDL_Surface *)> _handle;
+	SDL_Surface *_handle{};
 };
 }
 

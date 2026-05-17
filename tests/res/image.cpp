@@ -38,6 +38,7 @@
 #include <optional>
 #include <ranges>
 #include <stdexcept>
+#include <utility>
 
 using namespace stellarlib;
 
@@ -128,6 +129,13 @@ TEST(stellarlib_res_image, should_copy_via_ctor)
 	ASSERT_EQ(image2, image1);
 }
 
+TEST(stellarlib_res_image, should_move_via_ctor)
+{
+	res::image image1{ext::filesystem::base_directory_path() / "assets" / "tests" / "rgb.png"};
+	const auto image2{std::move(image1)};
+	check_rgb(image2);
+}
+
 TEST(stellarlib_res_image, should_skip_self_copy_via_assignment)
 {
 	res::image image{ext::filesystem::base_directory_path() / "assets" / "tests" / "rgb.png"};
@@ -143,6 +151,22 @@ TEST(stellarlib_res_image, should_copy_via_assignment)
 	image2 = image1;
 	check_rgb(image2);
 	ASSERT_EQ(image2, image1);
+}
+
+TEST(stellarlib_res_image, should_skip_self_move_via_assignment)
+{
+	res::image image{ext::filesystem::base_directory_path() / "assets" / "tests" / "rgb.png"};
+	image = std::move(image);
+	check_rgb(image);
+	ASSERT_EQ(image, image);
+}
+
+TEST(stellarlib_res_image, should_move_via_assignment)
+{
+	res::image image1{ext::filesystem::base_directory_path() / "assets" / "tests" / "rgb.png"};
+	res::image image2{lin::uint2{1, 1}};
+	image2 = std::move(image1);
+	check_rgb(image2);
 }
 
 TEST(stellarlib_res_image, should_provide_handle)
