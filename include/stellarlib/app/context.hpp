@@ -177,9 +177,10 @@ private:
 	app::clock _clock;
 	std::array<std::byte, 4> _padding1;
 	app::window _window;
+	std::array<std::byte, 8> _padding2;
 	ecs::world _world;
 	std::unique_ptr<scene> _scene;
-	std::array<std::byte, 8> _padding2;
+	std::array<std::byte, 8> _padding3;
 
 	[[nodiscard]]
 	explicit context(info info);

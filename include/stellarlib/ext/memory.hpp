@@ -283,7 +283,7 @@ public:
 private:
 	static const size_type page_capacity;
 	static const size_type page_alignment;
-	size_type _capacity;
+	size_type _capacity{};
 	value_type *_cursor{SDL_aligned_alloc(page_alignment, _capacity)};
 	size_type _size{_capacity};
 	value_type *_begin{_cursor};
