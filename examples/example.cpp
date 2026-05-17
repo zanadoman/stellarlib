@@ -36,6 +36,9 @@
 
 using namespace stellarlib;
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunreachable-code"
+
 [[nodiscard]]
 auto main([[maybe_unused]] const std::int32_t argc, [[maybe_unused]] char **argv)
 	-> std::int32_t
@@ -44,3 +47,5 @@ auto main([[maybe_unused]] const std::int32_t argc, [[maybe_unused]] char **argv
 	SDL_Log("%s", std::get<0>(world.operator[]<std::string>(world.spawn(std::string{"hello, world"}))).c_str());
 	return EXIT_SUCCESS;
 }
+
+#pragma clang diagnostic pop

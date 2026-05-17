@@ -38,6 +38,9 @@
 
 using namespace stellarlib;
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunreachable-code"
+
 namespace
 {
 class scene2 final : public app::scene
@@ -159,3 +162,5 @@ auto app::init(const std::vector<std::string> &args)
 		.entry = std::make_unique<scene1>()
 	}};
 }
+
+#pragma clang diagnostic pop

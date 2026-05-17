@@ -36,6 +36,9 @@
 
 using namespace stellarlib;
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunreachable-code"
+
 namespace
 {
 constexpr void check_metadata(const app::context &ctx)
@@ -102,3 +105,5 @@ auto app::init(const std::vector<std::string> &args)
 		}
 	}};
 }
+
+#pragma clang diagnostic pop
