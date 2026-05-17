@@ -33,6 +33,7 @@
 using namespace stellarlib;
 
 #pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdouble-promotion"
 #pragma clang diagnostic ignored "-Wself-assign-overloaded"
 #pragma clang diagnostic ignored "-Wself-move"
 
