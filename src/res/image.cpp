@@ -66,9 +66,7 @@ image::image(const std::filesystem::path &path)
 		return;
 	}
 
-	const auto handle{SDL_ConvertSurface(_handle, format)};
-	SDL_DestroySurface(_handle);
-	_handle = handle;
+	SDL_DestroySurface(std::exchange(_handle, SDL_ConvertSurface(_handle, format)));
 
 	if (!static_cast<bool>(_handle)) {
 		throw std::runtime_error{SDL_GetError()};

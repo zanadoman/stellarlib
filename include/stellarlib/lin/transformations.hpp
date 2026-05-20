@@ -86,9 +86,9 @@ constexpr auto rotate(const internal::matrix<T, 3, 3> &m, const U angle) noexcep
 	-> internal::matrix<std::common_type_t<T, U>, 3, 3>
 	requires (std::is_arithmetic_v<U>)
 {
+	internal::matrix<std::common_type_t<T, U>, 3, 3> res;
 	const auto c{internal::cos(angle)};
 	const auto s{internal::sin(angle)};
-	internal::matrix<std::common_type_t<T, U>, 3, 3> res;
 	res[0] = m[0] * c + m[1] * s;
 	res[1] = m[0] * -s + m[1] * c;
 	res[2] = m[2];
@@ -108,11 +108,11 @@ constexpr auto rotate(const internal::matrix<T, 4, 4> &m, const U angle, const i
 	-> internal::matrix<std::common_type_t<T, U, V>, 4, 4>
 	requires (std::is_arithmetic_v<U> && M * N == 3)
 {
+	internal::matrix<std::common_type_t<T, U, V>, 4, 4> res;
 	const auto c{internal::cos(angle)};
 	const auto n{internal::normalize(axis)};
 	const auto t{(1 - c) * n};
 	const auto s{internal::sin(angle)};
-	internal::matrix<std::common_type_t<T, U, V>, 4, 4> res;
 	res[0] = m[0] * internal::mad(t.x(), n.x(), c) + m[1] * (t.x() * n.y() + s * n.z()) + m[2] * (t.x() * n.z() - s * n.y());
 	res[1] = m[0] * (t.y() * n.x() - s * n.z()) + m[1] * internal::mad(t.y(), n.y(), c) + m[2] * (t.y() * n.z() + s * n.x());
 	res[2] = m[0] * (t.z() * n.x() + s * n.y()) + m[1] * (t.z() * n.y() - s * n.x()) + m[2] * internal::mad(t.z(), n.z(), c);
