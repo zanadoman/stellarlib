@@ -35,7 +35,7 @@
 
 namespace stellarlib::ecs::internal
 {
-class sparse_storage final
+class [[nodiscard]] sparse_storage final
 {
 public:
 	template <typename ...T>

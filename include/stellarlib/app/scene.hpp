@@ -35,7 +35,7 @@ namespace stellarlib::app
 /**
  * @brief Application scene interface
  */
-class scene
+class [[nodiscard]] scene
 {
 friend class context;
 

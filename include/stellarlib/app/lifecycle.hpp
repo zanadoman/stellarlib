@@ -31,7 +31,7 @@
 namespace stellarlib::app::internal
 {
 template <typename System>
-class lifecycle final
+class [[nodiscard]] lifecycle final
 {
 friend System;
 

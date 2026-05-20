@@ -40,7 +40,7 @@ namespace stellarlib::app
 /**
  * @brief Window subsystem
  */
-class window final
+class [[nodiscard]] window final
 {
 friend internal::lifecycle<class context>;
 
@@ -48,7 +48,7 @@ public:
 	/**
 	 * @brief Window initialization descriptor
 	 */
-	struct info final
+	struct [[nodiscard]] info final
 	{
 		/**
 		 * @brief Title of the window

@@ -37,7 +37,7 @@
 namespace stellarlib::ecs::internal
 {
 template <typename Key, typename T>
-class sparse_map final : public any_set<Key>
+class [[nodiscard]] sparse_map final : public any_set<Key>
 {
 public:
 	[[nodiscard]]

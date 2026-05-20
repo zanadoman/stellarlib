@@ -34,7 +34,7 @@
 namespace stellarlib::ecs::internal
 {
 template <typename T, typename SizeType = std::size_t>
-class stack_vector final : ext::vector_allocator<T, SizeType>
+class [[nodiscard]] stack_vector final : ext::vector_allocator<T, SizeType>
 {
 public:
 	[[nodiscard]]

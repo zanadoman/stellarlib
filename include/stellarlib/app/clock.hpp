@@ -34,7 +34,7 @@ namespace stellarlib::app
 /**
  * @brief Clock subsystem
  */
-class clock final
+class [[nodiscard]] clock final
 {
 friend internal::lifecycle<class context>;
 
@@ -42,7 +42,7 @@ public:
 	/**
 	 * @brief Clock initialization descriptor
 	 */
-	struct info final
+	struct [[nodiscard]] info final
 	{
 		/**
 		 * @brief Target scene update frequency in hertz [0.0F, +INF) (0.0F means as fast as possible)

@@ -46,13 +46,13 @@ namespace stellarlib::res
 /**
  * @brief Image resource
  */
-class image final
+class [[nodiscard]] image final
 {
 public:
 	/**
 	 * @brief Addressing mode
 	 */
-	enum class address_mode : std::uint8_t
+	enum class [[nodiscard]] address_mode : std::uint8_t
 	{
 		repeat,
 		mirrored_repeat,
@@ -62,7 +62,7 @@ public:
 	/**
 	 * @brief Filtering method
 	 */
-	enum class filter : std::uint8_t
+	enum class [[nodiscard]] filter : std::uint8_t
 	{
 		nearest,
 		linear
@@ -71,7 +71,7 @@ public:
 	/**
 	 * @brief Blending factor
 	 */
-	enum class blend_factor : std::uint8_t
+	enum class [[nodiscard]] blend_factor : std::uint8_t
 	{
 		zero,
 		one,
@@ -89,7 +89,7 @@ public:
 	/**
 	 * @brief Blending operation
 	 */
-	enum class blend_op : std::uint8_t
+	enum class [[nodiscard]] blend_op : std::uint8_t
 	{
 		add,
 		subtract,
@@ -101,7 +101,7 @@ public:
 	/**
 	 * @brief Blend state
 	 */
-	struct blend_state final
+	struct [[nodiscard]] blend_state final
 	{
 		/**
 		 * @brief Source color blending factor

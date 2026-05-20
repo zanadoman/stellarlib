@@ -54,7 +54,7 @@ namespace stellarlib::ecs
 /**
  * @brief Stores and exposes operations on entities and components
  */
-class world final
+class [[nodiscard]] world final
 {
 public:
 	/**

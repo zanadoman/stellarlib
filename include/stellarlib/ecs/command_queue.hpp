@@ -32,7 +32,7 @@
 
 namespace stellarlib::ecs::internal
 {
-class command_queue final : ext::arena_allocator
+class [[nodiscard]] command_queue final : ext::arena_allocator
 {
 public:
 	[[nodiscard]]
@@ -67,7 +67,7 @@ public:
 	void execute() noexcept;
 
 private:
-	struct command final
+	struct [[nodiscard]] command final
 	{
 		void (*execute)(void *) noexcept;
 		void *callback;

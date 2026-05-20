@@ -43,7 +43,7 @@
 
 namespace stellarlib::app
 {
-class host final
+class [[nodiscard]] host final
 {
 public:
 	[[nodiscard]]

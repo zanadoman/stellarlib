@@ -41,9 +41,9 @@ using namespace stellarlib;
 
 namespace
 {
-struct foo final {};
+struct [[nodiscard]] foo final {};
 
-struct bar final {};
+struct [[nodiscard]] bar final {};
 }
 
 TEST(stellarlib_ecs_sparse_storage, should_assign_and_cache_ids)

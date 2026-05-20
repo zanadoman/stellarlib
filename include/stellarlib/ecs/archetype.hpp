@@ -39,7 +39,7 @@ namespace stellarlib::ecs
 /**
  * @brief Represents the archetype of an entity
  */
-class archetype final : ext::vector_allocator<std::uintmax_t>
+class [[nodiscard]] archetype final : ext::vector_allocator<std::uintmax_t>
 {
 public:
 	/**

@@ -38,7 +38,7 @@ namespace stellarlib::lin::internal
 {
 template <typename T, std::size_t M, std::size_t N>
 requires (std::is_arithmetic_v<T> && static_cast<bool>(M * N))
-class matrix final : public std::array<T, M * N>
+class [[nodiscard]] matrix final : public std::array<T, M * N>
 {
 public:
 	[[nodiscard]]
@@ -759,7 +759,7 @@ constexpr auto operator<<(std::ostream &os, const matrix<T, M, N> &self)
 }
 
 template <typename T, std::size_t M, std::size_t N>
-struct std::formatter<stellarlib::lin::internal::matrix<T, M, N>> final
+struct [[nodiscard]] std::formatter<stellarlib::lin::internal::matrix<T, M, N>> final
 {
 	[[nodiscard]]
 	constexpr auto parse(const std::format_parse_context &ctx) const noexcept

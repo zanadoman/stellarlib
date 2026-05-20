@@ -38,11 +38,11 @@ using namespace stellarlib;
 
 namespace
 {
-struct foo final {};
+struct [[nodiscard]] foo final {};
 
-struct bar final {};
+struct [[nodiscard]] bar final {};
 
-struct baz final {};
+struct [[nodiscard]] baz final {};
 }
 
 TEST(stellarlib_ext_utility, sequential_id)

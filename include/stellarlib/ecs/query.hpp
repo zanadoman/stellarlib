@@ -31,7 +31,7 @@
 namespace stellarlib::ecs::internal
 {
 template <typename Query>
-class query final
+class [[nodiscard]] query final
 {
 public:
 	[[nodiscard]]

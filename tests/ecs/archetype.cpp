@@ -58,11 +58,11 @@ static_assert(ext::bit_index(IDS[2]) < ext::bit_index(IDS[1]));
 
 namespace
 {
-struct foo final {};
+struct [[nodiscard]] foo final {};
 
-struct bar final {};
+struct [[nodiscard]] bar final {};
 
-struct baz final {};
+struct [[nodiscard]] baz final {};
 
 constexpr void check_ids(const ecs::archetype &archetype)
 {

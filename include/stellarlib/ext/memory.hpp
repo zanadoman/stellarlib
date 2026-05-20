@@ -46,7 +46,7 @@ namespace stellarlib::ext
  * @tparam SizeType Size type of the allocator
  */
 template <typename T, typename SizeType = std::size_t>
-class vector_allocator : std::allocator<T>
+class [[nodiscard]] vector_allocator : std::allocator<T>
 {
 public:
 	/**
@@ -178,7 +178,7 @@ public:
 /**
  * @brief Fixed-size, page-aligned memory arena
  */
-class arena : std::allocator<void>
+class [[nodiscard]] arena : std::allocator<void>
 {
 public:
 	/**
@@ -292,7 +292,7 @@ private:
 /**
  * @brief Dynamic arena allocator
  */
-class arena_allocator : std::allocator<void>
+class [[nodiscard]] arena_allocator : std::allocator<void>
 {
 public:
 	/**

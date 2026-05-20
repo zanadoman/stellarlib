@@ -43,7 +43,7 @@ using namespace stellarlib;
 
 namespace
 {
-class scene2 final : public app::scene
+class [[nodiscard]] scene2 final : public app::scene
 {
 public:
 	[[nodiscard]]
@@ -89,7 +89,7 @@ private:
 	}
 };
 
-class scene1 final : public app::scene
+class [[nodiscard]] scene1 final : public app::scene
 {
 public:
 	[[nodiscard]]

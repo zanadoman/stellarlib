@@ -72,7 +72,7 @@ constexpr bool is_trivially_relocatable_v{is_trivially_relocatable<T>::value};
  * @tparam Fields Types whose combined size is being padded
  */
 template <typename AlignTo, typename ...Fields>
-struct padding final
+struct [[nodiscard]] padding final
 {
 	/**
 	 * @brief Size of the padding in bytes

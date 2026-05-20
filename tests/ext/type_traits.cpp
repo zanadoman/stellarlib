@@ -39,7 +39,7 @@ using namespace stellarlib;
 
 namespace
 {
-class trivially_relocatable final
+class [[nodiscard]] trivially_relocatable final
 {
 public:
 	[[nodiscard]]
@@ -60,7 +60,7 @@ public:
 	constexpr ~trivially_relocatable() noexcept = default;
 };
 
-class non_trivially_move_constructible final
+class [[nodiscard]] non_trivially_move_constructible final
 {
 public:
 	[[nodiscard]]
@@ -81,7 +81,7 @@ public:
 	constexpr ~non_trivially_move_constructible() noexcept = default;
 };
 
-class non_trivially_destructible final
+class [[nodiscard]] non_trivially_destructible final
 {
 public:
 	[[nodiscard]]

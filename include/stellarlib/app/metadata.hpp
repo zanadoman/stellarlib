@@ -36,7 +36,7 @@ namespace stellarlib::app
 /**
  * @brief Metadata subsystem
  */
-class metadata final
+class [[nodiscard]] metadata final
 {
 friend internal::lifecycle<class context>;
 
@@ -44,7 +44,7 @@ public:
 	/**
 	 * @brief Metadata initialization descriptor
 	 */
-	struct info final
+	struct [[nodiscard]] info final
 	{
 		/**
 		 * @brief Name of the application

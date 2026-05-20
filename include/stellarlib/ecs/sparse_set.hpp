@@ -30,7 +30,7 @@
 
 namespace stellarlib::ecs::internal
 {
-class sparse_set final
+class [[nodiscard]] sparse_set final
 {
 public:
 	[[nodiscard]]

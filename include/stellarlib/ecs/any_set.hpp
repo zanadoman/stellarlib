@@ -27,7 +27,7 @@
 namespace stellarlib::ecs::internal
 {
 template <typename Key>
-class any_set
+class [[nodiscard]] any_set
 {
 public:
 	virtual constexpr ~any_set() noexcept = 0;
