@@ -27,7 +27,6 @@
 #include <SDL3/SDL_gpu.h>
 
 #include <memory>
-#include <mutex>
 #include <utility>
 
 /**
@@ -45,16 +44,14 @@ class [[nodiscard]] resource final
 public:
 	/**
 	 * @brief Parameterized constructor
-	 * @param handle Handle of the resource
 	 * @param device Device of the resource
-	 * @param mutex Device synchronization primitive
+	 * @param handle Handle of the resource
 	 * @warning Intended for internal/professional use
 	 */
 	[[nodiscard]]
-	constexpr resource(T *handle, SDL_GPUDevice *device, const std::weak_ptr<std::recursive_mutex> &mutex)
+	constexpr resource(const std::shared_ptr<SDL_GPUDevice> &device, T *handle)
 		: _handle{handle}
 		, _device{device}
-		, _mutex{mutex}
 	{}
 
 	/**
@@ -71,7 +68,6 @@ public:
 	constexpr resource(resource &&other)
 		: _handle{std::exchange(other._handle, {})}
 		, _device{std::exchange(other._device, {})}
-		, _mutex{std::exchange(other._mutex, {})}
 	{}
 
 	/**
@@ -101,10 +97,7 @@ public:
 	 */
 	constexpr ~resource()
 	{
-		if (const auto mutex{_mutex.lock()}) {
-			const std::scoped_lock<std::recursive_mutex> guard{*mutex};
-			DELETER(_device, _handle);
-		}
+		DELETER(_device.get(), _handle);
 	}
 
 	/**
@@ -126,13 +119,12 @@ public:
 	[[nodiscard]]
 	explicit constexpr operator const SDL_GPUDevice *() const
 	{
-		return _device;
+		return _device.get();
 	}
 
 private:
 	T *_handle{};
-	SDL_GPUDevice *_device{};
-	std::weak_ptr<std::recursive_mutex> _mutex;
+	std::shared_ptr<SDL_GPUDevice> _device;
 };
 }
 
