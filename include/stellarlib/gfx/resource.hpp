@@ -101,7 +101,7 @@ public:
 	constexpr ~resource()
 	{
 		if (const auto mutex{_mutex.lock()}) {
-			const std::lock_guard<std::recursive_mutex> guard{*mutex};
+			const std::scoped_lock<std::recursive_mutex> guard{*mutex};
 			DELETER(_device, _handle);
 		}
 	}
