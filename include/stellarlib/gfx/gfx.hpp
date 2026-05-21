@@ -21,15 +21,11 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef STELLARLIB_STELLARLIB_HPP
-#define STELLARLIB_STELLARLIB_HPP
+#ifndef STELLARLIB_GFX_GFX_HPP
+#define STELLARLIB_GFX_GFX_HPP
 
 /* IWYU pragma: begin_exports */
-#include <stellarlib/app/app.hpp>
-#include <stellarlib/ecs/ecs.hpp>
-#include <stellarlib/gfx/gfx.hpp>
-#include <stellarlib/lin/lin.hpp>
-#include <stellarlib/res/res.hpp>
+#include <stellarlib/gfx/texture.hpp>
 /* IWYU pragma: end_exports */
 
 #endif
