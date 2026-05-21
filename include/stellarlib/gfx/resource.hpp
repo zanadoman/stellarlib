@@ -48,6 +48,7 @@ public:
 	 * @param handle Handle of the resource
 	 * @param device Device of the resource
 	 * @param mutex Device synchronization primitive
+	 * @warning Intended for internal/professional use
 	 */
 	[[nodiscard]]
 	constexpr resource(T *handle, SDL_GPUDevice *device, const std::weak_ptr<std::recursive_mutex> &mutex)
