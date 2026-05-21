@@ -25,7 +25,14 @@
 #define STELLARLIB_GFX_GFX_HPP
 
 /* IWYU pragma: begin_exports */
-#include <stellarlib/gfx/texture.hpp>
+#include <stellarlib/gfx/resource.hpp>
 /* IWYU pragma: end_exports */
+
+#include <SDL3/SDL_gpu.h>
+
+namespace stellarlib::gfx
+{
+using texture = resource<SDL_GPUTexture>;
+}
 
 #endif
