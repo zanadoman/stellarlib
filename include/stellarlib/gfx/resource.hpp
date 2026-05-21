@@ -30,22 +30,42 @@
 #include <mutex>
 #include <utility>
 
+/**
+ * @brief Graphics and rendering abstractions
+ */
 namespace stellarlib::gfx
 {
-template <typename T>
+/**
+ * @brief Generic GPU resource
+ * @tparam T Type of the resource
+ */
+template <typename T, void (*DELETER)(SDL_GPUDevice *, T *)>
 class [[nodiscard]] resource final
 {
 public:
+	/**
+	 * @brief Parameterized constructor
+	 * @param handle Handle of the resource
+	 * @param device Device of the resource
+	 * @param mutex Device synchronization primitive
+	 */
 	[[nodiscard]]
-	constexpr resource(T *handle, SDL_GPUDevice *device, std::weak_ptr<std::recursive_mutex> mutex)
+	constexpr resource(T *handle, SDL_GPUDevice *device, const std::weak_ptr<std::recursive_mutex> &mutex)
 		: _handle{handle}
 		, _device{device}
-		, _mutex{std::move(mutex)}
+		, _mutex{mutex}
 	{}
 
+	/**
+	 * @brief Deleted copy constructor
+	 */
 	[[nodiscard]]
 	constexpr resource(const resource &) noexcept = delete;
 
+	/**
+	 * @brief Move constructor
+	 * @param other Other instance
+	 */
 	[[nodiscard]]
 	constexpr resource(resource &&other)
 		: _handle{std::exchange(other._handle, {})}
@@ -53,10 +73,18 @@ public:
 		, _mutex{std::exchange(other._mutex, {})}
 	{}
 
+	/**
+	 * @brief Deleted copy assignment operator
+	 */
 	constexpr auto operator=(const resource &) noexcept
 		-> resource & = delete;
 
-	auto operator=(resource &&other)
+	/**
+	 * @brief Move assignment operator
+	 * @param other Other instance
+	 * @return Current instance
+	 */
+	constexpr auto operator=(resource &&other)
 		-> resource &
 	{
 		if (std::addressof(other) != this) {
@@ -67,22 +95,35 @@ public:
 		return *this;
 	}
 
+	/**
+	 * @brief Destructor
+	 */
 	constexpr ~resource()
 	{
 		if (const auto mutex{_mutex.lock()}) {
 			const std::lock_guard<std::recursive_mutex> guard{*mutex};
-			SDL_ReleaseGPUTexture(_device, _handle);
+			DELETER(_device, _handle);
 		}
 	}
 
+	/**
+	 * @brief Returns a pointer to the internal handle
+	 * @return Pointer to the internal handle
+	 * @warning Intended for internal/professional use
+	 */
 	[[nodiscard]]
-	explicit operator T *() const
+	explicit constexpr operator T *() const
 	{
 		return _handle;
 	}
 
+	/**
+	 * @brief Returns a pointer to the internal device
+	 * @return Pointer to the internal device
+	 * @warning Intended for internal/professional use
+	 */
 	[[nodiscard]]
-	explicit operator const SDL_GPUDevice *() const
+	explicit constexpr operator const SDL_GPUDevice *() const
 	{
 		return _device;
 	}

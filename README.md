@@ -25,6 +25,8 @@ Opinionated, cross-platform game engine library in [C++23](https://en.cppreferen
   - [x] Common 2D/3D transformations
 - [x] Resource Management Utilities
   - [x] Image resource
+- [x] Graphics and Rendering Abstractions
+  - [x] Texture resource
 - [x] Application Runtime
   - [x] Scene management
   - [x] Metadata subsystem

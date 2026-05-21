@@ -30,9 +30,15 @@
 
 #include <SDL3/SDL_gpu.h>
 
+/**
+ * @brief Graphics and rendering abstractions
+ */
 namespace stellarlib::gfx
 {
-using texture = resource<SDL_GPUTexture>;
+/**
+ * @brief Texture resource
+ */
+using texture = resource<SDL_GPUTexture, SDL_ReleaseGPUTexture>;
 }
 
 #endif
