@@ -26,7 +26,6 @@
 
 #include <SDL3/SDL_gpu.h>
 
-#include <atomic>
 #include <memory>
 #include <utility>
 
@@ -50,7 +49,7 @@ public:
 	 * @warning Intended for internal/professional use
 	 */
 	[[nodiscard]]
-	constexpr resource(const std::shared_ptr<std::atomic<SDL_GPUDevice *>> &device, T *handle)
+	constexpr resource(const std::shared_ptr<SDL_GPUDevice> &device, T *handle)
 		: _handle{handle}
 		, _device{device}
 	{}
@@ -83,7 +82,7 @@ public:
 	 * @return Current instance
 	 */
 	constexpr auto operator=(resource &&other)
-		-> resource &
+		-> auto &
 	{
 		if (std::addressof(other) != this) {
 			std::destroy_at(this);
@@ -98,7 +97,7 @@ public:
 	 */
 	constexpr ~resource()
 	{
-		DELETER(*_device.get(), _handle);
+		DELETER(_device.get(), _handle);
 	}
 
 	/**
@@ -120,12 +119,12 @@ public:
 	[[nodiscard]]
 	explicit constexpr operator const SDL_GPUDevice *() const
 	{
-		return *_device.get();
+		return _device.get();
 	}
 
 private:
 	T *_handle{};
-	std::shared_ptr<std::atomic<SDL_GPUDevice *>> _device;
+	std::shared_ptr<SDL_GPUDevice> _device;
 };
 }
 
