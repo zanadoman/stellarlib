@@ -27,16 +27,14 @@
 
 #include <SDL3/SDL_error.h>
 #include <SDL3/SDL_events.h>
-#include <SDL3/SDL_hints.h>
-#include <SDL3/SDL_init.h>
-#include <SDL3/SDL_pixels.h>
+#include <SDL3/SDL_gpu.h>
+#include <SDL3/SDL_properties.h>
 #include <SDL3/SDL_surface.h>
 #include <SDL3/SDL_video.h>
 
-#include <algorithm>
-#include <cstdint>
 #include <cstring>
-#include <ranges>
+#include <functional>
+#include <memory>
 #include <stdexcept>
 #include <string>
 
@@ -44,8 +42,8 @@ namespace stellarlib::app
 {
 window::~window()
 {
+	SDL_ReleaseWindowFromGPUDevice(_device.get(), _handle);
 	SDL_DestroyWindow(_handle);
-	SDL_QuitSubSystem(SDL_INIT_VIDEO);
 }
 
 auto window::title() const
@@ -61,47 +59,69 @@ void window::set_title(const std::string &title)
 	}
 }
 
-window::window(const info &info)
+auto window::vsync() const
+	-> bool
 {
-	if (std::ranges::contains(std::views::iota(std::int32_t{}, SDL_GetNumVideoDrivers()) | std::views::transform([] [[nodiscard]] (const auto i) -> auto {
-		return std::strcmp(SDL_GetVideoDriver(i), "x11");
-	}), 0) && !SDL_SetHintWithPriority(SDL_HINT_VIDEO_DRIVER, "x11", SDL_HINT_OVERRIDE)) {
+	return _vsync;
+}
+
+void window::set_vsync(const bool vsync)
+{
+	if (!SDL_SetGPUSwapchainParameters(_device.get(), _handle, SDL_GPU_SWAPCHAINCOMPOSITION_SDR, vsync ? SDL_WindowSupportsGPUPresentMode(_device.get(), _handle, SDL_GPU_PRESENTMODE_MAILBOX) ? SDL_GPU_PRESENTMODE_MAILBOX : SDL_GPU_PRESENTMODE_VSYNC : SDL_WindowSupportsGPUPresentMode(_device.get(), _handle, SDL_GPU_PRESENTMODE_IMMEDIATE) ? SDL_GPU_PRESENTMODE_IMMEDIATE : SDL_GPU_PRESENTMODE_MAILBOX)) {
 		throw std::runtime_error{SDL_GetError()};
 	}
 
-	if (!SDL_InitSubSystem(SDL_INIT_VIDEO)) {
+	_vsync = vsync;
+}
+
+window::window(const info &info)
+	: _handle{SDL_CreateWindow(info.title.c_str(), 0, 0, SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE)}
+{
+	if (!static_cast<bool>(_handle) || !SDL_SetWindowIcon(_handle, static_cast<SDL_Surface *>(info.icon)) && !static_cast<bool>(std::strstr(SDL_GetError(), "not supported"))) {
 		throw std::runtime_error{SDL_GetError()};
 	}
 
-	_handle = SDL_CreateWindow(info.title.c_str(), 0, 0, SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE);
+	const auto props{SDL_CreateProperties()};
 
-	if (!static_cast<bool>(_handle)) {
+	if (!lin::cast<bool>(props)) {
 		throw std::runtime_error{SDL_GetError()};
 	}
 
-	if (!SDL_SetWindowIcon(_handle, static_cast<SDL_Surface *>(info.icon)) && lin::cast<bool>(std::strcmp(SDL_GetError(), "That operation is not supported"))) {
+	const std::unique_ptr<const SDL_PropertiesID, void (*)(const SDL_PropertiesID *)> props_holder{std::addressof(props), [] (const auto props) -> void {
+		SDL_DestroyProperties(*props);
+	}};
+
+	if (!SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_DEBUGMODE_BOOLEAN, info.debug) || !SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_FEATURE_CLIP_DISTANCE_BOOLEAN, false) || !SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_FEATURE_DEPTH_CLAMPING_BOOLEAN, false) || !SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_FEATURE_INDIRECT_DRAW_FIRST_INSTANCE_BOOLEAN, false) || !SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_FEATURE_ANISOTROPY_BOOLEAN, false) || !SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_SHADERS_SPIRV_BOOLEAN, true) || !SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_SHADERS_DXIL_BOOLEAN, true)) {
 		throw std::runtime_error{SDL_GetError()};
 	}
+
+	_device = {SDL_CreateGPUDeviceWithProperties(props), SDL_DestroyGPUDevice};
+
+	if (!_device || !SDL_ClaimWindowForGPUDevice(_device.get(), _handle)) {
+		throw std::runtime_error{SDL_GetError()};
+	}
+
+	set_vsync(info.vsync);
 }
 
 void window::iterate()
 {
-	const auto surface{SDL_GetWindowSurface(_handle)};
+	SDL_GPUColorTargetInfo swapchain{
+		.load_op = SDL_GPU_LOADOP_CLEAR
+	};
 
-	if (!static_cast<bool>(surface)) {
+	const std::unique_ptr<SDL_GPUCommandBuffer, std::function<void (SDL_GPUCommandBuffer *)>> cmdbuf{SDL_AcquireGPUCommandBuffer(_device.get()), [&] (const auto cmdbuf) -> void {
+		if (swapchain.texture ? !SDL_SubmitGPUCommandBuffer(cmdbuf) : !SDL_CancelGPUCommandBuffer(cmdbuf)) {
+			throw std::runtime_error{SDL_GetError()};
+		}
+	}};
+
+	if (!SDL_AcquireGPUSwapchainTexture(cmdbuf.get(), _handle, std::addressof(swapchain.texture), nullptr, nullptr)) {
 		throw std::runtime_error{SDL_GetError()};
 	}
 
-	const auto format{SDL_GetPixelFormatDetails(surface->format)};
-
-	if (!static_cast<bool>(format)) {
-		throw std::runtime_error{SDL_GetError()};
-	}
-
-	std::fill_n(static_cast<std::uint8_t *>(surface->pixels), surface->w * surface->h * format->bytes_per_pixel, 0);
-
-	if (!SDL_UpdateWindowSurface(_handle)) {
-		throw std::runtime_error{SDL_GetError()};
+	if (static_cast<bool>(swapchain.texture)) {
+		SDL_EndGPURenderPass(SDL_BeginGPURenderPass(cmdbuf.get(), std::addressof(swapchain), 1, nullptr));
 	}
 }
 

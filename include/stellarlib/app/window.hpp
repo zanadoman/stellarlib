@@ -28,8 +28,12 @@
 #include <stellarlib/res/res.hpp>
 
 #include <SDL3/SDL_events.h>
+#include <SDL3/SDL_gpu.h>
 #include <SDL3/SDL_video.h>
 
+#include <array>
+#include <cstddef>
+#include <memory>
 #include <string>
 
 /**
@@ -59,6 +63,21 @@ public:
 		 * @brief Icon of the window
 		 */
 		res::image icon;
+
+		/**
+		 * @brief Enable GPU synchronization
+		 */
+		bool vsync;
+
+		/**
+		 * @brief Enable GPU debugging
+		 */
+		bool debug;
+
+		/**
+		 * @brief Explicit padding
+		 */
+		std::array<std::byte, 6> padding;
 	};
 
 	/**
@@ -104,8 +123,25 @@ public:
 	 */
 	void set_title(const std::string &title);
 
+	/**
+	 * @brief Returns whether GPU synchronization is enabled
+	 * @return Whether GPU synchronization is enabled
+	 */
+	[[nodiscard]]
+	auto vsync() const
+		-> bool;
+
+	/**
+	 * @brief Sets whether GPU synchronization is enabled
+	 * @param vsync Whether GPU synchronization is enabled
+	 */
+	void set_vsync(bool vsync);
+
 private:
 	SDL_Window *_handle{};
+	std::shared_ptr<SDL_GPUDevice> _device;
+	bool _vsync{};
+	std::array<std::byte, 7> _padding;
 
 	[[nodiscard]]
 	explicit window(const info &info);

@@ -100,6 +100,7 @@ Checks: >
   -performance-noexcept-move-constructor,
   -performance-trivially-destructible,
   -portability-template-virtual-member-function,
+  -readability-avoid-nested-conditional-operator,
   -readability-convert-member-functions-to-static,
   -readability-function-cognitive-complexity,
   -readability-identifier-length,
