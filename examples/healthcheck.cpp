@@ -70,6 +70,8 @@ constexpr void check_window(app::context &ctx)
 	assert(ctx.window().title() == "org.stellarlib.healthcheck");
 	ctx.window().set_title("healthcheck");
 	assert(ctx.window().title() == "healthcheck");
+	static_cast<void>(ctx.window().create_texture(res::image{ext::filesystem::base_directory_path() / "assets" / "tests" / "rgb.png"}, false));
+	static_cast<void>(ctx.window().create_texture(res::image{ext::filesystem::base_directory_path() / "assets" / "tests" / "rgb.png"}, true));
 }
 }
 
