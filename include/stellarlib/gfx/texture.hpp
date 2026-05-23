@@ -21,13 +21,12 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef STELLARLIB_GFX_RESOURCE_HPP
-#define STELLARLIB_GFX_RESOURCE_HPP
+#ifndef STELLARLIB_GFX_TEXTURE_HPP
+#define STELLARLIB_GFX_TEXTURE_HPP
 
 #include <SDL3/SDL_gpu.h>
 
 #include <memory>
-#include <utility>
 
 /**
  * @brief Graphics and rendering abstractions
@@ -35,70 +34,50 @@
 namespace stellarlib::gfx
 {
 /**
- * @brief Generic GPU resource
- * @tparam T Type of the resource
+ * @brief Texture resource
  */
-template <typename T, void (*DELETER)(SDL_GPUDevice *, T *)>
-class [[nodiscard]] resource final
+class [[nodiscard]] texture final
 {
 public:
 	/**
 	 * @brief Parameterized constructor
-	 * @param device Device of the resource
-	 * @param handle Handle of the resource
-	 * @warning Intended for internal/professional use
+	 * @param device Device of the texture
+	 * @param info Creation info of the texture
 	 */
 	[[nodiscard]]
-	constexpr resource(const std::shared_ptr<SDL_GPUDevice> &device, T *handle)
-		: _handle{handle}
-		, _device{device}
-	{}
+	texture(const std::shared_ptr<SDL_GPUDevice> &device, const SDL_GPUTextureCreateInfo &info);
 
 	/**
 	 * @brief Deleted copy constructor
 	 */
 	[[nodiscard]]
-	constexpr resource(const resource &) noexcept = delete;
+	constexpr texture(const texture &) noexcept = delete;
 
 	/**
 	 * @brief Move constructor
 	 * @param other Other instance
 	 */
 	[[nodiscard]]
-	constexpr resource(resource &&other)
-		: _handle{std::exchange(other._handle, {})}
-		, _device{std::exchange(other._device, {})}
-	{}
+	texture(texture &&other);
 
 	/**
 	 * @brief Deleted copy assignment operator
 	 */
-	constexpr auto operator=(const resource &) noexcept
-		-> resource & = delete;
+	constexpr auto operator=(const texture &) noexcept
+		-> texture & = delete;
 
 	/**
 	 * @brief Move assignment operator
 	 * @param other Other instance
 	 * @return Current instance
 	 */
-	constexpr auto operator=(resource &&other)
-		-> auto &
-	{
-		if (std::addressof(other) != this) {
-			std::destroy_at(this);
-			std::construct_at(this, std::move(other));
-		}
-
-		return *this;
-	}
+	auto operator=(texture &&other)
+		-> texture &;
 
 	/**
 	 * @brief Destructor
 	 */
-	constexpr ~resource()
-	{
-		DELETER(_device.get(), _handle);
-	}
+	~texture();
 
 	/**
 	 * @brief Returns a pointer to the internal handle
@@ -106,10 +85,7 @@ public:
 	 * @warning Intended for internal/professional use
 	 */
 	[[nodiscard]]
-	explicit constexpr operator T *() const
-	{
-		return _handle;
-	}
+	explicit operator SDL_GPUTexture *() const;
 
 	/**
 	 * @brief Returns a pointer to the internal device
@@ -117,13 +93,10 @@ public:
 	 * @warning Intended for internal/professional use
 	 */
 	[[nodiscard]]
-	explicit constexpr operator const SDL_GPUDevice *() const
-	{
-		return _device.get();
-	}
+	explicit operator const SDL_GPUDevice *() const;
 
 private:
-	T *_handle{};
+	SDL_GPUTexture *_handle{};
 	std::shared_ptr<SDL_GPUDevice> _device;
 };
 }
