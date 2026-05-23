@@ -32,6 +32,7 @@
 #include <SDL3/SDL_surface.h>
 #include <SDL3/SDL_video.h>
 
+#include <cstdint>
 #include <cstring>
 #include <functional>
 #include <memory>
@@ -67,7 +68,34 @@ auto window::vsync() const
 
 void window::set_vsync(const bool vsync)
 {
-	if (!SDL_SetGPUSwapchainParameters(_device.get(), _handle, SDL_GPU_SWAPCHAINCOMPOSITION_SDR, vsync ? SDL_WindowSupportsGPUPresentMode(_device.get(), _handle, SDL_GPU_PRESENTMODE_MAILBOX) ? SDL_GPU_PRESENTMODE_MAILBOX : SDL_GPU_PRESENTMODE_VSYNC : SDL_WindowSupportsGPUPresentMode(_device.get(), _handle, SDL_GPU_PRESENTMODE_IMMEDIATE) ? SDL_GPU_PRESENTMODE_IMMEDIATE : SDL_GPU_PRESENTMODE_MAILBOX)) {
+	if (!SDL_WindowSupportsGPUSwapchainComposition(_device.get(), _handle, SDL_GPU_SWAPCHAINCOMPOSITION_SDR)) {
+		return;
+	}
+
+	std::int8_t mode{-1};
+
+	if (vsync) {
+		if (SDL_WindowSupportsGPUPresentMode(_device.get(), _handle, SDL_GPU_PRESENTMODE_MAILBOX)) {
+			mode = SDL_GPU_PRESENTMODE_MAILBOX;
+		}
+		else if (SDL_WindowSupportsGPUPresentMode(_device.get(), _handle, SDL_GPU_PRESENTMODE_VSYNC)) {
+			mode = SDL_GPU_PRESENTMODE_VSYNC;
+		}
+	}
+	else {
+		if (SDL_WindowSupportsGPUPresentMode(_device.get(), _handle, SDL_GPU_PRESENTMODE_IMMEDIATE)) {
+			mode = SDL_GPU_PRESENTMODE_IMMEDIATE;
+		}
+		else if (SDL_WindowSupportsGPUPresentMode(_device.get(), _handle, SDL_GPU_PRESENTMODE_MAILBOX)) {
+			mode = SDL_GPU_PRESENTMODE_MAILBOX;
+		}
+	}
+
+	if (mode == -1) {
+		return;
+	}
+
+	if (!SDL_SetGPUSwapchainParameters(_device.get(), _handle, SDL_GPU_SWAPCHAINCOMPOSITION_SDR, static_cast<SDL_GPUPresentMode>(mode))) {
 		throw std::runtime_error{SDL_GetError()};
 	}
 

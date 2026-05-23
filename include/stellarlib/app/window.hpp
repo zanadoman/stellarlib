@@ -140,7 +140,7 @@ public:
 private:
 	SDL_Window *_handle{};
 	std::shared_ptr<SDL_GPUDevice> _device;
-	bool _vsync{};
+	bool _vsync{true};
 	std::array<std::byte, 7> _padding;
 
 	[[nodiscard]]
