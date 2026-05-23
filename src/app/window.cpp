@@ -123,8 +123,7 @@ auto window::create_texture(const res::image &image, const bool mipmaps)
 		info.num_levels += lin::cast<std::uint32_t>(lin::log(lin::max(info.width, info.height)));
 	}
 
-	// TODO CHECK
-	gfx::texture texture{_device, SDL_CreateGPUTexture(_device.get(), std::addressof(info))};
+	gfx::texture texture{_device, info};
 
 	if (_transbuf_size < image.bytes().size()) {
 		_transbuf_size = lin::cast<std::uint32_t>(image.bytes().size());
@@ -156,7 +155,7 @@ auto window::create_texture(const res::image &image, const bool mipmaps)
 		}
 	}};
 
-	auto cpypass{SDL_BeginGPUCopyPass(cmdbuf.get())};
+	const auto cpypass{SDL_BeginGPUCopyPass(cmdbuf.get())};
 
 	const SDL_GPUTextureTransferInfo transfer{
 		.transfer_buffer = _transbuf

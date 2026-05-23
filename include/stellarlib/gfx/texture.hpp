@@ -43,6 +43,7 @@ public:
 	 * @brief Parameterized constructor
 	 * @param device Device of the texture
 	 * @param info Creation info of the texture
+	 * @warning Intended for internal/professional use
 	 */
 	[[nodiscard]]
 	texture(const std::shared_ptr<SDL_GPUDevice> &device, const SDL_GPUTextureCreateInfo &info);
