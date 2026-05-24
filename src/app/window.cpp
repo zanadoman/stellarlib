@@ -31,6 +31,7 @@
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_gpu.h>
 #include <SDL3/SDL_properties.h>
+#include <SDL3/SDL_rect.h>
 #include <SDL3/SDL_surface.h>
 #include <SDL3/SDL_video.h>
 
@@ -196,6 +197,12 @@ window::window(const info &info)
 	: _handle{SDL_CreateWindow(info.title.c_str(), 0, 0, SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE)}
 {
 	if (!static_cast<bool>(_handle) || !SDL_SetWindowIcon(_handle, static_cast<SDL_Surface *>(info.icon)) && !static_cast<bool>(std::strstr(SDL_GetError(), "not supported"))) {
+		throw std::runtime_error{SDL_GetError()};
+	}
+
+	SDL_Rect bounds{};
+
+	if (const auto display{SDL_GetDisplayForWindow(_handle)}; !static_cast<bool>(display) || !SDL_GetDisplayUsableBounds(display, std::addressof(bounds)) || !SDL_SetWindowSize(_handle, bounds.w / 2, bounds.h / 2) && !static_cast<bool>(std::strstr(SDL_GetError(), "not supported"))) {
 		throw std::runtime_error{SDL_GetError()};
 	}
 
