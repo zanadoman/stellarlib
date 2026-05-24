@@ -24,8 +24,12 @@
 #ifndef STELLARLIB_GFX_TEXTURE_HPP
 #define STELLARLIB_GFX_TEXTURE_HPP
 
+#include <stellarlib/lin/lin.hpp>
+
 #include <SDL3/SDL_gpu.h>
 
+#include <array>
+#include <cstddef>
 #include <memory>
 
 /**
@@ -40,13 +44,19 @@ class [[nodiscard]] texture final
 {
 public:
 	/**
+	 * @brief Pixel format of the texture
+	 */
+	static constexpr auto format{SDL_GPU_TEXTUREFORMAT_R16G16B16A16_FLOAT};
+
+	/**
 	 * @brief Parameterized constructor
 	 * @param device Device of the texture
-	 * @param info Creation info of the texture
+	 * @param size Size of the texture
+	 * @param mipmaps Enable mipmap generation
 	 * @warning Intended for internal/professional use
 	 */
 	[[nodiscard]]
-	texture(const std::shared_ptr<SDL_GPUDevice> &device, const SDL_GPUTextureCreateInfo &info);
+	texture(const std::shared_ptr<SDL_GPUDevice> &device, lin::uint2 size, bool mipmaps);
 
 	/**
 	 * @brief Deleted copy constructor
@@ -96,9 +106,28 @@ public:
 	[[nodiscard]]
 	explicit operator const SDL_GPUDevice *() const;
 
+	/**
+	 * @brief Returns the size of the texture
+	 * @return Size of the texture
+	 */
+	[[nodiscard]]
+	auto size() const
+		-> lin::uint2;
+
+	/**
+	 * @brief Returns whether the texture has mipmaps
+	 * @return Whether the texture has mipmaps
+	 */
+	[[nodiscard]]
+	auto mipmaps() const
+		-> bool;
+
 private:
 	SDL_GPUTexture *_handle{};
 	std::shared_ptr<SDL_GPUDevice> _device;
+	lin::uint2 _size;
+	bool _mipmaps{};
+	[[maybe_unused]] std::array<std::byte, 7> _padding;
 };
 }
 

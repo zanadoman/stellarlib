@@ -163,7 +163,7 @@ private:
 	T *_end{};
 	SizeType _size{};
 	SizeType _capacity{};
-	[[no_unique_address]] ext::padding<T *, SizeType, SizeType> _padding;
+	[[maybe_unused]] [[no_unique_address]] ext::padding<T *, SizeType, SizeType> _padding;
 };
 }
 

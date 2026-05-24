@@ -23,19 +23,38 @@
 
 #include <stellarlib/gfx/texture.hpp>
 
+#include <stellarlib/lin/lin.hpp>
+
 #include <SDL3/SDL_error.h>
 #include <SDL3/SDL_gpu.h>
 
+#include <cstdint>
 #include <memory>
 #include <stdexcept>
 #include <utility>
 
 namespace stellarlib::gfx
 {
-texture::texture(const std::shared_ptr<SDL_GPUDevice> &device, const SDL_GPUTextureCreateInfo &info)
-	: _handle{SDL_CreateGPUTexture(device.get(), std::addressof(info))}
-	, _device{device}
+texture::texture(const std::shared_ptr<SDL_GPUDevice> &device, const lin::uint2 size, const bool mipmaps)
+	: _device{device}
+	, _size{size}
 {
+	SDL_GPUTextureCreateInfo info{
+		.format = format,
+		.usage = SDL_GPU_TEXTUREUSAGE_SAMPLER | SDL_GPU_TEXTUREUSAGE_COLOR_TARGET,
+		.width = _size.x(),
+		.height = _size.y(),
+		.layer_count_or_depth = 1,
+		.num_levels = 1
+	};
+
+	if (mipmaps) {
+		info.num_levels += lin::cast<std::uint32_t>(lin::log(lin::max(info.width, info.height)));
+	}
+
+	_handle = SDL_CreateGPUTexture(_device.get(), std::addressof(info));
+	_mipmaps = 1 < info.layer_count_or_depth;
+
 	if (!static_cast<bool>(_handle)) {
 		throw std::runtime_error{SDL_GetError()};
 	}
@@ -70,5 +89,17 @@ texture::operator SDL_GPUTexture *() const
 texture::operator const SDL_GPUDevice *() const
 {
 	return _device.get();
+}
+
+auto texture::size() const
+	-> lin::uint2
+{
+	return _size;
+}
+
+auto texture::mipmaps() const
+	-> bool
+{
+	return _mipmaps;
 }
 }

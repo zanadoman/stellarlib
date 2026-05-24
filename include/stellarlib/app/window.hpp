@@ -140,19 +140,19 @@ public:
 	void set_vsync(bool vsync);
 
 	/**
-	 * @brief Creates a texture in the GPU from an image
-	 * @param image Source image of the texture
+	 * @brief Uploads an image into the GPU
+	 * @param image Image to upload
 	 * @param mipmaps Enable mipmap generation
-	 * @return Handle to the texture
+	 * @return Uploaded image
 	 */
-	auto create_texture(const res::image &image, bool mipmaps)
+	auto upload_image(const res::image &image, bool mipmaps)
 		-> gfx::texture;
 
 private:
 	SDL_Window *_handle{};
 	std::shared_ptr<SDL_GPUDevice> _device;
 	bool _vsync{true};
-	std::array<std::byte, 3> _padding;
+	[[maybe_unused]] std::array<std::byte, 3> _padding;
 	std::uint32_t _transbuf_size{};
 	SDL_GPUTransferBuffer *_transbuf{};
 	SDL_GPUFence *_fence{};

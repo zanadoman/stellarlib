@@ -29,6 +29,8 @@
 #include <stellarlib/ext/filesystem.hpp>
 #include <stellarlib/stellarlib.hpp>
 
+#include <SDL3/SDL_gpu.h>
+
 #include <cassert>
 #include <optional>
 #include <string>
@@ -70,8 +72,15 @@ constexpr void check_window(app::context &ctx)
 	assert(ctx.window().title() == "org.stellarlib.healthcheck");
 	ctx.window().set_title("healthcheck");
 	assert(ctx.window().title() == "healthcheck");
-	static_cast<void>(ctx.window().create_texture(res::image{ext::filesystem::base_directory_path() / "assets" / "tests" / "rgb.png"}, false));
-	static_cast<void>(ctx.window().create_texture(res::image{ext::filesystem::base_directory_path() / "assets" / "tests" / "rgb.png"}, true));
+	const res::image image{ext::filesystem::base_directory_path() / "assets" / "tests" / "linear.png"};
+	const auto texture1{ctx.window().upload_image(image, false)};
+	assert(static_cast<SDL_GPUTexture *>(texture1));
+	assert(lin::all(texture1.size() == image.size()));
+	assert(!texture1.mipmaps());
+	const auto texture2{ctx.window().upload_image(image, true)};
+	assert(static_cast<SDL_GPUTexture *>(texture2));
+	assert(lin::all(texture2.size() == image.size()));
+	assert(!texture2.mipmaps());
 }
 }
 

@@ -180,11 +180,11 @@ public:
 private:
 	[[no_unique_address]] app::metadata _metadata;
 	app::clock _clock;
-	std::array<std::byte, 4> _padding1;
+	[[maybe_unused]] std::array<std::byte, 4> _padding1;
 	app::window _window;
 	ecs::world _world;
 	std::unique_ptr<scene> _scene;
-	std::array<std::byte, 8> _padding2;
+	[[maybe_unused]] std::array<std::byte, 8> _padding2;
 
 	[[nodiscard]]
 	explicit context(info info);

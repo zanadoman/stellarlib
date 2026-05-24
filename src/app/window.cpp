@@ -108,23 +108,27 @@ void window::set_vsync(const bool vsync)
 	_vsync = vsync;
 }
 
-auto window::create_texture(const res::image &image, const bool mipmaps)
+auto window::upload_image(const res::image &image, const bool mipmaps)
 	-> gfx::texture
 {
+	gfx::texture texture{_device, image.size(), mipmaps};
+
 	SDL_GPUTextureCreateInfo info{
 		.format = SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM,
-		.usage = SDL_GPU_TEXTUREUSAGE_SAMPLER | SDL_GPU_TEXTUREUSAGE_COLOR_TARGET,
-		.width = image.size().x(),
-		.height = image.size().y(),
+		.usage = SDL_GPU_TEXTUREUSAGE_SAMPLER,
+		.width = texture.size().x(),
+		.height = texture.size().y(),
 		.layer_count_or_depth = 1,
 		.num_levels = 1
 	};
 
-	if (mipmaps) {
-		info.num_levels += lin::cast<std::uint32_t>(lin::log(lin::max(info.width, info.height)));
-	}
+	const std::unique_ptr<SDL_GPUTexture, std::function<void (SDL_GPUTexture *)>> raw{SDL_CreateGPUTexture(_device.get(), std::addressof(info)), [this] (const auto raw) -> void {
+		SDL_ReleaseGPUTexture(_device.get(), raw);
+	}};
 
-	gfx::texture texture{_device, info};
+	if (!raw) {
+		throw std::runtime_error{SDL_GetError()};
+	}
 
 	if (_transbuf_size < image.bytes().size()) {
 		_transbuf_size = lin::cast<std::uint32_t>(image.bytes().size());
@@ -148,14 +152,17 @@ auto window::create_texture(const res::image &image, const bool mipmaps)
 		throw std::runtime_error{SDL_GetError()};
 	}
 
-	std::memcpy(transmem.get(), image.bytes().data(), image.bytes().size());
-
 	std::unique_ptr<SDL_GPUCommandBuffer, void (*)(SDL_GPUCommandBuffer *)> cmdbuf{SDL_AcquireGPUCommandBuffer(_device.get()), [] (const auto cmdbuf) -> void {
 		if (!SDL_CancelGPUCommandBuffer(cmdbuf)) {
 			throw std::runtime_error{SDL_GetError()};
 		}
 	}};
 
+	if (!cmdbuf) {
+		throw std::runtime_error{SDL_GetError()};
+	}
+
+	std::memcpy(transmem.get(), image.bytes().data(), image.bytes().size());
 	const auto cpypass{SDL_BeginGPUCopyPass(cmdbuf.get())};
 
 	const SDL_GPUTextureTransferInfo transfer{
@@ -163,7 +170,7 @@ auto window::create_texture(const res::image &image, const bool mipmaps)
 	};
 
 	const SDL_GPUTextureRegion region{
-		.texture = static_cast<SDL_GPUTexture *>(texture),
+		.texture = raw.get(),
 		.w = info.width,
 		.h = info.height,
 		.d = 1
@@ -172,8 +179,23 @@ auto window::create_texture(const res::image &image, const bool mipmaps)
 	SDL_UploadToGPUTexture(cpypass, std::addressof(transfer), std::addressof(region), false);
 	SDL_EndGPUCopyPass(cpypass);
 
-	if (1 < info.num_levels) {
-		SDL_GenerateMipmapsForGPUTexture(cmdbuf.get(), region.texture);
+	const SDL_GPUBlitInfo blit{
+		.source = {
+			.texture = region.texture,
+			.w = info.width,
+			.h = info.height
+		},
+		.destination = {
+			.texture = static_cast<SDL_GPUTexture *>(texture),
+			.w = info.width,
+			.h = info.height
+		}
+	};
+
+	SDL_BlitGPUTexture(cmdbuf.get(), std::addressof(blit));
+
+	if (texture.mipmaps()) {
+		SDL_GenerateMipmapsForGPUTexture(cmdbuf.get(), blit.destination.texture);
 	}
 
 	if (static_cast<bool>(_fence)) {
@@ -240,6 +262,10 @@ void window::iterate()
 			throw std::runtime_error{SDL_GetError()};
 		}
 	}};
+
+	if (!cmdbuf) {
+		throw std::runtime_error{SDL_GetError()};
+	}
 
 	if (!SDL_AcquireGPUSwapchainTexture(cmdbuf.get(), _handle, std::addressof(swapchain.texture), nullptr, nullptr)) {
 		throw std::runtime_error{SDL_GetError()};
