@@ -35,6 +35,7 @@
 #include <SDL3/SDL_surface.h>
 #include <SDL3/SDL_video.h>
 
+#include <algorithm>
 #include <cstdint>
 #include <cstring>
 #include <functional>
@@ -47,6 +48,10 @@ namespace stellarlib::app
 {
 window::~window()
 {
+	for (const auto fence : _fences) {
+		SDL_ReleaseGPUFence(_device.get(), fence);
+	}
+
 	SDL_ReleaseGPUFence(_device.get(), _fence);
 	SDL_ReleaseGPUTransferBuffer(_device.get(), _transbuf);
 	SDL_ReleaseWindowFromGPUDevice(_device.get(), _handle);
@@ -111,112 +116,68 @@ void window::set_vsync(const bool vsync)
 auto window::upload_image(const res::image &image, const bool mipmaps)
 	-> gfx::texture
 {
-	gfx::texture texture{_device, image.size(), mipmaps};
-
-	SDL_GPUTextureCreateInfo info{
-		.format = SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM,
-		.usage = SDL_GPU_TEXTUREUSAGE_SAMPLER,
-		.width = texture.size().x(),
-		.height = texture.size().y(),
-		.layer_count_or_depth = 1,
-		.num_levels = 1
-	};
-
-	const std::unique_ptr<SDL_GPUTexture, std::function<void (SDL_GPUTexture *)>> raw{SDL_CreateGPUTexture(_device.get(), std::addressof(info)), [this] (const auto raw) -> void {
-		SDL_ReleaseGPUTexture(_device.get(), raw);
-	}};
-
-	if (!raw) {
-		throw std::runtime_error{SDL_GetError()};
-	}
-
-	if (_transbuf_size < image.bytes().size()) {
-		_transbuf_size = lin::cast<std::uint32_t>(image.bytes().size());
-
-		const SDL_GPUTransferBufferCreateInfo transbuf{
-			.size = _transbuf_size
-		};
-
-		SDL_ReleaseGPUTransferBuffer(_device.get(), std::exchange(_transbuf, SDL_CreateGPUTransferBuffer(_device.get(), std::addressof(transbuf))));
-
-		if (!static_cast<bool>(_transbuf)) {
-			throw std::runtime_error{SDL_GetError()};
-		}
-	}
-
-	const std::unique_ptr<void, std::function<void (void *)>> transmem{SDL_MapGPUTransferBuffer(_device.get(), _transbuf, true), [this] (const auto) -> void {
-		SDL_UnmapGPUTransferBuffer(_device.get(), _transbuf);
-	}};
-
-	if (!transmem) {
-		throw std::runtime_error{SDL_GetError()};
-	}
-
-	std::unique_ptr<SDL_GPUCommandBuffer, void (*)(SDL_GPUCommandBuffer *)> cmdbuf{SDL_AcquireGPUCommandBuffer(_device.get()), [] (const auto cmdbuf) -> void {
-		if (!SDL_CancelGPUCommandBuffer(cmdbuf)) {
-			throw std::runtime_error{SDL_GetError()};
-		}
-	}};
-
-	if (!cmdbuf) {
-		throw std::runtime_error{SDL_GetError()};
-	}
-
-	std::memcpy(transmem.get(), image.bytes().data(), image.bytes().size());
+	extend_transbuf(lin::cast<std::uint32_t>(image.bytes().size()));
+	std::memcpy(map_transbuf().get(), image.bytes().data(), image.bytes().size());
+	auto cmdbuf{acquire_cmdbuf()};
 	const auto cpypass{SDL_BeginGPUCopyPass(cmdbuf.get())};
-
-	const SDL_GPUTextureTransferInfo transfer{
-		.transfer_buffer = _transbuf
-	};
-
-	const SDL_GPUTextureRegion region{
-		.texture = raw.get(),
-		.w = info.width,
-		.h = info.height,
-		.d = 1
-	};
-
+	const auto transtex{create_transtex(SDL_GPU_TEXTUREUSAGE_SAMPLER, image.size())};
+	const auto [transfer, region]{prepare_transfer(transtex.get(), image.size())};
 	SDL_UploadToGPUTexture(cpypass, std::addressof(transfer), std::addressof(region), false);
 	SDL_EndGPUCopyPass(cpypass);
-
-	const SDL_GPUBlitInfo blit{
-		.source = {
-			.texture = region.texture,
-			.w = info.width,
-			.h = info.height
-		},
-		.destination = {
-			.texture = static_cast<SDL_GPUTexture *>(texture),
-			.w = info.width,
-			.h = info.height
-		}
-	};
-
-	SDL_BlitGPUTexture(cmdbuf.get(), std::addressof(blit));
+	gfx::texture texture{_device, image.size(), mipmaps};
+	blit(cmdbuf.get(), transtex.get(), texture.size(), static_cast<SDL_GPUTexture *>(texture));
 
 	if (texture.mipmaps()) {
-		SDL_GenerateMipmapsForGPUTexture(cmdbuf.get(), blit.destination.texture);
+		SDL_GenerateMipmapsForGPUTexture(cmdbuf.get(), static_cast<SDL_GPUTexture *>(texture));
 	}
 
-	if (static_cast<bool>(_fence)) {
-		if (!SDL_WaitForGPUFences(_device.get(), true, std::addressof(_fence), 1)) {
-			throw std::runtime_error{SDL_GetError()};
-		}
-
-		SDL_ReleaseGPUFence(_device.get(), std::exchange(_fence, {}));
-	}
-
-	_fence = SDL_SubmitGPUCommandBufferAndAcquireFence(cmdbuf.release());
-
-	if (!static_cast<bool>(_fence)) {
-		throw std::runtime_error{SDL_GetError()};
-	}
-
+	submit_cmdbuf(cmdbuf.release());
 	return texture;
 }
 
+auto window::download_texture(const gfx::texture &texture)
+	-> res::image
+{
+	auto cmdbuf(acquire_cmdbuf());
+	const auto transtex{create_transtex(SDL_GPU_TEXTUREUSAGE_COLOR_TARGET, texture.size())};
+	blit(cmdbuf.get(), static_cast<SDL_GPUTexture *>(texture), texture.size(), transtex.get());
+	res::image image{texture.size()};
+	extend_transbuf(lin::cast<std::uint32_t>(image.bytes().size()));
+	const auto cpypass{SDL_BeginGPUCopyPass(cmdbuf.get())};
+	const auto [transfer, region]{prepare_transfer(transtex.get(), texture.size())};
+	SDL_DownloadFromGPUTexture(cpypass, std::addressof(region), std::addressof(transfer));
+	SDL_EndGPUCopyPass(cpypass);
+
+	if (!SDL_WaitForGPUFences(_device.get(), true, _fences.data(), lin::cast<std::uint32_t>(_fences.size()))) {
+		throw std::runtime_error{SDL_GetError()};
+	}
+
+	submit_cmdbuf(cmdbuf.release());
+	wait_fence();
+	std::memcpy(image.bytes().data(), map_transbuf().get(), image.bytes().size());
+	return image;
+}
+
+void window::blit(SDL_GPUCommandBuffer *cmdbuf, SDL_GPUTexture *src, const lin::uint2 size, SDL_GPUTexture *dst)
+{
+	const SDL_GPUBlitInfo info{
+		.source = {
+			.texture = src,
+			.w = size.x(),
+			.h = size.y()
+		},
+		.destination = {
+			.texture = dst,
+			.w = size.x(),
+			.h = size.y()
+		}
+	};
+
+	SDL_BlitGPUTexture(cmdbuf, std::addressof(info));
+}
+
 window::window(const info &info)
-	: _handle{SDL_CreateWindow(info.title.c_str(), 0, 0, SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE)}
+	: _handle{SDL_CreateWindow(info.title.c_str(), 0, 0, info.debug ? SDL_WINDOW_RESIZABLE : SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE)}
 {
 	if (!static_cast<bool>(_handle) || !SDL_SetWindowIcon(_handle, static_cast<SDL_Surface *>(info.icon)) && !static_cast<bool>(std::strstr(SDL_GetError(), "not supported"))) {
 		throw std::runtime_error{SDL_GetError()};
@@ -258,7 +219,24 @@ void window::iterate()
 	};
 
 	const std::unique_ptr<SDL_GPUCommandBuffer, std::function<void (SDL_GPUCommandBuffer *)>> cmdbuf{SDL_AcquireGPUCommandBuffer(_device.get()), [&] (const auto cmdbuf) -> void {
-		if (swapchain.texture ? !SDL_SubmitGPUCommandBuffer(cmdbuf) : !SDL_CancelGPUCommandBuffer(cmdbuf)) {
+		if (swapchain.texture) {
+			const auto fences{std::ranges::remove_if(_fences, [device = _device.get()] [[nodiscard]] (const auto fence) -> auto {
+				return SDL_QueryGPUFence(device, fence);
+			})};
+
+			for (const auto fence : fences) {
+				SDL_ReleaseGPUFence(_device.get(), fence);
+			}
+
+			_fences.erase(fences.begin(), _fences.end());
+			_fences.emplace_back(SDL_SubmitGPUCommandBufferAndAcquireFence(cmdbuf));
+
+			if (!_fences.back()) {
+				_fences.pop_back();
+				throw std::runtime_error{SDL_GetError()};
+			}
+		}
+		else if (!SDL_CancelGPUCommandBuffer(cmdbuf)) {
 			throw std::runtime_error{SDL_GetError()};
 		}
 	}};
@@ -268,20 +246,18 @@ void window::iterate()
 	}
 
 	if (!SDL_AcquireGPUSwapchainTexture(cmdbuf.get(), _handle, std::addressof(swapchain.texture), nullptr, nullptr)) {
-		throw std::runtime_error{SDL_GetError()};
+		SDL_ReleaseWindowFromGPUDevice(_device.get(), _handle);
+
+		if (!SDL_ClaimWindowForGPUDevice(_device.get(), _handle) || !SDL_AcquireGPUSwapchainTexture(cmdbuf.get(), _handle, std::addressof(swapchain.texture), nullptr, nullptr)) {
+			throw std::runtime_error{SDL_GetError()};
+		}
 	}
 
 	if (static_cast<bool>(swapchain.texture)) {
 		SDL_EndGPURenderPass(SDL_BeginGPURenderPass(cmdbuf.get(), std::addressof(swapchain), 1, nullptr));
 	}
 
-	if (static_cast<bool>(_fence)) {
-		if (!SDL_WaitForGPUFences(_device.get(), true, std::addressof(_fence), 1)) {
-			throw std::runtime_error{SDL_GetError()};
-		}
-
-		SDL_ReleaseGPUFence(_device.get(), std::exchange(_fence, {}));
-	}
+	wait_fence();
 }
 
 void window::event(const SDL_Event &event) const
@@ -289,6 +265,115 @@ void window::event(const SDL_Event &event) const
 	if (event.type == SDL_EVENT_WINDOW_DESTROYED && event.window.windowID == SDL_GetWindowID(_handle)) {
 		SDL_InvalidParamError("event");
 		throw std::invalid_argument{SDL_GetError()};
+	}
+}
+
+void window::extend_transbuf(const std::uint32_t size)
+{
+	if (size <= _transbuf_size) {
+		return;
+	}
+
+	const SDL_GPUTransferBufferCreateInfo info{
+		.size = size
+	};
+
+	SDL_ReleaseGPUTransferBuffer(_device.get(), std::exchange(_transbuf, SDL_CreateGPUTransferBuffer(_device.get(), std::addressof(info))));
+
+	if (!static_cast<bool>(_transbuf)) {
+		throw std::runtime_error{SDL_GetError()};
+	}
+
+	_transbuf_size = info.size;
+}
+
+auto window::map_transbuf()
+	-> std::unique_ptr<void, std::function<void (void *)>>
+{
+	std::unique_ptr<void, std::function<void (void *)>> transmem{SDL_MapGPUTransferBuffer(_device.get(), _transbuf, true), [this] (const auto) -> void {
+		SDL_UnmapGPUTransferBuffer(_device.get(), _transbuf);
+	}};
+
+	if (!transmem) {
+		throw std::runtime_error{SDL_GetError()};
+	}
+
+	return transmem;
+}
+
+auto window::acquire_cmdbuf()
+	-> std::unique_ptr<SDL_GPUCommandBuffer, void (*)(SDL_GPUCommandBuffer *)>
+{
+	std::unique_ptr<SDL_GPUCommandBuffer, void (*)(SDL_GPUCommandBuffer *)> cmdbuf{SDL_AcquireGPUCommandBuffer(_device.get()), [] (const auto cmdbuf) -> void {
+		if (!SDL_CancelGPUCommandBuffer(cmdbuf)) {
+			throw std::runtime_error{SDL_GetError()};
+		}
+	}};
+
+	if (!cmdbuf) {
+		throw std::runtime_error{SDL_GetError()};
+	}
+
+	return cmdbuf;
+}
+
+auto window::create_transtex(const SDL_GPUTextureUsageFlags usage, const lin::uint2 size)
+	-> std::unique_ptr<SDL_GPUTexture, std::function<void (SDL_GPUTexture *)>>
+{
+	SDL_GPUTextureCreateInfo info{
+		.format = SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM,
+		.usage = usage,
+		.width = size.x(),
+		.height = size.y(),
+		.layer_count_or_depth = 1,
+		.num_levels = 1
+	};
+
+	std::unique_ptr<SDL_GPUTexture, std::function<void (SDL_GPUTexture *)>> transtex{SDL_CreateGPUTexture(_device.get(), std::addressof(info)), [this] (const auto raw) -> void {
+		SDL_ReleaseGPUTexture(_device.get(), raw);
+	}};
+
+	if (!transtex) {
+		throw std::runtime_error{SDL_GetError()};
+	}
+
+	return transtex;
+}
+
+auto window::prepare_transfer(SDL_GPUTexture *texture, const lin::uint2 size)
+	-> std::pair<SDL_GPUTextureTransferInfo, SDL_GPUTextureRegion>
+{
+	return {
+		{
+			.transfer_buffer = _transbuf
+		},
+		{
+			.texture = texture,
+			.w = size.x(),
+			.h = size.y(),
+			.d = 1
+		}
+	};
+}
+
+void window::wait_fence()
+{
+	if (!static_cast<bool>(_fence)) {
+		return;
+	}
+
+	if (!SDL_WaitForGPUFences(_device.get(), false, std::addressof(_fence), 1)) {
+		throw std::runtime_error{SDL_GetError()};
+	}
+}
+
+void window::submit_cmdbuf(SDL_GPUCommandBuffer *cmdbuf)
+{
+	wait_fence();
+	SDL_ReleaseGPUFence(_device.get(), std::exchange(_fence, SDL_SubmitGPUCommandBufferAndAcquireFence(cmdbuf)));
+
+	if (!static_cast<bool>(_fence)) {
+		throw std::runtime_error{SDL_GetError()};
 	}
 }
 }

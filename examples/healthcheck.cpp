@@ -77,10 +77,12 @@ constexpr void check_window(app::context &ctx)
 	assert(static_cast<SDL_GPUTexture *>(texture1));
 	assert(lin::all(texture1.size() == image.size()));
 	assert(!texture1.mipmaps());
+	assert(ctx.window().download_texture(texture1) == image);
 	const auto texture2{ctx.window().upload_image(image, true)};
 	assert(static_cast<SDL_GPUTexture *>(texture2));
 	assert(lin::all(texture2.size() == image.size()));
 	assert(!texture2.mipmaps());
+	assert(ctx.window().download_texture(texture2) == image);
 }
 }
 

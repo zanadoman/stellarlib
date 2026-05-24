@@ -182,9 +182,10 @@ private:
 	app::clock _clock;
 	[[maybe_unused]] std::array<std::byte, 4> _padding1;
 	app::window _window;
+	[[maybe_unused]] std::array<std::byte, 8> _padding2;
 	ecs::world _world;
 	std::unique_ptr<scene> _scene;
-	[[maybe_unused]] std::array<std::byte, 8> _padding2;
+	[[maybe_unused]] std::array<std::byte, 8> _padding3;
 
 	[[nodiscard]]
 	explicit context(info info);

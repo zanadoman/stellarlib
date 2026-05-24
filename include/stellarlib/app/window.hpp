@@ -37,6 +37,8 @@
 #include <cstdint>
 #include <memory>
 #include <string>
+#include <utility>
+#include <vector>
 
 /**
  * @brief Application runtime
@@ -148,6 +150,14 @@ public:
 	auto upload_image(const res::image &image, bool mipmaps)
 		-> gfx::texture;
 
+	/**
+	 * @brief Downloads a texture from the GPU
+	 * @param texture Texture to download
+	 * @return Downloaded texture
+	 */
+	auto download_texture(const gfx::texture &texture)
+		-> res::image;
+
 private:
 	SDL_Window *_handle{};
 	std::shared_ptr<SDL_GPUDevice> _device;
@@ -156,6 +166,9 @@ private:
 	std::uint32_t _transbuf_size{};
 	SDL_GPUTransferBuffer *_transbuf{};
 	SDL_GPUFence *_fence{};
+	std::vector<SDL_GPUFence *> _fences;
+
+	static void blit(SDL_GPUCommandBuffer *cmdbuf, SDL_GPUTexture *src, lin::uint2 size, SDL_GPUTexture *dst);
 
 	[[nodiscard]]
 	explicit window(const info &info);
@@ -163,6 +176,28 @@ private:
 	void iterate();
 
 	void event(const SDL_Event &event) const;
+
+	void extend_transbuf(std::uint32_t size);
+
+	[[nodiscard]]
+	auto map_transbuf()
+		-> std::unique_ptr<void, std::function<void (void *)>>;
+
+	[[nodiscard]]
+	auto acquire_cmdbuf()
+		-> std::unique_ptr<SDL_GPUCommandBuffer, void (*)(SDL_GPUCommandBuffer *)>;
+
+	[[nodiscard]]
+	auto create_transtex(SDL_GPUTextureUsageFlags usage, lin::uint2 size)
+		-> std::unique_ptr<SDL_GPUTexture, std::function<void (SDL_GPUTexture *)>>;
+
+	[[nodiscard]]
+	auto prepare_transfer(SDL_GPUTexture *texture, lin::uint2 size)
+		-> std::pair<SDL_GPUTextureTransferInfo, SDL_GPUTextureRegion>;
+
+	void wait_fence();
+
+	void submit_cmdbuf(SDL_GPUCommandBuffer *cmdbuf);
 };
 }
 
