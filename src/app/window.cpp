@@ -28,7 +28,6 @@
 #include <stellarlib/res/res.hpp>
 
 #include <SDL3/SDL_error.h>
-#include <SDL3/SDL_events.h>
 #include <SDL3/SDL_gpu.h>
 #include <SDL3/SDL_properties.h>
 #include <SDL3/SDL_rect.h>
@@ -93,13 +92,11 @@ void window::set_vsync(const bool vsync)
 			mode = SDL_GPU_PRESENTMODE_VSYNC;
 		}
 	}
-	else {
-		if (SDL_WindowSupportsGPUPresentMode(_device.get(), _handle, SDL_GPU_PRESENTMODE_IMMEDIATE)) {
-			mode = SDL_GPU_PRESENTMODE_IMMEDIATE;
-		}
-		else if (SDL_WindowSupportsGPUPresentMode(_device.get(), _handle, SDL_GPU_PRESENTMODE_MAILBOX)) {
-			mode = SDL_GPU_PRESENTMODE_MAILBOX;
-		}
+	else if (SDL_WindowSupportsGPUPresentMode(_device.get(), _handle, SDL_GPU_PRESENTMODE_IMMEDIATE)) {
+		mode = SDL_GPU_PRESENTMODE_IMMEDIATE;
+	}
+	else if (SDL_WindowSupportsGPUPresentMode(_device.get(), _handle, SDL_GPU_PRESENTMODE_MAILBOX)) {
+		mode = SDL_GPU_PRESENTMODE_MAILBOX;
 	}
 
 	if (mode == -1) {
@@ -131,7 +128,7 @@ auto window::upload_image(const res::image &image, const bool mipmaps)
 		SDL_GenerateMipmapsForGPUTexture(cmdbuf.get(), static_cast<SDL_GPUTexture *>(texture));
 	}
 
-	submit_cmdbuf(cmdbuf.release());
+	submit_cmdbuf(std::move(cmdbuf));
 	return texture;
 }
 
@@ -141,18 +138,18 @@ auto window::download_texture(const gfx::texture &texture)
 	auto cmdbuf(acquire_cmdbuf());
 	const auto transtex{create_transtex(SDL_GPU_TEXTUREUSAGE_COLOR_TARGET, texture.size())};
 	blit(cmdbuf.get(), static_cast<SDL_GPUTexture *>(texture), texture.size(), transtex.get());
+	const auto cpypass{SDL_BeginGPUCopyPass(cmdbuf.get())};
 	res::image image{texture.size()};
 	extend_transbuf(lin::cast<std::uint32_t>(image.bytes().size()));
-	const auto cpypass{SDL_BeginGPUCopyPass(cmdbuf.get())};
 	const auto [transfer, region]{prepare_transfer(transtex.get(), texture.size())};
 	SDL_DownloadFromGPUTexture(cpypass, std::addressof(region), std::addressof(transfer));
 	SDL_EndGPUCopyPass(cpypass);
 
-	if (!SDL_WaitForGPUFences(_device.get(), true, _fences.data(), lin::cast<std::uint32_t>(_fences.size()))) {
+	if (lin::cast<bool>(_fences.size()) && !SDL_WaitForGPUFences(_device.get(), true, _fences.data(), lin::cast<std::uint32_t>(_fences.size()))) {
 		throw std::runtime_error{SDL_GetError()};
 	}
 
-	submit_cmdbuf(cmdbuf.release());
+	submit_cmdbuf(std::move(cmdbuf));
 	wait_fence();
 	std::memcpy(image.bytes().data(), map_transbuf().get(), image.bytes().size());
 	return image;
@@ -185,7 +182,7 @@ window::window(const info &info)
 
 	SDL_Rect bounds{};
 
-	if (const auto display{SDL_GetDisplayForWindow(_handle)}; !static_cast<bool>(display) || !SDL_GetDisplayUsableBounds(display, std::addressof(bounds)) || !SDL_SetWindowSize(_handle, bounds.w / 2, bounds.h / 2) && !static_cast<bool>(std::strstr(SDL_GetError(), "not supported"))) {
+	if (const auto display{SDL_GetDisplayForWindow(_handle)}; !lin::cast<bool>(display) || !SDL_GetDisplayUsableBounds(display, std::addressof(bounds)) || !SDL_SetWindowSize(_handle, bounds.w / 2, bounds.h / 2) && !static_cast<bool>(std::strstr(SDL_GetError(), "not supported"))) {
 		throw std::runtime_error{SDL_GetError()};
 	}
 
@@ -195,11 +192,7 @@ window::window(const info &info)
 		SDL_DestroyProperties(*props);
 	}};
 
-	if (!props_holder) {
-		throw std::runtime_error{SDL_GetError()};
-	}
-
-	if (!SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_DEBUGMODE_BOOLEAN, info.debug) || !SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_FEATURE_CLIP_DISTANCE_BOOLEAN, false) || !SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_FEATURE_DEPTH_CLAMPING_BOOLEAN, false) || !SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_FEATURE_INDIRECT_DRAW_FIRST_INSTANCE_BOOLEAN, false) || !SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_FEATURE_ANISOTROPY_BOOLEAN, false) || !SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_SHADERS_SPIRV_BOOLEAN, true) || !SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_SHADERS_DXIL_BOOLEAN, true)) {
+	if (!props_holder || !SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_DEBUGMODE_BOOLEAN, info.debug) || !SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_FEATURE_CLIP_DISTANCE_BOOLEAN, false) || !SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_FEATURE_DEPTH_CLAMPING_BOOLEAN, false) || !SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_FEATURE_INDIRECT_DRAW_FIRST_INSTANCE_BOOLEAN, false) || !SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_FEATURE_ANISOTROPY_BOOLEAN, false) || !SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_SHADERS_SPIRV_BOOLEAN, true) || !SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_SHADERS_DXIL_BOOLEAN, true)) {
 		throw std::runtime_error{SDL_GetError()};
 	}
 
@@ -241,11 +234,7 @@ void window::iterate()
 		}
 	}};
 
-	if (!cmdbuf) {
-		throw std::runtime_error{SDL_GetError()};
-	}
-
-	if (!SDL_AcquireGPUSwapchainTexture(cmdbuf.get(), _handle, std::addressof(swapchain.texture), nullptr, nullptr)) {
+	if (!cmdbuf || !SDL_AcquireGPUSwapchainTexture(cmdbuf.get(), _handle, std::addressof(swapchain.texture), nullptr, nullptr)) {
 		throw std::runtime_error{SDL_GetError()};
 	}
 
@@ -254,14 +243,6 @@ void window::iterate()
 	}
 
 	wait_fence();
-}
-
-void window::event(const SDL_Event &event) const
-{
-	if (event.type == SDL_EVENT_WINDOW_DESTROYED && event.window.windowID == SDL_GetWindowID(_handle)) {
-		SDL_InvalidParamError("event");
-		throw std::invalid_argument{SDL_GetError()};
-	}
 }
 
 void window::extend_transbuf(const std::uint32_t size)
@@ -274,12 +255,13 @@ void window::extend_transbuf(const std::uint32_t size)
 		.size = size
 	};
 
-	SDL_ReleaseGPUTransferBuffer(_device.get(), std::exchange(_transbuf, SDL_CreateGPUTransferBuffer(_device.get(), std::addressof(info))));
+	const auto transbuf{SDL_CreateGPUTransferBuffer(_device.get(), std::addressof(info))};
 
-	if (!static_cast<bool>(_transbuf)) {
+	if (!static_cast<bool>(transbuf)) {
 		throw std::runtime_error{SDL_GetError()};
 	}
 
+	SDL_ReleaseGPUTransferBuffer(_device.get(), std::exchange(_transbuf, transbuf));
 	_transbuf_size = info.size;
 }
 
@@ -316,7 +298,7 @@ auto window::acquire_cmdbuf()
 auto window::create_transtex(const SDL_GPUTextureUsageFlags usage, const lin::uint2 size)
 	-> std::unique_ptr<SDL_GPUTexture, std::function<void (SDL_GPUTexture *)>>
 {
-	SDL_GPUTextureCreateInfo info{
+	const SDL_GPUTextureCreateInfo info{
 		.format = SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM,
 		.usage = usage,
 		.width = size.x(),
@@ -325,8 +307,8 @@ auto window::create_transtex(const SDL_GPUTextureUsageFlags usage, const lin::ui
 		.num_levels = 1
 	};
 
-	std::unique_ptr<SDL_GPUTexture, std::function<void (SDL_GPUTexture *)>> transtex{SDL_CreateGPUTexture(_device.get(), std::addressof(info)), [this] (const auto raw) -> void {
-		SDL_ReleaseGPUTexture(_device.get(), raw);
+	std::unique_ptr<SDL_GPUTexture, std::function<void (SDL_GPUTexture *)>> transtex{SDL_CreateGPUTexture(_device.get(), std::addressof(info)), [device = _device.get()] (const auto transtex) -> void {
+		SDL_ReleaseGPUTexture(device, transtex);
 	}};
 
 	if (!transtex) {
@@ -354,19 +336,15 @@ auto window::prepare_transfer(SDL_GPUTexture *texture, const lin::uint2 size)
 
 void window::wait_fence()
 {
-	if (!static_cast<bool>(_fence)) {
-		return;
-	}
-
-	if (!SDL_WaitForGPUFences(_device.get(), false, std::addressof(_fence), 1)) {
+	if (static_cast<bool>(_fence) && !SDL_WaitForGPUFences(_device.get(), false, std::addressof(_fence), 1)) {
 		throw std::runtime_error{SDL_GetError()};
 	}
 }
 
-void window::submit_cmdbuf(SDL_GPUCommandBuffer *cmdbuf)
+void window::submit_cmdbuf(std::unique_ptr<SDL_GPUCommandBuffer, void (*)(SDL_GPUCommandBuffer *)> cmdbuf)
 {
 	wait_fence();
-	SDL_ReleaseGPUFence(_device.get(), std::exchange(_fence, SDL_SubmitGPUCommandBufferAndAcquireFence(cmdbuf)));
+	SDL_ReleaseGPUFence(_device.get(), std::exchange(_fence, SDL_SubmitGPUCommandBufferAndAcquireFence(cmdbuf.release())));
 
 	if (!static_cast<bool>(_fence)) {
 		throw std::runtime_error{SDL_GetError()};

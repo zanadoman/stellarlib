@@ -26,15 +26,16 @@
 
 #include <stellarlib/app/lifecycle.hpp>
 #include <stellarlib/gfx/gfx.hpp>
+#include <stellarlib/lin/lin.hpp>
 #include <stellarlib/res/res.hpp>
 
-#include <SDL3/SDL_events.h>
 #include <SDL3/SDL_gpu.h>
 #include <SDL3/SDL_video.h>
 
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <memory>
 #include <string>
 #include <utility>
@@ -147,6 +148,7 @@ public:
 	 * @param mipmaps Enable mipmap generation
 	 * @return Uploaded image
 	 */
+	[[nodiscard]]
 	auto upload_image(const res::image &image, bool mipmaps)
 		-> gfx::texture;
 
@@ -155,6 +157,7 @@ public:
 	 * @param texture Texture to download
 	 * @return Downloaded texture
 	 */
+	[[nodiscard]]
 	auto download_texture(const gfx::texture &texture)
 		-> res::image;
 
@@ -174,8 +177,6 @@ private:
 	explicit window(const info &info);
 
 	void iterate();
-
-	void event(const SDL_Event &event) const;
 
 	void extend_transbuf(std::uint32_t size);
 
@@ -197,7 +198,7 @@ private:
 
 	void wait_fence();
 
-	void submit_cmdbuf(SDL_GPUCommandBuffer *cmdbuf);
+	void submit_cmdbuf(std::unique_ptr<SDL_GPUCommandBuffer, void (*)(SDL_GPUCommandBuffer *)> cmdbuf);
 };
 }
 

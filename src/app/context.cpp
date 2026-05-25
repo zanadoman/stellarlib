@@ -144,7 +144,6 @@ auto context::event(const SDL_Event &event) const
 		return SDL_APP_SUCCESS;
 	}
 
-	internal::lifecycle<context>::event(_window, event);
 	return SDL_APP_CONTINUE;
 }
 }

@@ -72,6 +72,7 @@ constexpr void check_window(app::context &ctx)
 	assert(ctx.window().title() == "org.stellarlib.healthcheck");
 	ctx.window().set_title("healthcheck");
 	assert(ctx.window().title() == "healthcheck");
+	ctx.window().set_vsync(!ctx.window().vsync());
 	const res::image image{ext::filesystem::base_directory_path() / "assets" / "tests" / "linear.png"};
 	const auto texture1{ctx.window().upload_image(image, false)};
 	assert(static_cast<SDL_GPUTexture *>(texture1));
