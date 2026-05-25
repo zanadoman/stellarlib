@@ -246,11 +246,7 @@ void window::iterate()
 	}
 
 	if (!SDL_AcquireGPUSwapchainTexture(cmdbuf.get(), _handle, std::addressof(swapchain.texture), nullptr, nullptr)) {
-		SDL_ReleaseWindowFromGPUDevice(_device.get(), _handle);
-
-		if (!SDL_ClaimWindowForGPUDevice(_device.get(), _handle) || !SDL_AcquireGPUSwapchainTexture(cmdbuf.get(), _handle, std::addressof(swapchain.texture), nullptr, nullptr)) {
-			throw std::runtime_error{SDL_GetError()};
-		}
+		throw std::runtime_error{SDL_GetError()};
 	}
 
 	if (static_cast<bool>(swapchain.texture)) {
