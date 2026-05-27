@@ -116,7 +116,7 @@ public:
 	void clear() const noexcept;
 
 private:
-	sparse_map<std::uint16_t, std::unique_ptr<any_set<std::uint32_t>>> _maps;
+	sparse_map<std::uint16_t, std::unique_ptr<any_set<std::uint32_t>>> _maps{};
 };
 }
 

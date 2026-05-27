@@ -76,7 +76,7 @@ public:
 		/**
 		 * @brief Explicit padding
 		 */
-		std::array<std::byte, 8> padding;
+		[[maybe_unused]] std::array<std::byte, 8> padding;
 
 		/**
 		 * @brief Initial scene, application termination, or deferred scene factory
@@ -183,8 +183,8 @@ private:
 	[[maybe_unused]] std::array<std::byte, 4> _padding1;
 	app::window _window;
 	[[maybe_unused]] std::array<std::byte, 8> _padding2;
-	ecs::world _world;
-	std::unique_ptr<scene> _scene;
+	ecs::world _world{};
+	std::unique_ptr<scene> _scene{};
 	[[maybe_unused]] std::array<std::byte, 8> _padding3;
 
 	[[nodiscard]]

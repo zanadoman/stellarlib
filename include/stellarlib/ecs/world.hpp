@@ -468,15 +468,15 @@ public:
 
 private:
 	static thread_local archetype cache;
-	internal::sparse_storage _components;
-	internal::sparse_set _spawning;
-	internal::stack_vector<std::uint32_t, std::uint32_t> _despawned;
-	internal::sparse_map<std::uint32_t, std::pair<std::uint16_t, bool>> _entities;
-	internal::stack_vector<std::pair<archetype, internal::sparse_set>, std::uint16_t> _archetypes;
-	internal::stack_vector<std::uint16_t, std::uint16_t> _queries;
-	internal::stack_vector<std::pair<archetype, internal::stack_vector<std::uint16_t>>, std::uint16_t> _indices;
+	internal::sparse_storage _components{};
+	internal::sparse_set _spawning{};
+	internal::stack_vector<std::uint32_t, std::uint32_t> _despawned{};
+	internal::sparse_map<std::uint32_t, std::pair<std::uint16_t, bool>> _entities{};
+	internal::stack_vector<std::pair<archetype, internal::sparse_set>, std::uint16_t> _archetypes{};
+	internal::stack_vector<std::uint16_t, std::uint16_t> _queries{};
+	internal::stack_vector<std::pair<archetype, internal::stack_vector<std::uint16_t>>, std::uint16_t> _indices{};
 	std::size_t _lock{};
-	internal::command_queue _commands;
+	internal::command_queue _commands{};
 
 	std::function<void ()> _execute{[this] noexcept -> void {
 		if (!--_lock) {

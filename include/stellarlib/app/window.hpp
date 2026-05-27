@@ -82,7 +82,7 @@ public:
 		/**
 		 * @brief Explicit padding
 		 */
-		std::array<std::byte, 6> padding;
+		[[maybe_unused]] std::array<std::byte, 6> padding;
 	};
 
 	/**
@@ -163,13 +163,13 @@ public:
 
 private:
 	SDL_Window *_handle{};
-	std::shared_ptr<SDL_GPUDevice> _device;
+	std::shared_ptr<SDL_GPUDevice> _device{};
 	bool _vsync{true};
 	[[maybe_unused]] std::array<std::byte, 3> _padding;
 	std::uint32_t _transbuf_size{};
 	SDL_GPUTransferBuffer *_transbuf{};
 	SDL_GPUFence *_fence{};
-	std::vector<SDL_GPUFence *> _fences;
+	std::vector<SDL_GPUFence *> _fences{};
 
 	static void blit(SDL_GPUCommandBuffer *cmdbuf, SDL_GPUTexture *src, lin::uint2 size, SDL_GPUTexture *dst);
 

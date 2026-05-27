@@ -124,8 +124,8 @@ public:
 
 private:
 	SDL_GPUTexture *_handle{};
-	std::shared_ptr<SDL_GPUDevice> _device;
-	lin::uint2 _size;
+	std::shared_ptr<SDL_GPUDevice> _device{};
+	lin::uint2 _size{};
 	bool _mipmaps{};
 	[[maybe_unused]] std::array<std::byte, 7> _padding;
 };

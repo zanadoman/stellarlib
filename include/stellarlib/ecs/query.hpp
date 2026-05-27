@@ -76,8 +76,8 @@ public:
 	}
 
 private:
-	Query _query;
-	const std::function<void ()> &_callback;
+	Query _query{};
+	const std::function<void ()> &_callback{};
 };
 
 template <typename Query>

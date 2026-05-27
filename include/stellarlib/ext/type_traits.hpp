@@ -82,7 +82,7 @@ struct [[nodiscard]] padding final
 	/**
 	 * @brief Padding bytes
 	 */
-	[[no_unique_address]] std::conditional_t<lin::cast<bool>(size), std::array<std::byte, size>, std::tuple<>> bytes;
+	[[maybe_unused]] [[no_unique_address]] std::conditional_t<lin::cast<bool>(size), std::array<std::byte, size>, std::tuple<>> bytes;
 };
 }
 

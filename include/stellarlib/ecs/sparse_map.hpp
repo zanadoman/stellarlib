@@ -161,9 +161,9 @@ public:
 	}
 
 private:
-	stack_vector<Key, Key> _sparse;
-	stack_vector<T, Key> _values;
-	stack_vector<Key, Key> _keys;
+	stack_vector<Key, Key> _sparse{};
+	stack_vector<T, Key> _values{};
+	stack_vector<Key, Key> _keys{};
 };
 }
 

@@ -73,7 +73,7 @@ private:
 		void *callback;
 	};
 
-	stack_vector<command> _commands;
+	stack_vector<command> _commands{};
 };
 }
 

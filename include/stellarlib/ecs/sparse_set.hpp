@@ -73,8 +73,8 @@ public:
 	void clear() noexcept;
 
 private:
-	stack_vector<std::uint32_t, std::uint32_t> _sparse;
-	stack_vector<std::uint32_t, std::uint32_t> _keys;
+	stack_vector<std::uint32_t, std::uint32_t> _sparse{};
+	stack_vector<std::uint32_t, std::uint32_t> _keys{};
 };
 }
 
