@@ -213,8 +213,8 @@ void window::iterate()
 
 	const std::unique_ptr<SDL_GPUCommandBuffer, std::function<void (SDL_GPUCommandBuffer *)>> cmdbuf{SDL_AcquireGPUCommandBuffer(_device.get()), [&] (const auto cmdbuf) -> void {
 		if (swapchain.texture) {
-			const auto fences{std::ranges::remove_if(_fences, [device = _device.get()] [[nodiscard]] (const auto fence) -> auto {
-				return SDL_QueryGPUFence(device, fence);
+			const auto fences{std::ranges::remove_if(_fences, [cpt = _device.get()] [[nodiscard]] (const auto fence) -> auto {
+				return SDL_QueryGPUFence(cpt, fence);
 			})};
 
 			for (const auto fence : fences) {
@@ -307,8 +307,8 @@ auto window::create_transtex(const SDL_GPUTextureUsageFlags usage, const lin::ui
 		.num_levels = 1
 	};
 
-	std::unique_ptr<SDL_GPUTexture, std::function<void (SDL_GPUTexture *)>> transtex{SDL_CreateGPUTexture(_device.get(), std::addressof(info)), [device = _device.get()] (const auto transtex) -> void {
-		SDL_ReleaseGPUTexture(device, transtex);
+	std::unique_ptr<SDL_GPUTexture, std::function<void (SDL_GPUTexture *)>> transtex{SDL_CreateGPUTexture(_device.get(), std::addressof(info)), [cpt = _device.get()] (const auto transtex) -> void {
+		SDL_ReleaseGPUTexture(cpt, transtex);
 	}};
 
 	if (!transtex) {

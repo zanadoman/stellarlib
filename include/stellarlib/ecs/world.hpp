@@ -41,6 +41,7 @@
 #include <expected>
 #include <functional>
 #include <limits>
+#include <memory>
 #include <ranges>
 #include <tuple>
 #include <type_traits>
@@ -122,9 +123,9 @@ public:
 		}
 
 		const auto command{[this] (const auto entity, auto &&...components) noexcept -> void {
-			[this] <std::size_t ...I> (const auto entity, T &&...components, const std::index_sequence<I...>) noexcept -> void {
+			[cpt = std::addressof(_components)] <std::size_t ...I> (const auto entity, T &&...components, const std::index_sequence<I...>) noexcept -> void {
 				const auto &ids{internal::sparse_storage::ids<T...>()};
-				(_components.at<T>(ids[I]).insert(entity, std::forward<T>(components)), ...);
+				(cpt->at<T>(ids[I]).insert(entity, std::forward<T>(components)), ...);
 			}(entity, std::forward<T>(components)..., std::index_sequence_for<T...>{});
 
 			relocate<const archetype &>(entity, archetype::of<T...>());
@@ -161,9 +162,9 @@ public:
 		}
 
 		const auto command{[this] (const auto entity, auto &&...components) noexcept -> void {
-			[this] <std::size_t ...I> (const auto entity, T &&...components, const std::index_sequence<I...>) noexcept -> void {
+			[cpt = std::addressof(_components)] <std::size_t ...I> (const auto entity, T &&...components, const std::index_sequence<I...>) noexcept -> void {
 				const auto &ids{internal::sparse_storage::ids<T...>()};
-				(_components.at<T>(ids[I]).insert(entity, std::forward<T>(components)), ...);
+				(cpt->at<T>(ids[I]).insert(entity, std::forward<T>(components)), ...);
 			}(entity, std::forward<T>(components)..., std::index_sequence_for<T...>{});
 
 			cache = (*this)[entity];
@@ -266,9 +267,9 @@ public:
 	constexpr auto at(const std::uint32_t entity) const noexcept
 		requires (lin::cast<bool>(sizeof...(T)))
 	{
-		return [this] <std::size_t ...I> [[nodiscard]] (const auto entity, const std::index_sequence<I...>) noexcept -> auto {
+		return [cpt = std::addressof(_components)] <std::size_t ...I> [[nodiscard]] (const auto entity, const std::index_sequence<I...>) noexcept -> auto {
 			const auto &ids{internal::sparse_storage::ids<T...>()};
-			return std::tuple{_components.at<T>(ids[I]).at(entity)...};
+			return std::tuple{cpt->at<T>(ids[I]).at(entity)...};
 		}(entity, std::index_sequence_for<T...>{});
 	}
 
@@ -283,9 +284,9 @@ public:
 	constexpr auto at(const std::uint32_t entity) noexcept
 		requires (lin::cast<bool>(sizeof...(T)))
 	{
-		return [this] <std::size_t ...I> [[nodiscard]] (const auto entity, const std::index_sequence<I...>) noexcept -> auto {
+		return [cpt = std::addressof(_components)] <std::size_t ...I> [[nodiscard]] (const auto entity, const std::index_sequence<I...>) noexcept -> auto {
 			const auto &ids{internal::sparse_storage::ids<T...>()};
-			return std::tuple{_components.at<T>(ids[I]).at(entity)...};
+			return std::tuple{cpt->at<T>(ids[I]).at(entity)...};
 		}(entity, std::index_sequence_for<T...>{});
 	}
 
@@ -311,9 +312,9 @@ public:
 	constexpr auto operator[](const std::uint32_t entity) const noexcept
 		requires (lin::cast<bool>(sizeof...(T)))
 	{
-		return [this] <std::size_t ...I> [[nodiscard]] (const auto entity, const std::index_sequence<I...>) noexcept -> auto {
+		return [cpt = std::addressof(_components)] <std::size_t ...I> [[nodiscard]] (const auto entity, const std::index_sequence<I...>) noexcept -> auto {
 			const auto &ids{internal::sparse_storage::ids<T...>()};
-			return std::tuple<const T &...>{_components.operator[]<T>(ids[I])[entity]...};
+			return std::tuple<const T &...>{cpt->operator[]<T>(ids[I])[entity]...};
 		}(entity, std::index_sequence_for<T...>{});
 	}
 
@@ -329,9 +330,9 @@ public:
 	constexpr auto operator[](const std::uint32_t entity) noexcept
 		requires (lin::cast<bool>(sizeof...(T)))
 	{
-		return [this] <std::size_t ...I> [[nodiscard]] (const auto entity, const std::index_sequence<I...>) noexcept -> auto {
+		return [cpt = std::addressof(_components)] <std::size_t ...I> [[nodiscard]] (const auto entity, const std::index_sequence<I...>) noexcept -> auto {
 			const auto &ids{internal::sparse_storage::ids<T...>()};
-			return std::tuple<T &...>{_components.operator[]<T>(ids[I])[entity]...};
+			return std::tuple<T &...>{cpt->operator[]<T>(ids[I])[entity]...};
 		}(entity, std::index_sequence_for<T...>{});
 	}
 
@@ -398,15 +399,15 @@ public:
 		}
 
 		++_lock;
-		return internal::query{std::ranges::subrange{_indices[_queries[id]].second} | std::views::transform([this] [[nodiscard]] (const auto index) noexcept -> const auto & {
-			return _archetypes[index].second;
-		}) | std::views::join | std::views::transform([components = [this] <std::size_t ...I> [[nodiscard]] (const std::index_sequence<I...>) noexcept -> auto {
+		return internal::query{std::ranges::subrange{_indices[_queries[id]].second} | std::views::transform([cpt = std::addressof(_archetypes)] [[nodiscard]] (const auto index) noexcept -> const auto & {
+			return (*cpt)[index].second;
+		}) | std::views::join | std::views::transform([cpt = [cpt = std::addressof(_components)] <std::size_t ...I> [[nodiscard]] (const std::index_sequence<I...>) noexcept -> auto {
 			const auto &ids{internal::sparse_storage::ids<T...>()};
-			return std::tuple<internal::sparse_map<std::uint32_t, T> &...>{_components.operator[]<T>(ids[I])...};
+			return std::tuple<internal::sparse_map<std::uint32_t, T> &...>{cpt->operator[]<T>(ids[I])...};
 		}(std::index_sequence_for<T...>{})] [[nodiscard]] (const auto entity) noexcept -> auto {
 			return [] <std::size_t ...I> [[nodiscard]] (const auto entity, const auto &components, const std::index_sequence<I...>) noexcept -> auto {
 				return std::tuple<std::uint32_t, T &...>{entity, std::get<I>(components)[entity]...};
-			}(entity, components, std::index_sequence_for<T...>{});
+			}(entity, cpt, std::index_sequence_for<T...>{});
 		}), _execute};
 	}
 
@@ -425,9 +426,9 @@ public:
 		}
 
 		const auto command{[this] (const auto entity) noexcept -> void {
-			[this] <std::size_t ...I> (const auto entity, const std::index_sequence<I...>) noexcept -> void {
+			[cpt = std::addressof(_components)] <std::size_t ...I> (const auto entity, const std::index_sequence<I...>) noexcept -> void {
 				const auto &ids{internal::sparse_storage::ids<T...>()};
-				(_components.at<T>(ids[I]).erase(entity), ...);
+				(cpt->at<T>(ids[I]).erase(entity), ...);
 			}(entity, std::index_sequence_for<T...>{});
 
 			cache = (*this)[entity];
