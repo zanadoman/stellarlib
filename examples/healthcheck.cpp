@@ -73,17 +73,21 @@ constexpr void check_window(app::context &ctx)
 	ctx.window().set_title("healthcheck");
 	assert(ctx.window().title() == "healthcheck");
 	ctx.window().set_vsync(!ctx.window().vsync());
+}
+
+constexpr void check_window_renderer(app::context &ctx)
+{
 	const res::image image{ext::filesystem::base_directory_path() / "assets" / "tests" / "linear.png"};
-	const auto texture1{ctx.window().upload_image(image, false)};
+	const auto texture1{ctx.window().renderer().upload_image(image, false)};
 	assert(static_cast<SDL_GPUTexture *>(texture1));
 	assert(lin::all(texture1.size() == image.size()));
 	assert(!texture1.mipmaps());
-	assert(ctx.window().download_texture(texture1) == image);
-	const auto texture2{ctx.window().upload_image(image, true)};
+	assert(ctx.window().renderer().download_texture(texture1) == image);
+	const auto texture2{ctx.window().renderer().upload_image(image, true)};
 	assert(static_cast<SDL_GPUTexture *>(texture2));
 	assert(lin::all(texture2.size() == image.size()));
 	assert(!texture2.mipmaps());
-	assert(ctx.window().download_texture(texture2) == image);
+	assert(ctx.window().renderer().download_texture(texture2) == image);
 }
 }
 
@@ -116,6 +120,7 @@ auto app::init(const std::vector<std::string> &args)
 			check_metadata(ctx);
 			check_clock(ctx);
 			check_window(ctx);
+			check_window_renderer(ctx);
 			return nullptr;
 		}
 	}};

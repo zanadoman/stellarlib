@@ -142,24 +142,13 @@ public:
 	 */
 	void set_vsync(bool vsync);
 
-	/**
-	 * @brief Uploads an image into the GPU
-	 * @param image Image to upload
-	 * @param mipmaps Enable mipmap generation
-	 * @return Uploaded image
-	 */
 	[[nodiscard]]
-	auto upload_image(const res::image &image, bool mipmaps)
-		-> gfx::texture final;
+	auto renderer() const
+		-> const gfx::renderer &;
 
-	/**
-	 * @brief Downloads a texture from the GPU
-	 * @param texture Texture to download
-	 * @return Downloaded texture
-	 */
 	[[nodiscard]]
-	auto download_texture(const gfx::texture &texture)
-		-> res::image;
+	auto renderer()
+		-> gfx::renderer &;
 
 private:
 	SDL_Window *_handle{};
@@ -176,15 +165,15 @@ private:
 	[[nodiscard]]
 	explicit window(const info &info);
 
-	[[nodiscard]]
-	auto device() const
-		-> const SDL_GPUDevice * final;
-
-	[[nodiscard]]
-	auto device()
-		-> SDL_GPUDevice * final;
-
 	void iterate();
+
+	[[nodiscard]]
+	auto upload_image(const res::image &image, bool mipmaps)
+		-> gfx::texture final;
+
+	[[nodiscard]]
+	auto download_texture(const gfx::texture &texture)
+		-> res::image final;
 
 	void extend_transbuf(std::uint32_t size);
 

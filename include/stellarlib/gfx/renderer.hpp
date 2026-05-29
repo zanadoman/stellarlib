@@ -47,22 +47,6 @@ public:
 	virtual ~renderer() noexcept;
 
 	/**
-	 * @brief Returns a pointer to the internal device
-	 * @return Pointer to the internal device
-	 */
-	[[nodiscard]]
-	virtual constexpr auto device() const
-		-> const SDL_GPUDevice * = 0;
-
-	/**
-	 * @brief Returns a pointer to the internal device
-	 * @return Pointer to the internal device
-	 */
-	[[nodiscard]]
-	virtual constexpr auto device()
-		-> SDL_GPUDevice * = 0;
-
-	/**
 	 * @brief Uploads an image into the GPU
 	 * @param image Image to upload
 	 * @param mipmaps Enable mipmap generation
@@ -71,6 +55,15 @@ public:
 	[[nodiscard]]
 	virtual constexpr auto upload_image(const res::image &image, bool mipmaps)
 		-> gfx::texture = 0;
+
+	/**
+	 * @brief Downloads a texture from the GPU
+	 * @param texture Texture to download
+	 * @return Downloaded texture
+	 */
+	[[nodiscard]]
+	virtual constexpr auto download_texture(const gfx::texture &texture)
+		-> res::image = 0;
 
 protected:
 	/**
