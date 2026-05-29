@@ -1156,6 +1156,26 @@ using double3x4 = matrix<double, 3>;
 using double4x4 = matrix<double>;
 
 /**
+ * @brief 2D transform
+ */
+using transform2f = transform2<float>;
+
+/**
+ * @brief 3D transform
+ */
+using transform3f = transform3<float>;
+
+/**
+ * @brief 2D transform
+ */
+using transform2d = transform2<double>;
+
+/**
+ * @brief 3D transform
+ */
+using transform3d = transform3<double>;
+
+/**
  * @brief Returns the absolute value of x (per-component)
  */
 using internal::abs;

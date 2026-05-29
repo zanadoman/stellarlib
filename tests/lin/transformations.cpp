@@ -39,13 +39,41 @@ using namespace stellarlib;
 
 /* NOLINTBEGIN(performance-unnecessary-copy-initialization) */
 
-TEST(stellarlib_lib_transformations, translate)
+TEST(stellarlib_lin_transformations, transform2_should_negate)
+{
+	const lin::transform2 positive{
+		.p = lin::internal::matrix<float, 1, 3>{2.0F, 3.0F, 0.0F},
+		.r = lin::internal::radians(90.0F),
+		.s = lin::internal::matrix<float, 1, 2>{2.0F, 3.0F}
+	};
+	const auto negative{-positive};
+	ASSERT_EQ(+positive, -negative);
+	ASSERT_EQ(-positive, +negative);
+	ASSERT_NE(+positive, +negative);
+	ASSERT_NE(-positive, -negative);
+}
+
+TEST(stellarlib_lin_transformations, transform3_should_negate)
+{
+	const lin::transform3 positive{
+		.p = lin::internal::matrix<float, 1, 3>{2.0F, 3.0F, 4.0F},
+		.r = lin::internal::matrix<float, 1, 3>{0.0F, 0.0F, lin::internal::radians(90.0F)},
+		.s = lin::internal::matrix<float, 1, 3>{2.0F, 3.0F, 4.0F}
+	};
+	const auto negative{-positive};
+	ASSERT_EQ(+positive, -negative);
+	ASSERT_EQ(-positive, +negative);
+	ASSERT_NE(+positive, +negative);
+	ASSERT_NE(-positive, -negative);
+}
+
+TEST(stellarlib_lin_transformations, translate)
 {
 	ASSERT_TRUE(lin::internal::all(lin::internal::mul(lin::internal::matrix<float, 1, 3>{0.0F, 0.0F, 1.0F}, lin::translate(lin::internal::matrix<float, 3, 3>{1.0F}, lin::internal::matrix<float, 1, 2>{2.0F, 3.0F})) == lin::internal::matrix<float, 1, 3>{2.0F, 3.0F, 1.0F}));
 	ASSERT_TRUE(lin::internal::all(lin::internal::mul(lin::internal::matrix<float, 1, 4>{0.0F, 0.0F, 0.0F, 1.0F}, lin::translate(lin::internal::matrix<float, 4, 4>{1.0F}, lin::internal::matrix<float, 1, 3>{2.0F, 3.0F, 4.0F})) == lin::internal::matrix<float, 1, 4>{2.0F, 3.0F, 4.0F, 1.0F}));
 }
 
-TEST(stellarlib_lib_transformations, rotate)
+TEST(stellarlib_lin_transformations, rotate)
 {
 	const auto vector1{lin::internal::mul(lin::internal::matrix<float, 1, 3>{1.0F, 0.0F, 1.0F}, lin::rotate(lin::internal::matrix<float, 3, 3>{1.0F}, lin::internal::radians(90.0F)))};
 	ASSERT_NEAR(vector1.x(), 0.0F, std::numeric_limits<float>::epsilon());
@@ -68,26 +96,35 @@ TEST(stellarlib_lib_transformations, rotate)
 	ASSERT_NEAR(vector2.w(), 1.0F, std::numeric_limits<float>::epsilon());
 }
 
-TEST(stellarlib_lib_transformations, scale)
+TEST(stellarlib_lin_transformations, scale)
 {
 	ASSERT_TRUE(lin::internal::all(lin::internal::mul(lin::internal::matrix<float, 1, 3>{1.0F, 1.0F, 1.0F}, lin::scale(lin::internal::matrix<float, 3, 3>{1.0F}, lin::internal::matrix<float, 1, 2>{2.0F, 3.0F})) == lin::internal::matrix<float, 1, 3>{2.0F, 3.0F, 1.0F}));
 	ASSERT_TRUE(lin::internal::all(lin::internal::mul(lin::internal::matrix<float, 1, 4>{1.0F, 1.0F, 1.0F, 1.0F}, lin::scale(lin::internal::matrix<float, 4, 4>{1.0F}, lin::internal::matrix<float, 1, 3>{2.0F, 3.0F, 4.0F})) == lin::internal::matrix<float, 1, 4>{2.0F, 3.0F, 4.0F, 1.0F}));
 }
 
-TEST(stellarlib_lib_transformations, should_transform)
+TEST(stellarlib_lin_transformations, transform)
 {
-	const auto vector1{lin::internal::mul(lin::internal::matrix<float, 1, 3>{1.0F, 1.0F, 1.0F}, lin::scale(lin::rotate(lin::translate(lin::internal::matrix<float, 3, 3>{1.0F}, lin::internal::matrix<float, 1, 2>{2.0F, 3.0F}), lin::internal::radians(90.0F)), lin::internal::matrix<float, 1, 2>{2.0F, 3.0F}))};
+	const auto vector1{lin::internal::mul(lin::internal::matrix<float, 1, 4>{1.0F, 1.0F, 1.0F, 1.0F}, lin::transform<float>({
+		.p = lin::internal::matrix<float, 1, 3>{2.0F, 3.0F, 0.0F},
+		.r = lin::internal::radians(90.0F),
+		.s = lin::internal::matrix<float, 1, 2>{2.0F, 3.0F}
+	}))};
 	ASSERT_NEAR(vector1.x(), -1.0F, std::numeric_limits<float>::epsilon());
 	ASSERT_NEAR(vector1.y(), 5.0F, std::numeric_limits<float>::epsilon());
-	ASSERT_NEAR(vector1.z(), 1.0F, std::numeric_limits<float>::epsilon());
-	const auto vector2{lin::internal::mul(lin::internal::matrix<float, 1, 4>{1.0F, 1.0F, 1.0F, 1.0F}, lin::scale(lin::rotate(lin::translate(lin::internal::matrix<float, 4, 4>{1.0F}, lin::internal::matrix<float, 1, 3>{2.0F, 3.0F, 4.0F}), lin::internal::radians(90.0F), lin::internal::matrix<float, 1, 3>{0.0F, 0.0F, 1.0F}), lin::internal::matrix<float, 1, 3>{2.0F, 3.0F, 4.0F}))};
+	ASSERT_NEAR(vector1.z(), 0.0F, std::numeric_limits<float>::epsilon());
+	ASSERT_NEAR(vector1.w(), 1.0F, std::numeric_limits<float>::epsilon());
+	const auto vector2{lin::internal::mul(lin::internal::matrix<float, 1, 4>{1.0F, 1.0F, 1.0F, 1.0F}, lin::transform<float>({
+		.p = lin::internal::matrix<float, 1, 3>{2.0F, 3.0F, 4.0F},
+		.r = lin::internal::matrix<float, 1, 3>{0.0F, 0.0F, lin::internal::radians(90.0F)},
+		.s = lin::internal::matrix<float, 1, 3>{2.0F, 3.0F, 4.0F}
+	}))};
 	ASSERT_NEAR(vector2.x(), -1.0F, std::numeric_limits<float>::epsilon());
 	ASSERT_NEAR(vector2.y(), 5.0F, std::numeric_limits<float>::epsilon());
 	ASSERT_NEAR(vector2.z(), 8.0F, std::numeric_limits<float>::epsilon());
 	ASSERT_NEAR(vector2.w(), 1.0F, std::numeric_limits<float>::epsilon());
 }
 
-TEST(stellarlib_lib_transformations, perspective)
+TEST(stellarlib_lin_transformations, perspective)
 {
 	const auto matrix{lin::perspective(lin::internal::degrees(60.0F), 16.0F / 9.0F, 0.1F)};
 	const auto vector{lin::internal::mul(lin::internal::matrix<float, 1, 4>{0.0F, 0.0F, -1.0F, 1.0F}, matrix)};

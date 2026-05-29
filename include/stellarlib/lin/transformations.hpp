@@ -36,6 +36,132 @@
 namespace stellarlib::lin
 {
 /**
+ * @brief 2D transform
+ */
+template <typename T>
+struct [[nodiscard]] transform2 final
+{
+	/**
+	 * @brief Position
+	 */
+	internal::matrix<T, 1, 3> p;
+
+	/**
+	 * @brief Rotation
+	 */
+	T r;
+
+	/**
+	 * @brief Scale
+	 */
+	internal::matrix<T, 1, 2> s;
+};
+
+/**
+ * @brief Unary operator for 2D transform
+ * @param self Current instance
+ * @return Result of the operation
+ */
+template <typename T>
+[[nodiscard]]
+constexpr auto operator+(const transform2<T> &self) noexcept
+{
+	return self;
+}
+
+/**
+ * @brief Unary operator for 2D transform
+ * @param self Current instance
+ * @return Result of the operation
+ */
+template <typename T>
+[[nodiscard]]
+constexpr auto operator-(const transform2<T> &self) noexcept
+{
+	return transform2<T>{
+		.p = -self.p,
+		.r = -self.r,
+		.s = -self.s
+	};
+}
+
+/**
+ * @brief Comparison operator for 2D transforms
+ * @param lhs Left-hand side instance
+ * @param rhs Right-hand side instance
+ * @return Result of the comparison
+ */
+template <typename T, typename U>
+[[nodiscard]]
+constexpr auto operator==(const transform2<T> &lhs, const transform2<U> &rhs) noexcept
+{
+	return internal::all(lhs.p == rhs.p) && lhs.r == rhs.r && internal::all(lhs.s == rhs.s);
+}
+
+/**
+ * @brief 3D transform
+ */
+template <typename T>
+struct [[nodiscard]] transform3 final
+{
+	/**
+	 * @brief Position
+	 */
+	internal::matrix<T, 1, 3> p;
+
+	/**
+	 * @brief Rotation
+	 */
+	internal::matrix<T, 1, 3> r;
+
+	/**
+	 * @brief Scale
+	 */
+	internal::matrix<T, 1, 3> s;
+};
+
+/**
+ * @brief Unary operator for 3D transform
+ * @param self Current instance
+ * @return Result of the operation
+ */
+template <typename T>
+[[nodiscard]]
+constexpr auto operator+(const transform3<T> &self) noexcept
+{
+	return self;
+}
+
+/**
+ * @brief Unary operator for 3D transform
+ * @param self Current instance
+ * @return Result of the operation
+ */
+template <typename T>
+[[nodiscard]]
+constexpr auto operator-(const transform3<T> &self) noexcept
+{
+	return transform3<T>{
+		.p = -self.p,
+		.r = -self.r,
+		.s = -self.s
+	};
+}
+
+/**
+ * @brief Comparison operator for 3D transforms
+ * @param lhs Left-hand side instance
+ * @param rhs Right-hand side instance
+ * @return Result of the comparison
+ */
+template <typename T, typename U>
+[[nodiscard]]
+constexpr auto operator==(const transform3<T> &lhs, const transform3<U> &rhs) noexcept
+{
+	return internal::all(lhs.p == rhs.p) && internal::all(lhs.r == rhs.r) && internal::all(lhs.s == rhs.s);
+}
+
+/**
  * @brief Translates a 3x3 transformation matrix using a 2D vector
  * @param m 3x3 transformation matrix to be translated
  * @param v 2D translation vector
@@ -157,6 +283,30 @@ constexpr auto scale(const internal::matrix<T, 4, 4> &m, const internal::matrix<
 	res[2] = m[2] * v.z();
 	res[3] = m[3];
 	return res;
+}
+
+/**
+ * @brief Constructs a 4x4 transformation matrix from a 2D transform
+ * @param transform 2D transform
+ * @return Constructed 4x4 transformation matrix
+ */
+template <typename T>
+[[nodiscard]]
+constexpr auto transform(const transform2<T> &transform) noexcept
+{
+	return scale(rotate(translate(internal::matrix<T, 4, 4>{1}, transform.p), transform.r, internal::matrix<T, 1, 3>{0, 0, 1}), internal::matrix<T, 1, 3>{transform.s.x(), transform.s.y(), 0});
+}
+
+/**
+ * @brief Constructs a 4x4 transformation matrix from a 3D transform
+ * @param transform 3D transform
+ * @return Constructed 4x4 transformation matrix
+ */
+template <typename T>
+[[nodiscard]]
+constexpr auto transform(const transform3<T> &transform) noexcept
+{
+	return scale(rotate(rotate(rotate(translate(internal::matrix<T, 4, 4>{1}, transform.p), transform.r.z(), internal::matrix<T, 1, 3>{0, 0, 1}), transform.r.y(), internal::matrix<T, 1, 3>{0, 1, 0}), transform.r.x(), internal::matrix<T, 1, 3>{1, 0, 0}), transform.s);
 }
 
 /**
