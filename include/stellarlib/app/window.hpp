@@ -163,8 +163,6 @@ private:
 
 	void set_vsync(bool vsync) final;
 
-	void iterate();
-
 	[[nodiscard]]
 	auto upload_image(const res::image &image, bool mipmaps)
 		-> gfx::texture final;
@@ -172,6 +170,8 @@ private:
 	[[nodiscard]]
 	auto download_texture(const gfx::texture &texture)
 		-> res::image final;
+
+	void iterate();
 
 	void extend_transbuf(std::uint32_t size);
 
