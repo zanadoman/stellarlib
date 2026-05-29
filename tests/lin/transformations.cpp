@@ -39,33 +39,25 @@ using namespace stellarlib;
 
 /* NOLINTBEGIN(performance-unnecessary-copy-initialization) */
 
-TEST(stellarlib_lin_transformations, transform2_should_negate)
-{
-	const lin::transform2 positive{
-		.p = lin::internal::matrix<float, 1, 3>{2.0F, 3.0F, 0.0F},
-		.r = lin::internal::radians(90.0F),
-		.s = lin::internal::matrix<float, 1, 2>{2.0F, 3.0F}
-	};
-	const auto negative{-positive};
-	ASSERT_EQ(+positive, -negative);
-	ASSERT_EQ(-positive, +negative);
-	ASSERT_NE(+positive, +negative);
-	ASSERT_NE(-positive, -negative);
-}
+static_assert(+lin::transform2{
+	.p = -lin::internal::matrix<float, 1, 3>{2.0F, 3.0F, 0.0F},
+	.r = -lin::internal::radians(90.0F),
+	.s = -lin::internal::matrix<float, 1, 2>{2.0F, 3.0F}
+} == -lin::transform2{
+	.p = +lin::internal::matrix<float, 1, 3>{2.0F, 3.0F, 0.0F},
+	.r = +lin::internal::radians(90.0F),
+	.s = +lin::internal::matrix<float, 1, 2>{2.0F, 3.0F}
+});
 
-TEST(stellarlib_lin_transformations, transform3_should_negate)
-{
-	const lin::transform3 positive{
-		.p = lin::internal::matrix<float, 1, 3>{2.0F, 3.0F, 4.0F},
-		.r = lin::internal::matrix<float, 1, 3>{0.0F, 0.0F, lin::internal::radians(90.0F)},
-		.s = lin::internal::matrix<float, 1, 3>{2.0F, 3.0F, 4.0F}
-	};
-	const auto negative{-positive};
-	ASSERT_EQ(+positive, -negative);
-	ASSERT_EQ(-positive, +negative);
-	ASSERT_NE(+positive, +negative);
-	ASSERT_NE(-positive, -negative);
-}
+static_assert(+lin::transform3{
+	.p = -lin::internal::matrix<float, 1, 3>{2.0F, 3.0F, 4.0F},
+	.r = -lin::internal::matrix<float, 1, 3>{0.0F, 0.0F, lin::internal::radians(90.0F)},
+	.s = -lin::internal::matrix<float, 1, 3>{2.0F, 3.0F, 4.0F}
+} == -lin::transform3{
+	.p = +lin::internal::matrix<float, 1, 3>{2.0F, 3.0F, 4.0F},
+	.r = +lin::internal::matrix<float, 1, 3>{0.0F, 0.0F, lin::internal::radians(90.0F)},
+	.s = +lin::internal::matrix<float, 1, 3>{2.0F, 3.0F, 4.0F}
+});
 
 TEST(stellarlib_lin_transformations, translate)
 {
