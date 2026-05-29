@@ -21,12 +21,23 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef STELLARLIB_GFX_GFX_HPP
-#define STELLARLIB_GFX_GFX_HPP
-
-/* IWYU pragma: begin_exports */
 #include <stellarlib/gfx/renderer.hpp>
-#include <stellarlib/gfx/texture.hpp>
-/* IWYU pragma: end_exports */
 
-#endif
+namespace stellarlib::gfx
+{
+renderer::~renderer() noexcept = default;
+
+void renderer::set_vsync([[maybe_unused]] const bool vsync) {}
+
+renderer::renderer() noexcept = default;
+
+renderer::renderer(const renderer &) noexcept = default;
+
+renderer::renderer(renderer &&) noexcept = default;
+
+auto renderer::operator=(const renderer &) noexcept
+	-> renderer & = default;
+
+auto renderer::operator=(renderer &&) noexcept
+	-> renderer & = default;
+}
