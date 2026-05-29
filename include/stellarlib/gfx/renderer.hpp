@@ -44,7 +44,15 @@ public:
 	/**
 	 * @brief Destructor
 	 */
-	virtual ~renderer() noexcept = 0;
+	virtual ~renderer() noexcept;
+
+	/**
+	 * @brief Returns a pointer to the internal device
+	 * @return Pointer to the internal device
+	 */
+	[[nodiscard]]
+	virtual constexpr auto device() const
+		-> const SDL_GPUDevice * = 0;
 
 	/**
 	 * @brief Returns a pointer to the internal device

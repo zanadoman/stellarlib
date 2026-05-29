@@ -30,7 +30,7 @@ template <typename Key>
 class [[nodiscard]] any_set
 {
 public:
-	virtual constexpr ~any_set() noexcept = 0;
+	virtual constexpr ~any_set() noexcept = default;
 
 	virtual constexpr void erase(Key) noexcept = 0;
 
@@ -52,9 +52,6 @@ protected:
 	constexpr auto operator=(any_set &&) noexcept
 		-> any_set & = default;
 };
-
-template <typename Key>
-constexpr any_set<Key>::~any_set() noexcept = default;
 }
 
 #endif

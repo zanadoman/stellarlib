@@ -49,7 +49,7 @@ namespace stellarlib::app
 /**
  * @brief Window subsystem
  */
-class [[nodiscard]] window final
+class [[nodiscard]] window final : gfx::renderer
 {
 friend internal::lifecycle<class context>;
 
@@ -112,7 +112,7 @@ public:
 	/**
 	 * @brief Destructor
 	 */
-	~window();
+	~window() final;
 
 	/**
 	 * @brief Returns the title of the window
@@ -150,7 +150,7 @@ public:
 	 */
 	[[nodiscard]]
 	auto upload_image(const res::image &image, bool mipmaps)
-		-> gfx::texture;
+		-> gfx::texture final;
 
 	/**
 	 * @brief Downloads a texture from the GPU
@@ -175,6 +175,14 @@ private:
 
 	[[nodiscard]]
 	explicit window(const info &info);
+
+	[[nodiscard]]
+	auto device() const
+		-> const SDL_GPUDevice * final;
+
+	[[nodiscard]]
+	auto device()
+		-> SDL_GPUDevice * final;
 
 	void iterate();
 

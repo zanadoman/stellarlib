@@ -43,7 +43,7 @@ public:
 	/**
 	 * @brief Destructor
 	 */
-	virtual ~scene() noexcept = 0;
+	virtual ~scene() noexcept;
 
 protected:
 	/**

@@ -205,6 +205,18 @@ window::window(const info &info)
 	set_vsync(info.vsync);
 }
 
+auto window::device() const
+	-> const SDL_GPUDevice *
+{
+	return _device.get();
+}
+
+auto window::device()
+	-> SDL_GPUDevice *
+{
+	return _device.get();
+}
+
 void window::iterate()
 {
 	SDL_GPUColorTargetInfo swapchain{
