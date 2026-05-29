@@ -70,6 +70,73 @@ void window::set_title(const std::string &title)
 	}
 }
 
+void window::blit(SDL_GPUCommandBuffer *cmdbuf, SDL_GPUTexture *src, const lin::uint2 size, SDL_GPUTexture *dst)
+{
+	const SDL_GPUBlitInfo info{
+		.source = {
+			.texture = src,
+			.w = size.x(),
+			.h = size.y()
+		},
+		.destination = {
+			.texture = dst,
+			.w = size.x(),
+			.h = size.y()
+		}
+	};
+
+	SDL_BlitGPUTexture(cmdbuf, std::addressof(info));
+}
+
+auto window::renderer() const
+	-> const gfx::renderer &
+{
+	return *this;
+}
+
+auto window::renderer()
+	-> gfx::renderer &
+{
+	return *this;
+}
+
+window::window(const info &info)
+	: _handle{SDL_CreateWindow(info.title.c_str(), 0, 0, info.renderer.debug ? SDL_WINDOW_RESIZABLE : SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE)}
+{
+	if (!static_cast<bool>(_handle) || !SDL_SetWindowIcon(_handle, static_cast<SDL_Surface *>(info.icon)) && !static_cast<bool>(std::strstr(SDL_GetError(), "not supported"))) {
+		throw std::runtime_error{SDL_GetError()};
+	}
+
+	SDL_Rect bounds{};
+
+	if (const auto display{SDL_GetDisplayForWindow(_handle)}; !lin::cast<bool>(display) || !SDL_GetDisplayUsableBounds(display, std::addressof(bounds)) || !SDL_SetWindowSize(_handle, bounds.w / 2, bounds.h / 2) && !static_cast<bool>(std::strstr(SDL_GetError(), "not supported"))) {
+		throw std::runtime_error{SDL_GetError()};
+	}
+
+	const auto props{SDL_CreateProperties()};
+
+	const std::unique_ptr<const SDL_PropertiesID, void (*)(const SDL_PropertiesID *)> props_holder{std::addressof(props), [] (const auto props) -> void {
+		SDL_DestroyProperties(*props);
+	}};
+
+	if (!props_holder || !SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_DEBUGMODE_BOOLEAN, info.renderer.debug) || !SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_FEATURE_CLIP_DISTANCE_BOOLEAN, false) || !SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_FEATURE_DEPTH_CLAMPING_BOOLEAN, false) || !SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_FEATURE_INDIRECT_DRAW_FIRST_INSTANCE_BOOLEAN, false) || !SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_FEATURE_ANISOTROPY_BOOLEAN, false) || !SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_SHADERS_SPIRV_BOOLEAN, true) || !SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_SHADERS_DXIL_BOOLEAN, true)) {
+		throw std::runtime_error{SDL_GetError()};
+	}
+
+	_device = {SDL_CreateGPUDeviceWithProperties(props), SDL_DestroyGPUDevice};
+
+	if (!_device || !SDL_ClaimWindowForGPUDevice(_device.get(), _handle)) {
+		throw std::runtime_error{SDL_GetError()};
+	}
+
+	set_vsync(info.renderer.vsync);
+}
+
+window::operator std::shared_ptr<SDL_GPUDevice>() const
+{
+	return _device;
+}
+
 auto window::vsync() const
 	-> bool
 {
@@ -108,6 +175,46 @@ void window::set_vsync(const bool vsync)
 	}
 
 	_vsync = vsync;
+}
+
+void window::iterate()
+{
+	SDL_GPUColorTargetInfo swapchain{
+		.load_op = SDL_GPU_LOADOP_CLEAR
+	};
+
+	const std::unique_ptr<SDL_GPUCommandBuffer, std::function<void (SDL_GPUCommandBuffer *)>> cmdbuf{SDL_AcquireGPUCommandBuffer(_device.get()), [&] (const auto cmdbuf) -> void {
+		if (swapchain.texture) {
+			const auto fences{std::ranges::remove_if(_fences, [cpt = _device.get()] [[nodiscard]] (const auto fence) -> auto {
+				return SDL_QueryGPUFence(cpt, fence);
+			})};
+
+			for (const auto fence : fences) {
+				SDL_ReleaseGPUFence(_device.get(), fence);
+			}
+
+			_fences.erase(fences.begin(), _fences.end());
+			_fences.emplace_back(SDL_SubmitGPUCommandBufferAndAcquireFence(cmdbuf));
+
+			if (!_fences.back()) {
+				_fences.pop_back();
+				throw std::runtime_error{SDL_GetError()};
+			}
+		}
+		else if (!SDL_CancelGPUCommandBuffer(cmdbuf)) {
+			throw std::runtime_error{SDL_GetError()};
+		}
+	}};
+
+	if (!cmdbuf || !SDL_AcquireGPUSwapchainTexture(cmdbuf.get(), _handle, std::addressof(swapchain.texture), nullptr, nullptr)) {
+		throw std::runtime_error{SDL_GetError()};
+	}
+
+	if (static_cast<bool>(swapchain.texture)) {
+		SDL_EndGPURenderPass(SDL_BeginGPURenderPass(cmdbuf.get(), std::addressof(swapchain), 1, nullptr));
+	}
+
+	wait_fence();
 }
 
 auto window::upload_image(const res::image &image, const bool mipmaps)
@@ -153,96 +260,6 @@ auto window::download_texture(const gfx::texture &texture)
 	wait_fence();
 	std::memcpy(image.bytes().data(), map_transbuf().get(), image.bytes().size());
 	return image;
-}
-
-void window::blit(SDL_GPUCommandBuffer *cmdbuf, SDL_GPUTexture *src, const lin::uint2 size, SDL_GPUTexture *dst)
-{
-	const SDL_GPUBlitInfo info{
-		.source = {
-			.texture = src,
-			.w = size.x(),
-			.h = size.y()
-		},
-		.destination = {
-			.texture = dst,
-			.w = size.x(),
-			.h = size.y()
-		}
-	};
-
-	SDL_BlitGPUTexture(cmdbuf, std::addressof(info));
-}
-
-window::window(const info &info)
-	: _handle{SDL_CreateWindow(info.title.c_str(), 0, 0, info.debug ? SDL_WINDOW_RESIZABLE : SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE)}
-{
-	if (!static_cast<bool>(_handle) || !SDL_SetWindowIcon(_handle, static_cast<SDL_Surface *>(info.icon)) && !static_cast<bool>(std::strstr(SDL_GetError(), "not supported"))) {
-		throw std::runtime_error{SDL_GetError()};
-	}
-
-	SDL_Rect bounds{};
-
-	if (const auto display{SDL_GetDisplayForWindow(_handle)}; !lin::cast<bool>(display) || !SDL_GetDisplayUsableBounds(display, std::addressof(bounds)) || !SDL_SetWindowSize(_handle, bounds.w / 2, bounds.h / 2) && !static_cast<bool>(std::strstr(SDL_GetError(), "not supported"))) {
-		throw std::runtime_error{SDL_GetError()};
-	}
-
-	const auto props{SDL_CreateProperties()};
-
-	const std::unique_ptr<const SDL_PropertiesID, void (*)(const SDL_PropertiesID *)> props_holder{std::addressof(props), [] (const auto props) -> void {
-		SDL_DestroyProperties(*props);
-	}};
-
-	if (!props_holder || !SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_DEBUGMODE_BOOLEAN, info.debug) || !SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_FEATURE_CLIP_DISTANCE_BOOLEAN, false) || !SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_FEATURE_DEPTH_CLAMPING_BOOLEAN, false) || !SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_FEATURE_INDIRECT_DRAW_FIRST_INSTANCE_BOOLEAN, false) || !SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_FEATURE_ANISOTROPY_BOOLEAN, false) || !SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_SHADERS_SPIRV_BOOLEAN, true) || !SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_SHADERS_DXIL_BOOLEAN, true)) {
-		throw std::runtime_error{SDL_GetError()};
-	}
-
-	_device = {SDL_CreateGPUDeviceWithProperties(props), SDL_DestroyGPUDevice};
-
-	if (!_device || !SDL_ClaimWindowForGPUDevice(_device.get(), _handle)) {
-		throw std::runtime_error{SDL_GetError()};
-	}
-
-	set_vsync(info.vsync);
-}
-
-void window::iterate()
-{
-	SDL_GPUColorTargetInfo swapchain{
-		.load_op = SDL_GPU_LOADOP_CLEAR
-	};
-
-	const std::unique_ptr<SDL_GPUCommandBuffer, std::function<void (SDL_GPUCommandBuffer *)>> cmdbuf{SDL_AcquireGPUCommandBuffer(_device.get()), [&] (const auto cmdbuf) -> void {
-		if (swapchain.texture) {
-			const auto fences{std::ranges::remove_if(_fences, [cpt = _device.get()] [[nodiscard]] (const auto fence) -> auto {
-				return SDL_QueryGPUFence(cpt, fence);
-			})};
-
-			for (const auto fence : fences) {
-				SDL_ReleaseGPUFence(_device.get(), fence);
-			}
-
-			_fences.erase(fences.begin(), _fences.end());
-			_fences.emplace_back(SDL_SubmitGPUCommandBufferAndAcquireFence(cmdbuf));
-
-			if (!_fences.back()) {
-				_fences.pop_back();
-				throw std::runtime_error{SDL_GetError()};
-			}
-		}
-		else if (!SDL_CancelGPUCommandBuffer(cmdbuf)) {
-			throw std::runtime_error{SDL_GetError()};
-		}
-	}};
-
-	if (!cmdbuf || !SDL_AcquireGPUSwapchainTexture(cmdbuf.get(), _handle, std::addressof(swapchain.texture), nullptr, nullptr)) {
-		throw std::runtime_error{SDL_GetError()};
-	}
-
-	if (static_cast<bool>(swapchain.texture)) {
-		SDL_EndGPURenderPass(SDL_BeginGPURenderPass(cmdbuf.get(), std::addressof(swapchain), 1, nullptr));
-	}
-
-	wait_fence();
 }
 
 void window::extend_transbuf(const std::uint32_t size)

@@ -158,7 +158,10 @@ auto app::init(const std::vector<std::string> &args)
 		.window = {
 			.title = "scenes",
 			.icon = res::image{ext::filesystem::base_directory_path() / "assets" / "tests" / "rgb.png"},
-			.debug = true
+			.renderer = {
+				.vsync = false,
+				.debug = true
+			}
 		},
 		.entry = std::make_unique<scene1>()
 	}};
