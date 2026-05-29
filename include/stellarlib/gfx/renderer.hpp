@@ -61,7 +61,7 @@ public:
 	/**
 	 * @brief Destructor
 	 */
-	virtual ~renderer() noexcept = 0;
+	virtual ~renderer() noexcept;
 
 	/**
 	 * @brief Returns a shared pointer to the internal handle
