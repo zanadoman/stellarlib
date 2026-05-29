@@ -21,13 +21,37 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef STELLARLIB_GFX_GFX_HPP
-#define STELLARLIB_GFX_GFX_HPP
-
-/* IWYU pragma: begin_exports */
-#include <stellarlib/gfx/renderer.hpp>
 #include <stellarlib/gfx/stage.hpp>
-#include <stellarlib/gfx/texture.hpp>
-/* IWYU pragma: end_exports */
 
-#endif
+#include <SDL3/SDL_gpu.h>
+
+#include <memory>
+#include <utility>
+
+namespace stellarlib::gfx
+{
+stage::~stage() noexcept = default;
+
+stage::operator const SDL_GPUDevice *() const
+{
+	return _device.get();
+}
+
+void stage::copy([[maybe_unused]] const copy_info &info) {}
+
+void stage::render([[maybe_unused]] const render_info &info) {}
+
+stage::stage(std::shared_ptr<SDL_GPUDevice> device)
+	: _device{std::move(device)}
+{}
+
+stage::stage(const stage &) noexcept = default;
+
+stage::stage(stage &&) noexcept = default;
+
+auto stage::operator=(const stage &) noexcept
+	-> stage & = default;
+
+auto stage::operator=(stage &&) noexcept
+	-> stage & = default;
+}
