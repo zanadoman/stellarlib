@@ -341,7 +341,7 @@ public:
 	 * @return View to all entities with their archetypes
 	 */
 	[[nodiscard]]
-	constexpr auto query() noexcept
+	constexpr auto query() const noexcept
 	{
 		++_lock;
 		return internal::query{_archetypes | std::views::transform([] [[nodiscard]] (const auto &pair) noexcept -> auto {
@@ -349,6 +349,19 @@ public:
 				return std::tuple<std::uint32_t, const archetype &>{entity, pair.first};
 			});
 		}) | std::views::join, _execute};
+	}
+
+	/**
+	 * @brief Returns a view to entities with the specified components
+	 * @tparam T Component types
+	 * @return View to entities with the specified components
+	 */
+	template <typename T>
+	[[nodiscard]]
+	constexpr auto query() const noexcept
+	{
+		++_lock;
+		return internal::query{_components.at<T>(internal::sparse_storage::ids<T>().front()).zip(), _execute};
 	}
 
 	/**
@@ -371,37 +384,30 @@ public:
 	 */
 	template <typename ...T>
 	[[nodiscard]]
+	constexpr auto query() const noexcept
+		requires (1 < sizeof...(T))
+	{
+		return internal::query{entities<T...>() | std::views::transform([cpt = [cpt = std::addressof(_components)] <std::size_t ...I> [[nodiscard]] (const std::index_sequence<I...>) noexcept -> auto {
+			const auto &ids{internal::sparse_storage::ids<T...>()};
+			return std::tuple<const internal::sparse_map<std::uint32_t, T> &...>{cpt->operator[]<T>(ids[I])...};
+		}(std::index_sequence_for<T...>{})] [[nodiscard]] (const auto entity) noexcept -> auto {
+			return [] <std::size_t ...I> [[nodiscard]] (const auto entity, const auto &components, const std::index_sequence<I...>) noexcept -> auto {
+				return std::tuple<std::uint32_t, const T &...>{entity, std::get<I>(components)[entity]...};
+			}(entity, cpt, std::index_sequence_for<T...>{});
+		}), _execute};
+	}
+
+	/**
+	 * @brief Returns a view to entities with the specified components
+	 * @tparam T Component types
+	 * @return View to entities with the specified components
+	 */
+	template <typename ...T>
+	[[nodiscard]]
 	constexpr auto query() noexcept
 		requires (1 < sizeof...(T))
 	{
-		const auto id{ext::scoped_typeid<world, std::tuple<T...>, std::uint16_t>()};
-
-		if (_queries.extend(id + 1, std::numeric_limits<std::uint16_t>::max()) || _queries[id] == std::numeric_limits<std::uint16_t>::max()) {
-			const auto &archetype{archetype::of<T...>()};
-
-			const auto pair{std::ranges::find_if(_indices, [&] [[nodiscard]] (const auto &pair) noexcept -> auto {
-				return pair.first == archetype;
-			})};
-
-			if (pair == _indices.end()) {
-				_queries[id] = _indices.size();
-				_indices.push(archetype, internal::stack_vector<std::uint16_t>{});
-
-				for (const auto index : std::views::iota(std::uint16_t{}, _archetypes.size())) {
-					if (archetype <= _archetypes[index].first) {
-						(_indices.end() - 1)->second.push(index);
-					}
-				}
-			}
-			else {
-				_queries[id] = lin::cast<std::uint16_t>(pair - _indices.begin());
-			}
-		}
-
-		++_lock;
-		return internal::query{std::ranges::subrange{_indices[_queries[id]].second} | std::views::transform([cpt = std::addressof(_archetypes)] [[nodiscard]] (const auto index) noexcept -> const auto & {
-			return (*cpt)[index].second;
-		}) | std::views::join | std::views::transform([cpt = [cpt = std::addressof(_components)] <std::size_t ...I> [[nodiscard]] (const std::index_sequence<I...>) noexcept -> auto {
+		return internal::query{entities<T...>() | std::views::transform([cpt = [cpt = std::addressof(_components)] <std::size_t ...I> [[nodiscard]] (const std::index_sequence<I...>) noexcept -> auto {
 			const auto &ids{internal::sparse_storage::ids<T...>()};
 			return std::tuple<internal::sparse_map<std::uint32_t, T> &...>{cpt->operator[]<T>(ids[I])...};
 		}(std::index_sequence_for<T...>{})] [[nodiscard]] (const auto entity) noexcept -> auto {
@@ -473,9 +479,9 @@ private:
 	internal::stack_vector<std::uint32_t, std::uint32_t> _despawned{};
 	internal::sparse_map<std::uint32_t, std::pair<std::uint16_t, bool>> _entities{};
 	internal::stack_vector<std::pair<archetype, internal::sparse_set>, std::uint16_t> _archetypes{};
-	internal::stack_vector<std::uint16_t, std::uint16_t> _queries{};
-	internal::stack_vector<std::pair<archetype, internal::stack_vector<std::uint16_t>>, std::uint16_t> _indices{};
-	std::size_t _lock{};
+	mutable internal::stack_vector<std::uint16_t, std::uint16_t> _queries{};
+	mutable internal::stack_vector<std::pair<archetype, internal::stack_vector<std::uint16_t>>, std::uint16_t> _indices{};
+	mutable std::size_t _lock{};
 	internal::command_queue _commands{};
 
 	std::function<void ()> _execute{[this] noexcept -> void {
@@ -529,6 +535,40 @@ private:
 
 			pair->second.insert(entity);
 		}
+	}
+
+	template <typename ...T>
+	[[nodiscard]]
+	constexpr auto entities() const noexcept
+	{
+		const auto id{ext::scoped_typeid<world, std::tuple<T...>, std::uint16_t>()};
+
+		if (_queries.extend(id + 1, std::numeric_limits<std::uint16_t>::max()) || _queries[id] == std::numeric_limits<std::uint16_t>::max()) {
+			const auto &archetype{archetype::of<T...>()};
+
+			const auto pair{std::ranges::find_if(_indices, [&] [[nodiscard]] (const auto &pair) noexcept -> auto {
+				return pair.first == archetype;
+			})};
+
+			if (pair == _indices.end()) {
+				_queries[id] = _indices.size();
+				_indices.push(archetype, internal::stack_vector<std::uint16_t>{});
+
+				for (const auto index : std::views::iota(std::uint16_t{}, _archetypes.size())) {
+					if (archetype <= _archetypes[index].first) {
+						(_indices.end() - 1)->second.push(index);
+					}
+				}
+			}
+			else {
+				_queries[id] = lin::cast<std::uint16_t>(pair - _indices.begin());
+			}
+		}
+
+		++_lock;
+		return std::ranges::subrange{_indices[_queries[id]].second} | std::views::transform([cpt = std::addressof(_archetypes)] [[nodiscard]] (const auto index) noexcept -> const auto & {
+			return (*cpt)[index].second;
+		}) | std::views::join;
 	}
 };
 }

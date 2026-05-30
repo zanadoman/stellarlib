@@ -57,7 +57,7 @@ constexpr auto string_of(const std::uint32_t entity)
 	return std::to_string(entity * 10);
 }
 
-constexpr void check_entity_without_components(ecs::world &world, const std::uint32_t entity)
+constexpr void check_entity_without_components(const ecs::world &world, const std::uint32_t entity)
 {
 	ASSERT_TRUE(world.contains(entity));
 	ASSERT_FALSE(std::get<0>(world.contains<std::int32_t>(entity)));
@@ -79,7 +79,7 @@ constexpr void check_entity_without_components(ecs::world &world, const std::uin
 	ASSERT_TRUE(std::ranges::contains(query, std::tuple{entity, ecs::archetype::of()}));
 }
 
-constexpr void check_entity_with_number_only(ecs::world &world, const std::uint32_t entity)
+constexpr void check_entity_with_number_only(const ecs::world &world, const std::uint32_t entity)
 {
 	ASSERT_TRUE(world.contains(entity));
 	ASSERT_TRUE(std::get<0>(world.contains<std::int32_t>(entity)));
@@ -113,7 +113,7 @@ constexpr void check_entity_with_number_only(ecs::world &world, const std::uint3
 	ASSERT_FALSE(std::ranges::contains(query5, std::tuple{entity, string_of(entity), number_of(entity)}));
 }
 
-constexpr void check_entity_with_string_only(ecs::world &world, const std::uint32_t entity)
+constexpr void check_entity_with_string_only(const ecs::world &world, const std::uint32_t entity)
 {
 	ASSERT_TRUE(world.contains(entity));
 	ASSERT_FALSE(std::get<0>(world.contains<std::int32_t>(entity)));
@@ -147,7 +147,7 @@ constexpr void check_entity_with_string_only(ecs::world &world, const std::uint3
 	ASSERT_FALSE(std::ranges::contains(query5, std::tuple{entity, string_of(entity), number_of(entity)}));
 }
 
-constexpr void check_entity_with_components(ecs::world &world, const std::uint32_t entity)
+constexpr void check_entity_with_components(const ecs::world &world, const std::uint32_t entity)
 {
 	ASSERT_TRUE(world.contains(entity));
 	ASSERT_TRUE(std::get<0>(world.contains<std::int32_t>(entity)));
@@ -190,7 +190,7 @@ constexpr void check_entity_with_components(ecs::world &world, const std::uint32
 	ASSERT_TRUE(std::ranges::contains(query5, std::tuple{entity, string_of(entity), number_of(entity)}));
 }
 
-constexpr void check_entities(ecs::world &world)
+constexpr void check_entities(const ecs::world &world)
 {
 	ASSERT_EQ(world.query().size(), world.size());
 	for (const auto [entity, archetype] : world.query()) {
@@ -218,7 +218,7 @@ constexpr void check_entities(ecs::world &world)
 	}
 }
 
-constexpr void check_despawned_entity(ecs::world &world, const std::uint32_t entity)
+constexpr void check_despawned_entity(const ecs::world &world, const std::uint32_t entity)
 {
 	ASSERT_FALSE(world.contains(entity));
 	ASSERT_FALSE(std::get<0>(world.contains<std::int32_t>(entity)));

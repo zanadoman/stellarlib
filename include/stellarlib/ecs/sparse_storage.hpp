@@ -78,8 +78,8 @@ public:
 			return static_cast<const sparse_map<std::uint32_t, T> &>(**map);
 		}
 
-		static const sparse_map<std::uint32_t, T> map{};
-		return map;
+		_maps.insert(id, std::make_unique<sparse_map<std::uint32_t, T>>());
+		return static_cast<const sparse_map<std::uint32_t, T> &>(*_maps.values().back());
 	}
 
 	template <typename T>
@@ -116,7 +116,7 @@ public:
 	void clear() const noexcept;
 
 private:
-	sparse_map<std::uint16_t, std::unique_ptr<any_set<std::uint32_t>>> _maps{};
+	mutable sparse_map<std::uint16_t, std::unique_ptr<any_set<std::uint32_t>>> _maps{};
 };
 }
 
