@@ -32,6 +32,7 @@
 #include <SDL3/SDL_gpu.h>
 
 #include <cassert>
+#include <memory>
 #include <optional>
 #include <string>
 #include <vector>
@@ -76,11 +77,13 @@ constexpr void check_window(app::context &ctx)
 	const res::image image{ext::filesystem::base_directory_path() / "assets" / "tests" / "linear.png"};
 	const auto texture1{ctx.window().renderer().upload_image(image, false)};
 	assert(static_cast<SDL_GPUTexture *>(texture1));
+	assert(static_cast<const SDL_GPUDevice *>(texture1) == static_cast<std::shared_ptr<SDL_GPUDevice>>(ctx.window().renderer()).get());
 	assert(lin::all(texture1.size() == image.size()));
 	assert(!texture1.mipmaps());
 	assert(ctx.window().renderer().download_texture(texture1) == image);
 	const auto texture2{ctx.window().renderer().upload_image(image, true)};
 	assert(static_cast<SDL_GPUTexture *>(texture2));
+	assert(static_cast<const SDL_GPUDevice *>(texture2) == static_cast<std::shared_ptr<SDL_GPUDevice>>(ctx.window().renderer()).get());
 	assert(lin::all(texture2.size() == image.size()));
 	assert(!texture2.mipmaps());
 	assert(ctx.window().renderer().download_texture(texture2) == image);
