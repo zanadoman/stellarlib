@@ -43,6 +43,12 @@ auto world::operator=(world &&) noexcept
 
 world::~world() noexcept = default;
 
+auto world::deferred() const noexcept
+	-> bool
+{
+	return lin::cast<bool>(_defers);
+}
+
 auto world::size() const noexcept
 	-> std::size_t
 {
@@ -100,7 +106,7 @@ void world::despawn(const std::uint32_t entity) noexcept
 
 	_despawned.push(entity);
 
-	if (lin::cast<bool>(_lock)) {
+	if (lin::cast<bool>(_defers)) {
 		_commands.enqueue([cpt = std::pair{this, entity}] noexcept -> void {
 			cpt.first->_components.erase(cpt.second);
 			cpt.first->_archetypes[cpt.first->_entities[cpt.second].first].second.erase(cpt.second);
@@ -138,7 +144,7 @@ void world::clear() noexcept
 		_entities.clear();
 	}};
 
-	if (lin::cast<bool>(_lock)) {
+	if (lin::cast<bool>(_defers)) {
 		_commands.enqueue([command] noexcept -> void {
 			command();
 		});

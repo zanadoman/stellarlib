@@ -334,7 +334,38 @@ TEST(stellarlib_ecs_world, should_insert_and_erase_components)
 	check_entities(world);
 }
 
-TEST(stellarlib_ecs_world, should_handle_nested_modifications)
+TEST(stellarlib_ecs_world, should_track_queries)
+{
+	ecs::world world{};
+	{
+		ASSERT_FALSE(world.deferred());
+		const auto query{world.query()};
+		ASSERT_TRUE(world.deferred());
+	}
+	{
+		ASSERT_FALSE(world.deferred());
+		const auto query{world.query<std::int32_t>()};
+		ASSERT_TRUE(world.deferred());
+	}
+	{
+		ASSERT_FALSE(world.deferred());
+		const auto query{world.query<std::string>()};
+		ASSERT_TRUE(world.deferred());
+	}
+	{
+		ASSERT_FALSE(world.deferred());
+		const auto query{world.query<std::int32_t, std::string>()};
+		ASSERT_TRUE(world.deferred());
+	}
+	{
+		ASSERT_FALSE(world.deferred());
+		const auto query{world.query<std::string, std::int32_t>()};
+		ASSERT_TRUE(world.deferred());
+	}
+	ASSERT_FALSE(world.deferred());
+}
+
+TEST(stellarlib_ecs_world, should_handle_nested_mutations)
 {
 	ecs::world world{};
 	{

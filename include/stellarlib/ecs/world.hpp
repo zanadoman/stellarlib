@@ -113,7 +113,7 @@ public:
 			_despawned.pop();
 		}
 
-		if (_lock) {
+		if (_defers) {
 			if (const auto pair{_entities.at(entity)}) {
 				pair->second = false;
 			}
@@ -131,7 +131,7 @@ public:
 			relocate<const archetype &>(entity, archetype::of<T...>());
 		}};
 
-		if (_lock) {
+		if (_defers) {
 			_commands.enqueue([cpt = std::pair{command, std::tuple{entity, std::forward<T>(components)...}}] mutable noexcept -> void {
 				std::apply(cpt.first, std::move(cpt.second));
 			});
@@ -179,7 +179,7 @@ public:
 			relocate(entity, _entities[entity].first);
 		}};
 
-		if (_lock) {
+		if (_defers) {
 			_commands.enqueue([cpt = std::pair{command, std::tuple{entity, std::forward<T>(components)...}}] mutable noexcept -> void {
 				std::apply(cpt.first, std::move(cpt.second));
 			});
@@ -190,6 +190,14 @@ public:
 
 		return {};
 	}
+
+	/**
+	 * @brief Returns whether mutations are deferred
+	 * @return Whether mutations are deferred
+	 */
+	[[nodiscard]]
+	auto deferred() const noexcept
+		-> bool;
 
 	/**
 	 * @brief Returns the number of entities
@@ -343,7 +351,7 @@ public:
 	[[nodiscard]]
 	constexpr auto query() const noexcept
 	{
-		++_lock;
+		++_defers;
 		return internal::query{_archetypes | std::views::transform([] [[nodiscard]] (const auto &pair) noexcept -> auto {
 			return pair.second | std::views::transform([&] [[nodiscard]] (const auto entity) noexcept -> auto {
 				return std::tuple<std::uint32_t, const archetype &>{entity, pair.first};
@@ -360,7 +368,7 @@ public:
 	[[nodiscard]]
 	constexpr auto query() const noexcept
 	{
-		++_lock;
+		++_defers;
 		return internal::query{_components.at<T>(internal::sparse_storage::ids<T>().front()).zip(), _execute};
 	}
 
@@ -373,7 +381,7 @@ public:
 	[[nodiscard]]
 	constexpr auto query() noexcept
 	{
-		++_lock;
+		++_defers;
 		return internal::query{_components.at<T>(internal::sparse_storage::ids<T>().front()).zip(), _execute};
 	}
 
@@ -449,7 +457,7 @@ public:
 			relocate(entity, _entities[entity].first);
 		}};
 
-		if (_lock) {
+		if (_defers) {
 			_commands.enqueue([cpt = std::pair{command, entity}] noexcept -> void {
 				cpt.first(cpt.second);
 			});
@@ -481,11 +489,11 @@ private:
 	internal::stack_vector<std::pair<archetype, internal::sparse_set>, std::uint16_t> _archetypes{};
 	mutable internal::stack_vector<std::uint16_t, std::uint16_t> _queries{};
 	mutable internal::stack_vector<std::pair<archetype, internal::stack_vector<std::uint16_t>>, std::uint16_t> _indices{};
-	mutable std::size_t _lock{};
+	mutable std::size_t _defers{};
 	internal::command_queue _commands{};
 
 	std::function<void ()> _execute{[this] noexcept -> void {
-		if (!--_lock) {
+		if (!--_defers) {
 			_commands.execute();
 			_spawning.clear();
 		}
@@ -565,7 +573,7 @@ private:
 			}
 		}
 
-		++_lock;
+		++_defers;
 		return std::ranges::subrange{_indices[_queries[id]].second} | std::views::transform([cpt = std::addressof(_archetypes)] [[nodiscard]] (const auto index) noexcept -> const auto & {
 			return (*cpt)[index].second;
 		}) | std::views::join;
