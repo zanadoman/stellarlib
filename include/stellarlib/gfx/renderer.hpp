@@ -98,10 +98,11 @@ public:
 	/**
 	 * @brief Downloads a texture
 	 * @param texture Texture to download
+	 * @param idle Wait for idle
 	 * @return Downloaded texture
 	 */
 	[[nodiscard]]
-	virtual constexpr auto download_texture(const gfx::texture &texture)
+	virtual constexpr auto download_texture(const gfx::texture &texture, bool idle)
 		-> res::image = 0;
 
 protected:

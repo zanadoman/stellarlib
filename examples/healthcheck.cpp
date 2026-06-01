@@ -80,13 +80,13 @@ constexpr void check_window(app::context &ctx)
 	assert(static_cast<const SDL_GPUDevice *>(texture1) == static_cast<std::shared_ptr<SDL_GPUDevice>>(ctx.window().renderer()).get());
 	assert(lin::all(texture1.size() == image.size()));
 	assert(!texture1.mipmaps());
-	assert(ctx.window().renderer().download_texture(texture1) == image);
+	assert(ctx.window().renderer().download_texture(texture1, false) == image);
 	const auto texture2{ctx.window().renderer().upload_image(image, true)};
 	assert(static_cast<SDL_GPUTexture *>(texture2));
 	assert(static_cast<const SDL_GPUDevice *>(texture2) == static_cast<std::shared_ptr<SDL_GPUDevice>>(ctx.window().renderer()).get());
 	assert(lin::all(texture2.size() == image.size()));
 	assert(!texture2.mipmaps());
-	assert(ctx.window().renderer().download_texture(texture2) == image);
+	assert(ctx.window().renderer().download_texture(texture2, true) == image);
 }
 }
 

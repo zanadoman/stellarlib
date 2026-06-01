@@ -199,7 +199,7 @@ auto window::upload_image(const res::image &image, const bool mipmaps)
 	return texture;
 }
 
-auto window::download_texture(const gfx::texture &texture)
+auto window::download_texture(const gfx::texture &texture, const bool idle)
 	-> res::image
 {
 	auto cmdbuf(acquire_cmdbuf());
@@ -212,8 +212,16 @@ auto window::download_texture(const gfx::texture &texture)
 	SDL_DownloadFromGPUTexture(cpypass, std::addressof(region), std::addressof(transfer));
 	SDL_EndGPUCopyPass(cpypass);
 
-	if (lin::cast<bool>(_fences.size()) && !SDL_WaitForGPUFences(_device.get(), true, _fences.data(), lin::cast<std::uint32_t>(_fences.size()))) {
-		throw std::runtime_error{SDL_GetError()};
+	if (idle && lin::cast<bool>(_fences.size())) {
+		if (!SDL_WaitForGPUFences(_device.get(), true, _fences.data(), lin::cast<std::uint32_t>(_fences.size()))) {
+			throw std::runtime_error{SDL_GetError()};
+		}
+
+		for (auto &fence : _fences) {
+			SDL_ReleaseGPUFence(_device.get(), std::exchange(fence, {}));
+		}
+
+		_fences.clear();
 	}
 
 	submit_cmdbuf(std::move(cmdbuf));
@@ -234,8 +242,8 @@ void window::iterate()
 				return SDL_QueryGPUFence(cpt, fence);
 			})};
 
-			for (const auto fence : fences) {
-				SDL_ReleaseGPUFence(_device.get(), fence);
+			for (auto &fence : _fences) {
+				SDL_ReleaseGPUFence(_device.get(), std::exchange(fence, {}));
 			}
 
 			_fences.erase(fences.begin(), _fences.end());

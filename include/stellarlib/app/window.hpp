@@ -168,7 +168,7 @@ private:
 		-> gfx::texture final;
 
 	[[nodiscard]]
-	auto download_texture(const gfx::texture &texture)
+	auto download_texture(const gfx::texture &texture, bool idle)
 		-> res::image final;
 
 	void iterate();
