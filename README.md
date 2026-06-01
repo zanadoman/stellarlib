@@ -27,6 +27,7 @@ Opinionated, cross-platform game engine library in [C++23](https://en.cppreferen
   - [x] Image resource
 - [x] Graphics and Rendering Abstractions
   - [x] Texture resource
+  - [ ] Common interfaces
 - [x] Application Runtime
   - [x] Scene management
   - [x] Metadata subsystem
@@ -46,6 +47,15 @@ Opinionated, cross-platform game engine library in [C++23](https://en.cppreferen
 - [LLD](https://archlinux.org/packages/extra/x86_64/lld/)
 - [SDL3](https://archlinux.org/packages/extra/x86_64/sdl3/)
 - [DirectX Shader Compiler](https://aur.archlinux.org/packages/directx-shader-compiler-git)
+
+<details>
+<summary>aarch64-linux-gnu</summary>
+
+- [GCC](https://archlinux.org/packages/extra/x86_64/aarch64-linux-gnu-gcc/)
+- [pkg-config](https://aur.archlinux.org/packages/aarch64-linux-gnu-pkg-config)
+- [SDL3](https://github.com/libsdl-org/SDL/releases/latest)
+
+</details>
 
 <details>
 <summary>x86_64-w64-mingw32</summary>
@@ -127,6 +137,19 @@ cmake --install build                                                           
 cmake --build build -t example                                                                  # Build a target
 build/example                                                                                   # Run the target
 ```
+
+<details>
+<summary>aarch64-linux-gnu</summary>
+
+```sh
+cmake -B build -DCMAKE_BUILD_TYPE=Release -G Ninja --toolchain cmake/aarch64-linux-gnu.cmake     # Configure CMake
+cmake --build build                                                                              # Build stellarlib
+cmake --install build                                                                            # Install stellarlib
+cmake --build build -t example                                                                   # Build a target
+build/example                                                                                    # Run the target
+```
+
+</details>
 
 <details>
 <summary>x86_64-w64-mingw32</summary>
