@@ -29,6 +29,7 @@
 #include <stellarlib/app/scene.hpp>
 #include <stellarlib/app/window.hpp>
 #include <stellarlib/ecs/ecs.hpp>
+#include <stellarlib/ext/type_map.hpp>
 
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_init.h>
@@ -93,6 +94,18 @@ auto context::world()
 	-> ecs::world &
 {
 	return _world;
+}
+
+auto context::store() const
+	-> const ext::type_map<context> &
+{
+	return _store;
+}
+
+auto context::store()
+	-> ext::type_map<context> &
+{
+	return _store;
 }
 
 context::context(info info)

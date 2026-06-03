@@ -30,6 +30,7 @@
 #include <stellarlib/app/scene.hpp>
 #include <stellarlib/app/window.hpp>
 #include <stellarlib/ecs/ecs.hpp>
+#include <stellarlib/ext/type_map.hpp>
 
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_init.h>
@@ -177,14 +178,30 @@ public:
 	auto world()
 		-> ecs::world &;
 
+	/**
+	 * @brief Returns a reference to the global store
+	 * @return Reference to the global store
+	 */
+	[[nodiscard]]
+	auto store() const
+		-> const ext::type_map<context> &;
+
+	/**
+	 * @brief Returns a reference to the global store
+	 * @return Reference to the global store
+	 */
+	[[nodiscard]]
+	auto store()
+		-> ext::type_map<context> &;
+
 private:
 	[[no_unique_address]] app::metadata _metadata;
 	app::clock _clock;
-	[[maybe_unused]] std::array<std::byte, 4> _padding1;
+	[[maybe_unused]] std::array<std::byte, 4> _padding;
 	app::window _window;
 	ecs::world _world{};
+	ext::type_map<context> _store{};
 	std::unique_ptr<scene> _scene{};
-	[[maybe_unused]] std::array<std::byte, 8> _padding2;
 
 	[[nodiscard]]
 	explicit context(info info);
