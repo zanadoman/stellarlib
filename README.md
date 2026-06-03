@@ -14,6 +14,7 @@ Opinionated, cross-platform game engine library in [C++23](https://en.cppreferen
   - [x] Sequential/type ID generators
   - [x] Compile-time padding
   - [x] File system utilities
+  - [x] Utility containers
 - [x] Entity Component System
   - [x] Simple, consistent, and foolproof interface
   - [x] Deferred modifications during iterations
@@ -32,7 +33,7 @@ Opinionated, cross-platform game engine library in [C++23](https://en.cppreferen
   - [x] Scene management
   - [x] Metadata subsystem
   - [x] Clock subsystem
-  - [ ] Window subsystem
+  - [ ] Window/Renderer subsystem
   - [ ] Input subsystem
   - [ ] Universal renderer
   - [ ] Audio subsystem
@@ -107,6 +108,7 @@ env JAVA_HOME=/usr/lib/jvm/java-8-openjdk /opt/android-sdk/tools/bin/sdkmanager 
 <summary>Testing Tools</summary>
 
 - [GoogleTest (x86_64-linux-gnu)](https://archlinux.org/packages/extra/x86_64/gtest/)
+- [GoogleTest (aarch64-linux-gnu)](https://github.com/google/googletest/releases/latest)
 - [GoogleTest (x86_64-w64-mingw32)](https://aur.archlinux.org/packages/mingw-w64-gtest)
 - [GoogleTest (x86_64-linux-android)](https://aur.archlinux.org/packages/android-x86-64-gtest)
 - [GoogleTest (aarch64-linux-android)](https://aur.archlinux.org/packages/android-aarch64-gtest)

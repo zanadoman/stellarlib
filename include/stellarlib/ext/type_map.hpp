@@ -245,9 +245,6 @@ private:
 		return id < _map.size() && _map[id] != std::numeric_limits<std::size_t>::max();
 	}
 };
-
-type_map()
-	-> type_map<void>;
 }
 
 #endif

@@ -47,7 +47,7 @@ class [[nodiscard]] scene2 final : public app::scene
 {
 public:
 	[[nodiscard]]
-	constexpr scene2() noexcept
+	constexpr scene2()
 	{
 		SDL_Log("%p: constructor", static_cast<const void *>(this));
 	}
@@ -64,26 +64,26 @@ public:
 	constexpr auto operator=(scene2 &&) noexcept
 		-> scene2 & = delete;
 
-	constexpr ~scene2() noexcept final
+	constexpr ~scene2() final
 	{
 		SDL_Log("%p: destructor", static_cast<const void *>(this));
 	}
 
 private:
-	constexpr void begin([[maybe_unused]] app::context &ctx) noexcept final
+	constexpr void begin([[maybe_unused]] app::context &ctx) final
 	{
 		SDL_Log("%p: begin", static_cast<const void *>(this));
 	}
 
 	[[nodiscard]]
-	constexpr auto update([[maybe_unused]] app::context &ctx) noexcept
+	constexpr auto update([[maybe_unused]] app::context &ctx)
 		-> std::optional<std::unique_ptr<app::scene>> final
 	{
 		SDL_Log("%p: update", static_cast<const void *>(this));
 		return nullptr;
 	}
 
-	constexpr void end([[maybe_unused]] app::context &ctx) noexcept final
+	constexpr void end([[maybe_unused]] app::context &ctx) final
 	{
 		SDL_Log("%p: end", static_cast<const void *>(this));
 	}
@@ -93,7 +93,7 @@ class [[nodiscard]] scene1 final : public app::scene
 {
 public:
 	[[nodiscard]]
-	constexpr scene1() noexcept
+	constexpr scene1()
 	{
 		SDL_Log("%p: constructor", static_cast<const void *>(this));
 	}
@@ -110,13 +110,13 @@ public:
 	constexpr auto operator=(scene1 &&) noexcept
 		-> scene1 & = delete;
 
-	constexpr ~scene1() noexcept final
+	constexpr ~scene1() final
 	{
 		SDL_Log("%p: destructor", static_cast<const void *>(this));
 	}
 
 private:
-	constexpr void begin([[maybe_unused]] app::context &ctx) noexcept final
+	constexpr void begin([[maybe_unused]] app::context &ctx) final
 	{
 		SDL_Log("%p: begin", static_cast<const void *>(this));
 	}
@@ -129,7 +129,7 @@ private:
 		return std::make_unique<scene2>();
 	}
 
-	constexpr void end([[maybe_unused]] app::context &ctx) noexcept final
+	constexpr void end([[maybe_unused]] app::context &ctx) final
 	{
 		SDL_Log("%p: end", static_cast<const void *>(this));
 	}

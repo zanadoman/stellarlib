@@ -41,7 +41,7 @@ using namespace stellarlib;
 
 TEST(stellarlib_ext_type_map, should_init_from_elems)
 {
-	const ext::type_map map{std::string{"hello, world"}, std::array<std::int32_t, 3>{5, 10, 15}};
+	const ext::type_map<> map{std::string{"hello, world"}, std::array<std::int32_t, 3>{5, 10, 15}};
 	ASSERT_FALSE(map.empty());
 	ASSERT_EQ(map.size(), 2);
 	ASSERT_TRUE(map.contains<std::string>());
@@ -52,7 +52,7 @@ TEST(stellarlib_ext_type_map, should_init_from_elems)
 
 TEST(stellarlib_ext_type_map, should_insert_emplace_and_erase_elems)
 {
-	ext::type_map map{};
+	ext::type_map<> map{};
 	ASSERT_TRUE(map.empty());
 	ASSERT_EQ(map.size(), 0);
 	ASSERT_FALSE(map.contains<std::string>());
@@ -95,7 +95,7 @@ TEST(stellarlib_ext_type_map, should_insert_emplace_and_erase_elems)
 
 TEST(stellarlib_ext_type_map, should_clear_elems)
 {
-	ext::type_map map{std::string{"hello, world"}, std::array<std::int32_t, 3>{5, 10, 15}};
+	ext::type_map<> map{std::string{"hello, world"}, std::array<std::int32_t, 3>{5, 10, 15}};
 	map.clear();
 	ASSERT_TRUE(map.empty());
 	ASSERT_EQ(map.size(), 0);
