@@ -334,6 +334,20 @@ TEST(stellarlib_ecs_world, should_insert_and_erase_components)
 	check_entities(world);
 }
 
+TEST(stellarlib_ecs_world, should_find_entities)
+{
+	ecs::world world{};
+	for (const auto entity : std::views::iota(std::uint32_t{}, std::uint32_t{10})) {
+		world.spawn(number_of(entity), string_of(entity));
+	}
+	for (const auto [entity, number, string] : world.query<std::int32_t, std::string>()) {
+		ASSERT_TRUE(world.find(number));
+		ASSERT_EQ(world.find(number), entity);
+		ASSERT_TRUE(world.find(string));
+		ASSERT_EQ(world.find(string), entity);
+	}
+}
+
 TEST(stellarlib_ecs_world, should_track_queries)
 {
 	ecs::world world{};

@@ -120,6 +120,18 @@ TEST(stellarlib_ecs_sparse_map, should_insert_and_erase_pairs)
 	check_pairs(map);
 }
 
+TEST(stellarlib_ecs_sparse_map, should_find_keys)
+{
+	ecs::internal::sparse_map<std::size_t, std::shared_ptr<std::int32_t>> map{};
+	for (const auto [key, value] : std::views::zip(KEYS, VALUES)) {
+		map.insert(key, value);
+	}
+	for (const auto [key, value] : map.zip()) {
+		ASSERT_TRUE(map.find(value));
+		ASSERT_EQ(map.find(value), key);
+	}
+}
+
 TEST(stellarlib_ecs_sparse_map, should_clear_pairs)
 {
 	ecs::internal::sparse_map<std::size_t, std::shared_ptr<std::int32_t>> map{};

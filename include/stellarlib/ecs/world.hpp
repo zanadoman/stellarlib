@@ -256,6 +256,18 @@ public:
 	}
 
 	/**
+	 * @brief Finds the entity of the specified component
+	 * @param component Component instance
+	 * @return ID of the found entity, or std::nullopt
+	 */
+	template <typename T>
+	[[nodiscard]]
+	constexpr auto find(const T &component) const noexcept
+	{
+		return _components.at<T>(internal::sparse_storage::ids<T>().front()).find(component);
+	}
+
+	/**
 	 * @brief Returns a pointer to the archetype of an entity
 	 * @param entity ID of the entity (can be invalid)
 	 * @return Pointer to the archetype of the entity, or nullptr if the entity ID is invalid

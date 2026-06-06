@@ -26,9 +26,11 @@
 
 #include <stellarlib/ecs/any_set.hpp>
 #include <stellarlib/ecs/stack_vector.hpp>
+#include <stellarlib/lin/lin.hpp>
 
 #include <limits>
 #include <memory>
+#include <optional>
 #include <ranges>
 #include <span>
 #include <type_traits>
@@ -84,6 +86,17 @@ public:
 	constexpr auto contains(const Key key) const noexcept
 	{
 		return key < _sparse.size() && _sparse[key] != std::numeric_limits<Key>::max();
+	}
+
+	[[nodiscard]]
+	constexpr auto find(const T &value) const noexcept
+		-> std::optional<Key>
+	{
+		if (_values.begin() <= std::addressof(value) && std::addressof(value) < _values.end()) {
+			return _keys[lin::cast<Key>(std::addressof(value) - _values.begin())];
+		}
+
+		return std::nullopt;
 	}
 
 	[[nodiscard]]
