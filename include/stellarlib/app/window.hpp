@@ -155,6 +155,9 @@ private:
 	explicit window(const info &info);
 
 	[[nodiscard]]
+	explicit operator SDL_GPUDevice *() const final;
+
+	[[nodiscard]]
 	explicit operator std::shared_ptr<SDL_GPUDevice>() const final;
 
 	[[nodiscard]]

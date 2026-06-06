@@ -132,6 +132,11 @@ window::window(const info &info)
 	set_vsync(info.renderer.vsync);
 }
 
+window::operator SDL_GPUDevice *() const
+{
+	return _device.get();
+}
+
 window::operator std::shared_ptr<SDL_GPUDevice>() const
 {
 	return _device;
@@ -202,6 +207,11 @@ auto window::upload_image(const res::image &image, const bool mipmaps)
 auto window::download_texture(const gfx::texture &texture, const bool idle)
 	-> res::image
 {
+	if (static_cast<const SDL_GPUDevice *>(texture) != _device.get()) {
+		SDL_InvalidParamError("texture");
+		throw std::invalid_argument{SDL_GetError()};
+	}
+
 	auto cmdbuf(acquire_cmdbuf());
 	const auto transtex{create_transtex(SDL_GPU_TEXTUREUSAGE_COLOR_TARGET, texture.size())};
 	blit(cmdbuf.get(), static_cast<SDL_GPUTexture *>(texture), texture.size(), transtex.get());
