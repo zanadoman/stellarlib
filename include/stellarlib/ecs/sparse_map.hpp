@@ -30,7 +30,6 @@
 
 #include <limits>
 #include <memory>
-#include <optional>
 #include <ranges>
 #include <span>
 #include <type_traits>
@@ -90,13 +89,12 @@ public:
 
 	[[nodiscard]]
 	constexpr auto find(const T &value) const noexcept
-		-> std::optional<Key>
 	{
 		if (_values.begin() <= std::addressof(value) && std::addressof(value) < _values.end()) {
 			return _keys[lin::cast<Key>(std::addressof(value) - _values.begin())];
 		}
 
-		return std::nullopt;
+		return std::numeric_limits<Key>::max();
 	}
 
 	[[nodiscard]]

@@ -29,6 +29,7 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <limits>
 #include <memory>
 #include <ranges>
 #include <tuple>
@@ -126,9 +127,9 @@ TEST(stellarlib_ecs_sparse_map, should_find_keys)
 	for (const auto [key, value] : std::views::zip(KEYS, VALUES)) {
 		map.insert(key, value);
 	}
-	for (const auto [key, value] : map.zip()) {
-		ASSERT_TRUE(map.find(value));
-		ASSERT_EQ(map.find(value), key);
+	for (const auto [key, internal, external] : std::views::zip(KEYS, VALUES, map.values())) {
+		ASSERT_EQ(map.find(internal), std::numeric_limits<std::size_t>::max());
+		ASSERT_EQ(map.find(external), key);
 	}
 }
 
