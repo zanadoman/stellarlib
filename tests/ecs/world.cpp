@@ -28,6 +28,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <limits>
 #include <ranges>
 #include <string>
 #include <tuple>
@@ -237,6 +238,8 @@ constexpr void check_despawned_entity(const ecs::world &world, const std::uint32
 }
 }
 
+static_assert(ecs::world::none == std::numeric_limits<std::uint32_t>::max());
+
 TEST(stellarlib_ecs_world, should_spawn_and_despawn_entities)
 {
 	ecs::world world{};
@@ -341,9 +344,9 @@ TEST(stellarlib_ecs_world, should_find_entities)
 		world.spawn(number_of(entity), string_of(entity));
 	}
 	for (const auto [entity, number, string] : world.query<std::int32_t, std::string>()) {
-		ASSERT_TRUE(world.find(number));
+		ASSERT_EQ(world.find(number_of(entity)), ecs::world::none);
 		ASSERT_EQ(world.find(number), entity);
-		ASSERT_TRUE(world.find(string));
+		ASSERT_EQ(world.find(string_of(entity)), ecs::world::none);
 		ASSERT_EQ(world.find(string), entity);
 	}
 }

@@ -59,6 +59,11 @@ class [[nodiscard]] world final
 {
 public:
 	/**
+	 * @brief Invalid entity ID
+	 */
+	static constexpr auto none{std::numeric_limits<std::uint32_t>::max()};
+
+	/**
 	 * @brief Default constructor
 	 */
 	[[nodiscard]]
@@ -258,7 +263,7 @@ public:
 	/**
 	 * @brief Finds the entity of the specified component
 	 * @param component Component instance
-	 * @return ID of the found entity, or std::nullopt
+	 * @return ID of the found entity
 	 */
 	template <typename T>
 	[[nodiscard]]
