@@ -26,10 +26,12 @@
 
 #include <stellarlib/ext/utility.hpp>
 
-#include <any>
 #include <cstddef>
 #include <limits>
 #include <memory>
+#include <ranges>
+#include <stdexcept>
+#include <typeinfo>
 #include <type_traits>
 #include <utility>
 #include <vector>
@@ -41,9 +43,10 @@ namespace stellarlib::ext
 {
 /**
  * @brief Heterogeneous container
+ * @tparam Base Common interface type or void
  * @tparam Scope Type ID space
  */
-template <typename Scope = void>
+template <typename Base, typename Scope = void>
 class [[nodiscard]] type_map final
 {
 public:
@@ -65,11 +68,10 @@ public:
 	}
 
 	/**
-	 * @brief Copy constructor
-	 * @param other Other instance
+	 * @brief Deleted copy constructor
 	 */
 	[[nodiscard]]
-	constexpr type_map(const type_map &other) = default;
+	constexpr type_map(const type_map &) noexcept = delete;
 
 	/**
 	 * @brief Move constructor
@@ -79,12 +81,10 @@ public:
 	constexpr type_map(type_map &&other) = default;
 
 	/**
-	 * @brief Copy assignment operator
-	 * @param other Other instance
-	 * @return Current instance
+	 * @brief Deleted copy assignment operator
 	 */
-	constexpr auto operator=(const type_map &other)
-		-> type_map & = default;
+	constexpr auto operator=(const type_map &) noexcept
+		-> type_map & = delete;
 
 	/**
 	 * @brief Move assignment operator
@@ -128,35 +128,31 @@ public:
 
 			_map[id] = _ids.size();
 			_ids.emplace_back(id);
-			_elems.emplace_back(T{std::forward<Args>(args)...});
+
+			if constexpr (std::is_same_v<Base, void>) {
+				_elems.emplace_back(new T{std::forward<Args>(args)...}, [] (const auto elem) -> void {
+					delete static_cast<const T *>(elem);
+				});
+			}
+			else {
+				_elems.emplace_back(std::make_unique<T>(std::forward<Args>(args)...));
+			}
 		}
 		else if constexpr (sizeof...(Args) == 1 && (std::is_assignable_v<T &, Args> && ...)) {
-			std::any_cast<T &>(_elems[_map[id]]) = (std::forward<Args>(args), ...);
+			*static_cast<T *>(_elems[_map[id]].get()) = (std::forward<Args>(args), ...);
 		}
 		else {
 			std::destroy_at(_elems.data() + _map[id]);
-			std::construct_at(_elems.data() + _map[id], T{std::forward<Args>(args)...});
+
+			if constexpr (std::is_same_v<Base, void>) {
+				std::construct_at(_elems.data() + _map[id], new T{std::forward<Args>(args)...}, [] (const auto elem) -> void {
+					delete static_cast<const T *>(elem);
+				});
+			}
+			else {
+				std::construct_at(_elems.data() + _map[id], std::make_unique<T>(std::forward<Args>(args)...));
+			}
 		}
-	}
-
-	/**
-	 * @brief Returns whether the container is empty
-	 * @return Whether the container is empty
-	 */
-	[[nodiscard]]
-	constexpr auto empty() const
-	{
-		return _ids.empty();
-	}
-
-	/**
-	 * @brief Returns the number of stored elements
-	 * @return Number of stored elements
-	 */
-	[[nodiscard]]
-	constexpr auto size() const
-	{
-		return _ids.size();
 	}
 
 	/**
@@ -183,7 +179,7 @@ public:
 		-> const auto &
 	{
 		const auto id{ext::scoped_typeid<Scope, T>()};
-		return contains(id) ? std::any_cast<const T &>(_elems[_map[id]]) : throw std::bad_any_cast{};
+		return contains(id) ? *static_cast<const T *>(_elems[_map[id]].get()) : throw std::out_of_range{typeid(T).name()};
 	}
 
 	/**
@@ -197,7 +193,45 @@ public:
 		-> auto &
 	{
 		const auto id{ext::scoped_typeid<Scope, T>()};
-		return contains(id) ? std::any_cast<T &>(_elems[_map[id]]) : throw std::bad_any_cast{};
+		return contains(id) ? *static_cast<T *>(_elems[_map[id]].get()) : throw std::out_of_range{typeid(T).name()};
+	}
+
+	/**
+	 * @brief Returns a view to the contained elements
+	 * @return View to the contained elements
+	 */
+	[[nodiscard]]
+	constexpr auto view() const
+	{
+		if constexpr (std::is_same_v<Base, void>) {
+			return _elems | std::views::transform([] [[nodiscard]] (const auto &elem) -> auto {
+				return static_cast<const void *>(elem.get());
+			});
+		}
+		else {
+			return _elems | std::views::transform([] [[nodiscard]] (const auto &elem) -> const auto & {
+				return *static_cast<const Base *>(elem.get());
+			});
+		}
+	}
+
+	/**
+	 * @brief Returns a view to the contained elements
+	 * @return View to the contained elements
+	 */
+	[[nodiscard]]
+	constexpr auto view()
+	{
+		if constexpr (std::is_same_v<Base, void>) {
+			return _elems | std::views::transform([] [[nodiscard]] (const auto &elem) -> auto {
+				return elem.get();
+			});
+		}
+		else {
+			return _elems | std::views::transform([] [[nodiscard]] (const auto &elem) -> auto & {
+				return *static_cast<Base *>(elem.get());
+			});
+		}
 	}
 
 	/**
@@ -236,7 +270,7 @@ public:
 
 private:
 	std::vector<std::size_t> _map{};
-	std::vector<std::any> _elems{};
+	std::vector<std::conditional_t<std::is_same_v<Base, void>, std::unique_ptr<void, void (*)(const void *)>, std::unique_ptr<Base>>> _elems{};
 	std::vector<std::size_t> _ids{};
 
 	[[nodiscard]]
