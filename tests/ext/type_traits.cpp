@@ -43,63 +43,63 @@ class [[nodiscard]] trivially_relocatable final
 {
 public:
 	[[nodiscard]]
-	trivially_relocatable() noexcept;
+	trivially_relocatable();
 
 	[[nodiscard]]
-	trivially_relocatable(const trivially_relocatable &) noexcept;
+	trivially_relocatable(const trivially_relocatable &);
 
 	[[nodiscard]]
-	constexpr trivially_relocatable(trivially_relocatable &&) noexcept = default;
+	constexpr trivially_relocatable(trivially_relocatable &&) = default;
 
-	auto operator=(const trivially_relocatable &) noexcept
+	auto operator=(const trivially_relocatable &)
 		-> trivially_relocatable &;
 
-	auto operator=(trivially_relocatable &&) noexcept
+	auto operator=(trivially_relocatable &&)
 		-> trivially_relocatable &;
 
-	constexpr ~trivially_relocatable() noexcept = default;
+	constexpr ~trivially_relocatable() = default;
 };
 
 class [[nodiscard]] non_trivially_move_constructible final
 {
 public:
 	[[nodiscard]]
-	non_trivially_move_constructible() noexcept;
+	non_trivially_move_constructible();
 
 	[[nodiscard]]
-	non_trivially_move_constructible(const non_trivially_move_constructible &) noexcept;
+	non_trivially_move_constructible(const non_trivially_move_constructible &);
 
 	[[nodiscard]]
-	non_trivially_move_constructible(non_trivially_move_constructible &&) noexcept;
+	non_trivially_move_constructible(non_trivially_move_constructible &&);
 
-	auto operator=(const non_trivially_move_constructible &) noexcept
+	auto operator=(const non_trivially_move_constructible &)
 		-> non_trivially_move_constructible &;
 
-	auto operator=(non_trivially_move_constructible &&) noexcept
+	auto operator=(non_trivially_move_constructible &&)
 		-> non_trivially_move_constructible &;
 
-	constexpr ~non_trivially_move_constructible() noexcept = default;
+	constexpr ~non_trivially_move_constructible() = default;
 };
 
 class [[nodiscard]] non_trivially_destructible final
 {
 public:
 	[[nodiscard]]
-	non_trivially_destructible() noexcept;
+	non_trivially_destructible();
 
 	[[nodiscard]]
-	non_trivially_destructible(const non_trivially_destructible &) noexcept;
+	non_trivially_destructible(const non_trivially_destructible &);
 
 	[[nodiscard]]
-	constexpr non_trivially_destructible(non_trivially_destructible &&) noexcept = default;
+	constexpr non_trivially_destructible(non_trivially_destructible &&) = default;
 
-	auto operator=(const non_trivially_destructible &) noexcept
+	auto operator=(const non_trivially_destructible &)
 		-> non_trivially_destructible &;
 
-	auto operator=(non_trivially_destructible &&) noexcept
+	auto operator=(non_trivially_destructible &&)
 		-> non_trivially_destructible &;
 
-	~non_trivially_destructible() noexcept;
+	~non_trivially_destructible();
 };
 }
 

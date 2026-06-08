@@ -97,13 +97,13 @@ auto context::world()
 }
 
 auto context::store() const
-	-> const ext::type_map<context> &
+	-> const ext::type_map<void, context> &
 {
 	return _store;
 }
 
 auto context::store()
-	-> ext::type_map<context> &
+	-> ext::type_map<void, context> &
 {
 	return _store;
 }

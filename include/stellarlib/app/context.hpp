@@ -184,7 +184,7 @@ public:
 	 */
 	[[nodiscard]]
 	auto store() const
-		-> const ext::type_map<context> &;
+		-> const ext::type_map<void, context> &;
 
 	/**
 	 * @brief Returns a reference to the global store
@@ -192,7 +192,7 @@ public:
 	 */
 	[[nodiscard]]
 	auto store()
-		-> ext::type_map<context> &;
+		-> ext::type_map<void, context> &;
 
 private:
 	[[no_unique_address]] app::metadata _metadata;
@@ -200,7 +200,7 @@ private:
 	[[maybe_unused]] std::array<std::byte, 4> _padding;
 	app::window _window;
 	ecs::world _world{};
-	ext::type_map<context> _store{};
+	ext::type_map<void, context> _store{};
 	std::unique_ptr<scene> _scene{};
 
 	[[nodiscard]]
