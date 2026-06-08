@@ -21,13 +21,32 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef STELLARLIB_GFX_GFX_HPP
-#define STELLARLIB_GFX_GFX_HPP
+#ifndef STELLARLIB_GFX_PODS_HPP
+#define STELLARLIB_GFX_PODS_HPP
 
-/* IWYU pragma: begin_exports */
-#include <stellarlib/gfx/pods.hpp>
-#include <stellarlib/gfx/renderer.hpp>
-#include <stellarlib/gfx/texture.hpp>
-/* IWYU pragma: end_exports */
+#include <stellarlib/lin/lin.hpp>
+
+/**
+ * @brief Graphics and rendering abstractions
+ */
+namespace stellarlib::gfx
+{
+/**
+ * @brief Axis-aligned bounding box
+ */
+template <typename T>
+struct [[nodiscard]] aabb final
+{
+	/**
+	 * @brief Position
+	 */
+	lin::vector<T, 2> p;
+
+	/**
+	 * @brief Scale
+	 */
+	lin::vector<T, 2> s;
+};
+}
 
 #endif
