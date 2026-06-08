@@ -99,8 +99,8 @@ public:
 	explicit operator SDL_GPUTexture *() const;
 
 	/**
-	 * @brief Returns a pointer to the internal device
-	 * @return Pointer to the internal device
+	 * @brief Returns a pointer to the associated device
+	 * @return Pointer to the associated device
 	 * @warning Intended for internal/professional use
 	 */
 	[[nodiscard]]

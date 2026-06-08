@@ -261,7 +261,7 @@ constexpr auto cast(const matrix<U, M, N> &x) noexcept
 	matrix<T, M, N> res;
 
 	for (const auto [res, x] : std::views::zip(res, x)) {
-		res = static_cast<T>(x);
+		res = cast<T>(x);
 	}
 
 	return res;
