@@ -87,7 +87,7 @@ constexpr void check_window(app::context &ctx)
 	assert(static_cast<SDL_GPUTexture *>(texture2));
 	assert(static_cast<const SDL_GPUDevice *>(texture2) == static_cast<const SDL_GPUDevice *>(ctx.window().renderer()));
 	assert(lin::all(texture2.size() == image.size()));
-	assert(!texture2.mipmaps());
+	assert(texture2.mipmaps());
 	assert(ctx.window().renderer().download_texture(texture2, true) == image);
 }
 }

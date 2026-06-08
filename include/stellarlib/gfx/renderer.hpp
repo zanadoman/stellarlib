@@ -101,7 +101,7 @@ public:
 	 */
 	[[nodiscard]]
 	virtual constexpr auto upload_image(const res::image &image, bool mipmaps)
-		-> gfx::texture = 0;
+		-> texture = 0;
 
 	/**
 	 * @brief Downloads a texture
@@ -110,7 +110,7 @@ public:
 	 * @return Downloaded texture
 	 */
 	[[nodiscard]]
-	virtual constexpr auto download_texture(const gfx::texture &texture, bool idle)
+	virtual constexpr auto download_texture(const texture &texture, bool idle)
 		-> res::image = 0;
 
 protected:

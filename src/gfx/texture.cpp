@@ -53,7 +53,7 @@ texture::texture(const std::shared_ptr<SDL_GPUDevice> &device, const lin::uint2 
 	}
 
 	_handle = SDL_CreateGPUTexture(_device.get(), std::addressof(info));
-	_mipmaps = 1 < info.layer_count_or_depth;
+	_mipmaps = 1 < info.num_levels;
 
 	if (!static_cast<bool>(_handle)) {
 		throw std::runtime_error{SDL_GetError()};
@@ -63,6 +63,8 @@ texture::texture(const std::shared_ptr<SDL_GPUDevice> &device, const lin::uint2 
 texture::texture(texture &&other)
 	: _handle{std::exchange(other._handle, {})}
 	, _device{std::exchange(other._device, {})}
+	, _size{std::exchange(other._size, {})}
+	, _mipmaps{std::exchange(other._mipmaps, {})}
 {}
 
 auto texture::operator=(texture &&other)
