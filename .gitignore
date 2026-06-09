@@ -1,3 +1,4 @@
+/android/app/bin/
 /android/app/.classpath
 /android/app/src/main/assets/
 /android/app/src/main/jniLibs/*/libmain.so
