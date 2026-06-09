@@ -29,6 +29,7 @@
 #include <stellarlib/lin/lin.hpp>
 #include <stellarlib/res/res.hpp>
 
+#include <SDL3/SDL_events.h>
 #include <SDL3/SDL_gpu.h>
 #include <SDL3/SDL_video.h>
 
@@ -124,6 +125,14 @@ public:
 	void set_title(const std::string &title);
 
 	/**
+	 * @brief Returns the resolution of the window
+	 * @return Resolution of the window
+	 */
+	[[nodiscard]]
+	auto resolution() const
+		-> lin::uint2;
+
+	/**
 	 * @brief Returns the renderer of the window
 	 * @return Renderer of the window
 	 */
@@ -141,9 +150,12 @@ public:
 
 private:
 	SDL_Window *_handle{};
+	SDL_WindowID _handle_id{};
+	gfx::aabb<std::uint32_t> _safe_area{};
+	[[maybe_unused]] std::array<std::byte, 4> _padding1;
 	std::shared_ptr<SDL_GPUDevice> _device{};
 	bool _vsync{true};
-	[[maybe_unused]] std::array<std::byte, 3> _padding;
+	[[maybe_unused]] std::array<std::byte, 11> _padding2;
 	std::uint32_t _transbuf_size{};
 	SDL_GPUTransferBuffer *_transbuf{};
 	SDL_GPUFence *_fence{};
@@ -175,6 +187,8 @@ private:
 		-> res::image final;
 
 	void iterate();
+
+	void event(const SDL_Event &event);
 
 	void extend_transbuf(std::uint32_t size);
 

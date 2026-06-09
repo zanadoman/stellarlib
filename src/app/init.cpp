@@ -111,9 +111,9 @@ public:
 	}
 
 	[[nodiscard]]
-	static constexpr auto event(const void *appstate, const SDL_Event *event)
+	static constexpr auto event(void *appstate, const SDL_Event *event)
 	{
-		return internal::lifecycle<host>::event(*static_cast<const context *>(appstate), *event);
+		return internal::lifecycle<host>::event(*static_cast<context *>(appstate), *event);
 	}
 
 	static constexpr void quit(const void *appstate, const SDL_AppResult result)

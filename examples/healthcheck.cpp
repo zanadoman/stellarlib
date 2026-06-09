@@ -73,6 +73,7 @@ constexpr void check_window(app::context &ctx)
 	assert(ctx.window().title() == "org.stellarlib.healthcheck");
 	ctx.window().set_title("healthcheck");
 	assert(ctx.window().title() == "healthcheck");
+	assert(lin::all(ctx.window().resolution()));
 	assert(static_cast<const SDL_GPUDevice *>(ctx.window().renderer()));
 	assert(static_cast<std::shared_ptr<SDL_GPUDevice>>(ctx.window().renderer()).get() == static_cast<const SDL_GPUDevice *>(ctx.window().renderer()));
 	ctx.window().renderer().set_vsync(!ctx.window().renderer().vsync());

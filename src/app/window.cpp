@@ -70,6 +70,12 @@ void window::set_title(const std::string &title)
 	}
 }
 
+auto window::resolution() const
+	-> lin::uint2
+{
+	return _safe_area.s;
+}
+
 auto window::renderer() const
 	-> const gfx::renderer &
 {
@@ -104,6 +110,12 @@ window::window(const info &info)
 	: _handle{SDL_CreateWindow(info.title.c_str(), 0, 0, info.renderer.debug ? SDL_WINDOW_RESIZABLE : SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE)}
 {
 	if (!static_cast<bool>(_handle) || !SDL_SetWindowIcon(_handle, static_cast<SDL_Surface *>(info.icon)) && !static_cast<bool>(std::strstr(SDL_GetError(), "not supported"))) {
+		throw std::runtime_error{SDL_GetError()};
+	}
+
+	_handle_id = SDL_GetWindowID(_handle);
+
+	if (!lin::cast<bool>(_handle_id)) {
 		throw std::runtime_error{SDL_GetError()};
 	}
 
@@ -278,6 +290,27 @@ void window::iterate()
 	}
 
 	wait_fence();
+}
+
+void window::event(const SDL_Event &event)
+{
+	if (event.window.windowID != _handle_id || event.type != SDL_EVENT_WINDOW_SAFE_AREA_CHANGED && event.type != SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED) {
+		return;
+	}
+
+	SDL_Rect area{};
+	lin::int2 size{};
+
+	if (!SDL_GetWindowSafeArea(_handle, std::addressof(area)) || !SDL_GetWindowSizeInPixels(_handle, std::addressof(size.x()), std::addressof(size.y()))) {
+		throw std::runtime_error{SDL_GetError()};
+	}
+
+	const auto inset{lin::max(area.x, size.x() - area.w - area.x)};
+
+	_safe_area = {
+		.p = lin::uint2{inset, area.y},
+		.s = lin::uint2{size.x() - inset * 2, area.h}
+	};
 }
 
 void window::extend_transbuf(const std::uint32_t size)

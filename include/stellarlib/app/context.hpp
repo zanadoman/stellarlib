@@ -211,7 +211,7 @@ private:
 		-> SDL_AppResult;
 
 	[[nodiscard]]
-	auto event(const SDL_Event &event) const
+	auto event(const SDL_Event &event)
 		-> SDL_AppResult;
 };
 }
