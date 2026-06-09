@@ -1,6 +1,6 @@
 package com.example.myapplication;
 
-import org.libsdl.app.SDLActivity;
+import org.stellarlib.app.SLActivity;
 
-public final class MainActivity extends SDLActivity {
+public final class MainActivity extends SLActivity {
 }
