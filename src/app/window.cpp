@@ -28,7 +28,9 @@
 #include <stellarlib/res/res.hpp>
 
 #include <SDL3/SDL_error.h>
+#include <SDL3/SDL_events.h>
 #include <SDL3/SDL_gpu.h>
+#include <SDL3/SDL_hints.h>
 #include <SDL3/SDL_properties.h>
 #include <SDL3/SDL_rect.h>
 #include <SDL3/SDL_surface.h>
@@ -76,6 +78,12 @@ auto window::resolution() const
 	return _safe_area.s;
 }
 
+auto window::focused() const
+	-> bool
+{
+	return _focused;
+}
+
 auto window::renderer() const
 	-> const gfx::renderer &
 {
@@ -107,8 +115,13 @@ void window::blit(SDL_GPUCommandBuffer *cmdbuf, SDL_GPUTexture *src, const lin::
 }
 
 window::window(const info &info)
-	: _handle{SDL_CreateWindow(info.title.c_str(), 0, 0, info.renderer.debug ? SDL_WINDOW_RESIZABLE : SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE)}
 {
+	if (!SDL_SetHintWithPriority(SDL_HINT_ORIENTATIONS, "LandscapeLeft LandscapeRight", SDL_HINT_OVERRIDE)) {
+		throw std::runtime_error{SDL_GetError()};
+	}
+
+	_handle = SDL_CreateWindow(info.title.c_str(), 0, 0, info.renderer.debug ? SDL_WINDOW_RESIZABLE : SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE);
+
 	if (!static_cast<bool>(_handle) || !SDL_SetWindowIcon(_handle, static_cast<SDL_Surface *>(info.icon)) && !static_cast<bool>(std::strstr(SDL_GetError(), "not supported"))) {
 		throw std::runtime_error{SDL_GetError()};
 	}
@@ -294,23 +307,37 @@ void window::iterate()
 
 void window::event(const SDL_Event &event)
 {
-	if (event.window.windowID != _handle_id || event.type != SDL_EVENT_WINDOW_SAFE_AREA_CHANGED && event.type != SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED) {
+	if (event.window.windowID != _handle_id) {
 		return;
 	}
 
-	SDL_Rect area{};
-	lin::int2 size{};
+	switch (event.type) {
+	case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
+	case SDL_EVENT_WINDOW_SAFE_AREA_CHANGED: {
+		SDL_Rect area{};
+		lin::int2 size{};
 
-	if (!SDL_GetWindowSafeArea(_handle, std::addressof(area)) || !SDL_GetWindowSizeInPixels(_handle, std::addressof(size.x()), std::addressof(size.y()))) {
-		throw std::runtime_error{SDL_GetError()};
+		if (!SDL_GetWindowSafeArea(_handle, std::addressof(area)) || !SDL_GetWindowSizeInPixels(_handle, std::addressof(size.x()), std::addressof(size.y()))) {
+			throw std::runtime_error{SDL_GetError()};
+		}
+
+		const auto inset{lin::max(area.x, size.x() - area.w - area.x)};
+
+		_safe_area = {
+			.p = lin::uint2{inset, area.y},
+			.s = lin::uint2{size.x() - inset * 2, area.h}
+		};
+
+		break;
 	}
-
-	const auto inset{lin::max(area.x, size.x() - area.w - area.x)};
-
-	_safe_area = {
-		.p = lin::uint2{inset, area.y},
-		.s = lin::uint2{size.x() - inset * 2, area.h}
-	};
+	case SDL_EVENT_WINDOW_FOCUS_GAINED: {
+		_focused = true;
+		break;
+	}
+	case SDL_EVENT_WINDOW_FOCUS_LOST: {
+		_focused = false;
+		break;
+	}}
 }
 
 void window::extend_transbuf(const std::uint32_t size)

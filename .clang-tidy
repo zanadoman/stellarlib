@@ -73,6 +73,7 @@ Checks: >
   -bugprone-signed-char-misuse,
   -bugprone-std-namespace-modification,
   -bugprone-suspicious-realloc-usage,
+  -bugprone-switch-missing-default-case,
   -bugprone-throwing-static-initialization,
   -cert-dcl58-cpp,
   -cert-err58-cpp,

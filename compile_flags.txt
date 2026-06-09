@@ -14,5 +14,6 @@
 -Wno-missing-designated-field-initializers
 -Wno-overloaded-shift-op-parentheses
 -Wno-shadow
+-Wno-switch-default
 -Wno-unsafe-buffer-usage
 -Wno-unused-member-function

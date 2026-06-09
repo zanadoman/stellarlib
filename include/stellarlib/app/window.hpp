@@ -133,6 +133,14 @@ public:
 		-> lin::uint2;
 
 	/**
+	 * @brief Returns whether the window is focused
+	 * @return Whether the window is focused
+	 */
+	[[nodiscard]]
+	auto focused() const
+		-> bool;
+
+	/**
 	 * @brief Returns the renderer of the window
 	 * @return Renderer of the window
 	 */
@@ -152,7 +160,8 @@ private:
 	SDL_Window *_handle{};
 	SDL_WindowID _handle_id{};
 	gfx::aabb<std::uint32_t> _safe_area{};
-	[[maybe_unused]] std::array<std::byte, 4> _padding1;
+	bool _focused{};
+	[[maybe_unused]] std::array<std::byte, 3> _padding1;
 	std::shared_ptr<SDL_GPUDevice> _device{};
 	bool _vsync{true};
 	[[maybe_unused]] std::array<std::byte, 11> _padding2;
