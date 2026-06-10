@@ -24,11 +24,14 @@
 #ifndef STELLARLIB_GFX_RENDERER_HPP
 #define STELLARLIB_GFX_RENDERER_HPP
 
+#include <stellarlib/gfx/pods.hpp>
 #include <stellarlib/gfx/texture.hpp>
 #include <stellarlib/res/res.hpp>
 
 #include <SDL3/SDL_gpu.h>
 
+#include <array>
+#include <cstddef>
 #include <memory>
 
 /**
@@ -56,6 +59,42 @@ public:
 		 * @brief Enable debugging
 		 */
 		bool debug;
+	};
+
+	/**
+	 * @brief Blit operation descriptor
+	 */
+	struct [[nodiscard]] blit_info final
+	{
+		/**
+		 * @brief Source texture
+		 */
+		const texture &src;
+
+		/**
+		 * @brief Source region
+		 */
+		const aabb<float> &src_region;
+
+		/**
+		 * @brief Destination texture
+		 */
+		texture &dst;
+
+		/**
+		 * @brief Destination region
+		 */
+		const aabb<float> &dst_region;
+
+		/**
+		 * @brief Filtering method
+		 */
+		res::image::filter filter;
+
+		/**
+		 * @brief Explicit padding
+		 */
+		std::array<std::byte, 7> padding;
 	};
 
 	/**
@@ -104,6 +143,13 @@ public:
 		-> texture = 0;
 
 	/**
+	 * @brief Blits from a texture into another
+	 * @param info Operation descriptor
+	 * @param idle Wait for idle
+	 */
+	virtual void blit_texture(const blit_info &info, bool idle);
+
+	/**
 	 * @brief Downloads a texture
 	 * @param texture Texture to download
 	 * @param idle Wait for idle
@@ -112,6 +158,22 @@ public:
 	[[nodiscard]]
 	virtual constexpr auto download_texture(const texture &texture, bool idle)
 		-> res::image = 0;
+
+	/**
+	 * @brief Returns a reference to the virtual framebuffer
+	 * @return Reference to the virtual framebuffer
+	 */
+	[[nodiscard]]
+	virtual constexpr auto framebuffer() const
+		-> const texture & = 0;
+
+	/**
+	 * @brief Returns a reference to the virtual framebuffer
+	 * @return Reference to the virtual framebuffer
+	 */
+	[[nodiscard]]
+	virtual constexpr auto framebuffer()
+		-> texture & = 0;
 
 protected:
 	/**

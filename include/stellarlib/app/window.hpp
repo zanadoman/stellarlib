@@ -164,8 +164,10 @@ private:
 	[[maybe_unused]] std::array<std::byte, 3> _padding1;
 	std::shared_ptr<SDL_GPUDevice> _device{};
 	bool _vsync{true};
-	[[maybe_unused]] std::array<std::byte, 11> _padding2;
+	[[maybe_unused]] std::array<std::byte, 7> _padding2;
+	std::unique_ptr<gfx::texture> _framebuffer{};
 	std::uint32_t _transbuf_size{};
+	[[maybe_unused]] std::array<std::byte, 4> _padding3;
 	SDL_GPUTransferBuffer *_transbuf{};
 	SDL_GPUFence *_fence{};
 	std::vector<SDL_GPUFence *> _fences{};
@@ -191,9 +193,19 @@ private:
 	auto upload_image(const res::image &image, bool mipmaps)
 		-> gfx::texture final;
 
+	void blit_texture(const gfx::renderer::blit_info &info, bool idle) final;
+
 	[[nodiscard]]
 	auto download_texture(const gfx::texture &texture, bool idle)
 		-> res::image final;
+
+	[[nodiscard]]
+	auto framebuffer() const
+		-> const gfx::texture & final;
+
+	[[nodiscard]]
+	auto framebuffer()
+		-> gfx::texture & final;
 
 	void iterate();
 
@@ -218,6 +230,8 @@ private:
 		-> std::pair<SDL_GPUTextureTransferInfo, SDL_GPUTextureRegion>;
 
 	void wait_fence();
+
+	void wait_fences();
 
 	void submit_cmdbuf(std::unique_ptr<SDL_GPUCommandBuffer, void (*)(SDL_GPUCommandBuffer *)> cmdbuf);
 };

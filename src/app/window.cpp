@@ -98,7 +98,7 @@ auto window::renderer()
 
 void window::blit(SDL_GPUCommandBuffer *cmdbuf, SDL_GPUTexture *src, const lin::uint2 size, SDL_GPUTexture *dst)
 {
-	const SDL_GPUBlitInfo info{
+	const SDL_GPUBlitInfo descriptor{
 		.source = {
 			.texture = src,
 			.w = size.x(),
@@ -111,7 +111,7 @@ void window::blit(SDL_GPUCommandBuffer *cmdbuf, SDL_GPUTexture *src, const lin::
 		}
 	};
 
-	SDL_BlitGPUTexture(cmdbuf, std::addressof(info));
+	SDL_BlitGPUTexture(cmdbuf, std::addressof(descriptor));
 }
 
 window::window(const info &info)
@@ -155,6 +155,7 @@ window::window(const info &info)
 	}
 
 	set_vsync(info.renderer.vsync);
+	_framebuffer = std::make_unique<gfx::texture>(_device, lin::uint2{bounds.w, bounds.h}, false);
 }
 
 window::operator SDL_GPUDevice *() const
@@ -225,8 +226,59 @@ auto window::upload_image(const res::image &image, const bool mipmaps)
 		SDL_GenerateMipmapsForGPUTexture(cmdbuf.get(), static_cast<SDL_GPUTexture *>(texture));
 	}
 
+	wait_fence();
 	submit_cmdbuf(std::move(cmdbuf));
 	return texture;
+}
+
+void window::blit_texture(const gfx::renderer::blit_info &info, [[maybe_unused]] const bool idle)
+{
+	if (static_cast<const SDL_GPUDevice *>(info.src) != _device.get() && static_cast<const SDL_GPUDevice *>(info.dst) != _device.get()) {
+		SDL_InvalidParamError("info");
+		throw std::invalid_argument{SDL_GetError()};
+	}
+
+	auto cmdbuf{acquire_cmdbuf()};
+
+	SDL_GPUBlitInfo descriptor{
+		.source = {
+			.texture = static_cast<SDL_GPUTexture *>(info.src),
+			.x = lin::cast<std::uint32_t>(lin::cast<float>(info.src.size().x()) * info.src_region.p.x()),
+			.y = lin::cast<std::uint32_t>(lin::cast<float>(info.src.size().y()) * info.src_region.p.y()),
+			.w = lin::cast<std::uint32_t>(lin::cast<float>(info.src.size().x()) * info.src_region.s.x()),
+			.h = lin::cast<std::uint32_t>(lin::cast<float>(info.src.size().y()) * info.src_region.s.y())
+		},
+		.destination = {
+			.texture = static_cast<SDL_GPUTexture *>(info.dst),
+			.x = lin::cast<std::uint32_t>(lin::cast<float>(info.dst.size().x()) * info.dst_region.p.x()),
+			.y = lin::cast<std::uint32_t>(lin::cast<float>(info.dst.size().y()) * info.dst_region.p.y()),
+			.w = lin::cast<std::uint32_t>(lin::cast<float>(info.dst.size().x()) * info.dst_region.s.x()),
+			.h = lin::cast<std::uint32_t>(lin::cast<float>(info.dst.size().y()) * info.dst_region.s.y())
+		}
+	};
+
+	switch (info.filter) {
+	case res::image::filter::nearest: {
+		descriptor.filter = SDL_GPU_FILTER_NEAREST;
+		break;
+	}
+	case res::image::filter::linear: {
+		descriptor.filter = SDL_GPU_FILTER_LINEAR;
+		break;
+	}
+	default: {
+		SDL_InvalidParamError("info");
+		throw std::invalid_argument{SDL_GetError()};
+	}}
+
+	SDL_BlitGPUTexture(cmdbuf.get(), std::addressof(descriptor));
+
+	if (idle) {
+		wait_fence();
+		wait_fences();
+	}
+
+	submit_cmdbuf(std::move(cmdbuf));
 }
 
 auto window::download_texture(const gfx::texture &texture, const bool idle)
@@ -246,23 +298,28 @@ auto window::download_texture(const gfx::texture &texture, const bool idle)
 	const auto [transfer, region]{prepare_transfer(transtex.get(), texture.size())};
 	SDL_DownloadFromGPUTexture(cpypass, std::addressof(region), std::addressof(transfer));
 	SDL_EndGPUCopyPass(cpypass);
+	wait_fence();
 
-	if (idle && lin::cast<bool>(_fences.size())) {
-		if (!SDL_WaitForGPUFences(_device.get(), true, _fences.data(), lin::cast<std::uint32_t>(_fences.size()))) {
-			throw std::runtime_error{SDL_GetError()};
-		}
-
-		for (auto &fence : _fences) {
-			SDL_ReleaseGPUFence(_device.get(), std::exchange(fence, {}));
-		}
-
-		_fences.clear();
+	if (idle) {
+		wait_fences();
 	}
 
 	submit_cmdbuf(std::move(cmdbuf));
 	wait_fence();
 	std::memcpy(image.bytes().data(), map_transbuf().get(), image.bytes().size());
 	return image;
+}
+
+auto window::framebuffer() const
+	-> const gfx::texture &
+{
+	return *_framebuffer;
+}
+
+auto window::framebuffer()
+	-> gfx::texture &
+{
+	return *_framebuffer;
 }
 
 void window::iterate()
@@ -298,10 +355,28 @@ void window::iterate()
 		throw std::runtime_error{SDL_GetError()};
 	}
 
-	if (static_cast<bool>(swapchain.texture)) {
-		SDL_EndGPURenderPass(SDL_BeginGPURenderPass(cmdbuf.get(), std::addressof(swapchain), 1, nullptr));
+	if (!static_cast<bool>(swapchain.texture)) {
+		return;
 	}
 
+	SDL_EndGPURenderPass(SDL_BeginGPURenderPass(cmdbuf.get(), std::addressof(swapchain), 1, nullptr));
+
+	const SDL_GPUBlitInfo descriptor{
+		.source = {
+			.texture = static_cast<SDL_GPUTexture *>(*_framebuffer),
+			.w = _framebuffer->size().x(),
+			.h = _framebuffer->size().y()
+		},
+		.destination = {
+			.texture = swapchain.texture,
+			.x = _safe_area.p.x(),
+			.y = _safe_area.p.y(),
+			.w = _safe_area.s.x(),
+			.h = _safe_area.s.y()
+		}
+	};
+
+	SDL_BlitGPUTexture(cmdbuf.get(), std::addressof(descriptor));
 	wait_fence();
 }
 
@@ -346,18 +421,18 @@ void window::extend_transbuf(const std::uint32_t size)
 		return;
 	}
 
-	const SDL_GPUTransferBufferCreateInfo info{
+	const SDL_GPUTransferBufferCreateInfo descriptor{
 		.size = size
 	};
 
-	const auto transbuf{SDL_CreateGPUTransferBuffer(_device.get(), std::addressof(info))};
+	const auto transbuf{SDL_CreateGPUTransferBuffer(_device.get(), std::addressof(descriptor))};
 
 	if (!static_cast<bool>(transbuf)) {
 		throw std::runtime_error{SDL_GetError()};
 	}
 
 	SDL_ReleaseGPUTransferBuffer(_device.get(), std::exchange(_transbuf, transbuf));
-	_transbuf_size = info.size;
+	_transbuf_size = descriptor.size;
 }
 
 auto window::map_transbuf()
@@ -393,7 +468,7 @@ auto window::acquire_cmdbuf()
 auto window::create_transtex(const SDL_GPUTextureUsageFlags usage, const lin::uint2 size)
 	-> std::unique_ptr<SDL_GPUTexture, std::function<void (SDL_GPUTexture *)>>
 {
-	const SDL_GPUTextureCreateInfo info{
+	const SDL_GPUTextureCreateInfo descriptor{
 		.format = SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM,
 		.usage = usage,
 		.width = size.x(),
@@ -402,7 +477,7 @@ auto window::create_transtex(const SDL_GPUTextureUsageFlags usage, const lin::ui
 		.num_levels = 1
 	};
 
-	std::unique_ptr<SDL_GPUTexture, std::function<void (SDL_GPUTexture *)>> transtex{SDL_CreateGPUTexture(_device.get(), std::addressof(info)), [cpt = _device.get()] (const auto transtex) -> void {
+	std::unique_ptr<SDL_GPUTexture, std::function<void (SDL_GPUTexture *)>> transtex{SDL_CreateGPUTexture(_device.get(), std::addressof(descriptor)), [cpt = _device.get()] (const auto transtex) -> void {
 		SDL_ReleaseGPUTexture(cpt, transtex);
 	}};
 
@@ -436,9 +511,25 @@ void window::wait_fence()
 	}
 }
 
+void window::wait_fences()
+{
+	if (_fences.empty()) {
+		return;
+	}
+
+	if (!SDL_WaitForGPUFences(_device.get(), true, _fences.data(), lin::cast<std::uint32_t>(_fences.size()))) {
+		throw std::runtime_error{SDL_GetError()};
+	}
+
+	for (auto &fence : _fences) {
+		SDL_ReleaseGPUFence(_device.get(), std::exchange(fence, {}));
+	}
+
+	_fences.clear();
+}
+
 void window::submit_cmdbuf(std::unique_ptr<SDL_GPUCommandBuffer, void (*)(SDL_GPUCommandBuffer *)> cmdbuf)
 {
-	wait_fence();
 	SDL_ReleaseGPUFence(_device.get(), std::exchange(_fence, SDL_SubmitGPUCommandBufferAndAcquireFence(cmdbuf.release())));
 
 	if (!static_cast<bool>(_fence)) {

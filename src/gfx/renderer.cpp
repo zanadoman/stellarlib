@@ -29,6 +29,8 @@ renderer::~renderer() noexcept = default;
 
 void renderer::set_vsync([[maybe_unused]] const bool vsync) {}
 
+void renderer::blit_texture([[maybe_unused]] const blit_info &info, [[maybe_unused]] const bool idle) {}
+
 renderer::renderer() noexcept = default;
 
 renderer::renderer(const renderer &) noexcept = default;
