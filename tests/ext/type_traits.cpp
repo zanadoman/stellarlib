@@ -116,6 +116,13 @@ static_assert(ext::padding<std::uint16_t, std::uint8_t>::size == sizeof(std::uin
 static_assert(ext::padding<std::uint32_t, std::uint8_t, std::uint8_t>::size == sizeof(std::uint16_t));
 static_assert(ext::padding<std::uint64_t, std::uint16_t, std::uint16_t>::size == sizeof(std::uint32_t));
 
+static_assert(std::is_trivially_constructible_v<ext::pin>);
+static_assert(!std::is_copy_constructible_v<ext::pin>);
+static_assert(!std::is_move_constructible_v<ext::pin>);
+static_assert(!std::is_copy_assignable_v<ext::pin>);
+static_assert(!std::is_move_assignable_v<ext::pin>);
+static_assert(std::is_trivially_destructible_v<ext::pin>);
+
 /* NOLINTEND(performance-unnecessary-copy-initialization) */
 
 #pragma clang diagnostic pop

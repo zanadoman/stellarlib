@@ -84,6 +84,48 @@ struct [[nodiscard]] padding final
 	 */
 	[[maybe_unused]] [[no_unique_address]] std::conditional_t<lin::cast<bool>(size), std::array<std::byte, size>, std::tuple<>> bytes;
 };
+
+/**
+ * @brief Non-copyable and non-movable base class
+ */
+class [[nodiscard]] pin
+{
+public:
+	/**
+	 * @brief Default constructor
+	 */
+	[[nodiscard]]
+	constexpr pin() noexcept = default;
+
+	/**
+	 * @brief Deleted copy constructor
+	 */
+	[[nodiscard]]
+	constexpr pin(const pin &) noexcept = delete;
+
+	/**
+	 * @brief Deleted move constructor
+	 */
+	[[nodiscard]]
+	constexpr pin(pin &&) noexcept = delete;
+
+	/**
+	 * @brief Deleted copy assignment operator
+	 */
+	constexpr auto operator=(const pin &) noexcept
+		-> pin & = delete;
+
+	/**
+	 * @brief Deleted move assignment operator
+	 */
+	constexpr auto operator=(pin &&) noexcept
+		-> pin & = delete;
+
+	/**
+	 * @brief Destructor
+	 */
+	constexpr ~pin() noexcept = default;
+};
 }
 
 #endif
