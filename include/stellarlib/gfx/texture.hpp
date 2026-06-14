@@ -30,6 +30,7 @@
 
 #include <array>
 #include <cstddef>
+#include <cstdint>
 #include <memory>
 
 /**
@@ -122,12 +123,21 @@ public:
 	auto mipmaps() const
 		-> bool;
 
+	/**
+	 * @brief Returns the number of mip levels
+	 * @return Number of mip levels
+	 */
+	[[nodiscard]]
+	auto levels() const
+		-> std::uint32_t;
+
 private:
 	SDL_GPUTexture *_handle{};
 	std::shared_ptr<SDL_GPUDevice> _device{};
 	lin::uint2 _size{};
 	bool _mipmaps{};
-	[[maybe_unused]] std::array<std::byte, 7> _padding;
+	[[maybe_unused]] std::array<std::byte, 3> _padding;
+	std::uint32_t _levels{};
 };
 }
 

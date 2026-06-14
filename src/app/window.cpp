@@ -231,31 +231,43 @@ auto window::upload_image(const res::image &image, const bool mipmaps)
 	return texture;
 }
 
-void window::blit_texture(const gfx::renderer::blit_info &info, [[maybe_unused]] const bool idle)
+void window::blit_texture(const blit_info &info, [[maybe_unused]] const bool idle)
 {
-	if (static_cast<const SDL_GPUDevice *>(info.src) != _device.get() && static_cast<const SDL_GPUDevice *>(info.dst) != _device.get()) {
+	if (static_cast<const SDL_GPUDevice *>(info.src.texture) != _device.get() || lin::any(info.src.area.p < 0.0F) || lin::any(info.src.area.s < 0.0F) || info.src.texture.levels() <= info.src.level || static_cast<const SDL_GPUDevice *>(info.dst.texture) != _device.get() || lin::any(info.dst.area.p < 0.0F) || lin::any(info.dst.area.s < 0.0F) || info.dst.texture.levels() <= info.dst.level) {
 		SDL_InvalidParamError("info");
 		throw std::invalid_argument{SDL_GetError()};
 	}
 
-	auto cmdbuf{acquire_cmdbuf()};
+	const auto src_size{lin::cast<float>(info.src.texture.size()) * lin::ldexp(1.0F, -info.src.level)};
+	const auto dst_size{lin::cast<float>(info.dst.texture.size()) * lin::ldexp(1.0F, -info.dst.level)};
 
 	SDL_GPUBlitInfo descriptor{
 		.source = {
-			.texture = static_cast<SDL_GPUTexture *>(info.src),
-			.x = lin::cast<std::uint32_t>(lin::cast<float>(info.src.size().x()) * info.src_region.p.x()),
-			.y = lin::cast<std::uint32_t>(lin::cast<float>(info.src.size().y()) * info.src_region.p.y()),
-			.w = lin::cast<std::uint32_t>(lin::cast<float>(info.src.size().x()) * info.src_region.s.x()),
-			.h = lin::cast<std::uint32_t>(lin::cast<float>(info.src.size().y()) * info.src_region.s.y())
+			.texture = static_cast<SDL_GPUTexture *>(info.src.texture),
+			.mip_level = info.src.level,
+			.x = lin::cast<std::uint32_t>(src_size.x() * info.src.area.p.x()),
+			.y = lin::cast<std::uint32_t>(src_size.y() * info.src.area.p.y()),
+			.w = lin::cast<std::uint32_t>(src_size.x() * info.src.area.s.x()),
+			.h = lin::cast<std::uint32_t>(src_size.y() * info.src.area.s.y())
 		},
 		.destination = {
-			.texture = static_cast<SDL_GPUTexture *>(info.dst),
-			.x = lin::cast<std::uint32_t>(lin::cast<float>(info.dst.size().x()) * info.dst_region.p.x()),
-			.y = lin::cast<std::uint32_t>(lin::cast<float>(info.dst.size().y()) * info.dst_region.p.y()),
-			.w = lin::cast<std::uint32_t>(lin::cast<float>(info.dst.size().x()) * info.dst_region.s.x()),
-			.h = lin::cast<std::uint32_t>(lin::cast<float>(info.dst.size().y()) * info.dst_region.s.y())
+			.texture = static_cast<SDL_GPUTexture *>(info.dst.texture),
+			.mip_level = info.dst.level,
+			.x = lin::cast<std::uint32_t>(dst_size.x() * info.dst.area.p.x()),
+			.y = lin::cast<std::uint32_t>(dst_size.y() * info.dst.area.p.y()),
+			.w = lin::cast<std::uint32_t>(dst_size.x() * info.dst.area.s.x()),
+			.h = lin::cast<std::uint32_t>(dst_size.y() * info.dst.area.s.y())
 		}
 	};
+
+	if (info.src.texture.size().x() < descriptor.source.x + descriptor.source.w || info.src.texture.size().y() < descriptor.source.y + descriptor.source.h || info.dst.texture.size().x() < descriptor.destination.x + descriptor.destination.w || info.dst.texture.size().y() < descriptor.destination.y + descriptor.destination.h) {
+		SDL_InvalidParamError("info");
+		throw std::invalid_argument{SDL_GetError()};
+	}
+
+	if (!lin::cast<bool>(descriptor.source.w) || !lin::cast<bool>(descriptor.source.h) || !lin::cast<bool>(descriptor.destination.w) || !lin::cast<bool>(descriptor.destination.h)) {
+		return;
+	}
 
 	switch (info.filter) {
 	case res::image::filter::nearest: {
@@ -271,6 +283,7 @@ void window::blit_texture(const gfx::renderer::blit_info &info, [[maybe_unused]]
 		throw std::invalid_argument{SDL_GetError()};
 	}}
 
+	auto cmdbuf{acquire_cmdbuf()};
 	SDL_BlitGPUTexture(cmdbuf.get(), std::addressof(descriptor));
 
 	if (idle) {

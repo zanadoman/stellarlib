@@ -80,7 +80,6 @@ Checks: >
   -cert-str34-c,
   -clang-analyzer-nullability.NullableDereferenced,
   -clang-analyzer-unix.Malloc,
-  -cppcoreguidelines-avoid-const-or-ref-data-members,
   -cppcoreguidelines-avoid-magic-numbers,
   -cppcoreguidelines-c-copy-assignment-signature,
   -cppcoreguidelines-macro-usage,
