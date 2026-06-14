@@ -10,6 +10,9 @@
 /android/**/.settings/
 build/
 /.cache/
+/compile_commands.json
 /html/
+.idea/
+Testing/
 vgcore.*
 *.vim

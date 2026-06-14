@@ -8,8 +8,15 @@ file(READ ${CMAKE_SOURCE_DIR}/compile_flags.txt CMAKE_CXX_FLAGS)
 string(REPLACE \n \  CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
 set(CMAKE_CXX_FLAGS_DEBUG -g\ -save-temps\ -Wa,-W\ -Wno-gnu-line-marker\ -Wno-unused-command-line-argument)
 set(CMAKE_CXX_FLAGS_RELEASE -flto)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 find_program(CMAKE_CXX_CLANG_TIDY clang-tidy)
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+add_custom_target(
+	compile_commands.json
+	COMMAND ${CMAKE_COMMAND} -E create_symlink
+		${CMAKE_BINARY_DIR}/compile_commands.json
+		${CMAKE_SOURCE_DIR}/compile_commands.json
+)
 
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/src/*.cpp)
 add_library(${PROJECT_NAME} STATIC ${SOURCES})
@@ -33,20 +40,16 @@ elseif(ANDROID)
 	file(REMOVE_RECURSE ${ANDROID_JNI_DIR})
 	set(ANDROID_JNI_DIR ${ANDROID_JNI_DIR}/${ANDROID_ABI})
 	file(MAKE_DIRECTORY ${ANDROID_JNI_DIR})
-	set(ANDROID_ASSETS_DIR ${CMAKE_SOURCE_DIR}/android/app/src/main/assets)
-	file(REMOVE_RECURSE ${ANDROID_ASSETS_DIR})
 endif()
 
-file(GLOB_RECURSE ASSETS CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/assets/*)
 if(ANDROID)
-	set(ASSETS_DIR ${ANDROID_ASSETS_DIR}/assets)
+	set(ASSETS_DIR ${CMAKE_SOURCE_DIR}/android/app/src/main/assets/assets)
 else()
 	set(ASSETS_DIR ${CMAKE_BINARY_DIR}/assets)
 endif()
 add_custom_command(
 	OUTPUT ${ASSETS_DIR}
-	COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different ${CMAKE_SOURCE_DIR}/assets ${ASSETS_DIR}
-	DEPENDS ${ASSETS}
+	COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_SOURCE_DIR}/assets ${ASSETS_DIR}
 )
 add_custom_target(resources DEPENDS ${ASSETS_DIR})
 
@@ -103,31 +106,26 @@ endforeach()
 
 find_package(GTest)
 if(TARGET GTest::gtest_main)
+	enable_testing()
+	include(GoogleTest)
 	file(GLOB_RECURSE TESTS CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/tests/*.cpp)
+	add_custom_target(tests)
 	foreach(SOURCE ${TESTS})
 		get_filename_component(TEST ${SOURCE} NAME_WLE)
 		set(TEST ${TEST}_test)
 		add_executable(${TEST} EXCLUDE_FROM_ALL ${SOURCE})
 		target_link_libraries(${TEST} PRIVATE GTest::gtest_main ${PROJECT_NAME})
-		add_dependencies(${TEST} resources)
 		if(WIN32)
 			add_custom_command(
 				TARGET ${TEST} POST_BUILD
-				COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:tests> $<TARGET_RUNTIME_DLLS:tests>
+				COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:${TEST}> $<TARGET_RUNTIME_DLLS:${TEST}>
 				COMMAND_EXPAND_LISTS
 			)
 		endif()
+		add_dependencies(${TEST} resources)
+		add_dependencies(tests ${TEST})
+		gtest_discover_tests(${TEST})
 	endforeach()
-	add_executable(tests EXCLUDE_FROM_ALL ${TESTS})
-	target_link_libraries(tests PRIVATE GTest::gtest_main ${PROJECT_NAME})
-	add_dependencies(tests resources)
-	if(WIN32)
-		add_custom_command(
-			TARGET tests POST_BUILD
-			COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:tests> $<TARGET_RUNTIME_DLLS:tests>
-			COMMAND_EXPAND_LISTS
-		)
-	endif()
 endif()
 
 find_program(DOXYGEN doxygen)

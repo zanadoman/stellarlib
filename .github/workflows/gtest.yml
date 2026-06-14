@@ -20,13 +20,13 @@ jobs:
         run: pacman -Syu --noconfirm cmake ninja clang lld sdl3 gtest valgrind
 
       - name: Configure CMake
-        run: cmake -B build -DCMAKE_BUILD_TYPE=Release -G Ninja --toolchain cmake/x86_64-linux-gnu.cmake
+        run: cmake --preset x86_64-linux-gnu-release
 
       - name: Build examples
-        run: cmake --build build -t examples
+        run: cmake --build build/x86_64-linux-gnu/release -t examples
 
       - name: Build tests
-        run: cmake --build build -t tests
+        run: cmake --build build/x86_64-linux-gnu/release -t tests
 
       - name: Run tests
-        run: env DEBUGINFOD_URLS=https://debuginfod.archlinux.org valgrind build/tests
+        run: env DEBUGINFOD_URLS=https://debuginfod.archlinux.org valgrind ctest --test-dir build/x86_64-linux-gnu/release
