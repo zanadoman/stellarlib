@@ -41,6 +41,7 @@
 #include <cstring>
 #include <functional>
 #include <memory>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <utility>
@@ -154,8 +155,12 @@ window::window(const info &info)
 		throw std::runtime_error{SDL_GetError()};
 	}
 
+	set_min_aspect(info.renderer.min_aspect);
+	set_max_aspect(info.renderer.max_aspect);
+	set_max_resolution(info.renderer.max_resolution);
+	set_filter(info.renderer.filter);
+	set_presentation(info.renderer.presentation);
 	set_vsync(info.renderer.vsync);
-	_framebuffer = std::make_unique<gfx::texture>(_device, lin::uint2{bounds.w, bounds.h}, false);
 }
 
 window::operator SDL_GPUDevice *() const
@@ -166,6 +171,91 @@ window::operator SDL_GPUDevice *() const
 window::operator std::shared_ptr<SDL_GPUDevice>() const
 {
 	return _device;
+}
+
+auto window::min_aspect() const
+	-> std::optional<float>
+{
+	return _min_aspect;
+}
+
+void window::set_min_aspect(const std::optional<float> min_aspect)
+{
+	if (_max_aspect && _max_aspect < min_aspect) {
+		SDL_InvalidParamError("min_aspect");
+		throw std::invalid_argument{SDL_GetError()};
+	}
+
+	_min_aspect = min_aspect;
+}
+
+auto window::max_aspect() const
+	-> std::optional<float>
+{
+	return _max_aspect;
+}
+
+void window::set_max_aspect(const std::optional<float> max_aspect)
+{
+	if (max_aspect && max_aspect < _min_aspect) {
+		SDL_InvalidParamError("max_aspect");
+		throw std::invalid_argument{SDL_GetError()};
+	}
+
+	_max_aspect = max_aspect;
+}
+
+auto window::max_resolution() const
+	-> const std::optional<lin::uint2> &
+{
+	return _max_resolution;
+}
+
+void window::set_max_resolution(const std::optional<lin::uint2> &max_resolution)
+{
+	_max_resolution = max_resolution;
+}
+
+auto window::filter() const
+	-> res::image::filter
+{
+	return _filter;
+}
+
+void window::set_filter(const res::image::filter filter)
+{
+	switch (filter) {
+	case res::image::filter::nearest:
+	case res::image::filter::linear: {
+		break;
+	}
+	default: {
+		SDL_InvalidParamError("filter");
+		throw std::invalid_argument{SDL_GetError()};
+	}}
+
+	_filter = filter;
+}
+
+auto window::presentation() const
+	-> enum presentation
+{
+	return _presentation;
+}
+
+void window::set_presentation(const enum presentation presentation)
+{
+	switch (presentation) {
+	case presentation::letterbox:
+	case presentation::stretch: {
+		break;
+	}
+	default: {
+		SDL_InvalidParamError("presentation");
+		throw std::invalid_argument{SDL_GetError()};
+	}}
+
+	_presentation = presentation;
 }
 
 auto window::vsync() const
@@ -233,34 +323,34 @@ auto window::upload_image(const res::image &image, const bool mipmaps)
 
 void window::blit_texture(const blit_info &info, [[maybe_unused]] const bool idle)
 {
-	if (static_cast<const SDL_GPUDevice *>(info.src.texture) != _device.get() || lin::any(info.src.area.p < 0.0F) || lin::any(info.src.area.s < 0.0F) || info.src.texture.levels() <= info.src.level || static_cast<const SDL_GPUDevice *>(info.dst.texture) != _device.get() || lin::any(info.dst.area.p < 0.0F) || lin::any(info.dst.area.s < 0.0F) || info.dst.texture.levels() <= info.dst.level) {
+	if (static_cast<const SDL_GPUDevice *>(info.src_texture) != _device.get() || lin::any(info.src_area.p < 0.0F) || lin::any(info.src_area.s < 0.0F) || info.src_texture.levels() <= info.src_level || static_cast<const SDL_GPUDevice *>(info.dst_texture) != _device.get() || lin::any(info.dst_area.p < 0.0F) || lin::any(info.dst_area.s < 0.0F) || info.dst_texture.levels() <= info.dst_level) {
 		SDL_InvalidParamError("info");
 		throw std::invalid_argument{SDL_GetError()};
 	}
 
-	const auto src_size{lin::cast<float>(info.src.texture.size()) * lin::ldexp(1.0F, -info.src.level)};
-	const auto dst_size{lin::cast<float>(info.dst.texture.size()) * lin::ldexp(1.0F, -info.dst.level)};
+	const auto src_size{lin::cast<float>(info.src_texture.size()) * lin::ldexp(1.0F, -info.src_level)};
+	const auto dst_size{lin::cast<float>(info.dst_texture.size()) * lin::ldexp(1.0F, -info.dst_level)};
 
 	SDL_GPUBlitInfo descriptor{
 		.source = {
-			.texture = static_cast<SDL_GPUTexture *>(info.src.texture),
-			.mip_level = info.src.level,
-			.x = lin::cast<std::uint32_t>(src_size.x() * info.src.area.p.x()),
-			.y = lin::cast<std::uint32_t>(src_size.y() * info.src.area.p.y()),
-			.w = lin::cast<std::uint32_t>(src_size.x() * info.src.area.s.x()),
-			.h = lin::cast<std::uint32_t>(src_size.y() * info.src.area.s.y())
+			.texture = static_cast<SDL_GPUTexture *>(info.src_texture),
+			.mip_level = info.src_level,
+			.x = lin::cast<std::uint32_t>(src_size.x() * info.src_area.p.x()),
+			.y = lin::cast<std::uint32_t>(src_size.y() * info.src_area.p.y()),
+			.w = lin::cast<std::uint32_t>(src_size.x() * info.src_area.s.x()),
+			.h = lin::cast<std::uint32_t>(src_size.y() * info.src_area.s.y())
 		},
 		.destination = {
-			.texture = static_cast<SDL_GPUTexture *>(info.dst.texture),
-			.mip_level = info.dst.level,
-			.x = lin::cast<std::uint32_t>(dst_size.x() * info.dst.area.p.x()),
-			.y = lin::cast<std::uint32_t>(dst_size.y() * info.dst.area.p.y()),
-			.w = lin::cast<std::uint32_t>(dst_size.x() * info.dst.area.s.x()),
-			.h = lin::cast<std::uint32_t>(dst_size.y() * info.dst.area.s.y())
+			.texture = static_cast<SDL_GPUTexture *>(info.dst_texture),
+			.mip_level = info.dst_level,
+			.x = lin::cast<std::uint32_t>(dst_size.x() * info.dst_area.p.x()),
+			.y = lin::cast<std::uint32_t>(dst_size.y() * info.dst_area.p.y()),
+			.w = lin::cast<std::uint32_t>(dst_size.x() * info.dst_area.s.x()),
+			.h = lin::cast<std::uint32_t>(dst_size.y() * info.dst_area.s.y())
 		}
 	};
 
-	if (info.src.texture.size().x() < descriptor.source.x + descriptor.source.w || info.src.texture.size().y() < descriptor.source.y + descriptor.source.h || info.dst.texture.size().x() < descriptor.destination.x + descriptor.destination.w || info.dst.texture.size().y() < descriptor.destination.y + descriptor.destination.h) {
+	if (info.src_texture.size().x() < descriptor.source.x + descriptor.source.w || info.src_texture.size().y() < descriptor.source.y + descriptor.source.h || info.dst_texture.size().x() < descriptor.destination.x + descriptor.destination.w || info.dst_texture.size().y() < descriptor.destination.y + descriptor.destination.h) {
 		SDL_InvalidParamError("info");
 		throw std::invalid_argument{SDL_GetError()};
 	}
@@ -324,25 +414,27 @@ auto window::download_texture(const gfx::texture &texture, const bool idle)
 }
 
 auto window::framebuffer() const
-	-> const gfx::texture &
+	-> const std::optional<gfx::texture> &
 {
-	return *_framebuffer;
+	return _framebuffer;
 }
 
 auto window::framebuffer()
-	-> gfx::texture &
+	-> std::optional<gfx::texture> &
 {
-	return *_framebuffer;
+	return _framebuffer;
 }
 
 void window::iterate()
 {
-	SDL_GPUColorTargetInfo swapchain{
+	SDL_GPUColorTargetInfo target{
 		.load_op = SDL_GPU_LOADOP_CLEAR
 	};
 
 	const std::unique_ptr<SDL_GPUCommandBuffer, std::function<void (SDL_GPUCommandBuffer *)>> cmdbuf{SDL_AcquireGPUCommandBuffer(_device.get()), [&] (const auto cmdbuf) -> void {
-		if (swapchain.texture) {
+		if (target.texture) {
+			wait_fence();
+
 			const auto fences{std::ranges::remove_if(_fences, [cpt = _device.get()] [[nodiscard]] (const auto fence) -> auto {
 				return SDL_QueryGPUFence(cpt, fence);
 			})};
@@ -364,24 +456,58 @@ void window::iterate()
 		}
 	}};
 
-	if (!cmdbuf || !SDL_AcquireGPUSwapchainTexture(cmdbuf.get(), _handle, std::addressof(swapchain.texture), nullptr, nullptr)) {
+	if (!cmdbuf || !SDL_AcquireGPUSwapchainTexture(cmdbuf.get(), _handle, std::addressof(target.texture), nullptr, nullptr)) {
 		throw std::runtime_error{SDL_GetError()};
 	}
 
-	if (!static_cast<bool>(swapchain.texture)) {
+	if (!static_cast<bool>(target.texture)) {
+		_framebuffer.reset();
 		return;
 	}
 
-	SDL_EndGPURenderPass(SDL_BeginGPURenderPass(cmdbuf.get(), std::addressof(swapchain), 1, nullptr));
+	SDL_EndGPURenderPass(SDL_BeginGPURenderPass(cmdbuf.get(), std::addressof(target), 1, nullptr));
+	auto size{_safe_area.s};
 
-	const SDL_GPUBlitInfo descriptor{
+	if (_min_aspect || _max_aspect || _max_resolution) {
+		if (_max_resolution) {
+			size = lin::min(size, *_max_resolution);
+		}
+
+		auto src_aspect{lin::cast<float>(size.x()) / lin::cast<float>(size.y())};
+		const auto dst_aspect{src_aspect};
+
+		if (src_aspect < _min_aspect) {
+			src_aspect = *_min_aspect;
+		}
+		else if (_max_aspect && _max_aspect < src_aspect) {
+			src_aspect = *_max_aspect;
+		}
+
+		if (src_aspect < dst_aspect) {
+			size.x() = lin::cast<std::uint32_t>(lin::cast<float>(size.y()) * src_aspect);
+		}
+		else if (dst_aspect < src_aspect) {
+			size.y() = lin::cast<std::uint32_t>(lin::cast<float>(size.x()) / src_aspect);
+		}
+	}
+
+	if (!lin::all(size)) {
+		_framebuffer.reset();
+		return;
+	}
+
+	if (!_framebuffer) {
+		_framebuffer = {_device, size, false};
+	}
+
+	SDL_GPUBlitInfo descriptor{
 		.source = {
 			.texture = static_cast<SDL_GPUTexture *>(*_framebuffer),
 			.w = _framebuffer->size().x(),
 			.h = _framebuffer->size().y()
 		},
 		.destination = {
-			.texture = swapchain.texture,
+			.texture = target.texture,
 			.x = _safe_area.p.x(),
 			.y = _safe_area.p.y(),
 			.w = _safe_area.s.x(),
@@ -389,8 +515,45 @@ void window::iterate()
 		}
 	};
 
+	if (_presentation == presentation::letterbox) {
+		const auto src_aspect{lin::cast<float>(_framebuffer->size().x()) / lin::cast<float>(_framebuffer->size().y())};
+		const auto dst_aspect{lin::cast<float>(_safe_area.s.x()) / lin::cast<float>(_safe_area.s.y())};
+
+		if (src_aspect < dst_aspect) {
+			const auto width{lin::cast<std::uint32_t>(lin::cast<float>(_framebuffer->size().x()) * lin::cast<float>(descriptor.destination.h) / lin::cast<float>(_framebuffer->size().y()))};
+			descriptor.destination.x += (descriptor.destination.w - width) / 2;
+			descriptor.destination.w = width;
+		}
+		else if (dst_aspect < src_aspect) {
+			const auto height{lin::cast<std::uint32_t>(lin::cast<float>(_framebuffer->size().y()) * lin::cast<float>(descriptor.destination.w) / lin::cast<float>(_framebuffer->size().x()))};
+			descriptor.destination.y += (descriptor.destination.h - height) / 2;
+			descriptor.destination.h = height;
+		}
+	}
+
+	if (!lin::cast<bool>(descriptor.destination.w) || !lin::cast<bool>(descriptor.destination.h)) {
+		_framebuffer.reset();
+		return;
+	}
+
+	switch (_filter) {
+	case res::image::filter::nearest: {
+		descriptor.filter = SDL_GPU_FILTER_NEAREST;
+		break;
+	}
+	case res::image::filter::linear: {
+		descriptor.filter = SDL_GPU_FILTER_LINEAR;
+		break;
+	}}
+
 	SDL_BlitGPUTexture(cmdbuf.get(), std::addressof(descriptor));
-	wait_fence();
+
+	if (!lin::all(_framebuffer->size() == size)) {
+		_framebuffer = {_device, size, false};
+	}
+
+	target.texture = static_cast<SDL_GPUTexture *>(*_framebuffer);
+	SDL_EndGPURenderPass(SDL_BeginGPURenderPass(cmdbuf.get(), std::addressof(target), 1, nullptr));
 }
 
 void window::event(const SDL_Event &event)

@@ -78,6 +78,22 @@ constexpr void check_window(app::context &ctx)
 	SDL_assert_always(!ctx.window().focused());
 	SDL_assert_always(static_cast<const SDL_GPUDevice *>(ctx.window().renderer()));
 	SDL_assert_always(static_cast<std::shared_ptr<SDL_GPUDevice>>(ctx.window().renderer()).get() == static_cast<const SDL_GPUDevice *>(ctx.window().renderer()));
+	SDL_assert_always(!ctx.window().renderer().min_aspect());
+	ctx.window().renderer().set_min_aspect(16.0F / 10.0F);
+	SDL_assert_always(ctx.window().renderer().min_aspect() == 16.0F / 10.0F);
+	SDL_assert_always(!ctx.window().renderer().max_aspect());
+	ctx.window().renderer().set_max_aspect(32.0F / 9.0F);
+	SDL_assert_always(ctx.window().renderer().max_aspect() == 32.0F / 9.0F);
+	SDL_assert_always(ctx.window().renderer().max_resolution());
+	SDL_assert_always(lin::all(*ctx.window().renderer().max_resolution() == (lin::uint2{1920, 1080})));
+	ctx.window().renderer().set_max_resolution(std::nullopt);
+	SDL_assert_always(!ctx.window().renderer().max_resolution());
+	SDL_assert_always(ctx.window().renderer().filter() == res::image::filter::nearest);
+	ctx.window().renderer().set_filter(res::image::filter::linear);
+	SDL_assert_always(ctx.window().renderer().filter() == res::image::filter::linear);
+	SDL_assert_always(ctx.window().renderer().presentation() == gfx::renderer::presentation::stretch);
+	ctx.window().renderer().set_presentation(gfx::renderer::presentation::letterbox);
+	SDL_assert_always(ctx.window().renderer().presentation() == gfx::renderer::presentation::letterbox);
 	ctx.window().renderer().set_vsync(!ctx.window().renderer().vsync());
 	const res::image image{ext::filesystem::base_directory_path() / "assets" / "tests" / "linear.png"};
 	const auto texture1{ctx.window().renderer().upload_image(image, false)};
@@ -85,12 +101,14 @@ constexpr void check_window(app::context &ctx)
 	SDL_assert_always(static_cast<const SDL_GPUDevice *>(texture1) == static_cast<const SDL_GPUDevice *>(ctx.window().renderer()));
 	SDL_assert_always(lin::all(texture1.size() == image.size()));
 	SDL_assert_always(!texture1.mipmaps());
+	SDL_assert_always(texture1.levels() == 1);
 	SDL_assert_always(ctx.window().renderer().download_texture(texture1, false) == image);
 	const auto texture2{ctx.window().renderer().upload_image(image, true)};
 	SDL_assert_always(static_cast<SDL_GPUTexture *>(texture2));
 	SDL_assert_always(static_cast<const SDL_GPUDevice *>(texture2) == static_cast<const SDL_GPUDevice *>(ctx.window().renderer()));
 	SDL_assert_always(lin::all(texture2.size() == image.size()));
 	SDL_assert_always(texture2.mipmaps());
+	SDL_assert_always(texture2.levels() == 3);
 	SDL_assert_always(ctx.window().renderer().download_texture(texture2, true) == image);
 }
 
@@ -124,6 +142,7 @@ private:
 	constexpr void begin([[maybe_unused]] app::context &ctx) final
 	{
 		SDL_Log("%p: begin", static_cast<const void *>(this));
+		_texture = std::make_unique<gfx::texture>(ctx.window().renderer().upload_image(res::image{ext::filesystem::base_directory_path() / "assets" / "tests" / "alpha_blending.png"}, false));
 	}
 
 	[[nodiscard]]
@@ -131,6 +150,23 @@ private:
 		-> std::optional<std::unique_ptr<app::scene>> final
 	{
 		SDL_Log("%p: update", static_cast<const void *>(this));
+
+		if (auto &framebuffer{ctx.window().renderer().framebuffer()}) {
+			ctx.window().renderer().blit_texture(
+				{
+					.src_texture = *_texture,
+					.src_area = {
+						.s = lin::float2{1.0F, 1.0F}
+					},
+					.dst_texture = *framebuffer,
+					.dst_area = {
+						.s = lin::float2{1.0F, 1.0F}
+					}
+				},
+				false
+			);
+		}
+
 		return std::nullopt;
 	}
 
@@ -138,6 +174,8 @@ private:
 	{
 		SDL_Log("%p: end", static_cast<const void *>(this));
 	}
+
+	std::unique_ptr<gfx::texture> _texture{};
 };
 }
 
@@ -165,6 +203,8 @@ auto app::init(const std::vector<std::string> &args)
 			.title = "org.stellarlib.healthcheck",
 			.icon = res::image{ext::filesystem::base_directory_path() / "assets" / "tests" / "rgb.png"},
 			.renderer = {
+				.max_resolution = lin::uint2{1920, 1080},
+				.presentation = gfx::renderer::presentation::stretch,
 				.vsync = false,
 				.debug = true
 			}

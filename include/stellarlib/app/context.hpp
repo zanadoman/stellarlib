@@ -75,11 +75,6 @@ public:
 		app::window::info window;
 
 		/**
-		 * @brief Explicit padding
-		 */
-		[[maybe_unused]] std::array<std::byte, 8> padding;
-
-		/**
 		 * @brief Initial scene, application termination, or deferred scene factory
 		 */
 		std::variant<std::unique_ptr<scene>, std::function<std::unique_ptr<scene> (context &)>> entry;

@@ -33,11 +33,10 @@
 #include <SDL3/SDL_gpu.h>
 #include <SDL3/SDL_video.h>
 
-#include <array>
-#include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
@@ -74,11 +73,6 @@ public:
 		 * @brief Renderer initialization descriptor
 		 */
 		gfx::renderer::info renderer;
-
-		/**
-		 * @brief Explicit padding
-		 */
-		[[maybe_unused]] std::array<std::byte, 6> padding;
 	};
 
 	/**
@@ -158,16 +152,18 @@ public:
 
 private:
 	SDL_Window *_handle{};
-	SDL_WindowID _handle_id{};
-	gfx::aabb<std::uint32_t> _safe_area{};
-	bool _focused{};
-	[[maybe_unused]] std::array<std::byte, 3> _padding1;
 	std::shared_ptr<SDL_GPUDevice> _device{};
+	SDL_WindowID _handle_id{};
+	std::optional<float> _min_aspect{};
+	std::optional<float> _max_aspect{};
+	std::optional<lin::uint2> _max_resolution{};
+	bool _focused{};
+	res::image::filter _filter{};
+	enum presentation _presentation{};
 	bool _vsync{true};
-	[[maybe_unused]] std::array<std::byte, 7> _padding2;
-	std::unique_ptr<gfx::texture> _framebuffer{};
+	gfx::aabb<std::uint32_t> _safe_area{};
 	std::uint32_t _transbuf_size{};
-	[[maybe_unused]] std::array<std::byte, 4> _padding3;
+	std::optional<gfx::texture> _framebuffer{};
 	SDL_GPUTransferBuffer *_transbuf{};
 	SDL_GPUFence *_fence{};
 	std::vector<SDL_GPUFence *> _fences{};
@@ -184,6 +180,36 @@ private:
 	explicit operator std::shared_ptr<SDL_GPUDevice>() const final;
 
 	[[nodiscard]]
+	auto min_aspect() const
+		-> std::optional<float> final;
+
+	void set_min_aspect(std::optional<float> min_aspect) final;
+
+	[[nodiscard]]
+	auto max_aspect() const
+		-> std::optional<float> final;
+
+	void set_max_aspect(std::optional<float> max_aspect) final;
+
+	[[nodiscard]]
+	auto max_resolution() const
+		-> const std::optional<lin::uint2> & final;
+
+	void set_max_resolution(const std::optional<lin::uint2> &max_resolution) final;
+
+	[[nodiscard]]
+	auto filter() const
+		-> res::image::filter final;
+
+	void set_filter(res::image::filter filter) final;
+
+	[[nodiscard]]
+	auto presentation() const
+		-> enum presentation final;
+
+	void set_presentation(enum presentation presentation) final;
+
+	[[nodiscard]]
 	auto vsync() const
 		-> bool final;
 
@@ -193,7 +219,7 @@ private:
 	auto upload_image(const res::image &image, bool mipmaps)
 		-> gfx::texture final;
 
-	void blit_texture(const gfx::renderer::blit_info &info, bool idle) final;
+	void blit_texture(const blit_info &info, bool idle) final;
 
 	[[nodiscard]]
 	auto download_texture(const gfx::texture &texture, bool idle)
@@ -201,11 +227,11 @@ private:
 
 	[[nodiscard]]
 	auto framebuffer() const
-		-> const gfx::texture & final;
+		-> const std::optional<gfx::texture> & final;
 
 	[[nodiscard]]
 	auto framebuffer()
-		-> gfx::texture & final;
+		-> std::optional<gfx::texture> & final;
 
 	void iterate();
 

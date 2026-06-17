@@ -23,9 +23,24 @@
 
 #include <stellarlib/gfx/renderer.hpp>
 
+#include <stellarlib/lin/lin.hpp>
+#include <stellarlib/res/res.hpp>
+
+#include <optional>
+
 namespace stellarlib::gfx
 {
 renderer::~renderer() noexcept = default;
+
+void renderer::set_min_aspect([[maybe_unused]] const std::optional<float> min_aspect) {}
+
+void renderer::set_max_aspect([[maybe_unused]] const std::optional<float> max_aspect) {}
+
+void renderer::set_max_resolution([[maybe_unused]] const std::optional<lin::uint2> &max_resolution) {}
+
+void renderer::set_filter([[maybe_unused]] const res::image::filter filter) {}
+
+void renderer::set_presentation([[maybe_unused]] enum presentation presentation) {}
 
 void renderer::set_vsync([[maybe_unused]] const bool vsync) {}
 

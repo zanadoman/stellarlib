@@ -24,15 +24,19 @@
 #ifndef STELLARLIB_GFX_RENDERER_HPP
 #define STELLARLIB_GFX_RENDERER_HPP
 
+#include <stellarlib/ext/type_traits.hpp>
 #include <stellarlib/gfx/pods.hpp>
 #include <stellarlib/gfx/texture.hpp>
+#include <stellarlib/lin/lin.hpp>
 #include <stellarlib/res/res.hpp>
 
 #include <SDL3/SDL_gpu.h>
 
 #include <array>
 #include <cstddef>
+#include <cstdint>
 #include <memory>
+#include <optional>
 
 /**
  * @brief Graphics and rendering abstractions
@@ -46,10 +50,44 @@ class [[nodiscard]] renderer
 {
 public:
 	/**
+	 * @brief Presentation method
+	 */
+	enum class [[nodiscard]] presentation : std::uint8_t
+	{
+		letterbox,
+		stretch
+	};
+
+	/**
 	 * @brief Renderer initialization descriptor
 	 */
 	struct [[nodiscard]] info final
 	{
+		/**
+		 * @brief Minimum framebuffer aspect ratio
+		 */
+		std::optional<float> min_aspect;
+
+		/**
+		 * @brief Maximum framebuffer aspect ratio
+		 */
+		std::optional<float> max_aspect;
+
+		/**
+		 * @brief Maximum framebuffer resolution
+		 */
+		std::optional<lin::uint2> max_resolution;
+
+		/**
+		 * @brief Framebuffer filtering method
+		 */
+		res::image::filter filter;
+
+		/**
+		 * @brief Framebuffer presentation method
+		 */
+		enum presentation presentation;
+
 		/**
 		 * @brief Enable synchronization
 		 */
@@ -64,27 +102,42 @@ public:
 	/**
 	 * @brief Blit operation descriptor
 	 */
-	struct [[nodiscard]] blit_info final
+	struct [[nodiscard]] blit_info final : ext::pin
 	{
 		/**
 		 * @brief Source texture
 		 */
-		const texture &src;
+		const texture &src_texture;
 
 		/**
-		 * @brief Source region
+		 * @brief Source area
 		 */
-		const aabb<float> &src_region;
+		aabb<float> src_area;
+
+		/**
+		 * @brief Source mip level
+		 */
+		std::uint32_t src_level;
+
+		/**
+		 * @brief Explicit padding
+		 */
+		std::array<std::byte, 4> padding1;
 
 		/**
 		 * @brief Destination texture
 		 */
-		texture &dst;
+		texture &dst_texture;
 
 		/**
-		 * @brief Destination region
+		 * @brief Destination area
 		 */
-		const aabb<float> &dst_region;
+		aabb<float> dst_area;
+
+		/**
+		 * @brief Destination mip level
+		 */
+		std::uint32_t dst_level;
 
 		/**
 		 * @brief Filtering method
@@ -94,7 +147,7 @@ public:
 		/**
 		 * @brief Explicit padding
 		 */
-		std::array<std::byte, 7> padding;
+		std::array<std::byte, 3> padding2;
 	};
 
 	/**
@@ -117,6 +170,76 @@ public:
 	 */
 	[[nodiscard]]
 	virtual explicit constexpr operator std::shared_ptr<SDL_GPUDevice>() const = 0;
+
+	/**
+	 * @brief Returns the minimum framebuffer aspect ratio
+	 * @return Minimum framebuffer aspect ratio
+	 */
+	[[nodiscard]]
+	virtual constexpr auto min_aspect() const
+		-> std::optional<float> = 0;
+
+	/**
+	 * @brief Sets the minimum framebuffer aspect ratio
+	 * @param min_aspect Minimum framebuffer aspect ratio
+	 */
+	virtual void set_min_aspect(std::optional<float> min_aspect);
+
+	/**
+	 * @brief Returns the maximum framebuffer aspect ratio
+	 * @return Maximum framebuffer aspect ratio
+	 */
+	[[nodiscard]]
+	virtual constexpr auto max_aspect() const
+		-> std::optional<float> = 0;
+
+	/**
+	 * @brief Sets the maximum framebuffer aspect ratio
+	 * @param max_aspect Maximum framebuffer aspect ratio
+	 */
+	virtual void set_max_aspect(std::optional<float> max_aspect);
+
+	/**
+	 * @brief Returns the maximum resolution of the framebuffer
+	 * @return Maximum resolution of the framebuffer
+	 */
+	[[nodiscard]]
+	virtual constexpr auto max_resolution() const
+		-> const std::optional<lin::uint2> & = 0;
+
+	/**
+	 * @brief Sets the maximum resolution of the framebuffer
+	 * @param max_resolution Maximum resolution of the framebuffer
+	 */
+	virtual void set_max_resolution(const std::optional<lin::uint2> &max_resolution);
+
+	/**
+	 * @brief Returns the framebuffer filtering method
+	 * @return Framebuffer filtering method
+	 */
+	[[nodiscard]]
+	virtual constexpr auto filter() const
+		-> res::image::filter = 0;
+
+	/**
+	 * @brief Sets the framebuffer filtering method
+	 * @param filter Framebuffer filtering method
+	 */
+	virtual void set_filter(res::image::filter filter);
+
+	/**
+	 * @brief Returns the framebuffer presentation method
+	 * @return Framebuffer presentation method
+	 */
+	[[nodiscard]]
+	virtual constexpr auto presentation() const
+		-> enum presentation = 0;
+
+	/**
+	 * @brief Sets the framebuffer presentation method
+	 * @param presentation Framebuffer presentation method
+	 */
+	virtual void set_presentation(enum presentation presentation);
 
 	/**
 	 * @brief Returns whether synchronization is enabled
@@ -165,7 +288,7 @@ public:
 	 */
 	[[nodiscard]]
 	virtual constexpr auto framebuffer() const
-		-> const texture & = 0;
+		-> const std::optional<texture> & = 0;
 
 	/**
 	 * @brief Returns a reference to the virtual framebuffer
@@ -173,7 +296,7 @@ public:
 	 */
 	[[nodiscard]]
 	virtual constexpr auto framebuffer()
-		-> texture & = 0;
+		-> std::optional<texture> & = 0;
 
 protected:
 	/**
