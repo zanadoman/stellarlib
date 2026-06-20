@@ -1,6 +1,6 @@
-set(ANDROID_ABI arm64-v8a)
+set(ANDROID_ABI riscv64)
 set(ANDROID_PLATFORM 35)
 include(/opt/android-ndk/build/cmake/android.toolchain.cmake)
-set(CMAKE_FIND_ROOT_PATH /opt/android-libs/aarch64)
+set(CMAKE_FIND_ROOT_PATH /opt/android-libs/riscv64)
 include_directories(SYSTEM ${CMAKE_FIND_ROOT_PATH}/include)
 set(CMAKE_INSTALL_PREFIX ${CMAKE_FIND_ROOT_PATH} CACHE PATH "" FORCE)

@@ -47,6 +47,12 @@
       "toolchainFile": "${sourceDir}/cmake/aarch64-linux-android.cmake"
     },
     {
+      "name": "riscv64-linux-android",
+      "hidden": true,
+      "inherits": "linux-host",
+      "toolchainFile": "${sourceDir}/cmake/riscv64-linux-android.cmake"
+    },
+    {
       "name": "debug",
       "hidden": true,
       "cacheVariables": {
@@ -61,9 +67,20 @@
       }
     },
     {
+      "name": "vendored",
+      "hidden": true,
+      "cacheVariables": {
+        "STELLARLIB_VENDORED": "ON"
+      }
+    },
+    {
       "name": "x86_64-linux-gnu-debug",
       "inherits": ["x86_64-linux-gnu", "debug"],
       "binaryDir": "${sourceDir}/build/x86_64-linux-gnu/debug"
+    },
+    {
+      "name": "x86_64-linux-gnu-debug-vendored",
+      "inherits": ["x86_64-linux-gnu-debug", "vendored"]
     },
     {
       "name": "x86_64-linux-gnu-release",
@@ -71,9 +88,17 @@
       "binaryDir": "${sourceDir}/build/x86_64-linux-gnu/release"
     },
     {
+      "name": "x86_64-linux-gnu-release-vendored",
+      "inherits": ["x86_64-linux-gnu-release", "vendored"]
+    },
+    {
       "name": "aarch64-linux-gnu-debug",
       "inherits": ["aarch64-linux-gnu", "debug"],
       "binaryDir": "${sourceDir}/build/aarch64-linux-gnu/debug"
+    },
+    {
+      "name": "aarch64-linux-gnu-debug-vendored",
+      "inherits": ["aarch64-linux-gnu-debug", "vendored"]
     },
     {
       "name": "aarch64-linux-gnu-release",
@@ -81,9 +106,17 @@
       "binaryDir": "${sourceDir}/build/aarch64-linux-gnu/release"
     },
     {
+      "name": "aarch64-linux-gnu-release-vendored",
+      "inherits": ["aarch64-linux-gnu-release", "vendored"]
+    },
+    {
       "name": "x86_64-w64-mingw32-debug",
       "inherits": ["x86_64-w64-mingw32", "debug"],
       "binaryDir": "${sourceDir}/build/x86_64-w64-mingw32/debug"
+    },
+    {
+      "name": "x86_64-w64-mingw32-debug-vendored",
+      "inherits": ["x86_64-w64-mingw32-debug", "vendored"]
     },
     {
       "name": "x86_64-w64-mingw32-release",
@@ -91,9 +124,17 @@
       "binaryDir": "${sourceDir}/build/x86_64-w64-mingw32/release"
     },
     {
+      "name": "x86_64-w64-mingw32-release-vendored",
+      "inherits": ["x86_64-w64-mingw32-release", "vendored"]
+    },
+    {
       "name": "x86_64-linux-android-debug",
       "inherits": ["x86_64-linux-android", "debug"],
       "binaryDir": "${sourceDir}/build/x86_64-linux-android/debug"
+    },
+    {
+      "name": "x86_64-linux-android-debug-vendored",
+      "inherits": ["x86_64-linux-android-debug", "vendored"]
     },
     {
       "name": "x86_64-linux-android-release",
@@ -101,14 +142,44 @@
       "binaryDir": "${sourceDir}/build/x86_64-linux-android/release"
     },
     {
+      "name": "x86_64-linux-android-release-vendored",
+      "inherits": ["x86_64-linux-android-release", "vendored"]
+    },
+    {
       "name": "aarch64-linux-android-debug",
       "inherits": ["aarch64-linux-android", "debug"],
       "binaryDir": "${sourceDir}/build/aarch64-linux-android/debug"
     },
     {
+      "name": "aarch64-linux-android-debug-vendored",
+      "inherits": ["aarch64-linux-android-debug", "vendored"]
+    },
+    {
       "name": "aarch64-linux-android-release",
       "inherits": ["aarch64-linux-android", "release"],
       "binaryDir": "${sourceDir}/build/aarch64-linux-android/release"
+    },
+    {
+      "name": "aarch64-linux-android-release-vendored",
+      "inherits": ["aarch64-linux-android-release", "vendored"]
+    },
+    {
+      "name": "riscv64-linux-android-debug",
+      "inherits": ["riscv64-linux-android", "debug"],
+      "binaryDir": "${sourceDir}/build/riscv64-linux-android/debug"
+    },
+    {
+      "name": "riscv64-linux-android-debug-vendored",
+      "inherits": ["riscv64-linux-android-debug", "vendored"]
+    },
+    {
+      "name": "riscv64-linux-android-release",
+      "inherits": ["riscv64-linux-android", "release"],
+      "binaryDir": "${sourceDir}/build/riscv64-linux-android/release"
+    },
+    {
+      "name": "riscv64-linux-android-release-vendored",
+      "inherits": ["riscv64-linux-android-release", "vendored"]
     }
   ]
 }

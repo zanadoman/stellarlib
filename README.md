@@ -126,11 +126,20 @@ env JAVA_HOME=/usr/lib/jvm/java-8-openjdk /opt/android-sdk/tools/bin/sdkmanager 
 ### Setup
 
 ```sh
+git submodule update --init --recursive                                 # Install external dependencies
 cmake --preset x86_64-linux-gnu-debug                                   # Select a default a preset for development
 cmake --build build/x86_64-linux-gnu/debug -t compile_commands.json     # Expose compile_commands.json for clangd
+cp android/app/.classpath.example android/app/.classpath                # Expose classpath for Eclipse JDT Language Server
 ```
 
 ### Build & Run
+
+For each supported target, CMake defines presets using the naming structure `<target>-<type>[-vendored]`.
+
+- `x86_64-linux-gnu-debug` &rarr; `build/x86_64-linux-gnu/debug`
+- `x86_64-linux-gnu-debug-vendored` &rarr; `build/x86_64-linux-gnu/debug`
+- `x86_64-linux-gnu-release` &rarr; `build/x86_64-linux-gnu/release`
+- `x86_64-linux-gnu-release-vendored` &rarr; `build/x86_64-linux-gnu/release`
 
 The CMake configuration defines the following build targets:
 

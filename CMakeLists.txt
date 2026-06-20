@@ -1,6 +1,22 @@
 cmake_minimum_required(VERSION 3.29)
 project(stellarlib VERSION 0.1.0 LANGUAGES CXX)
 
+option(STELLARLIB_VENDORED "Use vendored third-party libraries" OFF)
+set(EXTERNAL_DIR ${CMAKE_SOURCE_DIR}/external)
+if(STELLARLIB_VENDORED)
+	include_directories(SYSTEM ${EXTERNAL_DIR}/googletest/googletest/include)
+	add_subdirectory(${EXTERNAL_DIR}/googletest EXCLUDE_FROM_ALL)
+else()
+	find_package(GTest)
+endif()
+if(STELLARLIB_VENDORED OR ANDROID)
+	include(${CMAKE_SOURCE_DIR}/cmake/SDL3Subsystems.cmake)
+	include_directories(SYSTEM ${EXTERNAL_DIR}/SDL/include)
+	add_subdirectory(${EXTERNAL_DIR}/SDL EXCLUDE_FROM_ALL)
+else()
+	find_package(SDL3 REQUIRED)
+endif()
+
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_EXTENSIONS OFF)
 include_directories(${CMAKE_SOURCE_DIR}/include)
@@ -20,7 +36,6 @@ add_custom_target(
 
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/src/*.cpp)
 add_library(${PROJECT_NAME} STATIC ${SOURCES})
-find_package(SDL3 REQUIRED)
 target_link_libraries(${PROJECT_NAME} INTERFACE SDL3::SDL3)
 if(WIN32)
 	file(
@@ -75,7 +90,13 @@ foreach(SOURCE ${EXAMPLES})
 			COMMAND_EXPAND_LISTS
 		)
 	elseif(ANDROID)
-		set(APK ${EXAMPLE}_apk)
+		set(ANDROID_SDL_DIR ${CMAKE_SOURCE_DIR}/android/app/src/main/java/org/libsdl)
+		add_custom_command(
+			OUTPUT ${ANDROID_SDL_DIR}
+			COMMAND ${CMAKE_COMMAND} -E create_symlink
+				${EXTERNAL_DIR}/SDL/android-project/app/src/main/java/org/libsdl
+				${ANDROID_SDL_DIR}
+		)
 		set_property(GLOBAL PROPERTY JOB_POOLS apk_pool=1)
 		add_custom_command(
 			OUTPUT ${CMAKE_BINARY_DIR}/${EXAMPLE}.apk
@@ -92,40 +113,53 @@ foreach(SOURCE ${EXAMPLES})
 			COMMAND ${CMAKE_COMMAND} -E copy_if_different
 				${CMAKE_SOURCE_DIR}/android/app/build/outputs/apk/debug/app-debug.apk
 				${CMAKE_BINARY_DIR}/${EXAMPLE}.apk
-			DEPENDS ${EXAMPLE}
+			DEPENDS ${ANDROID_SDL_DIR} ${EXAMPLE} resources
 			WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/android
 			JOB_POOL apk_pool
 			COMMAND_EXPAND_LISTS
 		)
+		set(APK ${EXAMPLE}_apk)
 		add_custom_target(${APK} DEPENDS ${CMAKE_BINARY_DIR}/${EXAMPLE}.apk)
-		add_dependencies(${APK} resources)
 		add_dependencies(apks ${APK})
 	endif()
 	add_dependencies(examples ${EXAMPLE})
 endforeach()
 
-find_package(GTest)
 if(TARGET GTest::gtest_main)
-	enable_testing()
-	include(GoogleTest)
+	find_package(Threads REQUIRED)
 	file(GLOB_RECURSE TESTS CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/tests/*.cpp)
-	add_custom_target(tests)
 	foreach(SOURCE ${TESTS})
 		get_filename_component(TEST ${SOURCE} NAME_WLE)
 		set(TEST ${TEST}_test)
 		add_executable(${TEST} EXCLUDE_FROM_ALL ${SOURCE})
 		target_link_libraries(${TEST} PRIVATE GTest::gtest_main ${PROJECT_NAME})
 		if(WIN32)
+			target_link_libraries(${TEST} PRIVATE Threads::Threads)
 			add_custom_command(
 				TARGET ${TEST} POST_BUILD
-				COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:${TEST}> $<TARGET_RUNTIME_DLLS:${TEST}>
+				COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:tests> $<TARGET_RUNTIME_DLLS:tests>
 				COMMAND_EXPAND_LISTS
 			)
 		endif()
 		add_dependencies(${TEST} resources)
-		add_dependencies(tests ${TEST})
-		gtest_discover_tests(${TEST})
 	endforeach()
+	add_executable(tests EXCLUDE_FROM_ALL ${TESTS})
+	target_link_libraries(tests PRIVATE GTest::gtest_main ${PROJECT_NAME})
+	if(WIN32)
+		target_link_libraries(tests PRIVATE Threads::Threads)
+		add_custom_command(
+			TARGET tests POST_BUILD
+			COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:tests> $<TARGET_RUNTIME_DLLS:tests>
+			COMMAND_EXPAND_LISTS
+		)
+	endif()
+	add_dependencies(tests resources)
+	find_program(WINE wine)
+	if((CMAKE_SYSTEM_NAME STREQUAL CMAKE_HOST_SYSTEM_NAME OR WIN32 AND WINE) AND CMAKE_SYSTEM_PROCESSOR STREQUAL CMAKE_HOST_SYSTEM_PROCESSOR)
+		enable_testing()
+		include(GoogleTest)
+		gtest_discover_tests(tests)
+	endif()
 endif()
 
 find_program(DOXYGEN doxygen)
@@ -140,16 +174,18 @@ if(DOXYGEN)
 	add_custom_target(docs ALL DEPENDS ${CMAKE_BINARY_DIR}/html)
 endif()
 
-include(GNUInstallDirs)
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Targets)
-install(EXPORT ${PROJECT_NAME}Targets DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME} NAMESPACE ${PROJECT_NAME}::)
-include(CMakePackageConfigHelpers)
-configure_package_config_file(
-	${CMAKE_SOURCE_DIR}/cmake/${PROJECT_NAME}Config.cmake.in
-	${CMAKE_BINARY_DIR}/${PROJECT_NAME}Config.cmake
-	INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
-)
-install(FILES ${CMAKE_BINARY_DIR}/${PROJECT_NAME}Config.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
-install(FILES ${CMAKE_SOURCE_DIR}/LICENSE DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/licenses/${PROJECT_NAME})
-install(DIRECTORY ${CMAKE_BINARY_DIR}/html DESTINATION ${CMAKE_INSTALL_DOCDIR} OPTIONAL)
+if(NOT STELLARLIB_VENDORED AND NOT ANDROID)
+	include(GNUInstallDirs)
+	install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+	install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Targets)
+	install(EXPORT ${PROJECT_NAME}Targets DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME} NAMESPACE ${PROJECT_NAME}::)
+	include(CMakePackageConfigHelpers)
+	configure_package_config_file(
+		${CMAKE_SOURCE_DIR}/cmake/${PROJECT_NAME}Config.cmake.in
+		${CMAKE_BINARY_DIR}/${PROJECT_NAME}Config.cmake
+		INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+	)
+	install(FILES ${CMAKE_BINARY_DIR}/${PROJECT_NAME}Config.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
+	install(FILES ${CMAKE_SOURCE_DIR}/LICENSE DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/licenses/${PROJECT_NAME})
+	install(DIRECTORY ${CMAKE_BINARY_DIR}/html DESTINATION ${CMAKE_INSTALL_DOCDIR} OPTIONAL)
+endif()
