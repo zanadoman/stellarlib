@@ -165,6 +165,8 @@ private:
 	std::uint32_t _transbuf_size{};
 	std::optional<gfx::texture> _framebuffer{};
 	SDL_GPUTransferBuffer *_transbuf{};
+	lin::uint2 _transtex_size{};
+	SDL_GPUTexture *_transtex{};
 	SDL_GPUFence *_fence{};
 	std::vector<SDL_GPUFence *> _fences{};
 
@@ -247,9 +249,7 @@ private:
 	auto acquire_cmdbuf()
 		-> std::unique_ptr<SDL_GPUCommandBuffer, void (*)(SDL_GPUCommandBuffer *)>;
 
-	[[nodiscard]]
-	auto create_transtex(SDL_GPUTextureUsageFlags usage, lin::uint2 size)
-		-> std::unique_ptr<SDL_GPUTexture, std::function<void (SDL_GPUTexture *)>>;
+	void extend_transtex(lin::uint2 size);
 
 	[[nodiscard]]
 	auto prepare_transfer(SDL_GPUTexture *texture, lin::uint2 size)

@@ -55,6 +55,7 @@ window::~window()
 	}
 
 	SDL_ReleaseGPUFence(_device.get(), _fence);
+	SDL_ReleaseGPUTexture(_device.get(), _transtex);
 	SDL_ReleaseGPUTransferBuffer(_device.get(), _transbuf);
 	SDL_ReleaseWindowFromGPUDevice(_device.get(), _handle);
 	SDL_DestroyWindow(_handle);
@@ -305,12 +306,12 @@ auto window::upload_image(const res::image &image, const bool mipmaps)
 	std::memcpy(map_transbuf().get(), image.bytes().data(), image.bytes().size());
 	auto cmdbuf{acquire_cmdbuf()};
 	const auto cpypass{SDL_BeginGPUCopyPass(cmdbuf.get())};
-	const auto transtex{create_transtex(SDL_GPU_TEXTUREUSAGE_SAMPLER, image.size())};
-	const auto [transfer, region]{prepare_transfer(transtex.get(), image.size())};
+	extend_transtex(image.size());
+	const auto [transfer, region]{prepare_transfer(_transtex, image.size())};
 	SDL_UploadToGPUTexture(cpypass, std::addressof(transfer), std::addressof(region), false);
 	SDL_EndGPUCopyPass(cpypass);
 	gfx::texture texture{_device, image.size(), mipmaps};
-	blit(cmdbuf.get(), transtex.get(), texture.size(), static_cast<SDL_GPUTexture *>(texture));
+	blit(cmdbuf.get(), _transtex, texture.size(), static_cast<SDL_GPUTexture *>(texture));
 
 	if (texture.mipmaps()) {
 		SDL_GenerateMipmapsForGPUTexture(cmdbuf.get(), static_cast<SDL_GPUTexture *>(texture));
@@ -393,12 +394,12 @@ auto window::download_texture(const gfx::texture &texture, const bool idle)
 	}
 
 	auto cmdbuf(acquire_cmdbuf());
-	const auto transtex{create_transtex(SDL_GPU_TEXTUREUSAGE_COLOR_TARGET, texture.size())};
-	blit(cmdbuf.get(), static_cast<SDL_GPUTexture *>(texture), texture.size(), transtex.get());
+	extend_transtex(texture.size());
+	blit(cmdbuf.get(), static_cast<SDL_GPUTexture *>(texture), texture.size(), _transtex);
 	const auto cpypass{SDL_BeginGPUCopyPass(cmdbuf.get())};
 	res::image image{texture.size()};
 	extend_transbuf(lin::cast<std::uint32_t>(image.bytes().size()));
-	const auto [transfer, region]{prepare_transfer(transtex.get(), texture.size())};
+	const auto [transfer, region]{prepare_transfer(_transtex, texture.size())};
 	SDL_DownloadFromGPUTexture(cpypass, std::addressof(region), std::addressof(transfer));
 	SDL_EndGPUCopyPass(cpypass);
 	wait_fence();
@@ -601,13 +602,15 @@ void window::extend_transbuf(const std::uint32_t size)
 		.size = size
 	};
 
-	const auto transbuf{SDL_CreateGPUTransferBuffer(_device.get(), std::addressof(descriptor))};
+	std::unique_ptr<SDL_GPUTransferBuffer, std::function<void (SDL_GPUTransferBuffer *)>> transbuf{SDL_CreateGPUTransferBuffer(_device.get(), std::addressof(descriptor)), [cpt = _device.get()] (const auto transbuf) -> void {
+		SDL_ReleaseGPUTransferBuffer(cpt, transbuf);
+	}};
 
-	if (!static_cast<bool>(transbuf)) {
+	if (!transbuf) {
 		throw std::runtime_error{SDL_GetError()};
 	}
 
-	SDL_ReleaseGPUTransferBuffer(_device.get(), std::exchange(_transbuf, transbuf));
+	SDL_ReleaseGPUTransferBuffer(_device.get(), std::exchange(_transbuf, transbuf.release()));
 	_transbuf_size = descriptor.size;
 }
 
@@ -641,12 +644,15 @@ auto window::acquire_cmdbuf()
 	return cmdbuf;
 }
 
-auto window::create_transtex(const SDL_GPUTextureUsageFlags usage, const lin::uint2 size)
-	-> std::unique_ptr<SDL_GPUTexture, std::function<void (SDL_GPUTexture *)>>
+void window::extend_transtex(const lin::uint2 size)
 {
+	if (lin::all(size <= _transtex_size)) {
+		return;
+	}
+
 	const SDL_GPUTextureCreateInfo descriptor{
 		.format = SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM,
-		.usage = usage,
+		.usage = SDL_GPU_TEXTUREUSAGE_SAMPLER | SDL_GPU_TEXTUREUSAGE_COLOR_TARGET,
 		.width = size.x(),
 		.height = size.y(),
 		.layer_count_or_depth = 1,
@@ -661,7 +667,8 @@ auto window::create_transtex(const SDL_GPUTextureUsageFlags usage, const lin::ui
 		throw std::runtime_error{SDL_GetError()};
 	}
 
-	return transtex;
+	SDL_ReleaseGPUTexture(_device.get(), std::exchange(_transtex, transtex.release()));
+	_transtex_size = size;
 }
 
 auto window::prepare_transfer(SDL_GPUTexture *texture, const lin::uint2 size)

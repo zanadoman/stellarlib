@@ -122,7 +122,7 @@ public:
 		/**
 		 * @brief Explicit padding
 		 */
-		std::array<std::byte, 4> padding1;
+		[[maybe_unused]] std::array<std::byte, 4> padding1;
 
 		/**
 		 * @brief Destination texture
@@ -147,7 +147,7 @@ public:
 		/**
 		 * @brief Explicit padding
 		 */
-		std::array<std::byte, 3> padding2;
+		[[maybe_unused]] std::array<std::byte, 3> padding2;
 	};
 
 	/**
