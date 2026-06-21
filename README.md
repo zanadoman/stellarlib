@@ -98,6 +98,7 @@ env JAVA_HOME=/usr/lib/jvm/java-8-openjdk /opt/android-sdk/tools/bin/sdkmanager 
 <details>
 <summary>Development Tools</summary>
 
+- [clangd](https://archlinux.org/packages/extra/x86_64/clang/)
 - [Valgrind](https://archlinux.org/packages/extra/x86_64/valgrind/)
 - [Vulkan Validation Layers](https://archlinux.org/packages/extra/x86_64/vulkan-validation-layers/)
 - [RenderDoc](https://archlinux.org/packages/extra/x86_64/renderdoc/)
@@ -122,7 +123,23 @@ env JAVA_HOME=/usr/lib/jvm/java-8-openjdk /opt/android-sdk/tools/bin/sdkmanager 
 
 </details>
 
+### Setup
+
+```sh
+git submodule update --init --recursive                                 # Install external dependencies
+cmake --preset x86_64-linux-gnu-debug                                   # Select a default a preset for development
+cmake --build build/x86_64-linux-gnu/debug -t compile_commands.json     # Expose compile_commands.json for clangd
+cp android/app/.classpath.example android/app/.classpath                # Expose classpath for Eclipse JDT Language Server
+```
+
 ### Build & Run
+
+For each supported target, CMake defines presets using the naming structure `<target>-<type>[-vendored]`.
+
+- `x86_64-linux-gnu-debug` &rarr; `build/x86_64-linux-gnu/debug`
+- `x86_64-linux-gnu-debug-vendored` &rarr; `build/x86_64-linux-gnu/debug`
+- `x86_64-linux-gnu-release` &rarr; `build/x86_64-linux-gnu/release`
+- `x86_64-linux-gnu-release-vendored` &rarr; `build/x86_64-linux-gnu/release`
 
 The CMake configuration defines the following build targets:
 
@@ -133,22 +150,22 @@ The CMake configuration defines the following build targets:
 - `docs` (requires Doxygen)
 
 ```sh
-cmake -B build -DCMAKE_BUILD_TYPE=Release -G Ninja --toolchain cmake/x86_64-linux-gnu.cmake     # Configure CMake
-cmake --build build                                                                             # Build stellarlib
-cmake --install build                                                                           # Install stellarlib
-cmake --build build -t example                                                                  # Build a target
-build/example                                                                                   # Run the target
+cmake --preset x86_64-linux-gnu-release                     # Configure CMake
+cmake --build build/x86_64-linux-gnu/release                # Build stellarlib
+cmake --install build/x86_64-linux-gnu/release              # Install stellarlib
+cmake --build build/x86_64-linux-gnu/release -t example     # Build a target
+build/x86_64-linux-gnu/release/example                      # Run the target
 ```
 
 <details>
 <summary>aarch64-linux-gnu</summary>
 
 ```sh
-cmake -B build -DCMAKE_BUILD_TYPE=Release -G Ninja --toolchain cmake/aarch64-linux-gnu.cmake     # Configure CMake
-cmake --build build                                                                              # Build stellarlib
-cmake --install build                                                                            # Install stellarlib
-cmake --build build -t example                                                                   # Build a target
-build/example                                                                                    # Run the target
+cmake --preset aarch64-linux-gnu-release                     # Configure CMake
+cmake --build build/aarch64-linux-gnu/release                # Build stellarlib
+cmake --install build/aarch64-linux-gnu/release              # Install stellarlib
+cmake --build build/aarch64-linux-gnu/release -t example     # Build a target
+build/aarch64-linux-gnu/release/example                      # Run the target
 ```
 
 </details>
@@ -157,11 +174,11 @@ build/example                                                                   
 <summary>x86_64-w64-mingw32</summary>
 
 ```sh
-cmake -B build -DCMAKE_BUILD_TYPE=Release -G Ninja --toolchain cmake/x86_64-w64-mingw32.cmake     # Configure CMake
-cmake --build build                                                                               # Build stellarlib
-cmake --install build                                                                             # Install stellarlib
-cmake --build build -t example                                                                    # Build a target
-build/example.exe                                                                                 # Run the target
+cmake --preset x86_64-w64-mingw32-release                     # Configure CMake
+cmake --build build/x86_64-w64-mingw32/release                # Build stellarlib
+cmake --install build/x86_64-w64-mingw32/release              # Install stellarlib
+cmake --build build/x86_64-w64-mingw32/release -t example     # Build a target
+build/x86_64-w64-mingw32/release/example.exe                  # Run the target
 ```
 
 </details>
@@ -170,11 +187,11 @@ build/example.exe                                                               
 <summary>x86_64-linux-android</summary>
 
 ```sh
-cmake -B build -DCMAKE_BUILD_TYPE=Release -G Ninja --toolchain cmake/x86_64-linux-android.cmake             # Configure CMake
-cmake --build build                                                                                         # Build stellarlib
-cmake --install build                                                                                       # Install stellarlib
-env JAVA_HOME=/usr/lib/jvm/java-21-openjdk ANDROID_HOME=/opt/android-sdk cmake --build build -t example     # Build a target
-/opt/android-sdk/platform-tools/adb install -r build/example.apk                                            # Install the target
+cmake --preset x86_64-linux-android-release                                                                                                  # Configure CMake
+cmake --build build/x86_64-linux-android/release                                                                                             # Build stellarlib
+cmake --install build/x86_64-linux-android/release                                                                                           # Install stellarlib
+env JAVA_HOME=/usr/lib/jvm/java-21-openjdk ANDROID_HOME=/opt/android-sdk cmake --build build/x86_64-linux-android/release -t example_apk     # Build a target
+/opt/android-sdk/platform-tools/adb install -r build/x86_64-linux-android/release/example.apk                                                # Install the target
 ```
 
 </details>
@@ -183,11 +200,11 @@ env JAVA_HOME=/usr/lib/jvm/java-21-openjdk ANDROID_HOME=/opt/android-sdk cmake -
 <summary>aarch64-linux-android</summary>
 
 ```sh
-cmake -B build -DCMAKE_BUILD_TYPE=Release -G Ninja --toolchain cmake/aarch64-linux-android.cmake            # Configure CMake
-cmake --build build                                                                                         # Build stellarlib
-cmake --install build                                                                                       # Install stellarlib
-env JAVA_HOME=/usr/lib/jvm/java-21-openjdk ANDROID_HOME=/opt/android-sdk cmake --build build -t example     # Build a target
-/opt/android-sdk/platform-tools/adb install -r build/example.apk                                            # Install the target
+cmake --preset aarch64-linux-android-release                                                                                                  # Configure CMake
+cmake --build build/aarch64-linux-android/release                                                                                             # Build stellarlib
+cmake --install build/aarch64-linux-android/release                                                                                           # Install stellarlib
+env JAVA_HOME=/usr/lib/jvm/java-21-openjdk ANDROID_HOME=/opt/android-sdk cmake --build build/aarch64-linux-android/release -t example_apk     # Build a target
+/opt/android-sdk/platform-tools/adb install -r build/aarch64-linux-android/release/example.apk                                                # Install the target
 ```
 
 </details>
@@ -195,7 +212,7 @@ env JAVA_HOME=/usr/lib/jvm/java-21-openjdk ANDROID_HOME=/opt/android-sdk cmake -
 ## [Documentation](https://zanadoman.github.io/stellarlib/)
 
 ```sh
-$BROWSER build/html/index.html     # Browse local documentation (requires Doxygen)
+$BROWSER build/x86_64-linux-gnu/release/html/index.html     # Browse local documentation (requires Doxygen)
 ```
 
 ## Contributing

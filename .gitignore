@@ -1,6 +1,7 @@
 /android/app/bin/
 /android/app/.classpath
 /android/app/src/main/assets/
+/android/app/src/main/java/org/libsdl
 /android/app/src/main/jniLibs/*/libmain.so
 /android/app/src/main/jniLibs/*/libSDL3.so
 /android/.gradle/
@@ -10,6 +11,9 @@
 /android/**/.settings/
 build/
 /.cache/
+/compile_commands.json
 /html/
+.idea/
+Testing/
 vgcore.*
 *.vim
