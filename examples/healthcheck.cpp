@@ -171,14 +171,14 @@ public:
 	}
 
 private:
-	constexpr void begin([[maybe_unused]] app::context &ctx) final
+	constexpr void begin(app::context &ctx) final
 	{
 		SDL_Log("%p: begin", static_cast<const void *>(this));
 		_texture = std::make_unique<gfx::texture>(ctx.window().renderer().upload_image(res::image{ext::filesystem::base_directory_path() / "assets" / "tests" / "alpha_blending.png"}, false));
 	}
 
 	[[nodiscard]]
-	constexpr auto update([[maybe_unused]] app::context &ctx)
+	constexpr auto update(app::context &ctx)
 		-> std::optional<std::unique_ptr<app::scene>> final
 	{
 		SDL_Log("%p: update", static_cast<const void *>(this));
@@ -238,7 +238,7 @@ auto app::init(const std::vector<std::string> &args)
 				.max_resolution = lin::uint2{1920, 1080},
 				.presentation = gfx::renderer::presentation::stretch,
 				.vsync = false,
-				.debug = true
+				.validation = true
 			}
 		},
 		.entry = [] [[nodiscard]] (auto &ctx) -> auto {

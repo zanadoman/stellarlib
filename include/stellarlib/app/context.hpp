@@ -62,17 +62,17 @@ public:
 		/**
 		 * @brief Metadata initialization descriptor
 		 */
-		app::metadata::info metadata;
+		metadata::info metadata;
 
 		/**
 		 * @brief Clock initialization descriptor
 		 */
-		app::clock::info clock;
+		clock::info clock;
 
 		/**
 		 * @brief Window initialization descriptor
 		 */
-		app::window::info window;
+		window::info window;
 
 		/**
 		 * @brief Initial scene, application termination, or deferred scene factory
@@ -115,7 +115,7 @@ public:
 	 */
 	[[nodiscard]]
 	auto metadata() const
-		-> const app::metadata &;
+		-> const class metadata &;
 
 	/**
 	 * @brief Returns a reference to the metadata subsystem
@@ -123,7 +123,7 @@ public:
 	 */
 	[[nodiscard]]
 	auto metadata()
-		-> app::metadata &;
+		-> class metadata &;
 
 	/**
 	 * @brief Returns a reference to the clock subsystem
@@ -131,7 +131,7 @@ public:
 	 */
 	[[nodiscard]]
 	auto clock() const
-		-> const app::clock &;
+		-> const class clock &;
 
 	/**
 	 * @brief Returns a reference to the clock subsystem
@@ -139,7 +139,7 @@ public:
 	 */
 	[[nodiscard]]
 	auto clock()
-		-> app::clock &;
+		-> class clock &;
 
 	/**
 	 * @brief Returns a reference to the window subsystem
@@ -147,7 +147,7 @@ public:
 	 */
 	[[nodiscard]]
 	auto window() const
-		-> const app::window &;
+		-> const class window &;
 
 	/**
 	 * @brief Returns a reference to the window subsystem
@@ -155,7 +155,7 @@ public:
 	 */
 	[[nodiscard]]
 	auto window()
-		-> app::window &;
+		-> class window &;
 
 	/**
 	 * @brief Returns a reference to the ECS subsystem
@@ -190,10 +190,10 @@ public:
 		-> ext::type_map<void, context> &;
 
 private:
-	[[no_unique_address]] app::metadata _metadata;
-	app::clock _clock;
+	[[no_unique_address]] class metadata _metadata;
+	class clock _clock;
 	[[maybe_unused]] std::array<std::byte, 4> _padding;
-	app::window _window;
+	class window _window;
 	ecs::world _world{};
 	ext::type_map<void, context> _store{};
 	std::unique_ptr<scene> _scene{};

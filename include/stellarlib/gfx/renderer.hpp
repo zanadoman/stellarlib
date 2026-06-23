@@ -94,9 +94,9 @@ public:
 		bool vsync;
 
 		/**
-		 * @brief Enable debugging
+		 * @brief Enable validation
 		 */
-		bool debug;
+		bool validation;
 	};
 
 	/**
@@ -132,7 +132,7 @@ public:
 		/**
 		 * @brief Explicit padding
 		 */
-		[[maybe_unused]] std::array<std::byte, 7> padding2;
+		[[maybe_unused]] std::array<std::byte, 7> padding;
 	};
 
 	/**
@@ -185,16 +185,16 @@ public:
 	virtual void set_max_aspect(std::optional<float> max_aspect);
 
 	/**
-	 * @brief Returns the maximum resolution of the framebuffer
-	 * @return Maximum resolution of the framebuffer
+	 * @brief Returns the maximum framebuffer resolution
+	 * @return Maximum framebuffer resolution
 	 */
 	[[nodiscard]]
 	virtual constexpr auto max_resolution() const
 		-> const std::optional<lin::uint2> & = 0;
 
 	/**
-	 * @brief Sets the maximum resolution of the framebuffer
-	 * @param max_resolution Maximum resolution of the framebuffer
+	 * @brief Sets the maximum framebuffer resolution
+	 * @param max_resolution Maximum framebuffer resolution
 	 */
 	virtual void set_max_resolution(const std::optional<lin::uint2> &max_resolution);
 

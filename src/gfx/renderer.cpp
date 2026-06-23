@@ -40,7 +40,7 @@ void renderer::set_max_resolution([[maybe_unused]] const std::optional<lin::uint
 
 void renderer::set_filter([[maybe_unused]] const res::image::filter filter) {}
 
-void renderer::set_presentation([[maybe_unused]] enum presentation presentation) {}
+void renderer::set_presentation([[maybe_unused]] const enum presentation presentation) {}
 
 void renderer::set_vsync([[maybe_unused]] const bool vsync) {}
 

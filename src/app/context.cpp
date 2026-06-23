@@ -49,37 +49,37 @@ context::~context()
 }
 
 auto context::metadata() const
-	-> const app::metadata &
+	-> const class metadata &
 {
 	return _metadata;
 }
 
 auto context::metadata()
-	-> app::metadata &
+	-> class metadata &
 {
 	return _metadata;
 }
 
 auto context::clock() const
-	-> const app::clock &
+	-> const class clock &
 {
 	return _clock;
 }
 
 auto context::clock()
-	-> app::clock &
+	-> class clock &
 {
 	return _clock;
 }
 
 auto context::window() const
-	-> const app::window &
+	-> const class window &
 {
 	return _window;
 }
 
 auto context::window()
-	-> app::window &
+	-> class window &
 {
 	return _window;
 }
@@ -109,9 +109,9 @@ auto context::store()
 }
 
 context::context(info info)
-	: _metadata{internal::lifecycle<context>::init<app::metadata>(info.metadata)}
-	, _clock{internal::lifecycle<context>::init<app::clock>(info.clock)}
-	, _window{internal::lifecycle<context>::init<app::window>(info.window)}
+	: _metadata{internal::lifecycle<context>::init<class metadata>(info.metadata)}
+	, _clock{internal::lifecycle<context>::init<class clock>(info.clock)}
+	, _window{internal::lifecycle<context>::init<class window>(info.window)}
 {
 	if (const auto entry{std::get_if<std::unique_ptr<scene>>(std::addressof(info.entry))}) {
 		_scene = std::move(*entry);
