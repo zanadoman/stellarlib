@@ -436,7 +436,8 @@ void window::iterate()
 			})};
 
 			for (auto &fence : _fences) {
-				SDL_ReleaseGPUFence(_device.get(), std::exchange(fence, {}));
+				SDL_ReleaseGPUFence(_device.get(), fence);
+				fence = nullptr;
 			}
 
 			_fences.erase(fences.begin(), _fences.end());
@@ -605,7 +606,8 @@ void window::extend_transbuf(const std::uint32_t size)
 		throw std::runtime_error{SDL_GetError()};
 	}
 
-	SDL_ReleaseGPUTransferBuffer(_device.get(), std::exchange(_transbuf, transbuf.release()));
+	SDL_ReleaseGPUTransferBuffer(_device.get(), _transbuf);
+	_transbuf = transbuf.release();
 	_transbuf_size = descriptor.size;
 }
 
@@ -662,7 +664,8 @@ void window::extend_transtex(const lin::uint2 size)
 		throw std::runtime_error{SDL_GetError()};
 	}
 
-	SDL_ReleaseGPUTexture(_device.get(), std::exchange(_transtex, transtex.release()));
+	SDL_ReleaseGPUTexture(_device.get(), _transtex);
+	_transtex = transtex.release();
 	_transtex_size = size;
 }
 
@@ -700,7 +703,8 @@ void window::wait_fences()
 	}
 
 	for (auto &fence : _fences) {
-		SDL_ReleaseGPUFence(_device.get(), std::exchange(fence, {}));
+		SDL_ReleaseGPUFence(_device.get(), fence);
+		fence = nullptr;
 	}
 
 	_fences.clear();
@@ -708,7 +712,8 @@ void window::wait_fences()
 
 void window::submit_cmdbuf(std::unique_ptr<SDL_GPUCommandBuffer, void (*)(SDL_GPUCommandBuffer *)> cmdbuf)
 {
-	SDL_ReleaseGPUFence(_device.get(), std::exchange(_fence, SDL_SubmitGPUCommandBufferAndAcquireFence(cmdbuf.release())));
+	SDL_ReleaseGPUFence(_device.get(), _fence);
+	_fence = SDL_SubmitGPUCommandBufferAndAcquireFence(cmdbuf.release());
 
 	if (!static_cast<bool>(_fence)) {
 		throw std::runtime_error{SDL_GetError()};

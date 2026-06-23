@@ -151,7 +151,8 @@ public:
 				std::destroy_at(src);
 			}
 
-			deallocate(std::exchange(begin, dst));
+			deallocate(begin);
+			begin = dst;
 		}
 	}
 
