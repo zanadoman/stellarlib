@@ -324,30 +324,25 @@ auto window::upload_image(const res::image &image, const bool mipmaps)
 
 void window::blit_texture(const blit_info &info, [[maybe_unused]] const bool idle)
 {
-	if (static_cast<const SDL_GPUDevice *>(info.src_texture) != _device.get() || lin::any(info.src_area.p < 0.0F) || lin::any(info.src_area.s < 0.0F) || info.src_texture.levels() <= info.src_level || static_cast<const SDL_GPUDevice *>(info.dst_texture) != _device.get() || lin::any(info.dst_area.p < 0.0F) || lin::any(info.dst_area.s < 0.0F) || info.dst_texture.levels() <= info.dst_level) {
+	if (static_cast<const SDL_GPUDevice *>(info.src_texture) != _device.get() || lin::any(info.src_area.p < 0.0F) || lin::any(info.src_area.s < 0.0F) || static_cast<const SDL_GPUDevice *>(info.dst_texture) != _device.get() || lin::any(info.dst_area.p < 0.0F) || lin::any(info.dst_area.s < 0.0F)) {
 		SDL_InvalidParamError("info");
 		throw std::invalid_argument{SDL_GetError()};
 	}
 
-	const auto src_size{lin::cast<float>(info.src_texture.size()) * lin::ldexp(1.0F, -info.src_level)};
-	const auto dst_size{lin::cast<float>(info.dst_texture.size()) * lin::ldexp(1.0F, -info.dst_level)};
-
 	SDL_GPUBlitInfo descriptor{
 		.source = {
 			.texture = static_cast<SDL_GPUTexture *>(info.src_texture),
-			.mip_level = info.src_level,
-			.x = lin::cast<std::uint32_t>(src_size.x() * info.src_area.p.x()),
-			.y = lin::cast<std::uint32_t>(src_size.y() * info.src_area.p.y()),
-			.w = lin::cast<std::uint32_t>(src_size.x() * info.src_area.s.x()),
-			.h = lin::cast<std::uint32_t>(src_size.y() * info.src_area.s.y())
+			.x = lin::cast<std::uint32_t>(lin::cast<float>(info.src_texture.size().x()) * info.src_area.p.x()),
+			.y = lin::cast<std::uint32_t>(lin::cast<float>(info.src_texture.size().y()) * info.src_area.p.y()),
+			.w = lin::cast<std::uint32_t>(lin::cast<float>(info.src_texture.size().x()) * info.src_area.s.x()),
+			.h = lin::cast<std::uint32_t>(lin::cast<float>(info.src_texture.size().y()) * info.src_area.s.y())
 		},
 		.destination = {
 			.texture = static_cast<SDL_GPUTexture *>(info.dst_texture),
-			.mip_level = info.dst_level,
-			.x = lin::cast<std::uint32_t>(dst_size.x() * info.dst_area.p.x()),
-			.y = lin::cast<std::uint32_t>(dst_size.y() * info.dst_area.p.y()),
-			.w = lin::cast<std::uint32_t>(dst_size.x() * info.dst_area.s.x()),
-			.h = lin::cast<std::uint32_t>(dst_size.y() * info.dst_area.s.y())
+			.x = lin::cast<std::uint32_t>(lin::cast<float>(info.dst_texture.size().x()) * info.dst_area.p.x()),
+			.y = lin::cast<std::uint32_t>(lin::cast<float>(info.dst_texture.size().y()) * info.dst_area.p.y()),
+			.w = lin::cast<std::uint32_t>(lin::cast<float>(info.dst_texture.size().x()) * info.dst_area.s.x()),
+			.h = lin::cast<std::uint32_t>(lin::cast<float>(info.dst_texture.size().y()) * info.dst_area.s.y())
 		}
 	};
 

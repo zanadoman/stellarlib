@@ -115,16 +115,6 @@ public:
 		aabb<float> src_area;
 
 		/**
-		 * @brief Source mip level
-		 */
-		std::uint32_t src_level;
-
-		/**
-		 * @brief Explicit padding
-		 */
-		[[maybe_unused]] std::array<std::byte, 4> padding1;
-
-		/**
 		 * @brief Destination texture
 		 */
 		texture &dst_texture;
@@ -135,11 +125,6 @@ public:
 		aabb<float> dst_area;
 
 		/**
-		 * @brief Destination mip level
-		 */
-		std::uint32_t dst_level;
-
-		/**
 		 * @brief Filtering method
 		 */
 		res::image::filter filter;
@@ -147,7 +132,7 @@ public:
 		/**
 		 * @brief Explicit padding
 		 */
-		[[maybe_unused]] std::array<std::byte, 3> padding2;
+		[[maybe_unused]] std::array<std::byte, 7> padding2;
 	};
 
 	/**

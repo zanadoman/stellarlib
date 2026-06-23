@@ -45,71 +45,103 @@ using namespace stellarlib;
 
 namespace
 {
-constexpr void check_metadata(const app::context &ctx)
+constexpr void check_metadata(const app::metadata &metadata)
 {
-	SDL_assert_always(ctx.metadata().name() == "healthcheck");
-	SDL_assert_always(ctx.metadata().version() == "0.1.0");
-	SDL_assert_always(ctx.metadata().identifier() == "org.stellarlib.healthcheck");
-	SDL_assert_always(ctx.metadata().creator() == "Domán Zana");
-	SDL_assert_always(ctx.metadata().copyright() == "Copyright (C) 2025-2026 Domán Zana");
-	SDL_assert_always(ctx.metadata().url() == "https://zanadoman.github.io/stellarlib/examples_2healthcheck_8cpp-example.html");
-	SDL_assert_always(ctx.metadata().type() == "application");
+	SDL_assert_always(metadata.name() == "healthcheck");
+	SDL_assert_always(metadata.version() == "0.1.0");
+	SDL_assert_always(metadata.identifier() == "org.stellarlib.healthcheck");
+	SDL_assert_always(metadata.creator() == "Domán Zana");
+	SDL_assert_always(metadata.copyright() == "Copyright (C) 2025-2026 Domán Zana");
+	SDL_assert_always(metadata.url() == "https://zanadoman.github.io/stellarlib/examples_2healthcheck_8cpp-example.html");
+	SDL_assert_always(metadata.type() == "application");
 }
 
-constexpr void check_clock(app::context &ctx)
+constexpr void check_clock(app::clock &clock)
 {
-	SDL_assert_always(0.0F < ctx.clock().now());
-	SDL_assert_always(ctx.clock().target_frequency() == 60.0F);
-	ctx.clock().set_target_frequency(120.0F);
-	SDL_assert_always(ctx.clock().target_frequency() == 120.0F);
-	SDL_assert_always(ctx.clock().frame() < ctx.clock().now());
-	SDL_assert_always(ctx.clock().max_delta() == 0.05F);
-	ctx.clock().set_max_delta(0.025F);
-	SDL_assert_always(ctx.clock().max_delta() == 0.025F);
-	SDL_assert_always(!lin::cast<bool>(ctx.clock().delta()));
+	SDL_assert_always(0.0F < clock.now());
+	SDL_assert_always(clock.target_frequency() == 60.0F);
+	clock.set_target_frequency(120.0F);
+	SDL_assert_always(clock.target_frequency() == 120.0F);
+	SDL_assert_always(clock.frame() < clock.now());
+	SDL_assert_always(clock.max_delta() == 0.05F);
+	clock.set_max_delta(0.025F);
+	SDL_assert_always(clock.max_delta() == 0.025F);
+	SDL_assert_always(!lin::cast<bool>(clock.delta()));
 }
 
-constexpr void check_window(app::context &ctx)
+constexpr void check_window(app::window &window)
 {
-	SDL_assert_always(ctx.window().title() == "org.stellarlib.healthcheck");
-	ctx.window().set_title("healthcheck");
-	SDL_assert_always(ctx.window().title() == "healthcheck");
-	SDL_assert_always(!lin::all(ctx.window().resolution()));
-	SDL_assert_always(!ctx.window().focused());
-	SDL_assert_always(static_cast<const SDL_GPUDevice *>(ctx.window().renderer()));
-	SDL_assert_always(static_cast<std::shared_ptr<SDL_GPUDevice>>(ctx.window().renderer()).get() == static_cast<const SDL_GPUDevice *>(ctx.window().renderer()));
-	SDL_assert_always(!ctx.window().renderer().min_aspect());
-	ctx.window().renderer().set_min_aspect(16.0F / 10.0F);
-	SDL_assert_always(ctx.window().renderer().min_aspect() == 16.0F / 10.0F);
-	SDL_assert_always(!ctx.window().renderer().max_aspect());
-	ctx.window().renderer().set_max_aspect(32.0F / 9.0F);
-	SDL_assert_always(ctx.window().renderer().max_aspect() == 32.0F / 9.0F);
-	SDL_assert_always(ctx.window().renderer().max_resolution());
-	SDL_assert_always(lin::all(*ctx.window().renderer().max_resolution() == (lin::uint2{1920, 1080})));
-	ctx.window().renderer().set_max_resolution(std::nullopt);
-	SDL_assert_always(!ctx.window().renderer().max_resolution());
-	SDL_assert_always(ctx.window().renderer().filter() == res::image::filter::nearest);
-	ctx.window().renderer().set_filter(res::image::filter::linear);
-	SDL_assert_always(ctx.window().renderer().filter() == res::image::filter::linear);
-	SDL_assert_always(ctx.window().renderer().presentation() == gfx::renderer::presentation::stretch);
-	ctx.window().renderer().set_presentation(gfx::renderer::presentation::letterbox);
-	SDL_assert_always(ctx.window().renderer().presentation() == gfx::renderer::presentation::letterbox);
-	ctx.window().renderer().set_vsync(!ctx.window().renderer().vsync());
+	SDL_assert_always(window.title() == "org.stellarlib.healthcheck");
+	window.set_title("healthcheck");
+	SDL_assert_always(window.title() == "healthcheck");
+	SDL_assert_always(!lin::all(window.resolution()));
+	SDL_assert_always(!window.focused());
+}
+
+constexpr void check_renderer(gfx::renderer &renderer)
+{
+	SDL_assert_always(static_cast<const SDL_GPUDevice *>(renderer));
+	SDL_assert_always(static_cast<std::shared_ptr<SDL_GPUDevice>>(renderer).get() == static_cast<const SDL_GPUDevice *>(renderer));
+	SDL_assert_always(!renderer.min_aspect());
+	renderer.set_min_aspect(16.0F / 10.0F);
+	SDL_assert_always(renderer.min_aspect() == 16.0F / 10.0F);
+	SDL_assert_always(!renderer.max_aspect());
+	renderer.set_max_aspect(32.0F / 9.0F);
+	SDL_assert_always(renderer.max_aspect() == 32.0F / 9.0F);
+	SDL_assert_always(renderer.max_resolution());
+	SDL_assert_always(lin::all(*renderer.max_resolution() == (lin::uint2{1920, 1080})));
+	renderer.set_max_resolution(std::nullopt);
+	SDL_assert_always(!renderer.max_resolution());
+	SDL_assert_always(renderer.filter() == res::image::filter::nearest);
+	renderer.set_filter(res::image::filter::linear);
+	SDL_assert_always(renderer.filter() == res::image::filter::linear);
+	SDL_assert_always(renderer.presentation() == gfx::renderer::presentation::stretch);
+	renderer.set_presentation(gfx::renderer::presentation::letterbox);
+	SDL_assert_always(renderer.presentation() == gfx::renderer::presentation::letterbox);
+	renderer.set_vsync(!renderer.vsync());
 	const res::image image{ext::filesystem::base_directory_path() / "assets" / "tests" / "linear.png"};
-	const auto texture1{ctx.window().renderer().upload_image(image, false)};
+	const auto texture1{renderer.upload_image(image, false)};
 	SDL_assert_always(static_cast<SDL_GPUTexture *>(texture1));
-	SDL_assert_always(static_cast<const SDL_GPUDevice *>(texture1) == static_cast<const SDL_GPUDevice *>(ctx.window().renderer()));
+	SDL_assert_always(static_cast<const SDL_GPUDevice *>(texture1) == static_cast<const SDL_GPUDevice *>(renderer));
 	SDL_assert_always(lin::all(texture1.size() == image.size()));
 	SDL_assert_always(!texture1.mipmaps());
 	SDL_assert_always(texture1.levels() == 1);
-	SDL_assert_always(ctx.window().renderer().download_texture(texture1, false) == image);
-	const auto texture2{ctx.window().renderer().upload_image(image, true)};
-	SDL_assert_always(static_cast<SDL_GPUTexture *>(texture2));
-	SDL_assert_always(static_cast<const SDL_GPUDevice *>(texture2) == static_cast<const SDL_GPUDevice *>(ctx.window().renderer()));
-	SDL_assert_always(lin::all(texture2.size() == image.size()));
-	SDL_assert_always(texture2.mipmaps());
-	SDL_assert_always(texture2.levels() == 3);
-	SDL_assert_always(ctx.window().renderer().download_texture(texture2, true) == image);
+	gfx::texture texture2{static_cast<std::shared_ptr<SDL_GPUDevice>>(renderer), texture1.size(), texture1.mipmaps()};
+	renderer.blit_texture(
+		{
+			.src_texture = texture1,
+			.src_area = {
+				.s = lin::float2{1.0F, 1.0F}
+			},
+			.dst_texture = texture2,
+			.dst_area = {
+				.s = lin::float2{1.0F, 1.0F}
+			}
+		},
+		true
+	);
+	SDL_assert_always(renderer.download_texture(texture2, false) == image);
+	const auto texture3{renderer.upload_image(image, true)};
+	SDL_assert_always(static_cast<SDL_GPUTexture *>(texture3));
+	SDL_assert_always(static_cast<const SDL_GPUDevice *>(texture3) == static_cast<const SDL_GPUDevice *>(renderer));
+	SDL_assert_always(lin::all(texture3.size() == image.size()));
+	SDL_assert_always(texture3.mipmaps());
+	SDL_assert_always(texture3.levels() == 3);
+	gfx::texture texture4{static_cast<std::shared_ptr<SDL_GPUDevice>>(renderer), texture3.size(), texture3.mipmaps()};
+	renderer.blit_texture(
+		{
+			.src_texture = texture3,
+			.src_area = {
+				.s = lin::float2{1.0F, 1.0F}
+			},
+			.dst_texture = texture4,
+			.dst_area = {
+				.s = lin::float2{1.0F, 1.0F}
+			}
+		},
+		true
+	);
+	SDL_assert_always(renderer.download_texture(texture4, true) == image);
 }
 
 class [[nodiscard]] blank final : public app::scene
@@ -210,9 +242,10 @@ auto app::init(const std::vector<std::string> &args)
 			}
 		},
 		.entry = [] [[nodiscard]] (auto &ctx) -> auto {
-			check_metadata(ctx);
-			check_clock(ctx);
-			check_window(ctx);
+			check_metadata(ctx.metadata());
+			check_clock(ctx.clock());
+			check_window(ctx.window());
+			check_renderer(ctx.window().renderer());
 			return std::make_unique<blank>();
 		}
 	}};
