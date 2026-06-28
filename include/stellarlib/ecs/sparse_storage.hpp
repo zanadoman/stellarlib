@@ -30,7 +30,6 @@
 
 #include <array>
 #include <cstdint>
-#include <memory>
 #include <new>
 #include <type_traits>
 
@@ -117,7 +116,7 @@ public:
 	void clear() const noexcept;
 
 private:
-	mutable sparse_map<std::uint16_t, std::unique_ptr<any_set<std::uint32_t>>> _maps{};
+	mutable sparse_map<std::uint16_t, any_set<std::uint32_t> *> _maps{};
 };
 }
 

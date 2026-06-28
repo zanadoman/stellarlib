@@ -34,18 +34,23 @@ sparse_storage::sparse_storage(sparse_storage &&) noexcept = default;
 auto sparse_storage::operator=(sparse_storage &&) noexcept
 	-> sparse_storage & = default;
 
-sparse_storage::~sparse_storage() noexcept = default;
+sparse_storage::~sparse_storage() noexcept
+{
+	for (const auto map : _maps.values()) {
+		delete map;
+	}
+}
 
 void sparse_storage::erase(const std::uint32_t key) const noexcept
 {
-	for (const auto &map : _maps.values()) {
+	for (const auto map : _maps.values()) {
 		map->erase(key);
 	}
 }
 
 void sparse_storage::clear() const noexcept
 {
-	for (const auto &map : _maps.values()) {
+	for (const auto map : _maps.values()) {
 		map->clear();
 	}
 }

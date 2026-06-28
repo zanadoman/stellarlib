@@ -70,6 +70,7 @@ Checks: >
   readability-*,
   -bugprone-easily-swappable-parameters,
   -bugprone-exception-escape,
+  -bugprone-multi-level-implicit-pointer-conversion,
   -bugprone-signed-char-misuse,
   -bugprone-std-namespace-modification,
   -bugprone-suspicious-realloc-usage,

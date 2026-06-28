@@ -36,15 +36,15 @@
 
 #include <functional>
 #include <memory>
-#include <utility>
 #include <variant>
 
 namespace stellarlib::app
 {
 context::~context()
 {
-	if (_scene) {
+	if (static_cast<bool>(_scene)) {
 		_scene->end(*this);
+		delete _scene;
 	}
 }
 
@@ -114,13 +114,13 @@ context::context(info info)
 	, _window{internal::lifecycle<context>::init<class window>(info.window)}
 {
 	if (const auto entry{std::get_if<std::unique_ptr<scene>>(std::addressof(info.entry))}) {
-		_scene = std::move(*entry);
+		_scene = entry->release();
 	}
 	else if (const auto callback{std::get_if<std::function<std::unique_ptr<scene> (context &)>>(std::addressof(info.entry))}; static_cast<bool>(callback) && *callback) {
-		_scene = (*callback)(*this);
+		_scene = (*callback)(*this).release();
 	}
 
-	if (_scene) {
+	if (static_cast<bool>(_scene)) {
 		_scene->begin(*this);
 	}
 }
@@ -128,7 +128,7 @@ context::context(info info)
 auto context::iterate()
 	-> SDL_AppResult
 {
-	if (!_scene) {
+	if (!static_cast<bool>(_scene)) {
 		return SDL_APP_SUCCESS;
 	}
 
@@ -139,7 +139,8 @@ auto context::iterate()
 	if (scene) {
 		if (*scene) {
 			_scene->end(*this);
-			_scene = std::move(*scene);
+			delete _scene;
+			_scene = scene->release();
 			_scene->begin(*this);
 		}
 		else {

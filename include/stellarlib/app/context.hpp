@@ -196,7 +196,7 @@ private:
 	class window _window;
 	ecs::world _world{};
 	ext::type_map<void, context> _store{};
-	std::unique_ptr<scene> _scene{};
+	scene *_scene{};
 
 	[[nodiscard]]
 	explicit context(info info);

@@ -140,7 +140,12 @@ public:
 			}
 		}
 		else if constexpr (sizeof...(Args) == 1 && (std::is_assignable_v<T &, Args> && ...)) {
-			*static_cast<T *>(_elems[_map[id]].get()) = (std::forward<Args>(args), ...);
+			if constexpr (std::is_same_v<Base, void>) {
+				*static_cast<T *>(_elems[_map[id]].get()) = (std::forward<Args>(args), ...);
+			}
+			else {
+				*static_cast<T *>(_elems[_map[id]]) = (std::forward<Args>(args), ...);
+			}
 		}
 		else {
 			std::destroy_at(_elems.data() + _map[id]);
@@ -151,6 +156,7 @@ public:
 				});
 			}
 			else {
+				std::destroy_at(_elems.data() + _map[id]);
 				std::construct_at(_elems.data() + _map[id], new (std::nothrow) T{std::forward<Args>(args)...});
 			}
 		}
@@ -180,7 +186,17 @@ public:
 		-> const auto &
 	{
 		const auto id{ext::scoped_typeid<Scope, T>()};
-		return contains(id) ? *static_cast<const T *>(_elems[_map[id]].get()) : throw std::out_of_range{typeid(T).name()};
+
+		if (!contains(id)) {
+			throw std::out_of_range{typeid(T).name()};
+		}
+
+		if constexpr (std::is_same_v<Base, void>) {
+			return *static_cast<const T *>(_elems[_map[id]].get());
+		}
+		else {
+			return *static_cast<const T *>(_elems[_map[id]]);
+		}
 	}
 
 	/**
@@ -194,7 +210,17 @@ public:
 		-> auto &
 	{
 		const auto id{ext::scoped_typeid<Scope, T>()};
-		return contains(id) ? *static_cast<T *>(_elems[_map[id]].get()) : throw std::out_of_range{typeid(T).name()};
+
+		if (!contains(id)) {
+			throw std::out_of_range{typeid(T).name()};
+		}
+
+		if constexpr (std::is_same_v<Base, void>) {
+			return *static_cast<T *>(_elems[_map[id]].get());
+		}
+		else {
+			return *static_cast<T *>(_elems[_map[id]]);
+		}
 	}
 
 	/**
@@ -210,8 +236,8 @@ public:
 			});
 		}
 		else {
-			return _elems | std::views::transform([] [[nodiscard]] (const auto &elem) -> const auto & {
-				return *static_cast<const Base *>(elem.get());
+			return _elems | std::views::transform([] [[nodiscard]] (const auto elem) -> const auto & {
+				return *static_cast<const Base *>(elem);
 			});
 		}
 	}
@@ -229,8 +255,8 @@ public:
 			});
 		}
 		else {
-			return _elems | std::views::transform([] [[nodiscard]] (const auto &elem) -> auto & {
-				return *static_cast<Base *>(elem.get());
+			return _elems | std::views::transform([] [[nodiscard]] (const auto elem) -> auto & {
+				return *static_cast<Base *>(elem);
 			});
 		}
 	}
@@ -256,6 +282,11 @@ public:
 
 		_map[id] = std::numeric_limits<std::size_t>::max();
 		_ids.pop_back();
+
+		if constexpr (!std::is_same_v<Base, void>) {
+			delete _elems.back();
+		}
+
 		_elems.pop_back();
 	}
 
@@ -266,12 +297,19 @@ public:
 	{
 		_map.clear();
 		_ids.clear();
+
+		if constexpr (!std::is_same_v<Base, void>) {
+			for (const auto elem : _elems) {
+				delete elem;
+			}
+		}
+
 		_elems.clear();
 	}
 
 private:
 	std::vector<std::size_t> _map{};
-	std::vector<std::conditional_t<std::is_same_v<Base, void>, std::unique_ptr<void, void (*)(const void *)>, std::unique_ptr<Base>>> _elems{};
+	std::vector<std::conditional_t<std::is_same_v<Base, void>, std::unique_ptr<void, void (*)(const void *)>, Base *>> _elems{};
 	std::vector<std::size_t> _ids{};
 
 	[[nodiscard]]
