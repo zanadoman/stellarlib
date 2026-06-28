@@ -98,7 +98,14 @@ public:
 	/**
 	 * @brief Destructor
 	 */
-	constexpr ~type_map() = default;
+	constexpr ~type_map()
+	{
+		if constexpr (!std::is_same_v<Base, void>) {
+			for (const auto elem : _elems) {
+				delete elem;
+			}
+		}
+	}
 
 	/**
 	 * @brief Inserts an element into the container
@@ -148,16 +155,13 @@ public:
 			}
 		}
 		else {
-			std::destroy_at(_elems.data() + _map[id]);
-
 			if constexpr (std::is_same_v<Base, void>) {
-				std::construct_at(_elems.data() + _map[id], new (std::nothrow) T{std::forward<Args>(args)...}, [] (const auto elem) -> void {
-					delete static_cast<const T *>(elem);
-				});
+				std::destroy_at(static_cast<const T *>(_elems[_map[id]].get()));
+				std::construct_at(static_cast<T *>(_elems[_map[id]].get()), std::forward<Args>(args)...);
 			}
 			else {
-				std::destroy_at(_elems.data() + _map[id]);
-				std::construct_at(_elems.data() + _map[id], new (std::nothrow) T{std::forward<Args>(args)...});
+				std::destroy_at(_elems[_map[id]]);
+				std::construct_at(static_cast<T *>(_elems[_map[id]]), std::forward<Args>(args)...);
 			}
 		}
 	}
@@ -275,18 +279,23 @@ public:
 		}
 
 		if (_map[id] != _ids.size() - 1) {
-			_elems[_map[id]] = std::move(_elems.back());
+			if constexpr (std::is_same_v<Base, void>) {
+				_elems[_map[id]] = std::move(_elems.back());
+			}
+			else {
+				delete _elems[_map[id]];
+				_elems[_map[id]] = _elems.back();
+			}
+
 			_ids[_map[id]] = _ids.back();
 			_map[_ids[_map[id]]] = _map[id];
+		}
+		else if constexpr (!std::is_same_v<Base, void>) {
+			delete _elems.back();
 		}
 
 		_map[id] = std::numeric_limits<std::size_t>::max();
 		_ids.pop_back();
-
-		if constexpr (!std::is_same_v<Base, void>) {
-			delete _elems.back();
-		}
-
 		_elems.pop_back();
 	}
 
