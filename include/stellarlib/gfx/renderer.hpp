@@ -141,12 +141,12 @@ public:
 	virtual ~renderer() noexcept;
 
 	/**
-	 * @brief Returns a pointer to the internal handle
-	 * @return Pointer to the internal handle
+	 * @brief Returns a reference to the internal handle
+	 * @return Reference to the internal handle
 	 * @warning Intended for internal/professional use
 	 */
 	[[nodiscard]]
-	virtual explicit constexpr operator SDL_GPUDevice *() const = 0;
+	virtual explicit constexpr operator SDL_GPUDevice &() const = 0;
 
 	/**
 	 * @brief Returns a shared pointer to the internal handle

@@ -98,22 +98,22 @@ auto window::renderer()
 	return *this;
 }
 
-void window::blit(SDL_GPUCommandBuffer *cmdbuf, SDL_GPUTexture *src, const lin::uint2 size, SDL_GPUTexture *dst)
+void window::blit(SDL_GPUCommandBuffer &cmdbuf, SDL_GPUTexture &src, const lin::uint2 size, SDL_GPUTexture &dst)
 {
 	const SDL_GPUBlitInfo descriptor{
 		.source = {
-			.texture = src,
+			.texture = std::addressof(src),
 			.w = size.x(),
 			.h = size.y()
 		},
 		.destination = {
-			.texture = dst,
+			.texture = std::addressof(dst),
 			.w = size.x(),
 			.h = size.y()
 		}
 	};
 
-	SDL_BlitGPUTexture(cmdbuf, std::addressof(descriptor));
+	SDL_BlitGPUTexture(std::addressof(cmdbuf), std::addressof(descriptor));
 }
 
 window::window(const info &info)
@@ -124,7 +124,7 @@ window::window(const info &info)
 
 	_handle = SDL_CreateWindow(info.title.c_str(), 0, 0, info.renderer.validation ? SDL_WINDOW_RESIZABLE : SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE);
 
-	if (!static_cast<bool>(_handle) || !SDL_SetWindowIcon(_handle, static_cast<SDL_Surface *>(info.icon)) && !static_cast<bool>(std::strstr(SDL_GetError(), "not supported"))) {
+	if (!static_cast<bool>(_handle) || !SDL_SetWindowIcon(_handle, std::addressof(static_cast<SDL_Surface &>(info.icon))) && !static_cast<bool>(std::strstr(SDL_GetError(), "not supported"))) {
 		throw std::runtime_error{SDL_GetError()};
 	}
 
@@ -164,9 +164,9 @@ window::window(const info &info)
 	set_vsync(info.renderer.vsync);
 }
 
-window::operator SDL_GPUDevice *() const
+window::operator SDL_GPUDevice &() const
 {
-	return _device.get();
+	return *_device;
 }
 
 window::operator std::shared_ptr<SDL_GPUDevice>() const
@@ -307,14 +307,14 @@ auto window::upload_image(const res::image &image, const bool mipmaps)
 	auto cmdbuf{acquire_cmdbuf()};
 	const auto cpypass{SDL_BeginGPUCopyPass(cmdbuf.get())};
 	extend_transtex(image.size());
-	const auto [transfer, region]{prepare_transfer(_transtex, image.size())};
+	const auto [transfer, region]{prepare_transfer(*_transtex, image.size())};
 	SDL_UploadToGPUTexture(cpypass, std::addressof(transfer), std::addressof(region), false);
 	SDL_EndGPUCopyPass(cpypass);
 	gfx::texture texture{_device, image.size(), mipmaps};
-	blit(cmdbuf.get(), _transtex, texture.size(), static_cast<SDL_GPUTexture *>(texture));
+	blit(*cmdbuf, *_transtex, texture.size(), static_cast<SDL_GPUTexture &>(texture));
 
 	if (texture.mipmaps()) {
-		SDL_GenerateMipmapsForGPUTexture(cmdbuf.get(), static_cast<SDL_GPUTexture *>(texture));
+		SDL_GenerateMipmapsForGPUTexture(cmdbuf.get(), std::addressof(static_cast<SDL_GPUTexture &>(texture)));
 	}
 
 	wait_fence();
@@ -324,21 +324,21 @@ auto window::upload_image(const res::image &image, const bool mipmaps)
 
 void window::blit_texture(const blit_info &info, [[maybe_unused]] const bool idle)
 {
-	if (static_cast<const SDL_GPUDevice *>(info.src_texture) != _device.get() || lin::any(info.src_area.p < 0.0F) || lin::any(info.src_area.s < 0.0F) || static_cast<const SDL_GPUDevice *>(info.dst_texture) != _device.get() || lin::any(info.dst_area.p < 0.0F) || lin::any(info.dst_area.s < 0.0F)) {
+	if (std::addressof(static_cast<const SDL_GPUDevice &>(info.src_texture)) != _device.get() || lin::any(info.src_area.p < 0.0F) || lin::any(info.src_area.s < 0.0F) || std::addressof(static_cast<const SDL_GPUDevice &>(info.dst_texture)) != _device.get() || lin::any(info.dst_area.p < 0.0F) || lin::any(info.dst_area.s < 0.0F)) {
 		SDL_InvalidParamError("info");
 		throw std::invalid_argument{SDL_GetError()};
 	}
 
 	SDL_GPUBlitInfo descriptor{
 		.source = {
-			.texture = static_cast<SDL_GPUTexture *>(info.src_texture),
+			.texture = std::addressof(static_cast<SDL_GPUTexture &>(info.src_texture)),
 			.x = lin::cast<std::uint32_t>(lin::cast<float>(info.src_texture.size().x()) * info.src_area.p.x()),
 			.y = lin::cast<std::uint32_t>(lin::cast<float>(info.src_texture.size().y()) * info.src_area.p.y()),
 			.w = lin::cast<std::uint32_t>(lin::cast<float>(info.src_texture.size().x()) * info.src_area.s.x()),
 			.h = lin::cast<std::uint32_t>(lin::cast<float>(info.src_texture.size().y()) * info.src_area.s.y())
 		},
 		.destination = {
-			.texture = static_cast<SDL_GPUTexture *>(info.dst_texture),
+			.texture = std::addressof(static_cast<SDL_GPUTexture &>(info.dst_texture)),
 			.x = lin::cast<std::uint32_t>(lin::cast<float>(info.dst_texture.size().x()) * info.dst_area.p.x()),
 			.y = lin::cast<std::uint32_t>(lin::cast<float>(info.dst_texture.size().y()) * info.dst_area.p.y()),
 			.w = lin::cast<std::uint32_t>(lin::cast<float>(info.dst_texture.size().x()) * info.dst_area.s.x()),
@@ -383,18 +383,18 @@ void window::blit_texture(const blit_info &info, [[maybe_unused]] const bool idl
 auto window::download_texture(const gfx::texture &texture, const bool idle)
 	-> res::image
 {
-	if (static_cast<const SDL_GPUDevice *>(texture) != _device.get()) {
+	if (std::addressof(static_cast<const SDL_GPUDevice &>(texture)) != _device.get()) {
 		SDL_InvalidParamError("texture");
 		throw std::invalid_argument{SDL_GetError()};
 	}
 
 	auto cmdbuf(acquire_cmdbuf());
 	extend_transtex(texture.size());
-	blit(cmdbuf.get(), static_cast<SDL_GPUTexture *>(texture), texture.size(), _transtex);
+	blit(*cmdbuf, static_cast<SDL_GPUTexture &>(texture), texture.size(), *_transtex);
 	const auto cpypass{SDL_BeginGPUCopyPass(cmdbuf.get())};
 	res::image image{texture.size()};
 	extend_transbuf(lin::cast<std::uint32_t>(image.bytes().size()));
-	const auto [transfer, region]{prepare_transfer(_transtex, texture.size())};
+	const auto [transfer, region]{prepare_transfer(*_transtex, texture.size())};
 	SDL_DownloadFromGPUTexture(cpypass, std::addressof(region), std::addressof(transfer));
 	SDL_EndGPUCopyPass(cpypass);
 	wait_fence();
@@ -499,7 +499,7 @@ void window::iterate()
 
 	SDL_GPUBlitInfo descriptor{
 		.source = {
-			.texture = static_cast<SDL_GPUTexture *>(*_framebuffer),
+			.texture = std::addressof(static_cast<SDL_GPUTexture &>(*_framebuffer)),
 			.w = _framebuffer->size().x(),
 			.h = _framebuffer->size().y()
 		},
@@ -549,7 +549,7 @@ void window::iterate()
 		_framebuffer = {_device, size, false};
 	}
 
-	target.texture = static_cast<SDL_GPUTexture *>(*_framebuffer);
+	target.texture = std::addressof(static_cast<SDL_GPUTexture &>(*_framebuffer));
 	SDL_EndGPURenderPass(SDL_BeginGPURenderPass(cmdbuf.get(), std::addressof(target), 1, nullptr));
 }
 
@@ -669,7 +669,7 @@ void window::extend_transtex(const lin::uint2 size)
 	_transtex_size = size;
 }
 
-auto window::prepare_transfer(SDL_GPUTexture *texture, const lin::uint2 size)
+auto window::prepare_transfer(SDL_GPUTexture &texture, const lin::uint2 size)
 	-> std::pair<SDL_GPUTextureTransferInfo, SDL_GPUTextureRegion>
 {
 	return {
@@ -677,7 +677,7 @@ auto window::prepare_transfer(SDL_GPUTexture *texture, const lin::uint2 size)
 			.transfer_buffer = _transbuf
 		},
 		{
-			.texture = texture,
+			.texture = std::addressof(texture),
 			.w = size.x(),
 			.h = size.y(),
 			.d = 1

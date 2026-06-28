@@ -80,8 +80,7 @@ constexpr void check_window(app::window &window)
 
 constexpr void check_renderer(gfx::renderer &renderer)
 {
-	SDL_assert_always(static_cast<const SDL_GPUDevice *>(renderer));
-	SDL_assert_always(static_cast<std::shared_ptr<SDL_GPUDevice>>(renderer).get() == static_cast<const SDL_GPUDevice *>(renderer));
+	SDL_assert_always(static_cast<std::shared_ptr<SDL_GPUDevice>>(renderer).get() == std::addressof(static_cast<const SDL_GPUDevice &>(renderer)));
 	SDL_assert_always(!renderer.min_aspect());
 	renderer.set_min_aspect(16.0F / 10.0F);
 	SDL_assert_always(renderer.min_aspect() == 16.0F / 10.0F);
@@ -101,8 +100,7 @@ constexpr void check_renderer(gfx::renderer &renderer)
 	renderer.set_vsync(!renderer.vsync());
 	const res::image image{ext::filesystem::base_directory_path() / "assets" / "tests" / "linear.png"};
 	const auto texture1{renderer.upload_image(image, false)};
-	SDL_assert_always(static_cast<SDL_GPUTexture *>(texture1));
-	SDL_assert_always(static_cast<const SDL_GPUDevice *>(texture1) == static_cast<const SDL_GPUDevice *>(renderer));
+	SDL_assert_always(std::addressof(static_cast<const SDL_GPUDevice &>(texture1)) == std::addressof(static_cast<const SDL_GPUDevice &>(renderer)));
 	SDL_assert_always(lin::all(texture1.size() == image.size()));
 	SDL_assert_always(!texture1.mipmaps());
 	SDL_assert_always(texture1.levels() == 1);
@@ -122,8 +120,7 @@ constexpr void check_renderer(gfx::renderer &renderer)
 	);
 	SDL_assert_always(renderer.download_texture(texture2, false) == image);
 	const auto texture3{renderer.upload_image(image, true)};
-	SDL_assert_always(static_cast<SDL_GPUTexture *>(texture3));
-	SDL_assert_always(static_cast<const SDL_GPUDevice *>(texture3) == static_cast<const SDL_GPUDevice *>(renderer));
+	SDL_assert_always(std::addressof(static_cast<const SDL_GPUDevice &>(texture3)) == std::addressof(static_cast<const SDL_GPUDevice &>(renderer)));
 	SDL_assert_always(lin::all(texture3.size() == image.size()));
 	SDL_assert_always(texture3.mipmaps());
 	SDL_assert_always(texture3.levels() == 3);

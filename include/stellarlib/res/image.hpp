@@ -202,12 +202,12 @@ public:
 	~image();
 
 	/**
-	 * @brief Returns a pointer to the internal handle
-	 * @return Pointer to the internal handle
+	 * @brief Returns a reference to the internal handle
+	 * @return Reference to the internal handle
 	 * @warning Intended for internal/professional use
 	 */
 	[[nodiscard]]
-	explicit operator SDL_Surface *() const;
+	explicit operator SDL_Surface &() const;
 
 	/**
 	 * @brief Returns the size of the image

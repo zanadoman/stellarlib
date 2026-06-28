@@ -170,13 +170,13 @@ private:
 	SDL_GPUFence *_fence{};
 	std::vector<SDL_GPUFence *> _fences{};
 
-	static void blit(SDL_GPUCommandBuffer *cmdbuf, SDL_GPUTexture *src, lin::uint2 size, SDL_GPUTexture *dst);
+	static void blit(SDL_GPUCommandBuffer &cmdbuf, SDL_GPUTexture &src, lin::uint2 size, SDL_GPUTexture &dst);
 
 	[[nodiscard]]
 	explicit window(const info &info);
 
 	[[nodiscard]]
-	explicit operator SDL_GPUDevice *() const final;
+	explicit operator SDL_GPUDevice &() const final;
 
 	[[nodiscard]]
 	explicit operator std::shared_ptr<SDL_GPUDevice>() const final;
@@ -252,7 +252,7 @@ private:
 	void extend_transtex(lin::uint2 size);
 
 	[[nodiscard]]
-	auto prepare_transfer(SDL_GPUTexture *texture, lin::uint2 size)
+	auto prepare_transfer(SDL_GPUTexture &texture, lin::uint2 size)
 		-> std::pair<SDL_GPUTextureTransferInfo, SDL_GPUTextureRegion>;
 
 	void wait_fence();

@@ -122,9 +122,9 @@ image::~image()
 	SDL_DestroySurface(_handle);
 }
 
-image::operator SDL_Surface *() const
+image::operator SDL_Surface &() const
 {
-	return _handle;
+	return *_handle;
 }
 
 auto image::size() const

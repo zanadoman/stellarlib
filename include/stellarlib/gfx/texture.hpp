@@ -92,20 +92,20 @@ public:
 	~texture();
 
 	/**
-	 * @brief Returns a pointer to the internal handle
-	 * @return Pointer to the internal handle
+	 * @brief Returns a reference to the internal handle
+	 * @return Reference to the internal handle
 	 * @warning Intended for internal/professional use
 	 */
 	[[nodiscard]]
-	explicit operator SDL_GPUTexture *() const;
+	explicit operator SDL_GPUTexture &() const;
 
 	/**
-	 * @brief Returns a pointer to the associated device
-	 * @return Pointer to the associated device
+	 * @brief Returns a reference to the associated device
+	 * @return Reference to the associated device
 	 * @warning Intended for internal/professional use
 	 */
 	[[nodiscard]]
-	explicit operator const SDL_GPUDevice *() const;
+	explicit operator const SDL_GPUDevice &() const;
 
 	/**
 	 * @brief Returns the size of the texture

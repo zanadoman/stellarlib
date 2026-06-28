@@ -85,14 +85,14 @@ texture::~texture()
 	SDL_ReleaseGPUTexture(_device.get(), _handle);
 }
 
-texture::operator SDL_GPUTexture *() const
+texture::operator SDL_GPUTexture &() const
 {
-	return _handle;
+	return *_handle;
 }
 
-texture::operator const SDL_GPUDevice *() const
+texture::operator const SDL_GPUDevice &() const
 {
-	return _device.get();
+	return *_device;
 }
 
 auto texture::size() const

@@ -27,7 +27,6 @@
 #include <stellarlib/lin/lin.hpp>
 
 #include <SDL3/SDL_pixels.h>
-#include <SDL3/SDL_surface.h>
 
 #include <gtest/gtest.h>
 
@@ -167,11 +166,6 @@ TEST(stellarlib_res_image, should_move_via_assignment)
 	res::image image2{lin::uint2{1, 1}};
 	image2 = std::move(image1);
 	check_rgb(image2);
-}
-
-TEST(stellarlib_res_image, should_provide_handle)
-{
-	ASSERT_TRUE(static_cast<SDL_Surface *>(res::image{ext::filesystem::base_directory_path() / "assets" / "tests" / "rgb.png"}));
 }
 
 TEST(stellarlib_res_image, should_apply_repeat)
