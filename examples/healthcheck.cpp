@@ -34,6 +34,7 @@
 #include <SDL3/SDL_log.h>
 
 #include <memory>
+#include <new>
 #include <optional>
 #include <string>
 #include <vector>
@@ -171,7 +172,7 @@ private:
 	constexpr void begin(app::context &ctx) final
 	{
 		SDL_Log("%p: begin", static_cast<const void *>(this));
-		_texture = std::make_unique<gfx::texture>(ctx.window().renderer().upload_image(res::image{ext::filesystem::base_directory_path() / "assets" / "tests" / "alpha_blending.png"}, false));
+		_texture.reset(new (std::nothrow) gfx::texture{ctx.window().renderer().upload_image(res::image{ext::filesystem::base_directory_path() / "assets" / "tests" / "alpha_blending.png"}, false)});
 	}
 
 	[[nodiscard]]
@@ -243,7 +244,7 @@ auto app::init(const std::vector<std::string> &args)
 			check_clock(ctx.clock());
 			check_window(ctx.window());
 			check_renderer(ctx.window().renderer());
-			return std::make_unique<blank>();
+			return std::unique_ptr<blank>{new (std::nothrow) blank{}};
 		}
 	}};
 }

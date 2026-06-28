@@ -38,6 +38,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <exception>
+#include <new>
 #include <stdexcept>
 #include <utility>
 
@@ -97,7 +98,7 @@ public:
 		});
 
 		if (auto info{app::init({argv, argv + argc})}) {
-			*appstate = new context{internal::lifecycle<host>::init<context>(std::move(*info))};
+			*appstate = new (std::nothrow) context{internal::lifecycle<host>::init<context>(std::move(*info))};
 			return SDL_APP_CONTINUE;
 		}
 

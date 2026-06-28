@@ -32,6 +32,7 @@
 #include <SDL3/SDL_log.h>
 
 #include <memory>
+#include <new>
 #include <optional>
 #include <string>
 #include <vector>
@@ -126,7 +127,7 @@ private:
 		-> std::optional<std::unique_ptr<app::scene>> final
 	{
 		SDL_Log("%p: update", static_cast<const void *>(this));
-		return std::make_unique<scene2>();
+		return std::unique_ptr<scene2>{new (std::nothrow) scene2{}};
 	}
 
 	constexpr void end([[maybe_unused]] app::context &ctx) final
@@ -163,7 +164,7 @@ auto app::init(const std::vector<std::string> &args)
 				.validation = true
 			}
 		},
-		.entry = std::make_unique<scene1>()
+		.entry = std::unique_ptr<scene1>{new (std::nothrow) scene1{}}
 	}};
 }
 

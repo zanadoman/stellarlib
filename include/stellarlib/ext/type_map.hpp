@@ -29,6 +29,7 @@
 #include <cstddef>
 #include <limits>
 #include <memory>
+#include <new>
 #include <ranges>
 #include <stdexcept>
 #include <typeinfo>
@@ -130,12 +131,12 @@ public:
 			_ids.emplace_back(id);
 
 			if constexpr (std::is_same_v<Base, void>) {
-				_elems.emplace_back(new T{std::forward<Args>(args)...}, [] (const auto elem) -> void {
+				_elems.emplace_back(new (std::nothrow) T{std::forward<Args>(args)...}, [] (const auto elem) -> void {
 					delete static_cast<const T *>(elem);
 				});
 			}
 			else {
-				_elems.emplace_back(std::make_unique<T>(std::forward<Args>(args)...));
+				_elems.emplace_back(new (std::nothrow) T{std::forward<Args>(args)...});
 			}
 		}
 		else if constexpr (sizeof...(Args) == 1 && (std::is_assignable_v<T &, Args> && ...)) {
@@ -145,12 +146,12 @@ public:
 			std::destroy_at(_elems.data() + _map[id]);
 
 			if constexpr (std::is_same_v<Base, void>) {
-				std::construct_at(_elems.data() + _map[id], new T{std::forward<Args>(args)...}, [] (const auto elem) -> void {
+				std::construct_at(_elems.data() + _map[id], new (std::nothrow) T{std::forward<Args>(args)...}, [] (const auto elem) -> void {
 					delete static_cast<const T *>(elem);
 				});
 			}
 			else {
-				std::construct_at(_elems.data() + _map[id], std::make_unique<T>(std::forward<Args>(args)...));
+				std::construct_at(_elems.data() + _map[id], new (std::nothrow) T{std::forward<Args>(args)...});
 			}
 		}
 	}

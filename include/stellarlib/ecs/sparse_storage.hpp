@@ -31,6 +31,7 @@
 #include <array>
 #include <cstdint>
 #include <memory>
+#include <new>
 #include <type_traits>
 
 namespace stellarlib::ecs::internal
@@ -78,7 +79,7 @@ public:
 			return static_cast<const sparse_map<std::uint32_t, T> &>(**map);
 		}
 
-		_maps.insert(id, std::make_unique<sparse_map<std::uint32_t, T>>());
+		_maps.insert(id, new (std::nothrow) sparse_map<std::uint32_t, T>{});
 		return static_cast<const sparse_map<std::uint32_t, T> &>(*_maps.values().back());
 	}
 
@@ -91,7 +92,7 @@ public:
 			return static_cast<sparse_map<std::uint32_t, T> &>(**map);
 		}
 
-		_maps.insert(id, std::make_unique<sparse_map<std::uint32_t, T>>());
+		_maps.insert(id, new (std::nothrow) sparse_map<std::uint32_t, T>{});
 		return static_cast<sparse_map<std::uint32_t, T> &>(*_maps.values().back());
 	}
 
