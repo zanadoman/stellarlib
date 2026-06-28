@@ -242,17 +242,17 @@ private:
 	void extend_transbuf(std::uint32_t size);
 
 	[[nodiscard]]
-	auto map_transbuf()
+	auto map_transbuf() const
 		-> std::unique_ptr<void, std::function<void (void *)>>;
 
 	[[nodiscard]]
-	auto acquire_cmdbuf()
+	auto acquire_cmdbuf() const
 		-> std::unique_ptr<SDL_GPUCommandBuffer, void (*)(SDL_GPUCommandBuffer *)>;
 
 	void extend_transtex(lin::uint2 size);
 
 	[[nodiscard]]
-	auto prepare_transfer(SDL_GPUTexture &texture, lin::uint2 size)
+	auto prepare_transfer(SDL_GPUTexture &texture, lin::uint2 size) const
 		-> std::pair<SDL_GPUTextureTransferInfo, SDL_GPUTextureRegion>;
 
 	void wait_fence();

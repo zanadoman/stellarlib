@@ -611,7 +611,7 @@ void window::extend_transbuf(const std::uint32_t size)
 	_transbuf_size = descriptor.size;
 }
 
-auto window::map_transbuf()
+auto window::map_transbuf() const
 	-> std::unique_ptr<void, std::function<void (void *)>>
 {
 	std::unique_ptr<void, std::function<void (void *)>> transmem{SDL_MapGPUTransferBuffer(_device.get(), _transbuf, true), [this] (const auto) -> void {
@@ -625,7 +625,7 @@ auto window::map_transbuf()
 	return transmem;
 }
 
-auto window::acquire_cmdbuf()
+auto window::acquire_cmdbuf() const
 	-> std::unique_ptr<SDL_GPUCommandBuffer, void (*)(SDL_GPUCommandBuffer *)>
 {
 	std::unique_ptr<SDL_GPUCommandBuffer, void (*)(SDL_GPUCommandBuffer *)> cmdbuf{SDL_AcquireGPUCommandBuffer(_device.get()), [] (const auto cmdbuf) -> void {
@@ -669,7 +669,7 @@ void window::extend_transtex(const lin::uint2 size)
 	_transtex_size = size;
 }
 
-auto window::prepare_transfer(SDL_GPUTexture &texture, const lin::uint2 size)
+auto window::prepare_transfer(SDL_GPUTexture &texture, const lin::uint2 size) const
 	-> std::pair<SDL_GPUTextureTransferInfo, SDL_GPUTextureRegion>
 {
 	return {
@@ -690,6 +690,9 @@ void window::wait_fence()
 	if (static_cast<bool>(_fence) && !SDL_WaitForGPUFences(_device.get(), false, std::addressof(_fence), 1)) {
 		throw std::runtime_error{SDL_GetError()};
 	}
+
+	SDL_ReleaseGPUFence(_device.get(), _fence);
+	_fence = nullptr;
 }
 
 void window::wait_fences()
