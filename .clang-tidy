@@ -72,6 +72,7 @@ Checks: >
   -bugprone-exception-escape,
   -bugprone-multi-level-implicit-pointer-conversion,
   -bugprone-signed-char-misuse,
+  -bugprone-sizeof-expression,
   -bugprone-std-namespace-modification,
   -bugprone-suspicious-realloc-usage,
   -bugprone-switch-missing-default-case,

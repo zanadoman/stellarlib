@@ -322,7 +322,7 @@ auto window::upload_image(const res::image &image, const bool mipmaps)
 	return texture;
 }
 
-void window::blit_texture(const blit_info &info, [[maybe_unused]] const bool idle)
+void window::blit_texture(const blit_info &info, const bool idle)
 {
 	if (std::addressof(static_cast<const SDL_GPUDevice &>(info.src_texture)) != _device.get() || lin::any(info.src_area.p < 0.0F) || lin::any(info.src_area.s < 0.0F) || std::addressof(static_cast<const SDL_GPUDevice &>(info.dst_texture)) != _device.get() || lin::any(info.dst_area.p < 0.0F) || lin::any(info.dst_area.s < 0.0F)) {
 		SDL_InvalidParamError("info");
