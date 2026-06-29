@@ -14,13 +14,15 @@ jobs:
       image: archlinux:latest
 
     steps:
-      - uses: actions/checkout@v6
-
       - name: Install prerequisites
-        run: pacman -Syu --noconfirm cmake ninja clang lld sdl3 gtest valgrind
+        run: pacman -Syu --noconfirm git cmake ninja clang lld valgrind
+
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
 
       - name: Configure CMake
-        run: cmake --preset x86_64-linux-gnu-release
+        run: cmake --preset x86_64-linux-gnu-release-vendored -DSDL_UNIX_CONSOLE_BUILD=ON
 
       - name: Build examples
         run: cmake --build build/x86_64-linux-gnu/release -t examples
@@ -29,4 +31,4 @@ jobs:
         run: cmake --build build/x86_64-linux-gnu/release -t tests
 
       - name: Run tests
-        run: env DEBUGINFOD_URLS=https://debuginfod.archlinux.org valgrind ctest --test-dir build/x86_64-linux-gnu/release
+        run: env DEBUGINFOD_URLS=https://debuginfod.archlinux.org valgrind build/x86_64-linux-gnu/release/tests
