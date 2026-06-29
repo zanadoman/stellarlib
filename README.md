@@ -42,6 +42,7 @@ Opinionated, cross-platform game engine library in [C++23](https://en.cppreferen
 
 ### Prerequisites
 
+- [git](https://archlinux.org/packages/extra/x86_64/git/)
 - [CMake](https://archlinux.org/packages/extra/x86_64/cmake/)
 - [Ninja](https://archlinux.org/packages/extra/x86_64/ninja/)
 - [Clang](https://archlinux.org/packages/extra/x86_64/clang/)
