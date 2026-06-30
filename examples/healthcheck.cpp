@@ -78,7 +78,7 @@ constexpr void check_window(app::window &window)
 	SDL_assert_always(!window.focused());
 }
 
-constexpr void check_renderer(gfx::renderer &renderer)
+constexpr void check_renderer(app::renderer &renderer)
 {
 	SDL_assert_always(static_cast<std::shared_ptr<SDL_GPUDevice>>(renderer).get() == std::addressof(static_cast<const SDL_GPUDevice &>(renderer)));
 	SDL_assert_always(!renderer.min_aspect());
@@ -94,9 +94,9 @@ constexpr void check_renderer(gfx::renderer &renderer)
 	SDL_assert_always(renderer.filter() == res::image::filter::nearest);
 	renderer.set_filter(res::image::filter::linear);
 	SDL_assert_always(renderer.filter() == res::image::filter::linear);
-	SDL_assert_always(renderer.presentation() == gfx::renderer::presentation::stretch);
-	renderer.set_presentation(gfx::renderer::presentation::letterbox);
-	SDL_assert_always(renderer.presentation() == gfx::renderer::presentation::letterbox);
+	SDL_assert_always(renderer.presentation() == app::renderer::presentation::stretch);
+	renderer.set_presentation(app::renderer::presentation::letterbox);
+	SDL_assert_always(renderer.presentation() == app::renderer::presentation::letterbox);
 	renderer.set_vsync(!renderer.vsync());
 	const res::image image{ext::filesystem::base_directory_path() / "assets" / "tests" / "linear.png"};
 	const auto texture1{renderer.upload_image(image, false)};
@@ -233,7 +233,7 @@ auto app::init(const std::vector<std::string> &args)
 			.icon = res::image{ext::filesystem::base_directory_path() / "assets" / "tests" / "rgb.png"},
 			.renderer = {
 				.max_resolution = lin::uint2{1920, 1080},
-				.presentation = gfx::renderer::presentation::stretch,
+				.presentation = app::renderer::presentation::stretch,
 				.vsync = false,
 				.validation = true
 			}

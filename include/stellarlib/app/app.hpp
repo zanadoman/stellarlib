@@ -34,4 +34,17 @@
 #include <stellarlib/app/window.hpp>
 /* IWYU pragma: end_exports */
 
+#include <stellarlib/gfx/gfx.hpp>
+
+/**
+ * @brief Application runtime
+ */
+namespace stellarlib::app
+{
+/**
+ * @brief Renderer subsystem
+ */
+using renderer = gfx::renderer<window>;
+}
+
 #endif

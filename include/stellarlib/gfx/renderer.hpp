@@ -45,9 +45,13 @@ namespace stellarlib::gfx
 {
 /**
  * @brief Common renderer interface
+ * @tparam Self Implementation provider
  */
+template <typename Self>
 class [[nodiscard]] renderer
 {
+friend Self;
+
 public:
 	/**
 	 * @brief Presentation method
@@ -136,17 +140,15 @@ public:
 	};
 
 	/**
-	 * @brief Destructor
-	 */
-	virtual ~renderer() noexcept;
-
-	/**
 	 * @brief Returns a reference to the internal handle
 	 * @return Reference to the internal handle
 	 * @warning Intended for internal/professional use
 	 */
 	[[nodiscard]]
-	virtual explicit constexpr operator SDL_GPUDevice &() const = 0;
+	explicit constexpr operator SDL_GPUDevice &() const
+	{
+		return static_cast<SDL_GPUDevice &>(static_cast<const Self &>(*this));
+	}
 
 	/**
 	 * @brief Returns a shared pointer to the internal handle
@@ -154,91 +156,130 @@ public:
 	 * @warning Intended for internal/professional use
 	 */
 	[[nodiscard]]
-	virtual explicit constexpr operator std::shared_ptr<SDL_GPUDevice>() const = 0;
+	explicit constexpr operator std::shared_ptr<SDL_GPUDevice>() const
+	{
+		return static_cast<std::shared_ptr<SDL_GPUDevice>>(static_cast<const Self &>(*this));
+	}
 
 	/**
 	 * @brief Returns the minimum framebuffer aspect ratio
 	 * @return Minimum framebuffer aspect ratio
 	 */
 	[[nodiscard]]
-	virtual constexpr auto min_aspect() const
-		-> std::optional<float> = 0;
+	constexpr auto min_aspect() const
+		-> std::optional<float>
+	{
+		return static_cast<const Self &>(*this).min_aspect();
+	}
 
 	/**
 	 * @brief Sets the minimum framebuffer aspect ratio
 	 * @param min_aspect Minimum framebuffer aspect ratio
 	 */
-	virtual void set_min_aspect(std::optional<float> min_aspect);
+	constexpr void set_min_aspect(std::optional<float> min_aspect)
+	{
+		static_cast<Self &>(*this).set_min_aspect(min_aspect);
+	}
 
 	/**
 	 * @brief Returns the maximum framebuffer aspect ratio
 	 * @return Maximum framebuffer aspect ratio
 	 */
 	[[nodiscard]]
-	virtual constexpr auto max_aspect() const
-		-> std::optional<float> = 0;
+	constexpr auto max_aspect() const
+		-> std::optional<float>
+	{
+		return static_cast<const Self &>(*this).max_aspect();
+	}
 
 	/**
 	 * @brief Sets the maximum framebuffer aspect ratio
 	 * @param max_aspect Maximum framebuffer aspect ratio
 	 */
-	virtual void set_max_aspect(std::optional<float> max_aspect);
+	constexpr void set_max_aspect(std::optional<float> max_aspect)
+	{
+		static_cast<Self &>(*this).set_max_aspect(max_aspect);
+	}
 
 	/**
 	 * @brief Returns the maximum framebuffer resolution
 	 * @return Maximum framebuffer resolution
 	 */
 	[[nodiscard]]
-	virtual constexpr auto max_resolution() const
-		-> const std::optional<lin::uint2> & = 0;
+	constexpr auto max_resolution() const
+		-> const std::optional<lin::uint2> &
+	{
+		return static_cast<const Self &>(*this).max_resolution();
+	}
 
 	/**
 	 * @brief Sets the maximum framebuffer resolution
 	 * @param max_resolution Maximum framebuffer resolution
 	 */
-	virtual void set_max_resolution(const std::optional<lin::uint2> &max_resolution);
+	constexpr void set_max_resolution(const std::optional<lin::uint2> &max_resolution)
+	{
+		static_cast<Self &>(*this).set_max_resolution(max_resolution);
+	}
 
 	/**
 	 * @brief Returns the framebuffer filtering method
 	 * @return Framebuffer filtering method
 	 */
 	[[nodiscard]]
-	virtual constexpr auto filter() const
-		-> res::image::filter = 0;
+	constexpr auto filter() const
+		-> res::image::filter
+	{
+		return static_cast<const Self &>(*this).filter();
+	}
 
 	/**
 	 * @brief Sets the framebuffer filtering method
 	 * @param filter Framebuffer filtering method
 	 */
-	virtual void set_filter(res::image::filter filter);
+	constexpr void set_filter(res::image::filter filter)
+	{
+		static_cast<Self &>(*this).set_filter(filter);
+	}
 
 	/**
 	 * @brief Returns the framebuffer presentation method
 	 * @return Framebuffer presentation method
 	 */
 	[[nodiscard]]
-	virtual constexpr auto presentation() const
-		-> enum presentation = 0;
+	constexpr auto presentation() const
+		-> enum presentation
+	{
+		return static_cast<const Self &>(*this).presentation();
+	}
 
 	/**
 	 * @brief Sets the framebuffer presentation method
 	 * @param presentation Framebuffer presentation method
 	 */
-	virtual void set_presentation(enum presentation presentation);
+	constexpr void set_presentation(enum presentation presentation)
+	{
+		static_cast<Self &>(*this).set_presentation(presentation);
+	}
 
 	/**
 	 * @brief Returns whether synchronization is enabled
 	 * @return Whether synchronization is enabled
 	 */
 	[[nodiscard]]
-	virtual constexpr auto vsync() const
-		-> bool = 0;
+	constexpr auto vsync() const
+		-> bool
+	{
+		return static_cast<const Self &>(*this).vsync();
+	}
 
 	/**
 	 * @brief Sets whether synchronization is enabled
 	 * @param vsync Whether synchronization is enabled
 	 */
-	virtual void set_vsync(bool vsync);
+	constexpr void set_vsync(bool vsync)
+	{
+		static_cast<Self &>(*this).set_vsync(vsync);
+	}
 
 	/**
 	 * @brief Uploads an image
@@ -247,15 +288,21 @@ public:
 	 * @return Uploaded image
 	 */
 	[[nodiscard]]
-	virtual constexpr auto upload_image(const res::image &image, bool mipmaps)
-		-> texture = 0;
+	constexpr auto upload_image(const res::image &image, bool mipmaps)
+		-> texture
+	{
+		return static_cast<Self &>(*this).upload_image(image, mipmaps);
+	}
 
 	/**
 	 * @brief Blits from a texture into another
 	 * @param info Operation descriptor
 	 * @param idle Wait for idle
 	 */
-	virtual void blit_texture(const blit_info &info, bool idle);
+	constexpr void blit_texture(const blit_info &info, bool idle)
+	{
+		static_cast<Self &>(*this).blit_texture(info, idle);
+	}
 
 	/**
 	 * @brief Downloads a texture
@@ -264,61 +311,75 @@ public:
 	 * @return Downloaded texture
 	 */
 	[[nodiscard]]
-	virtual constexpr auto download_texture(const texture &texture, bool idle)
-		-> res::image = 0;
+	constexpr auto download_texture(const texture &texture, bool idle)
+		-> res::image
+	{
+		return static_cast<Self &>(*this).download_texture(texture, idle);
+	}
 
 	/**
 	 * @brief Returns a reference to the virtual framebuffer
 	 * @return Reference to the virtual framebuffer
 	 */
 	[[nodiscard]]
-	virtual constexpr auto framebuffer() const
-		-> const std::optional<texture> & = 0;
+	constexpr auto framebuffer() const
+		-> const std::optional<texture> &
+	{
+		return static_cast<const Self &>(*this).framebuffer();
+	}
 
 	/**
 	 * @brief Returns a reference to the virtual framebuffer
 	 * @return Reference to the virtual framebuffer
 	 */
 	[[nodiscard]]
-	virtual constexpr auto framebuffer()
-		-> std::optional<texture> & = 0;
+	constexpr auto framebuffer()
+		-> std::optional<texture> &
+	{
+		return static_cast<Self &>(*this).framebuffer();
+	}
 
-protected:
+private:
 	/**
 	 * @brief Default constructor
 	 */
 	[[nodiscard]]
-	renderer() noexcept;
+	constexpr renderer() noexcept = default;
 
 	/**
 	 * @brief Copy constructor
 	 * @param other Other instance
 	 */
 	[[nodiscard]]
-	renderer(const renderer &other) noexcept;
+	constexpr renderer(const renderer &other) noexcept = default;
 
 	/**
 	 * @brief Move constructor
 	 * @param other Other instance
 	 */
 	[[nodiscard]]
-	renderer(renderer &&other) noexcept;
+	constexpr renderer(renderer &&other) noexcept = default;
 
 	/**
 	 * @brief Copy assignment operator
 	 * @param other Other instance
 	 * @return Current instance
 	 */
-	auto operator=(const renderer &other) noexcept
-		-> renderer &;
+	constexpr auto operator=(const renderer &other) noexcept
+		-> renderer & = default;
 
 	/**
 	 * @brief Move assignment operator
 	 * @param other Other instance
 	 * @return Current instance
 	 */
-	auto operator=(renderer &&other) noexcept
-		-> renderer &;
+	constexpr auto operator=(renderer &&other) noexcept
+		-> renderer & = default;
+
+	/**
+	 * @brief Destructor
+	 */
+	constexpr ~renderer() noexcept = default;
 };
 }
 

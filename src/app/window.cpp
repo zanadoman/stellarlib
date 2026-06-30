@@ -87,13 +87,13 @@ auto window::focused() const
 }
 
 auto window::renderer() const
-	-> const gfx::renderer &
+	-> const gfx::renderer<window> &
 {
 	return *this;
 }
 
 auto window::renderer()
-	-> gfx::renderer &
+	-> gfx::renderer<window> &
 {
 	return *this;
 }

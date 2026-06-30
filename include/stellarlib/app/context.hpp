@@ -192,8 +192,9 @@ public:
 private:
 	[[no_unique_address]] class metadata _metadata;
 	class clock _clock;
-	[[maybe_unused]] std::array<std::byte, 4> _padding;
+	[[maybe_unused]] std::array<std::byte, 4> _padding1;
 	class window _window;
+	[[maybe_unused]] std::array<std::byte, 8> _padding2;
 	ecs::world _world{};
 	ext::type_map<void, context> _store{};
 	scene *_scene{};

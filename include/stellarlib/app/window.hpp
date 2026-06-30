@@ -49,9 +49,10 @@ namespace stellarlib::app
 /**
  * @brief Window subsystem
  */
-class [[nodiscard]] window final : gfx::renderer
+class [[nodiscard]] window final : gfx::renderer<window>
 {
 friend internal::lifecycle<class context>;
+friend gfx::renderer<window>;
 
 public:
 	/**
@@ -72,7 +73,7 @@ public:
 		/**
 		 * @brief Renderer initialization descriptor
 		 */
-		gfx::renderer::info renderer;
+		gfx::renderer<window>::info renderer;
 	};
 
 	/**
@@ -102,7 +103,7 @@ public:
 	/**
 	 * @brief Destructor
 	 */
-	~window() final;
+	~window();
 
 	/**
 	 * @brief Returns the title of the window
@@ -140,7 +141,7 @@ public:
 	 */
 	[[nodiscard]]
 	auto renderer() const
-		-> const gfx::renderer &;
+		-> const gfx::renderer<window> &;
 
 	/**
 	 * @brief Returns the renderer of the window
@@ -148,7 +149,7 @@ public:
 	 */
 	[[nodiscard]]
 	auto renderer()
-		-> gfx::renderer &;
+		-> gfx::renderer<window> &;
 
 private:
 	SDL_Window *_handle{};
@@ -176,64 +177,64 @@ private:
 	explicit window(const info &info);
 
 	[[nodiscard]]
-	explicit operator SDL_GPUDevice &() const final;
+	explicit operator SDL_GPUDevice &() const;
 
 	[[nodiscard]]
-	explicit operator std::shared_ptr<SDL_GPUDevice>() const final;
+	explicit operator std::shared_ptr<SDL_GPUDevice>() const;
 
 	[[nodiscard]]
 	auto min_aspect() const
-		-> std::optional<float> final;
+		-> std::optional<float>;
 
-	void set_min_aspect(std::optional<float> min_aspect) final;
+	void set_min_aspect(std::optional<float> min_aspect);
 
 	[[nodiscard]]
 	auto max_aspect() const
-		-> std::optional<float> final;
+		-> std::optional<float>;
 
-	void set_max_aspect(std::optional<float> max_aspect) final;
+	void set_max_aspect(std::optional<float> max_aspect);
 
 	[[nodiscard]]
 	auto max_resolution() const
-		-> const std::optional<lin::uint2> & final;
+		-> const std::optional<lin::uint2> &;
 
-	void set_max_resolution(const std::optional<lin::uint2> &max_resolution) final;
+	void set_max_resolution(const std::optional<lin::uint2> &max_resolution);
 
 	[[nodiscard]]
 	auto filter() const
-		-> res::image::filter final;
+		-> res::image::filter;
 
-	void set_filter(res::image::filter filter) final;
+	void set_filter(res::image::filter filter);
 
 	[[nodiscard]]
 	auto presentation() const
-		-> enum presentation final;
+		-> enum presentation;
 
-	void set_presentation(enum presentation presentation) final;
+	void set_presentation(enum presentation presentation);
 
 	[[nodiscard]]
 	auto vsync() const
-		-> bool final;
+		-> bool;
 
-	void set_vsync(bool vsync) final;
+	void set_vsync(bool vsync);
 
 	[[nodiscard]]
 	auto upload_image(const res::image &image, bool mipmaps)
-		-> gfx::texture final;
+		-> gfx::texture;
 
-	void blit_texture(const blit_info &info, bool idle) final;
+	void blit_texture(const blit_info &info, bool idle);
 
 	[[nodiscard]]
 	auto download_texture(const gfx::texture &texture, bool idle)
-		-> res::image final;
+		-> res::image;
 
 	[[nodiscard]]
 	auto framebuffer() const
-		-> const std::optional<gfx::texture> & final;
+		-> const std::optional<gfx::texture> &;
 
 	[[nodiscard]]
 	auto framebuffer()
-		-> std::optional<gfx::texture> & final;
+		-> std::optional<gfx::texture> &;
 
 	void iterate();
 
