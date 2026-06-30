@@ -162,6 +162,7 @@ window::window(const info &info)
 	set_filter(info.renderer.filter);
 	set_presentation(info.renderer.presentation);
 	set_vsync(info.renderer.vsync);
+	submit_cmdbuf(acquire_cmdbuf());
 }
 
 window::operator SDL_GPUDevice &() const
@@ -214,6 +215,11 @@ auto window::max_resolution() const
 
 void window::set_max_resolution(const std::optional<lin::uint2> &max_resolution)
 {
+	if (max_resolution && !lin::all(*max_resolution)) {
+		SDL_InvalidParamError("max_resolution");
+		throw std::invalid_argument{SDL_GetError()};
+	}
+
 	_max_resolution = max_resolution;
 }
 
@@ -228,14 +234,13 @@ void window::set_filter(const res::image::filter filter)
 	switch (filter) {
 	case res::image::filter::nearest:
 	case res::image::filter::linear: {
+		_filter = filter;
 		break;
 	}
 	default: {
 		SDL_InvalidParamError("filter");
 		throw std::invalid_argument{SDL_GetError()};
 	}}
-
-	_filter = filter;
 }
 
 auto window::presentation() const
@@ -249,14 +254,13 @@ void window::set_presentation(const enum presentation presentation)
 	switch (presentation) {
 	case presentation::letterbox:
 	case presentation::stretch: {
+		_presentation = presentation;
 		break;
 	}
 	default: {
 		SDL_InvalidParamError("presentation");
 		throw std::invalid_argument{SDL_GetError()};
 	}}
-
-	_presentation = presentation;
 }
 
 auto window::vsync() const
@@ -303,6 +307,7 @@ auto window::upload_image(const res::image &image, const bool mipmaps)
 	-> gfx::texture
 {
 	extend_transbuf(lin::cast<std::uint32_t>(image.bytes().size()));
+	wait_fence();
 	std::memcpy(map_transbuf().get(), image.bytes().data(), image.bytes().size());
 	auto cmdbuf{acquire_cmdbuf()};
 	const auto cpypass{SDL_BeginGPUCopyPass(cmdbuf.get())};
@@ -317,7 +322,6 @@ auto window::upload_image(const res::image &image, const bool mipmaps)
 		SDL_GenerateMipmapsForGPUTexture(cmdbuf.get(), std::addressof(static_cast<SDL_GPUTexture &>(texture)));
 	}
 
-	wait_fence();
 	submit_cmdbuf(std::move(cmdbuf));
 	return texture;
 }
@@ -371,9 +375,9 @@ void window::blit_texture(const blit_info &info, const bool idle)
 
 	auto cmdbuf{acquire_cmdbuf()};
 	SDL_BlitGPUTexture(cmdbuf.get(), std::addressof(descriptor));
+	wait_fence();
 
 	if (idle) {
-		wait_fence();
 		wait_fences();
 	}
 
@@ -595,6 +599,7 @@ void window::extend_transbuf(const std::uint32_t size)
 	}
 
 	const SDL_GPUTransferBufferCreateInfo descriptor{
+		.usage = static_cast<SDL_GPUTransferBufferUsage>(SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD | SDL_GPU_TRANSFERBUFFERUSAGE_DOWNLOAD),
 		.size = size
 	};
 
@@ -614,7 +619,7 @@ void window::extend_transbuf(const std::uint32_t size)
 auto window::map_transbuf() const
 	-> std::unique_ptr<void, std::function<void (void *)>>
 {
-	std::unique_ptr<void, std::function<void (void *)>> transmem{SDL_MapGPUTransferBuffer(_device.get(), _transbuf, true), [this] (const auto) -> void {
+	std::unique_ptr<void, std::function<void (const void *)>> transmem{SDL_MapGPUTransferBuffer(_device.get(), _transbuf, false), [this] (const auto) -> void {
 		SDL_UnmapGPUTransferBuffer(_device.get(), _transbuf);
 	}};
 
@@ -687,20 +692,13 @@ auto window::prepare_transfer(SDL_GPUTexture &texture, const lin::uint2 size) co
 
 void window::wait_fence()
 {
-	if (static_cast<bool>(_fence) && !SDL_WaitForGPUFences(_device.get(), false, std::addressof(_fence), 1)) {
+	if (!SDL_WaitForGPUFences(_device.get(), false, std::addressof(_fence), 1)) {
 		throw std::runtime_error{SDL_GetError()};
 	}
-
-	SDL_ReleaseGPUFence(_device.get(), _fence);
-	_fence = nullptr;
 }
 
 void window::wait_fences()
 {
-	if (_fences.empty()) {
-		return;
-	}
-
 	if (!SDL_WaitForGPUFences(_device.get(), true, _fences.data(), lin::cast<std::uint32_t>(_fences.size()))) {
 		throw std::runtime_error{SDL_GetError()};
 	}

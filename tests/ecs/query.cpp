@@ -29,6 +29,7 @@
 #include <cstdint>
 #include <functional>
 #include <limits>
+#include <memory>
 #include <ranges>
 
 using namespace stellarlib;
@@ -43,8 +44,8 @@ using namespace stellarlib;
 TEST(stellarlib_ecs_query, should_execute_callback)
 {
 	auto executed{false};
-	const std::function callback{[&] noexcept -> void {
-		executed = true;
+	const std::function callback{[cpt = std::addressof(executed)] noexcept -> void {
+		*cpt = true;
 	}};
 	{
 		ecs::internal::query query{std::views::iota(std::uint32_t{}, std::numeric_limits<std::uint32_t>::max()), callback};

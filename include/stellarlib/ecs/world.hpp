@@ -370,8 +370,8 @@ public:
 	{
 		++_defers;
 		return internal::query{_archetypes | std::views::transform([] [[nodiscard]] (const auto &pair) noexcept -> auto {
-			return pair.second | std::views::transform([&] [[nodiscard]] (const auto entity) noexcept -> auto {
-				return std::tuple<std::uint32_t, const archetype &>{entity, pair.first};
+			return pair.second | std::views::transform([cpt = std::addressof(pair)] [[nodiscard]] (const auto entity) noexcept -> auto {
+				return std::tuple<std::uint32_t, const archetype &>{entity, cpt->first};
 			});
 		}) | std::views::join, _execute};
 	}
@@ -571,8 +571,8 @@ private:
 		if (_queries.extend(id + 1, std::numeric_limits<std::uint16_t>::max()) || _queries[id] == std::numeric_limits<std::uint16_t>::max()) {
 			const auto &archetype{archetype::of<T...>()};
 
-			const auto pair{std::ranges::find_if(_indices, [&] [[nodiscard]] (const auto &pair) noexcept -> auto {
-				return pair.first == archetype;
+			const auto pair{std::ranges::find_if(_indices, [cpt = std::addressof(archetype)] [[nodiscard]] (const auto &pair) noexcept -> auto {
+				return pair.first == *cpt;
 			})};
 
 			if (pair == _indices.end()) {
