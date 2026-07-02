@@ -40,7 +40,7 @@ Opinionated, cross-platform game engine library in [C++23](https://en.cppreferen
 
 ## Build Instructions
 
-### Prerequisites
+### Prerequisites & Tools
 
 - [git](https://archlinux.org/packages/extra/x86_64/git/)
 - [CMake](https://archlinux.org/packages/extra/x86_64/cmake/)
@@ -77,7 +77,6 @@ Opinionated, cross-platform game engine library in [C++23](https://en.cppreferen
 ```sh
 env JAVA_HOME=/usr/lib/jvm/java-8-openjdk /opt/android-sdk/tools/bin/sdkmanager 'platforms;android-36' 'build-tools;35.0.0' platform-tools
 ```
-- [SDL3](https://aur.archlinux.org/packages/android-x86-64-sdl3)
 - [OpenJDK 21](https://archlinux.org/packages/extra/x86_64/jdk21-openjdk/)
 
 </details>
@@ -91,7 +90,19 @@ env JAVA_HOME=/usr/lib/jvm/java-8-openjdk /opt/android-sdk/tools/bin/sdkmanager 
 ```sh
 env JAVA_HOME=/usr/lib/jvm/java-8-openjdk /opt/android-sdk/tools/bin/sdkmanager 'platforms;android-36' 'build-tools;35.0.0' platform-tools
 ```
-- [SDL3](https://aur.archlinux.org/packages/android-aarch64-sdl3)
+- [OpenJDK 21](https://archlinux.org/packages/extra/x86_64/jdk21-openjdk/)
+
+</details>
+
+<details>
+<summary>riscv64-linux-android</summary>
+
+- [Android NDK](https://aur.archlinux.org/packages/android-ndk)
+- [OpenJDK 8](https://archlinux.org/packages/extra/x86_64/jdk8-openjdk/)
+- [Android SDK](https://aur.archlinux.org/packages/android-sdk)
+```sh
+env JAVA_HOME=/usr/lib/jvm/java-8-openjdk /opt/android-sdk/tools/bin/sdkmanager 'platforms;android-36' 'build-tools;35.0.0' platform-tools
+```
 - [OpenJDK 21](https://archlinux.org/packages/extra/x86_64/jdk21-openjdk/)
 
 </details>
@@ -114,6 +125,7 @@ env JAVA_HOME=/usr/lib/jvm/java-8-openjdk /opt/android-sdk/tools/bin/sdkmanager 
 - [GoogleTest (x86_64-w64-mingw32)](https://aur.archlinux.org/packages/mingw-w64-gtest)
 - [GoogleTest (x86_64-linux-android)](https://aur.archlinux.org/packages/android-x86-64-gtest)
 - [GoogleTest (aarch64-linux-android)](https://aur.archlinux.org/packages/android-aarch64-gtest)
+- [GoogleTest (riscv64-linux-android)](https://aur.archlinux.org/packages/android-riscv64-gtest)
 
 </details>
 
@@ -124,23 +136,19 @@ env JAVA_HOME=/usr/lib/jvm/java-8-openjdk /opt/android-sdk/tools/bin/sdkmanager 
 
 </details>
 
-### Setup
-
-```sh
-git submodule update --init --recursive                                 # Install external dependencies
-cmake --preset x86_64-linux-gnu-debug                                   # Select a default a preset for development
-cmake --build build/x86_64-linux-gnu/debug -t compile_commands.json     # Expose compile_commands.json for clangd
-cp android/app/.classpath.example android/app/.classpath                # Expose classpath for Eclipse JDT Language Server
-```
-
-### Build & Run
+### Setup & Configure
 
 For each supported target, CMake defines presets using the naming structure `<target>-<type>[-vendored]`.
 
-- `x86_64-linux-gnu-debug` &rarr; `build/x86_64-linux-gnu/debug`
-- `x86_64-linux-gnu-debug-vendored` &rarr; `build/x86_64-linux-gnu/debug`
-- `x86_64-linux-gnu-release` &rarr; `build/x86_64-linux-gnu/release`
-- `x86_64-linux-gnu-release-vendored` &rarr; `build/x86_64-linux-gnu/release`
+```sh
+git submodule update --init --recursive                        # Install external dependencies
+cmake --list-presets                                           # List all available presets
+cmake --preset <target>-<type>[-vendored]                      # Select a preset for development
+cmake --build build/<target>/<type> -t compile_commands.json   # Expose compile_commands.json for clangd
+cp android/app/.classpath.example android/app/.classpath       # Expose classpath for Eclipse JDT Language Server
+```
+
+### Build & Run
 
 The CMake configuration defines the following build targets:
 
@@ -151,22 +159,22 @@ The CMake configuration defines the following build targets:
 - `docs` (requires Doxygen)
 
 ```sh
-cmake --preset x86_64-linux-gnu-release                     # Configure CMake
-cmake --build build/x86_64-linux-gnu/release                # Build stellarlib
-cmake --install build/x86_64-linux-gnu/release              # Install stellarlib
-cmake --build build/x86_64-linux-gnu/release -t example     # Build a target
-build/x86_64-linux-gnu/release/example                      # Run the target
+cmake --preset x86_64-linux-gnu-release                   # Configure CMake
+cmake --build build/x86_64-linux-gnu/release              # Build stellarlib
+cmake --install build/x86_64-linux-gnu/release            # Install stellarlib
+cmake --build build/x86_64-linux-gnu/release -t example   # Build a target
+build/x86_64-linux-gnu/release/example                    # Run the target
 ```
 
 <details>
 <summary>aarch64-linux-gnu</summary>
 
 ```sh
-cmake --preset aarch64-linux-gnu-release                     # Configure CMake
-cmake --build build/aarch64-linux-gnu/release                # Build stellarlib
-cmake --install build/aarch64-linux-gnu/release              # Install stellarlib
-cmake --build build/aarch64-linux-gnu/release -t example     # Build a target
-build/aarch64-linux-gnu/release/example                      # Run the target
+cmake --preset aarch64-linux-gnu-release                   # Configure CMake
+cmake --build build/aarch64-linux-gnu/release              # Build stellarlib
+cmake --install build/aarch64-linux-gnu/release            # Install stellarlib
+cmake --build build/aarch64-linux-gnu/release -t example   # Build a target
+build/aarch64-linux-gnu/release/example                    # Run the target
 ```
 
 </details>
@@ -175,11 +183,11 @@ build/aarch64-linux-gnu/release/example                      # Run the target
 <summary>x86_64-w64-mingw32</summary>
 
 ```sh
-cmake --preset x86_64-w64-mingw32-release                     # Configure CMake
-cmake --build build/x86_64-w64-mingw32/release                # Build stellarlib
-cmake --install build/x86_64-w64-mingw32/release              # Install stellarlib
-cmake --build build/x86_64-w64-mingw32/release -t example     # Build a target
-build/x86_64-w64-mingw32/release/example.exe                  # Run the target
+cmake --preset x86_64-w64-mingw32-release                   # Configure CMake
+cmake --build build/x86_64-w64-mingw32/release              # Build stellarlib
+cmake --install build/x86_64-w64-mingw32/release            # Install stellarlib
+cmake --build build/x86_64-w64-mingw32/release -t example   # Build a target
+build/x86_64-w64-mingw32/release/example.exe                # Run the target
 ```
 
 </details>
@@ -188,11 +196,11 @@ build/x86_64-w64-mingw32/release/example.exe                  # Run the target
 <summary>x86_64-linux-android</summary>
 
 ```sh
-cmake --preset x86_64-linux-android-release                                                                                                  # Configure CMake
-cmake --build build/x86_64-linux-android/release                                                                                             # Build stellarlib
-cmake --install build/x86_64-linux-android/release                                                                                           # Install stellarlib
-env JAVA_HOME=/usr/lib/jvm/java-21-openjdk ANDROID_HOME=/opt/android-sdk cmake --build build/x86_64-linux-android/release -t example_apk     # Build a target
-/opt/android-sdk/platform-tools/adb install -r build/x86_64-linux-android/release/example.apk                                                # Install the target
+cmake --preset x86_64-linux-android-release                                                                                                # Configure CMake
+cmake --build build/x86_64-linux-android/release                                                                                           # Build stellarlib
+cmake --install build/x86_64-linux-android/release                                                                                         # Install stellarlib
+env JAVA_HOME=/usr/lib/jvm/java-21-openjdk ANDROID_HOME=/opt/android-sdk cmake --build build/x86_64-linux-android/release -t example_apk   # Build a target
+/opt/android-sdk/platform-tools/adb install -r build/x86_64-linux-android/release/example.apk                                              # Install the target
 ```
 
 </details>
@@ -201,19 +209,38 @@ env JAVA_HOME=/usr/lib/jvm/java-21-openjdk ANDROID_HOME=/opt/android-sdk cmake -
 <summary>aarch64-linux-android</summary>
 
 ```sh
-cmake --preset aarch64-linux-android-release                                                                                                  # Configure CMake
-cmake --build build/aarch64-linux-android/release                                                                                             # Build stellarlib
-cmake --install build/aarch64-linux-android/release                                                                                           # Install stellarlib
-env JAVA_HOME=/usr/lib/jvm/java-21-openjdk ANDROID_HOME=/opt/android-sdk cmake --build build/aarch64-linux-android/release -t example_apk     # Build a target
-/opt/android-sdk/platform-tools/adb install -r build/aarch64-linux-android/release/example.apk                                                # Install the target
+cmake --preset aarch64-linux-android-release                                                                                                # Configure CMake
+cmake --build build/aarch64-linux-android/release                                                                                           # Build stellarlib
+cmake --install build/aarch64-linux-android/release                                                                                         # Install stellarlib
+env JAVA_HOME=/usr/lib/jvm/java-21-openjdk ANDROID_HOME=/opt/android-sdk cmake --build build/aarch64-linux-android/release -t example_apk   # Build a target
+/opt/android-sdk/platform-tools/adb install -r build/aarch64-linux-android/release/example.apk                                              # Install the target
 ```
 
 </details>
 
+<details>
+<summary>riscv64-linux-android</summary>
+
+```sh
+cmake --preset riscv64-linux-android-release                                                                                                # Configure CMake
+cmake --build build/riscv64-linux-android/release                                                                                           # Build stellarlib
+cmake --install build/riscv64-linux-android/release                                                                                         # Install stellarlib
+env JAVA_HOME=/usr/lib/jvm/java-21-openjdk ANDROID_HOME=/opt/android-sdk cmake --build build/riscv64-linux-android/release -t example_apk   # Build a target
+/opt/android-sdk/platform-tools/adb install -r build/riscv64-linux-android/release/example.apk                                              # Install the target
+```
+
+</details>
+
+### Tips & Tricks
+
+```sh
+cmake -DSDL_UNIX_CONSOLE_BUILD=ON --preset <target>-<type>[-vendored]   # Configure headless mode for servers
+```
+
 ## [Documentation](https://zanadoman.github.io/stellarlib/)
 
 ```sh
-$BROWSER build/x86_64-linux-gnu/release/html/index.html     # Browse local documentation (requires Doxygen)
+$BROWSER build/<target>/<type>/html/index.html   # Browse local documentation (requires Doxygen)
 ```
 
 ## Contributing
